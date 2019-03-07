@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。 1.内存泄漏iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。 1.1循环引用可以使用腾讯开源的 MLeaksFinder 控件来实">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-06-28T10:26:53.000Z">
+<meta property="og:updated_time" content="2019-03-07T16:21:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS性能优化">
 <meta name="twitter:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。 1.内存泄漏iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。 1.1循环引用可以使用腾讯开源的 MLeaksFinder 控件来实">
@@ -190,6 +190,16 @@
         </li>
       
         
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
@@ -284,8 +294,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
+                  <a href="/categories/iOS性能监控与优化/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS性能监控与优化</span>
                   </a>
                 </span>
 
@@ -325,6 +335,37 @@
 
           
 
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  429
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  1
+                </span>
+              
+            </div>
           
 
           
@@ -402,14 +443,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/06/01/hexo安装遇坑/" rel="next" title="Hexo安装遇坑笔记">
+                <i class="fa fa-chevron-left"></i> Hexo安装遇坑笔记
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/06/25/hexo安装遇坑/" rel="prev" title="Hexo安装遇坑笔记">
-                Hexo安装遇坑笔记 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/06/28/autoreleasePool总结/" rel="prev" title="AutoreleasePool总结">
+                AutoreleasePool总结 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -501,7 +546,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -562,6 +607,15 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Jack Chen</span>
 
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">15.6k</span>
   
 </div>
 

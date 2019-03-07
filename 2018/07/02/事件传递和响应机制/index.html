@@ -87,7 +87,7 @@
 <meta property="og:description" content="响应者对象（UIResponder）继承了UIResponder的对象才能接受并处理事件，我们称之为“响应者对象”。以下都是继承UIResponder的，所以都能接收并处理事件。 123UIApplicationUIViewControllerUIView 为什么继承了UIResponder的类就能够接收并处理事件呢？因为UIResponder中提供了以下4个对象方法来处理触摸事件 1234567">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/07/02/事件传递和响应机制/responder.png">
-<meta property="og:updated_time" content="2018-07-02T08:52:15.000Z">
+<meta property="og:updated_time" content="2019-03-07T16:19:29.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="事件传递和响应机制">
 <meta name="twitter:description" content="响应者对象（UIResponder）继承了UIResponder的对象才能接受并处理事件，我们称之为“响应者对象”。以下都是继承UIResponder的，所以都能接收并处理事件。 123UIApplicationUIViewControllerUIView 为什么继承了UIResponder的类就能够接收并处理事件呢？因为UIResponder中提供了以下4个对象方法来处理触摸事件 1234567">
@@ -192,6 +192,16 @@
         </li>
       
         
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
@@ -286,8 +296,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
+                  <a href="/categories/iOS之UI/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS之UI</span>
                   </a>
                 </span>
 
@@ -328,6 +338,37 @@
           
 
           
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  953
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
 
           
 
@@ -354,16 +395,16 @@
 <li>keywindow会在视图层次结构中找到一个最合适的视图来处理触摸事件。</li>
 </ol>
 <h3 id="寻找处理事件最合适的view"><a href="#寻找处理事件最合适的view" class="headerlink" title="寻找处理事件最合适的view"></a>寻找处理事件最合适的view</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.首先判断主窗口（keyWindow）自己是否能接受触摸事件</span><br><span class="line">2.判断触摸点是否在自己身上</span><br><span class="line">3.子控件数组中从后往前遍历子控件，重复前面的两个步骤（所谓从后往前遍历子控件，就是首先查找子控件数组中最后一个元素，然后执行1、2步骤）</span><br><span class="line">4.view，比如叫做hitView，那么会把这个事件交给这个hitView，再遍历这个hitView的子控件，直至没有更合适的view为止。</span><br><span class="line">5.如果没有符合条件的子控件，那么就认为自己最合适处理这个事件，也就是自己是最合适的view。</span><br></pre></td></tr></table></figure>
-<p>UIView不能接收触摸事件的三种情况：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">不允许交互：userInteractionEnabled = NO</span><br><span class="line">隐藏：如果把父控件隐藏，那么子控件也会隐藏，隐藏的控件不能接受事件</span><br><span class="line">透明度：如果设置一个控件的透明度&lt;0.01，会直接影响子控件的透明度。alpha：0.0~0.01为透明</span><br></pre></td></tr></table></figure>
-<p>Code</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event</span><br><span class="line">&#123;</span><br><span class="line">    // 1.判断自己能否接收事件</span><br><span class="line">    <span class="keyword">if</span> (self.userInteractionEnabled == NO || self.hidden == YES || self.alpha &lt;= 0.01) <span class="built_in">return</span> nil;</span><br><span class="line">    </span><br><span class="line">    // 2.判断点在不在当前控件上面</span><br><span class="line">    <span class="keyword">if</span> (![self pointInside:point withEvent:event]) <span class="built_in">return</span> nil;</span><br><span class="line">    </span><br><span class="line">    // 3.去找有没有比自己更合适的view</span><br><span class="line">    // 从后往前遍历自己的子控件</span><br><span class="line">    int count = self.subviews.count;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (int i = count - 1; i &gt;= 0; i--) &#123;</span><br><span class="line">        // 获取子控件</span><br><span class="line">        UIView *childView = self.subviews[i];</span><br><span class="line">        </span><br><span class="line">        // 转换坐标系</span><br><span class="line">        // 把自己坐标系上的点转换成子控件做坐标系上的点</span><br><span class="line">        CGPoint childPoint = [self convertPoint:point toView:childView];</span><br><span class="line">        </span><br><span class="line">        UIView *fitView = [childView hitTest:childPoint withEvent:event];</span><br><span class="line">        // 找到最合适的view</span><br><span class="line">        <span class="keyword">if</span> (fitView) &#123;</span><br><span class="line">            <span class="built_in">return</span> fitView;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 没有找到比自己更合适的view</span><br><span class="line">    <span class="built_in">return</span> self;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="UIView不能接收触摸事件的三种情况："><a href="#UIView不能接收触摸事件的三种情况：" class="headerlink" title="UIView不能接收触摸事件的三种情况："></a>UIView不能接收触摸事件的三种情况：</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">不允许交互：userInteractionEnabled = NO</span><br><span class="line">隐藏：如果把父控件隐藏，那么子控件也会隐藏，隐藏的控件不能接受事件</span><br><span class="line">透明度：如果设置一个控件的透明度&lt;0.01，会直接影响子控件的透明度。alpha：0.0~0.01为透明</span><br></pre></td></tr></table></figure>
+<h4 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event</span><br><span class="line">&#123;</span><br><span class="line">    // 1.判断自己能否接收事件</span><br><span class="line">    <span class="keyword">if</span> (self.userInteractionEnabled == NO || self.hidden == YES || self.alpha &lt;= 0.01) <span class="built_in">return</span> nil;</span><br><span class="line">    </span><br><span class="line">    // 2.判断点在不在当前控件上面</span><br><span class="line">    <span class="keyword">if</span> (![self pointInside:point withEvent:event]) <span class="built_in">return</span> nil;</span><br><span class="line">    </span><br><span class="line">    // 3.去找有没有比自己更合适的view</span><br><span class="line">    // 从后往前遍历自己的子控件</span><br><span class="line">    int count = self.subviews.count;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (int i = count - 1; i &gt;= 0; i--) &#123;</span><br><span class="line">        // 获取子控件</span><br><span class="line">        UIView *childView = self.subviews[i];</span><br><span class="line">        </span><br><span class="line">        // 转换坐标系</span><br><span class="line">        // 把自己坐标系上的点转换成子控件做坐标系上的点</span><br><span class="line">        CGPoint childPoint = [self convertPoint:point toView:childView];</span><br><span class="line">        </span><br><span class="line">        UIView *fitView = [childView hitTest:childPoint withEvent:event];</span><br><span class="line">        // 找到最合适的view</span><br><span class="line">        <span class="keyword">if</span> (fitView) &#123;</span><br><span class="line">            <span class="built_in">return</span> fitView;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 没有找到比自己更合适的view</span><br><span class="line">    <span class="built_in">return</span> self;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <img src="/2018/07/02/事件传递和响应机制/responder.png">
 <h3 id="拦截事件的处理"><a href="#拦截事件的处理" class="headerlink" title="拦截事件的处理"></a>拦截事件的处理</h3><p>通过重写hitTest：withEvent：就可以拦截事件的传递过程，想让谁处理事件谁就处理事件。</p>
 <h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>如果hitTest:withEvent:方法中返回nil，那么调用该方法的控件本身和其子控件都不是最合适的view，也就是在自己身上没有找到更合适的view。那么最合适的view就是该控件的父控件。</p>
 <h4 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h4><p>想让谁成为最合适的view就重写谁自己的父控件的hitTest:withEvent:方法返回指定的子控件，或者重写自己的hitTest:withEvent:方法 return self。但是，建议在父控件的hitTest:withEvent:中返回子控件作为最合适的view！</p>
 <p>原因是子控件在遍历时会根据addsuview的逆序遍历。</p>
-<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p><a href="https://www.jianshu.com/p/2e074db792ba" target="_blank" rel="noopener">iOS之事件的传递和响应机制</a></p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><ol>
+<li><a href="https://www.jianshu.com/p/2e074db792ba" target="_blank" rel="noopener">iOS之事件的传递和响应机制</a></li>
+</ol>
 
       
     </div>
@@ -412,8 +453,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/29/runLoop总结/" rel="next" title="runLoop总结">
-                <i class="fa fa-chevron-left"></i> runLoop总结
+              <a href="/2018/07/02/UIView几个重要的方法/" rel="next" title="UIView 几个重要的方法">
+                <i class="fa fa-chevron-left"></i> UIView 几个重要的方法
               </a>
             
           </div>
@@ -422,8 +463,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/02/UIView几个重要的方法/" rel="prev" title="UIView 几个重要的方法">
-                UIView 几个重要的方法 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/07/02/iOS异步绘制/" rel="prev" title="iOS异步绘制">
+                iOS异步绘制 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -515,7 +556,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -550,7 +591,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#响应者对象（UIResponder）"><span class="nav-number">1.</span> <span class="nav-text">响应者对象（UIResponder）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件的产生和传递"><span class="nav-number"></span> <span class="nav-text">事件的产生和传递</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件的产生"><span class="nav-number">1.</span> <span class="nav-text">事件的产生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找处理事件最合适的view"><span class="nav-number">2.</span> <span class="nav-text">寻找处理事件最合适的view</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拦截事件的处理"><span class="nav-number">3.</span> <span class="nav-text">拦截事件的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#注意"><span class="nav-number">3.1.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#技巧"><span class="nav-number">3.2.</span> <span class="nav-text">技巧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#响应者对象（UIResponder）"><span class="nav-number">1.</span> <span class="nav-text">响应者对象（UIResponder）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事件的产生和传递"><span class="nav-number"></span> <span class="nav-text">事件的产生和传递</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件的产生"><span class="nav-number">1.</span> <span class="nav-text">事件的产生</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#寻找处理事件最合适的view"><span class="nav-number">2.</span> <span class="nav-text">寻找处理事件最合适的view</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#UIView不能接收触摸事件的三种情况："><span class="nav-number">2.1.</span> <span class="nav-text">UIView不能接收触摸事件的三种情况：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Code"><span class="nav-number">2.2.</span> <span class="nav-text">Code</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拦截事件的处理"><span class="nav-number">3.</span> <span class="nav-text">拦截事件的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#注意"><span class="nav-number">3.1.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#技巧"><span class="nav-number">3.2.</span> <span class="nav-text">技巧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>
@@ -576,6 +617,15 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Jack Chen</span>
 
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">15.6k</span>
   
 </div>
 

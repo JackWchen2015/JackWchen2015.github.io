@@ -81,15 +81,15 @@
 
 <meta name="description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
 <meta property="og:type" content="article">
-<meta property="og:title" content="runLoop总结">
+<meta property="og:title" content="RunLoop总结">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/index.html">
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
-<meta property="og:updated_time" content="2018-07-02T02:40:27.000Z">
+<meta property="og:updated_time" content="2019-03-07T16:27:28.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="runLoop总结">
+<meta name="twitter:title" content="RunLoop总结">
 <meta name="twitter:description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
 <meta name="twitter:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
 
@@ -127,7 +127,7 @@
 
 
 
-  <title>runLoop总结 | 学计算机的那个</title>
+  <title>RunLoop总结 | 学计算机的那个</title>
   
 
 
@@ -192,6 +192,16 @@
         </li>
       
         
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
@@ -251,7 +261,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">runLoop总结</h1>
+          <h1 class="post-title" itemprop="name headline">RunLoop总结</h1>
         
 
         <div class="post-meta">
@@ -286,8 +296,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS</span>
+                  <a href="/categories/iOS特性/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS特性</span>
                   </a>
                 </span>
 
@@ -313,7 +323,7 @@
 
           
           
-             <span id="/2018/06/29/runLoop总结/" class="leancloud_visitors" data-flag-title="runLoop总结">
+             <span id="/2018/06/29/runLoop总结/" class="leancloud_visitors" data-flag-title="RunLoop总结">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -327,6 +337,37 @@
 
           
 
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  947
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
           
 
           
@@ -428,8 +469,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/02/事件传递和响应机制/" rel="prev" title="事件传递和响应机制">
-                事件传递和响应机制 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/07/02/UIView几个重要的方法/" rel="prev" title="UIView 几个重要的方法">
+                UIView 几个重要的方法 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -521,7 +562,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -582,6 +623,15 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Jack Chen</span>
 
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">15.6k</span>
   
 </div>
 
