@@ -79,17 +79,21 @@
 
 
 
-<meta name="description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
+<meta name="description" content="UIView绘制流程UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CAL">
 <meta property="og:type" content="article">
-<meta property="og:title" content="UIView 几个重要的方法">
-<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView几个重要的方法/index.html">
+<meta property="og:title" content="UIView绘制原理以及异步绘制">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView绘制原理以及异步绘制/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
+<meta property="og:description" content="UIView绘制流程UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CAL">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-09T11:51:15.000Z">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_Display.jpeg">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_DisplayBySystem.jpeg">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_DrawAsync.jpeg">
+<meta property="og:updated_time" content="2019-03-09T12:10:07.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="UIView 几个重要的方法">
-<meta name="twitter:description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
+<meta name="twitter:title" content="UIView绘制原理以及异步绘制">
+<meta name="twitter:description" content="UIView绘制流程UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CAL">
+<meta name="twitter:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_Display.jpeg">
 
 
 
@@ -119,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView几个重要的方法/"/>
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView绘制原理以及异步绘制/"/>
 
 
 
 
 
-  <title>UIView 几个重要的方法 | 学计算机的那个</title>
+  <title>UIView绘制原理以及异步绘制 | 学计算机的那个</title>
   
 
 
@@ -242,7 +246,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView几个重要的方法/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView绘制原理以及异步绘制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -259,7 +263,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">UIView 几个重要的方法</h1>
+          <h1 class="post-title" itemprop="name headline">UIView绘制原理以及异步绘制</h1>
         
 
         <div class="post-meta">
@@ -271,8 +275,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-02T08:00:00+08:00">
-                2018-07-02
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-01T08:00:00+08:00">
+                2018-09-01
               </time>
             
 
@@ -312,8 +316,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/07/02/UIView几个重要的方法/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/07/02/UIView几个重要的方法/" itemprop="commentCount"></span>
+                <a href="/2018/09/01/UIView绘制原理以及异步绘制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/09/01/UIView绘制原理以及异步绘制/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -321,7 +325,7 @@
 
           
           
-             <span id="/2018/07/02/UIView几个重要的方法/" class="leancloud_visitors" data-flag-title="UIView 几个重要的方法">
+             <span id="/2018/09/01/UIView绘制原理以及异步绘制/" class="leancloud_visitors" data-flag-title="UIView绘制原理以及异步绘制">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -346,7 +350,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  885
+                  523
                 </span>
               
 
@@ -362,7 +366,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  3
+                  1
                 </span>
               
             </div>
@@ -383,37 +387,16 @@
       
 
       
-        <h2 id="layout"><a href="#layout" class="headerlink" title="layout"></a>layout</h2><h3 id="layoutSubviews在以下情况下回被调用"><a href="#layoutSubviews在以下情况下回被调用" class="headerlink" title="layoutSubviews在以下情况下回被调用"></a>layoutSubviews在以下情况下回被调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1、init初始化不会触发layoutSubviews</span><br><span class="line">但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发</span><br><span class="line"></span><br><span class="line">2、addSubview会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化</span><br><span class="line"></span><br><span class="line">4、滚动一个UIScrollView会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">5、旋转Screen会触发父UIView上的layoutSubviews事件</span><br><span class="line"></span><br><span class="line">6、改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件</span><br></pre></td></tr></table></figure>
-<p>注意<br>苹果官方文档强调</p>
-<p>You should override this method only if the autoresizing behaviors of the subviews do not offer the behavior you want.</p>
-<p>也就是说layoutSubviews, 当我们在某个类的内部调整子视图位置时，需要调用。</p>
-<p>反过来的意思就是说：如果你想要在外部设置subviews的位置，就不要重写。</p>
-<h3 id="setNeedsLayout"><a href="#setNeedsLayout" class="headerlink" title="setNeedsLayout"></a>setNeedsLayout</h3><ol>
-<li>标记为需要重新布局，异步调用layoutIfNeeded刷新布局，不立即刷新，但layoutSubviews一定会被调用 </li>
-</ol>
-<ol start="2">
-<li>setNeedsLayout在receiver标上一个需要被重新布局的标记，在系统runloop的下一个周期自动调用layoutSubviews</li>
-</ol>
-<h3 id="layoutIfNeeded"><a href="#layoutIfNeeded" class="headerlink" title="layoutIfNeeded"></a>layoutIfNeeded</h3><ol>
-<li>如果有需要刷新的标记，立即调用layoutSubviews进行布局（如果没有标记，不会调用layoutSubviews）</li>
-<li>layoutIfNeeded方法如其名，UIKit会判断该receiver是否需要layout.根据Apple官方文档,layoutIfNeeded方法应该是这样的，layoutIfNeeded遍历的不是superview链，应该是subviews链</li>
-</ol>
-<h3 id="立刻刷新"><a href="#立刻刷新" class="headerlink" title="立刻刷新"></a>立刻刷新</h3><p>先调用[view setNeedsLayout]，把标记设为需要布局，然后马上调用[view layoutIfNeeded]，实现布局</p>
-<h2 id="重绘"><a href="#重绘" class="headerlink" title="重绘"></a>重绘</h2><h3 id="drawRect在以下情况下会被调用"><a href="#drawRect在以下情况下会被调用" class="headerlink" title="drawRect在以下情况下会被调用"></a>drawRect在以下情况下会被调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1、如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。drawRect调用是在Controller-&gt;loadView,Controller-&gt;viewDidLoad 两方法之后掉用的.所以不用担心在控制器中,这些View的drawRect就开始画了.</span><br><span class="line">这样可以在控制器中设置一些值给View(如果这些View draw的时候需要用到某些变量值).</span><br><span class="line">2、该方法在调用sizeToFit后被调用，所以可以先调用sizeToFit计算出size。然后系统自动调用drawRect:方法。</span><br><span class="line">3、通过设置contentMode属性值为UIViewContentModeRedraw。那么将在每次设置或更改frame的时候自动调用drawRect:。</span><br><span class="line">4、直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect:，但是有个前提条件是rect不能为0。</span><br><span class="line">以上1,2推荐；而3,4不提倡</span><br></pre></td></tr></table></figure>
-<h3 id="drawRect方法使用注意点"><a href="#drawRect方法使用注意点" class="headerlink" title="drawRect方法使用注意点"></a>drawRect方法使用注意点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate的ref并且不能用于画图。drawRect：方法不能手动显示调用，必须通过调用setNeedsDisplay 或者 setNeedsDisplayInRect，让系统自动调该方法。</span><br><span class="line">2、若使用calayer绘图，只能在drawInContext: 中（类似于drawRect）绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法</span><br><span class="line">3、若要实时画图，不能使用gestureRecognizer，只能使用touchbegan等方法来掉用setNeedsDisplay实时刷新屏幕</span><br></pre></td></tr></table></figure>
-<h3 id="drawRect-CGRect-rect"><a href="#drawRect-CGRect-rect" class="headerlink" title="drawRect:(CGRect)rect"></a>drawRect:(CGRect)rect</h3><p>重写此方法，执行重绘任务 </p>
-<h3 id="setNeedsDisplay"><a href="#setNeedsDisplay" class="headerlink" title="setNeedsDisplay"></a>setNeedsDisplay</h3><ol>
-<li>标记为需要重绘，异步调用drawRect </li>
-<li>setNeedDisplay在receiver标上一个需要被重新绘图的标记，在下一个draw周期自动重绘，iphone device的刷新频率是60hz，也就是1/60秒后重绘</li>
-</ol>
-<h3 id="setNeedsDisplayInRect-CGRect-invalidRect"><a href="#setNeedsDisplayInRect-CGRect-invalidRect" class="headerlink" title="setNeedsDisplayInRect:(CGRect)invalidRect"></a>setNeedsDisplayInRect:(CGRect)invalidRect</h3><p>标记为需要局部重绘</p>
-<h2 id="自适应"><a href="#自适应" class="headerlink" title="自适应"></a>自适应</h2><h3 id="sizeToFit"><a href="#sizeToFit" class="headerlink" title="sizeToFit"></a>sizeToFit</h3><p>sizeToFit会自动调用sizeThatFits方法；</p>
-<p>sizeToFit不应该在子类中被重写，应该重写sizeThatFits</p>
-<p>sizeToFit和sizeThatFits方法都没有递归，对subviews也不负责，只负责自己</p>
-<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>layoutSubviews方法调用先于drawRect</p>
-<h2 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h2><ol>
-<li><a href="https://blog.csdn.net/timtian008/article/details/57084670" target="_blank" rel="noopener">UIView 刷新</a></li>
-<li><a href="http://blog.sina.com.cn/s/blog_a573f7990101cdpe.html" target="_blank" rel="noopener">UIView常用的一些方法小记</a></li>
+        <h3 id="UIView绘制流程"><a href="#UIView绘制流程" class="headerlink" title="UIView绘制流程"></a>UIView绘制流程</h3><p>UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?<br>当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CALayer的display方法,才会真正的进入当前视图的绘制流程当中,所以视图的绘制时机,是在当前runloop即将结束的时候才会开始。</p>
+<p>CALayer的display方法的内部实现,首先会判断layer的delegete是否响应display方法,如果代理不响应就会进入到系统的绘制流程当中,如果响应,实际上就为我们提供了异步绘制的接口,这样就构成了UIView的绘制原理</p>
+<img src="/2018/09/01/UIView绘制原理以及异步绘制/UIView_Display.jpeg">
+<h3 id="系统的绘制流程"><a href="#系统的绘制流程" class="headerlink" title="系统的绘制流程"></a>系统的绘制流程</h3><p>首先CALayer会在内部创建一个backing store(CGContextRef),我们一般在drawRect中可以通过上下文堆栈当中拿到当前栈顶的context.然后layer判断是否有代理,如果没有代理会调用layer的drawInContext方法,如果实现了代理就会调用delegete的drawLayer:inContext方法,这是在发生在系统内部当中的,然后在合适的时机给予回调方法,也就是View的drawRect方法.可以通过drawRect方法做一些其他的绘制工作.然后无论哪两个分支,都有calayer上传backing store (最终的位图)到CPU.然后结束系统的绘制流程.</p>
+<img src="/2018/09/01/UIView绘制原理以及异步绘制/UIView_DisplayBySystem.jpeg">
+<h3 id="异步绘制"><a href="#异步绘制" class="headerlink" title="异步绘制"></a>异步绘制</h3><p>怎么进行异步绘制呢,其实就是基于系统给我们开的口子layer.delegate,如果遵从或者实现了displayLayer方法,我们就可以进入到异步绘制流程当中,在异步绘制的过程当中</p>
+<p>就由delegete去负责生成bitmap位图<br>设置改bitmap作为layer.content属性的值</p>
+<p>通过一副时序图来了解异步绘制的机制和流程<br><img src="/2018/09/01/UIView绘制原理以及异步绘制/UIView_DrawAsync.jpeg"></p>
+<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
+<li><a href="https://www.jianshu.com/p/a0ef0838e0e0" target="_blank" rel="noopener">UIView绘制原理,异步绘制</a></li>
 </ol>
 
       
@@ -463,8 +446,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/02/iOS异步绘制/" rel="next" title="iOS异步绘制">
-                <i class="fa fa-chevron-left"></i> iOS异步绘制
+              <a href="/2018/07/05/多线程/" rel="next" title="多线程">
+                <i class="fa fa-chevron-left"></i> 多线程
               </a>
             
           </div>
@@ -473,8 +456,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/03/iOS面试题汇总/" rel="prev" title="iOS面试题汇总">
-                iOS面试题汇总 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/02/28/iOS设计模式六大原则/" rel="prev" title="iOS设计模式六大原则">
+                iOS设计模式六大原则 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -601,7 +584,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#layout"><span class="nav-number">1.</span> <span class="nav-text">layout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#layoutSubviews在以下情况下回被调用"><span class="nav-number">1.1.</span> <span class="nav-text">layoutSubviews在以下情况下回被调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsLayout"><span class="nav-number">1.2.</span> <span class="nav-text">setNeedsLayout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#layoutIfNeeded"><span class="nav-number">1.3.</span> <span class="nav-text">layoutIfNeeded</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#立刻刷新"><span class="nav-number">1.4.</span> <span class="nav-text">立刻刷新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重绘"><span class="nav-number">2.</span> <span class="nav-text">重绘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect在以下情况下会被调用"><span class="nav-number">2.1.</span> <span class="nav-text">drawRect在以下情况下会被调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect方法使用注意点"><span class="nav-number">2.2.</span> <span class="nav-text">drawRect方法使用注意点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect-CGRect-rect"><span class="nav-number">2.3.</span> <span class="nav-text">drawRect:(CGRect)rect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsDisplay"><span class="nav-number">2.4.</span> <span class="nav-text">setNeedsDisplay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsDisplayInRect-CGRect-invalidRect"><span class="nav-number">2.5.</span> <span class="nav-text">setNeedsDisplayInRect:(CGRect)invalidRect</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自适应"><span class="nav-number">3.</span> <span class="nav-text">自适应</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sizeToFit"><span class="nav-number">3.1.</span> <span class="nav-text">sizeToFit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意"><span class="nav-number">4.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文章参考"><span class="nav-number">5.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#UIView绘制流程"><span class="nav-number">1.</span> <span class="nav-text">UIView绘制流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统的绘制流程"><span class="nav-number">2.</span> <span class="nav-text">系统的绘制流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步绘制"><span class="nav-number">3.</span> <span class="nav-text">异步绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">4.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
             
 
           </div>

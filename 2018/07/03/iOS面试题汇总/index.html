@@ -87,7 +87,7 @@
 <meta property="og:description" content="把最近面试中遇到的问题总结下 1.使用 atomic 一定是线程安全的吗?不是,atomic 的本意是指属性的存取方法是线程安全的,并不保证整个对象是线程安全的。 声明一个 NSMutableArray 的原子属性 stuff,此时 self.stuff 和 self.stuff =othersulf 都是线程安全的。但是,使用[self.stuff objectAtIndex:index]就不是">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/07/03/iOS面试题汇总/method_forward.png">
-<meta property="og:updated_time" content="2019-03-07T16:26:23.000Z">
+<meta property="og:updated_time" content="2019-03-09T12:28:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS面试题汇总">
 <meta name="twitter:description" content="把最近面试中遇到的问题总结下 1.使用 atomic 一定是线程安全的吗?不是,atomic 的本意是指属性的存取方法是线程安全的,并不保证整个对象是线程安全的。 声明一个 NSMutableArray 的原子属性 stuff,此时 self.stuff 和 self.stuff =othersulf 都是线程安全的。但是,使用[self.stuff objectAtIndex:index]就不是">
@@ -364,7 +364,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  4
+                  5
                 </span>
               
             </div>
@@ -425,6 +425,10 @@
 <p>instancetype 和 id 都是万能指针，指向对象。</p>
 <p>不同点：</p>
 <p>1.id 在编译的适合不能判断对象的真实类型，instancetype 在编译的时候可以判断对象的真实类型<br>2.id 可以用来定义变量，可以作为返回值类型，可以作为形参类型；instancetype 只能作为返回值类型</p>
+<h3 id="12-block-vs-weak"><a href="#12-block-vs-weak" class="headerlink" title="12.block vs weak"></a>12.<strong>block vs </strong>weak</h3><ol>
+<li><strong>block：使用</strong>block修饰的变量在block代码快中会被retain（ARC下，MRC下不会retain） </li>
+<li><strong>weak：使用</strong>weak修饰的变量不会在block代码块中被retain<br>同时，在ARC下，要避免block出现循环引用 __weak typedof(self)weakSelf = self;</li>
+</ol>
 
       
     </div>
@@ -473,8 +477,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/02/iOS异步绘制/" rel="next" title="iOS异步绘制">
-                <i class="fa fa-chevron-left"></i> iOS异步绘制
+              <a href="/2018/07/02/UIView几个重要的方法/" rel="next" title="UIView 几个重要的方法">
+                <i class="fa fa-chevron-left"></i> UIView 几个重要的方法
               </a>
             
           </div>
@@ -565,7 +569,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -576,7 +580,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -611,7 +615,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-atomic-一定是线程安全的吗"><span class="nav-number">1.</span> <span class="nav-text">1.使用 atomic 一定是线程安全的吗?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-synthesize-和-dynamic-分别有什么作用"><span class="nav-number">2.</span> <span class="nav-text">2.@synthesize 和 @dynamic 分别有什么作用?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-NSString-为什么要用copy关键字，用strong会有什么问题。"><span class="nav-number">3.</span> <span class="nav-text">3.NSString 为什么要用copy关键字，用strong会有什么问题。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-这个写法会出什么问题：-property-copy-NSMutableArray-array"><span class="nav-number">4.</span> <span class="nav-text">4.这个写法会出什么问题： @property (copy) NSMutableArray *array;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-如何给-Category-添加属性？关联对象以什么形式进行存储？"><span class="nav-number">5.</span> <span class="nav-text">5.如何给 Category 添加属性？关联对象以什么形式进行存储？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-说一下-Runtime-消息解析和转发"><span class="nav-number">6.</span> <span class="nav-text">6.说一下 Runtime 消息解析和转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-说一下-Runtime-的方法缓存？存储的形式、数据结构以及查找的过程？"><span class="nav-number">7.</span> <span class="nav-text">7.说一下 Runtime 的方法缓存？存储的形式、数据结构以及查找的过程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Category-可不可以添加实例对象？为什么？"><span class="nav-number">8.</span> <span class="nav-text">7.Category 可不可以添加实例对象？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Bounds-和Frame的区别"><span class="nav-number">9.</span> <span class="nav-text">8.Bounds 和Frame的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-UIViewController-的生命周期"><span class="nav-number">10.</span> <span class="nav-text">9.UIViewController 的生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-iOS程序的启动流程"><span class="nav-number">11.</span> <span class="nav-text">10.iOS程序的启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#applicationWillResignActive-非活动-与applicationDidEnterBackground-后台-的区别。"><span class="nav-number">11.1.</span> <span class="nav-text">applicationWillResignActive(非活动)与applicationDidEnterBackground(后台)的区别。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-id-和instanceType有什么区别？"><span class="nav-number">12.</span> <span class="nav-text">11.id 和instanceType有什么区别？</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-atomic-一定是线程安全的吗"><span class="nav-number">1.</span> <span class="nav-text">1.使用 atomic 一定是线程安全的吗?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-synthesize-和-dynamic-分别有什么作用"><span class="nav-number">2.</span> <span class="nav-text">2.@synthesize 和 @dynamic 分别有什么作用?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-NSString-为什么要用copy关键字，用strong会有什么问题。"><span class="nav-number">3.</span> <span class="nav-text">3.NSString 为什么要用copy关键字，用strong会有什么问题。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-这个写法会出什么问题：-property-copy-NSMutableArray-array"><span class="nav-number">4.</span> <span class="nav-text">4.这个写法会出什么问题： @property (copy) NSMutableArray *array;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-如何给-Category-添加属性？关联对象以什么形式进行存储？"><span class="nav-number">5.</span> <span class="nav-text">5.如何给 Category 添加属性？关联对象以什么形式进行存储？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-说一下-Runtime-消息解析和转发"><span class="nav-number">6.</span> <span class="nav-text">6.说一下 Runtime 消息解析和转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-说一下-Runtime-的方法缓存？存储的形式、数据结构以及查找的过程？"><span class="nav-number">7.</span> <span class="nav-text">7.说一下 Runtime 的方法缓存？存储的形式、数据结构以及查找的过程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Category-可不可以添加实例对象？为什么？"><span class="nav-number">8.</span> <span class="nav-text">7.Category 可不可以添加实例对象？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Bounds-和Frame的区别"><span class="nav-number">9.</span> <span class="nav-text">8.Bounds 和Frame的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-UIViewController-的生命周期"><span class="nav-number">10.</span> <span class="nav-text">9.UIViewController 的生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-iOS程序的启动流程"><span class="nav-number">11.</span> <span class="nav-text">10.iOS程序的启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#applicationWillResignActive-非活动-与applicationDidEnterBackground-后台-的区别。"><span class="nav-number">11.1.</span> <span class="nav-text">applicationWillResignActive(非活动)与applicationDidEnterBackground(后台)的区别。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-id-和instanceType有什么区别？"><span class="nav-number">12.</span> <span class="nav-text">11.id 和instanceType有什么区别？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-block-vs-weak"><span class="nav-number">13.</span> <span class="nav-text">12.block vs weak</span></a></li></ol></div>
             
 
           </div>
@@ -645,7 +649,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">15.6k</span>
+    <span title="Site words total count">16.2k</span>
   
 </div>
 
