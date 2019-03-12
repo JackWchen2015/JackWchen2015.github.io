@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
+<meta name="description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
 <meta property="og:type" content="article">
-<meta property="og:title" content="RunLoop总结">
-<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/index.html">
+<meta property="og:title" content="Category和load">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/10/10/Category和load/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
+<meta property="og:description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
-<meta property="og:updated_time" content="2019-03-11T03:10:30.000Z">
+<meta property="og:image" content="https://github.com/2018/10/10/Category和load/laod_initial.png">
+<meta property="og:updated_time" content="2019-03-12T09:47:01.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RunLoop总结">
-<meta name="twitter:description" content="runloop做个专题笔记 1.Runloop和线程的关系 一个线程对应一个Runloop 主线程的默认就有Runloop 子线程的Runloop以懒加载的形式创建 Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。  2.讲一下 Runloop 的 Mode一共有5个 Mode，常用的有仨，其中一个是占位用的。 Mode 里面有一个或者多个 Source、ti">
-<meta name="twitter:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
+<meta name="twitter:title" content="Category和load">
+<meta name="twitter:description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
+<meta name="twitter:image" content="https://github.com/2018/10/10/Category和load/laod_initial.png">
 
 
 
@@ -121,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/"/>
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/10/10/Category和load/"/>
 
 
 
 
 
-  <title>RunLoop总结 | 学计算机的那个</title>
+  <title>Category和load | 学计算机的那个</title>
   
 
 
@@ -244,7 +244,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/10/10/Category和load/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -261,7 +261,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">RunLoop总结</h1>
+          <h1 class="post-title" itemprop="name headline">Category和load</h1>
         
 
         <div class="post-meta">
@@ -273,8 +273,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-29T08:00:00+08:00">
-                2018-06-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-10T08:00:00+08:00">
+                2018-10-10
               </time>
             
 
@@ -314,8 +314,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/06/29/runLoop总结/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/29/runLoop总结/" itemprop="commentCount"></span>
+                <a href="/2018/10/10/Category和load/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/10/10/Category和load/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -323,7 +323,7 @@
 
           
           
-             <span id="/2018/06/29/runLoop总结/" class="leancloud_visitors" data-flag-title="RunLoop总结">
+             <span id="/2018/10/10/Category和load/" class="leancloud_visitors" data-flag-title="Category和load">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -348,7 +348,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  947
+                  1k
                 </span>
               
 
@@ -385,32 +385,34 @@
       
 
       
-        <p>runloop做个专题笔记</p>
-<h2 id="1-Runloop和线程的关系"><a href="#1-Runloop和线程的关系" class="headerlink" title="1.Runloop和线程的关系"></a>1.Runloop和线程的关系</h2><ol>
-<li>一个线程对应一个Runloop</li>
-<li>主线程的默认就有Runloop</li>
-<li>子线程的Runloop以懒加载的形式创建</li>
-<li>Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。</li>
+        <p> 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？</p>
+<h3 id="load"><a href="#load" class="headerlink" title="+load"></a>+load</h3><p>+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执行。但是不同的类之间的 +load 方法的调用顺序是不确定的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原因就在这里，因为加载顺序是父类先+load，然后子类+load，然后分类+load，那么如果分类重写子类方法：首先子类+load，将方法添加到类的方法列表methodLists，然后分类+load，将重写的方法添加到方法列表中</span><br></pre></td></tr></table></figure>
+<p>但是这里存在几点疑问：</p>
+<ol>
+<li>方法列表methodLists里是否会有两个SEL相同的方法？</li>
+<li>如果会有，这两个方法在方法列表中的顺序是怎样的？(顺序决定哪个被调用)</li>
 </ol>
-<h2 id="2-讲一下-Runloop-的-Mode"><a href="#2-讲一下-Runloop-的-Mode" class="headerlink" title="2.讲一下 Runloop 的 Mode"></a>2.讲一下 Runloop 的 Mode</h2><p>一共有5个 Mode，常用的有仨，其中一个是占位用的。</p>
-<p>Mode 里面有一个或者多个 Source、timer、 Observer。</p>
-<p>Source事件源，分 0 和 1；本质就是函数回调<br>timer 就是计时器<br>Observer 顾名思义观察者</p>
-<p>‘Mode’ 的切换</p>
-<h2 id="3-Runloop的Observer"><a href="#3-Runloop的Observer" class="headerlink" title="3.Runloop的Observer"></a>3.Runloop的Observer</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) &#123;</span><br><span class="line">    kCFRunLoopEntry         = (1UL &lt;&lt; 0), // 即将进入Loop</span><br><span class="line">    kCFRunLoopBeforeTimers  = (1UL &lt;&lt; 1), // 即将处理 Timer</span><br><span class="line">    kCFRunLoopBeforeSources = (1UL &lt;&lt; 2), // 即将处理 Source</span><br><span class="line">    kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5), // 即将进入休眠</span><br><span class="line">    kCFRunLoopAfterWaiting  = (1UL &lt;&lt; 6), // 刚从休眠中唤醒</span><br><span class="line">    kCFRunLoopExit          = (1UL &lt;&lt; 7), // 即将退出Loop</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h2 id="4-Runloop的内部实现逻辑"><a href="#4-Runloop的内部实现逻辑" class="headerlink" title="4.Runloop的内部实现逻辑"></a>4.Runloop的内部实现逻辑</h2><img src="/2018/06/29/runLoop总结/runloop.png">
-<h2 id="5-解释下-事件响应的过程"><a href="#5-解释下-事件响应的过程" class="headerlink" title="5.解释下 事件响应的过程"></a>5.解释下 事件响应的过程</h2><p>苹果注册了一个 Source1 (基于 mach port 的) 用来接收系统事件，其回调函数为 __IOHIDEventSystemClientQueueCallback()。</p>
-<p>当一个硬件事件(触摸/锁屏/摇晃等)发生后，首先由 IOKit.framework 生成一个 IOHIDEvent 事件并由 SpringBoard 接收。这个过程的详细情况可以参考这里。SpringBoard 只接收按键(锁屏/静音等)，触摸，加速，接近传感器等几种 Event，随后用 mach port 转发给需要的 App 进程。随后苹果注册的那个 Source1 就会触发回调，并调用 _UIApplicationHandleEventQueue() 进行应用内部的分发。</p>
-<p>_UIApplicationHandleEventQueue() 会把 IOHIDEvent 处理并包装成 UIEvent 进行处理或分发，其中包括识别 UIGesture/处理屏幕旋转/发送给 UIWindow 等。通常事件比如 UIButton 点击、touchesBegin/Move/End/Cancel 事件都是在这个回调中完成的。</p>
-<h2 id="6-解释一下-手势识别-的过程？"><a href="#6-解释一下-手势识别-的过程？" class="headerlink" title="6.解释一下 手势识别 的过程？"></a>6.解释一下 手势识别 的过程？</h2><p>当上面的 _UIApplicationHandleEventQueue()识别了一个手势时，其首先会调用 Cancel 将当前的 touchesBegin/Move/End 系列回调打断。随后系统将对应的 UIGestureRecognizer 标记为待处理。</p>
-<p>苹果注册了一个 Observer 监测 BeforeWaiting (Loop即将进入休眠) 事件，这个 Observer 的回调函数是 _UIGestureRecognizerUpdateObserver()，其内部会获取所有刚被标记为待处理的 GestureRecognizer，并执行GestureRecognizer 的回调。</p>
-<p>当有 UIGestureRecognizer 的变化(创建/销毁/状态改变)时，这个回调都会进行相应处理。</p>
-<h2 id="7-AFNetworking-中如何运用-Runloop"><a href="#7-AFNetworking-中如何运用-Runloop" class="headerlink" title="7.AFNetworking 中如何运用 Runloop?"></a>7.AFNetworking 中如何运用 Runloop?</h2><p>AFURLConnectionOperation 这个类是基于 NSURLConnection 构建的，其希望能在后台线程接收 Delegate 回调。为此 AFNetworking 单独创建了一个线程，并在这个线程中启动了一个 RunLoop：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">+ (void)networkRequestThreadEntryPoint:(id)__unused object &#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        [[NSThread currentThread] setName:@<span class="string">"AFNetworking"</span>];</span><br><span class="line">        NSRunLoop *runLoop = [NSRunLoop currentRunLoop];</span><br><span class="line">        [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];</span><br><span class="line">        [runLoop run];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (NSThread *)networkRequestThread &#123;</span><br><span class="line">    static NSThread *_networkRequestThread = nil;</span><br><span class="line">    static dispatch_once_t oncePredicate;</span><br><span class="line">    dispatch_once(&amp;oncePredicate, ^&#123;</span><br><span class="line">        _networkRequestThread = [[NSThread alloc] initWithTarget:self selector:@selector(networkRequestThreadEntryPoint:) object:nil];</span><br><span class="line">        [_networkRequestThread start];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">return</span> _networkRequestThread;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>RunLoop 启动前内部必须要有至少一个 Timer/Observer/Source，所以 AFNetworking 在 [runLoop run] 之前先创建了一个新的 NSMachPort 添加进去了。通常情况下，调用者需要持有这个 NSMachPort (mach_port) 并在外部线程通过这个 port 发送消息到 loop 内；但此处添加 port 只是为了让 RunLoop 不至于退出，并没有用于实际的发送消息。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (void)start &#123;</span><br><span class="line">    [self.lock lock];</span><br><span class="line">    <span class="keyword">if</span> ([self isCancelled]) &#123;</span><br><span class="line">        [self performSelector:@selector(cancelConnection) onThread:[[self class] networkRequestThread] withObject:nil waitUntilDone:NO modes:[self.runLoopModes allObjects]];</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> ([self isReady]) &#123;</span><br><span class="line">        self.state = AFOperationExecutingState;</span><br><span class="line">        [self performSelector:@selector(operationDidStart) onThread:[[self class] networkRequestThread] withObject:nil waitUntilDone:NO modes:[self.runLoopModes allObjects]];</span><br><span class="line">    &#125;</span><br><span class="line">    [self.lock unlock];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当需要这个后台线程执行任务时，AFNetworking 通过调用 [NSObject performSelector:onThread:..] 将这个任务扔到了后台线程的 RunLoop 中。</p>
-<h2 id="8-PerformSelector-afterDelay-这个方法在子线程中是否起作用？为什么？怎么解决？"><a href="#8-PerformSelector-afterDelay-这个方法在子线程中是否起作用？为什么？怎么解决？" class="headerlink" title="8.PerformSelector:afterDelay:这个方法在子线程中是否起作用？为什么？怎么解决？"></a>8.PerformSelector:afterDelay:这个方法在子线程中是否起作用？为什么？怎么解决？</h2><p>不起作用，子线程默认没有 Runloop，也就没有 Timer。</p>
-<p>解决的办法是可以使用 GCD 来实现：Dispatch_after</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#import "TestCategory.h"</span></span><br><span class="line">/*主类实现*/</span><br><span class="line">@implementation TestCategory</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"主类"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"><span class="comment">#import "TestCategory+add.h"</span></span><br><span class="line">/*分类一实现*/</span><br><span class="line">@implementation TestCategory (add)</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"分类一"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#import &lt;objc/runtime.h&gt;</span></span><br><span class="line"><span class="comment">#import "TestCategory.h"</span></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line"></span><br><span class="line">    id LenderClass = objc_getClass(<span class="string">"TestCategory"</span>);</span><br><span class="line">    unsigned int outCount, i;</span><br><span class="line">    //获取实例方法列表</span><br><span class="line">    Method *methodList = class_copyMethodList(LenderClass, &amp;outCount);</span><br><span class="line">    <span class="keyword">for</span> (i=0; i&lt;outCount; i++) &#123;</span><br><span class="line">        Method method = methodList[i];</span><br><span class="line">        NSLog(@<span class="string">"instanceMethod：%@"</span>, NSStringFromSelector(method_getName(method)));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    //调用一下</span><br><span class="line">    TestCategory *tCategory = [[TestCategory alloc]init];</span><br><span class="line">    [tCategory newMethod];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2017-07-19 21:38:13.593 TestRuntimeProperty[27827:1306334] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:38:13.593 TestRuntimeProperty[27827:1306334] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:38:13.594 TestRuntimeProperty[27827:1306334] 分类一</span><br></pre></td></tr></table></figure>
+<p>可见：</p>
+<ol>
+<li>方法列表里会存在两个SEL相同的方法。</li>
+<li>实际调用时，调用的是分类添加的方法，即分类添加的方法在方法列表methodLists的这个数组的顶部</li>
+</ol>
+<p>答案已经很明确了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">后+load的类的方法，后添加到方法列表，而这时的添加方式又是插入顶部添加，即[methodLists insertObject:category_method atIndex:0]; 所以objc_msgSend遍历方法列表查找SEL 对应的IMP时，会先找到分类重写的那个，调用执行。然后添加到缓存列表中，这样主类方法实现永远也不会调到。</span><br></pre></td></tr></table></figure>
+<h3 id="多个category实现同一个方法"><a href="#多个category实现同一个方法" class="headerlink" title="多个category实现同一个方法"></a>多个category实现同一个方法</h3><p>如果多个分类同时重写同一个方法，执行顺序又是怎样的呢？<br>对于多个分类同时重写同一个方法，Xcode在运行时是根据buildPhases-&gt;Compile Sources里面的顺序从上至下编译的，那么很明显就像子类和分类一样，后编译的后load，即后添加到方法列表，所以后编译的分类，方法会放到方法列表顶部，调用的时候先执行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#import "TestCategory+addAgain.h"</span></span><br><span class="line">/*分类二实现*/</span><br><span class="line">@implementation TestCategory (addAgain)</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"分类二"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p>看输出：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">2017-07-19 22:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 22:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 22:18:13.594 TestRuntimeProperty[28385:1331972] 分类一</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">总结:类的加载顺序，决定方法的添加顺序，调用的时候，后添加的方法会先被找到，所以调用的始终是后加载的类的方法实现。</span><br></pre></td></tr></table></figure>
+<h3 id="initialize"><a href="#initialize" class="headerlink" title="+initialize"></a>+initialize</h3><p>+initialize 方法是在类或它的子类收到第一条消息之前被调用的，这里所指的消息包括实例方法和类方法的调用。也就是说 +initialize 方法是以懒加载的方式被调用的，如果程序一直没有给某个类或它的子类发送消息，那么这个类的 +initialize 方法是永远不会被调用的。那这样设计有什么好处呢？好处是显而易见的，那就是节省系统资源，避免浪费。</p>
+<h3 id="load-VS-initialize"><a href="#load-VS-initialize" class="headerlink" title="load VS initialize"></a>load VS initialize</h3><img src="/2018/10/10/Category和load/laod_initial.png">
+<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
+<li><a href="https://www.jianshu.com/p/87cfbdda0a68" target="_blank" rel="noopener">Category 重写方法的调用</a></li>
+<li><a href="http://blog.leichunfeng.com/blog/2015/05/02/objective-c-plus-load-vs-plus-initialize/" target="_blank" rel="noopener">Objective-C +load vs +initialize</a></li>
+</ol>
 
       
     </div>
@@ -459,8 +461,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/28/autoreleasePool总结/" rel="next" title="AutoreleasePool总结">
-                <i class="fa fa-chevron-left"></i> AutoreleasePool总结
+              <a href="/2018/09/01/UIView绘制原理以及异步绘制/" rel="next" title="UIView绘制原理以及异步绘制">
+                <i class="fa fa-chevron-left"></i> UIView绘制原理以及异步绘制
               </a>
             
           </div>
@@ -469,8 +471,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/02/事件传递和响应机制/" rel="prev" title="事件传递和响应机制">
-                事件传递和响应机制 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/02/28/iOS设计模式六大原则/" rel="prev" title="iOS设计模式六大原则">
+                iOS设计模式六大原则 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -597,7 +599,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Runloop和线程的关系"><span class="nav-number">1.</span> <span class="nav-text">1.Runloop和线程的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-讲一下-Runloop-的-Mode"><span class="nav-number">2.</span> <span class="nav-text">2.讲一下 Runloop 的 Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Runloop的Observer"><span class="nav-number">3.</span> <span class="nav-text">3.Runloop的Observer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Runloop的内部实现逻辑"><span class="nav-number">4.</span> <span class="nav-text">4.Runloop的内部实现逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-解释下-事件响应的过程"><span class="nav-number">5.</span> <span class="nav-text">5.解释下 事件响应的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-解释一下-手势识别-的过程？"><span class="nav-number">6.</span> <span class="nav-text">6.解释一下 手势识别 的过程？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-AFNetworking-中如何运用-Runloop"><span class="nav-number">7.</span> <span class="nav-text">7.AFNetworking 中如何运用 Runloop?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-PerformSelector-afterDelay-这个方法在子线程中是否起作用？为什么？怎么解决？"><span class="nav-number">8.</span> <span class="nav-text">8.PerformSelector:afterDelay:这个方法在子线程中是否起作用？为什么？怎么解决？</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#load"><span class="nav-number">1.</span> <span class="nav-text">+load</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多个category实现同一个方法"><span class="nav-number">2.</span> <span class="nav-text">多个category实现同一个方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#initialize"><span class="nav-number">3.</span> <span class="nav-text">+initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load-VS-initialize"><span class="nav-number">4.</span> <span class="nav-text">load VS initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">5.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
             
 
           </div>
