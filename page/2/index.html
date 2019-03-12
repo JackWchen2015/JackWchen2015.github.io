@@ -239,7 +239,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/事件传递和响应机制/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView几个重要的方法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -258,7 +258,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/07/02/事件传递和响应机制/" itemprop="url">事件传递和响应机制</a></h1>
+                <a class="post-title-link" href="/2018/07/02/UIView几个重要的方法/" itemprop="url">UIView 几个重要的方法</a></h1>
         
 
         <div class="post-meta">
@@ -311,8 +311,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/07/02/事件传递和响应机制/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/07/02/事件传递和响应机制/" itemprop="commentCount"></span>
+                <a href="/2018/07/02/UIView几个重要的方法/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/07/02/UIView几个重要的方法/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -320,7 +320,7 @@
 
           
           
-             <span id="/2018/07/02/事件传递和响应机制/" class="leancloud_visitors" data-flag-title="事件传递和响应机制">
+             <span id="/2018/07/02/UIView几个重要的方法/" class="leancloud_visitors" data-flag-title="UIView 几个重要的方法">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -345,7 +345,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  953
+                  885
                 </span>
               
 
@@ -384,14 +384,11 @@
       
         
           
-          响应者对象（UIResponder）继承了UIResponder的对象才能接受并处理事件，我们称之为“响应者对象”。以下都是继承UIResponder的，所以都能接收并处理事件。
-123UIApplicationUIViewControllerUIView
-为什么继承了UIResponder的类就能够接收并处理事件呢？因为UIResponder中提供了以下4个对象方法来处理触摸事件
-1234567891011UIResponder内部提供了以下方法来处理事件触摸事件- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
+          layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化4、滚动一个UIScrollView会触发layoutSubviews5、旋转Screen会触发父UIView上的layoutSubviews事件6、改变一个UIView大小的时候也会触发父U
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/07/02/事件传递和响应机制/#more" rel="contents">
+            <a class="btn" href="/2018/07/02/UIView几个重要的方法/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
