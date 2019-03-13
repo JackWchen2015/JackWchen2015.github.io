@@ -79,21 +79,21 @@
 
 
 
-<meta name="description" content="拓展 VS 分类####一般用扩展做什么？  声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorif">
+<meta name="description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对象结构和行为">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/01/对象结构和行为/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="拓展 VS 分类####一般用扩展做什么？  声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorif">
+<meta property="og:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/KVC.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_law.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_deep.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_mutable.png">
-<meta property="og:updated_time" content="2019-03-13T01:05:34.000Z">
+<meta property="og:updated_time" content="2019-03-13T01:11:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对象结构和行为">
-<meta name="twitter:description" content="拓展 VS 分类####一般用扩展做什么？  声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorif">
+<meta name="twitter:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
 <meta name="twitter:image" content="https://github.com/2018/12/01/对象结构和行为/KVC.png">
 
 
@@ -388,8 +388,7 @@
       
 
       
-        <h3 id="拓展-VS-分类"><a href="#拓展-VS-分类" class="headerlink" title="拓展 VS 分类"></a>拓展 VS 分类</h3><p>####一般用扩展做什么？</p>
-<ul>
+        <h3 id="拓展-VS-分类"><a href="#拓展-VS-分类" class="headerlink" title="拓展 VS 分类"></a>拓展 VS 分类</h3><h4 id="一般用扩展做什么？"><a href="#一般用扩展做什么？" class="headerlink" title="一般用扩展做什么？"></a>一般用扩展做什么？</h4><ul>
 <li>声明私有属性</li>
 <li>声明私有方法</li>
 <li>声明私有成员变量</li>
@@ -410,7 +409,7 @@
 <h4 id="KVC-VS-KVO"><a href="#KVC-VS-KVO" class="headerlink" title="KVC VS KVO"></a>KVC VS KVO</h4><p>KVC，即是指 NSKeyValueCoding，一个非正式的 Protocol，提供一种机制来间接访问对象的属性。KVO 就是基于 KVC 实现的关键技术之一。<br>一个对象拥有某些属性。比如说，一个 Person 对象有一个 name 和一个 address 属性。以 KVC 说法，Person 对象分别有一个 value 对应他的 name 和 address 的 key。 key 只是一个字符串，它对应的值可以是任意类型的对象。从最基础的层次上看，KVC 有两个方法：一个是设置 key 的值，另一个是获取 key 的值</p>
 <h3 id="Copy-属性关键字"><a href="#Copy-属性关键字" class="headerlink" title="Copy    属性关键字"></a>Copy    属性关键字</h3><h4 id="浅拷贝和深拷贝的概念"><a href="#浅拷贝和深拷贝的概念" class="headerlink" title="浅拷贝和深拷贝的概念"></a>浅拷贝和深拷贝的概念</h4><img src="/2018/12/01/对象结构和行为/copy_law.png">
 <img src="/2018/12/01/对象结构和行为/copy_deep.png">
-<h4 id="copy-修饰对象"><a href="#copy-修饰对象" class="headerlink" title="copy    修饰对象"></a>copy    修饰对象</h4><img src="/2018/12/01/对象结构和行为/copy_mutable.png">
+<h4 id="Copy-修饰对象"><a href="#Copy-修饰对象" class="headerlink" title="Copy    修饰对象"></a>Copy    修饰对象</h4><img src="/2018/12/01/对象结构和行为/copy_mutable.png">
 <p>总结下来三点</p>
 <ol>
 <li>可变对象的 copy 和mutableCopy都是深拷贝</li>
@@ -603,7 +602,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#拓展-VS-分类"><span class="nav-number">1.</span> <span class="nav-text">拓展 VS 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#扩展的特点-和分类的区别"><span class="nav-number">1.1.</span> <span class="nav-text">扩展的特点 (和分类的区别)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO-和-KVC"><span class="nav-number">2.</span> <span class="nav-text">KVO 和 KVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">2.1.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC"><span class="nav-number">2.2.</span> <span class="nav-text">KVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC-VS-KVO"><span class="nav-number">2.3.</span> <span class="nav-text">KVC VS KVO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copy-属性关键字"><span class="nav-number">3.</span> <span class="nav-text">Copy    属性关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#浅拷贝和深拷贝的概念"><span class="nav-number">3.1.</span> <span class="nav-text">浅拷贝和深拷贝的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#copy-修饰对象"><span class="nav-number">3.2.</span> <span class="nav-text">copy    修饰对象</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#拓展-VS-分类"><span class="nav-number">1.</span> <span class="nav-text">拓展 VS 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一般用扩展做什么？"><span class="nav-number">1.1.</span> <span class="nav-text">一般用扩展做什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩展的特点-和分类的区别"><span class="nav-number">1.2.</span> <span class="nav-text">扩展的特点 (和分类的区别)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO-和-KVC"><span class="nav-number">2.</span> <span class="nav-text">KVO 和 KVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">2.1.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC"><span class="nav-number">2.2.</span> <span class="nav-text">KVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC-VS-KVO"><span class="nav-number">2.3.</span> <span class="nav-text">KVC VS KVO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copy-属性关键字"><span class="nav-number">3.</span> <span class="nav-text">Copy    属性关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#浅拷贝和深拷贝的概念"><span class="nav-number">3.1.</span> <span class="nav-text">浅拷贝和深拷贝的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Copy-修饰对象"><span class="nav-number">3.2.</span> <span class="nav-text">Copy    修饰对象</span></a></li></ol></li></ol></div>
             
 
           </div>
