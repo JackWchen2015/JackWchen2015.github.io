@@ -87,7 +87,7 @@
 <meta property="og:description" content="TCP/IP五层模型/OSI参考模型1234567应用层 文件传输，电子邮件，文件服务，虚拟终端 TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet表示层 数据格式化，代码转换，数据加密 没有协议会话层 解除或建立与别的接点的联系 没有协议传输层 提供端对端的接口 TCP，UDP网络层 为数据包选择路由 IP，ICMP，RIP，OSPF，BGP，IGMP数据链路层 传输有地址的帧">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/07/04/iOS网络模型/网络层.png">
-<meta property="og:updated_time" content="2019-03-14T01:27:59.000Z">
+<meta property="og:updated_time" content="2019-03-14T04:38:41.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS网络模型">
 <meta name="twitter:description" content="TCP/IP五层模型/OSI参考模型1234567应用层 文件传输，电子邮件，文件服务，虚拟终端 TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet表示层 数据格式化，代码转换，数据加密 没有协议会话层 解除或建立与别的接点的联系 没有协议传输层 提供端对端的接口 TCP，UDP网络层 为数据包选择路由 IP，ICMP，RIP，OSPF，BGP，IGMP数据链路层 传输有地址的帧">
@@ -348,7 +348,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.4k
+                  1.1k
                 </span>
               
 
@@ -364,7 +364,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  4
+                  3
                 </span>
               
             </div>
@@ -406,25 +406,6 @@
 <p>timeout:20 表示持续时间</p>
 <p>max</p>
 <p>max:30 表示最多建立多少个 Http 连接</p>
-<h3 id="GET和POST请求的区别"><a href="#GET和POST请求的区别" class="headerlink" title="GET和POST请求的区别"></a>GET和POST请求的区别</h3><h4 id="参数位置"><a href="#参数位置" class="headerlink" title="参数位置"></a>参数位置</h4><ol>
-<li>GET 方式的请求参数以 ? 拼接到 Url 后面。</li>
-<li>Post 请求的参数在请求体内。</li>
-</ol>
-<h4 id="参数长度"><a href="#参数长度" class="headerlink" title="参数长度"></a>参数长度</h4><ol>
-<li>GET 方式的请求参数长度限制为 2048字符。</li>
-<li>Post 请求的参数长度没有该限制。</li>
-</ol>
-<h4 id="安全性"><a href="#安全性" class="headerlink" title="安全性"></a>安全性</h4><ol>
-<li>GET 方式不会引起服务端的任何变化</li>
-</ol>
-<h4 id="幂等性（同一方法执行多次和执行一次效果相同）"><a href="#幂等性（同一方法执行多次和执行一次效果相同）" class="headerlink" title="幂等性（同一方法执行多次和执行一次效果相同）"></a>幂等性（同一方法执行多次和执行一次效果相同）</h4><ol>
-<li>GET 幂等。</li>
-<li>POST 不幂等。</li>
-</ol>
-<h4 id="缓存性"><a href="#缓存性" class="headerlink" title="缓存性"></a>缓存性</h4><ol>
-<li>GET 可缓存。</li>
-<li>Post 不可缓存。</li>
-</ol>
 <h3 id="DNS的解析过程以及优化"><a href="#DNS的解析过程以及优化" class="headerlink" title="DNS的解析过程以及优化"></a>DNS的解析过程以及优化</h3><p>DNS 是域名到 IP 地址的映射，DNS 解析使用 UDP 数据报，端口号53，并且采用明文传输的方式<br>客户端在向服务端发送请求时，会先将 域名 到 DNS 服务器映射出 IP 地址，然后再访问。</p>
 <h4 id="DNS-解析的两种方式"><a href="#DNS-解析的两种方式" class="headerlink" title="DNS 解析的两种方式"></a>DNS 解析的两种方式</h4><p>递归查询</p>
 <p>不断地自下而上遍历解析，“我去给你问一下”的方式</p>
@@ -438,7 +419,6 @@
 <p>使用 http 协议向 DNS 服务器 80 端口进行请求</p>
 <p>长连接</p>
 <p>找一个中间的长连 server ,在内网专线进行 Http 请求。客户端和这个长连 server通信即可。</p>
-<h3 id="网络请求的状态码都大致代表什么意思"><a href="#网络请求的状态码都大致代表什么意思" class="headerlink" title="网络请求的状态码都大致代表什么意思"></a>网络请求的状态码都大致代表什么意思</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1xx 代表临时响应，需要请求者继续执行操作的状态代码。</span><br><span class="line">2xx 代表的多是操作成功。</span><br><span class="line">3xx 代表重定向，表示要完成请求，需要进一步操作</span><br><span class="line">4xx 代表请求错误，表示请求可能出错，妨碍了服务器的处理。</span><br><span class="line">5xx 代表服务器错误，表示服务器在尝试处理请求时发生内部错误。 这些错误可能是服务器本身的错误，而不是请求出错</span><br></pre></td></tr></table></figure>
 <h3 id="抓包软件-Charles-的原理是什么？说一下中间人攻击的过程"><a href="#抓包软件-Charles-的原理是什么？说一下中间人攻击的过程" class="headerlink" title="抓包软件 Charles 的原理是什么？说一下中间人攻击的过程"></a>抓包软件 Charles 的原理是什么？说一下中间人攻击的过程</h3><p>Charles 的原理实际就是网络的 中间人攻击。</p>
 <p>中间人（MITM）攻击是一种攻击类型，其中攻击者将它自己放到两方之间，通常是客户端和服务端通信线路的中间。这可以通过破坏原始频道之后拦截一方的消息并将它们转发（有时会有改变）给另一方来实现。</p>
 <p>客户端发给服务端的请求，被中间人劫持篡改之后，再发送给服务端。</p>
@@ -501,8 +481,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/05/ReactiveCocoa学习/" rel="prev" title="ReactiveCocoa学习">
-                ReactiveCocoa学习 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/07/05/多线程/" rel="prev" title="多线程">
+                多线程 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -583,7 +563,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">19</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -629,7 +609,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-IP五层模型-OSI参考模型"><span class="nav-number">1.</span> <span class="nav-text">TCP/IP五层模型/OSI参考模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何在测试过程中-MOCK-各种网络环境？"><span class="nav-number">2.</span> <span class="nav-text">如何在测试过程中 MOCK 各种网络环境？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Http和Https的区别"><span class="nav-number">3.</span> <span class="nav-text">Http和Https的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据传输的加密过程"><span class="nav-number">3.1.</span> <span class="nav-text">数据传输的加密过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解释一下Http的持久连接"><span class="nav-number">4.</span> <span class="nav-text">解释一下Http的持久连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GET和POST请求的区别"><span class="nav-number">5.</span> <span class="nav-text">GET和POST请求的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#参数位置"><span class="nav-number">5.1.</span> <span class="nav-text">参数位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参数长度"><span class="nav-number">5.2.</span> <span class="nav-text">参数长度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安全性"><span class="nav-number">5.3.</span> <span class="nav-text">安全性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#幂等性（同一方法执行多次和执行一次效果相同）"><span class="nav-number">5.4.</span> <span class="nav-text">幂等性（同一方法执行多次和执行一次效果相同）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存性"><span class="nav-number">5.5.</span> <span class="nav-text">缓存性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS的解析过程以及优化"><span class="nav-number">6.</span> <span class="nav-text">DNS的解析过程以及优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-解析的两种方式"><span class="nav-number">6.1.</span> <span class="nav-text">DNS 解析的两种方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-解析存在的问题"><span class="nav-number">6.2.</span> <span class="nav-text">DNS 解析存在的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-劫持解决办法"><span class="nav-number">6.3.</span> <span class="nav-text">DNS 劫持解决办法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络请求的状态码都大致代表什么意思"><span class="nav-number">7.</span> <span class="nav-text">网络请求的状态码都大致代表什么意思</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抓包软件-Charles-的原理是什么？说一下中间人攻击的过程"><span class="nav-number">8.</span> <span class="nav-text">抓包软件 Charles 的原理是什么？说一下中间人攻击的过程</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-IP五层模型-OSI参考模型"><span class="nav-number">1.</span> <span class="nav-text">TCP/IP五层模型/OSI参考模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何在测试过程中-MOCK-各种网络环境？"><span class="nav-number">2.</span> <span class="nav-text">如何在测试过程中 MOCK 各种网络环境？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Http和Https的区别"><span class="nav-number">3.</span> <span class="nav-text">Http和Https的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据传输的加密过程"><span class="nav-number">3.1.</span> <span class="nav-text">数据传输的加密过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解释一下Http的持久连接"><span class="nav-number">4.</span> <span class="nav-text">解释一下Http的持久连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS的解析过程以及优化"><span class="nav-number">5.</span> <span class="nav-text">DNS的解析过程以及优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-解析的两种方式"><span class="nav-number">5.1.</span> <span class="nav-text">DNS 解析的两种方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-解析存在的问题"><span class="nav-number">5.2.</span> <span class="nav-text">DNS 解析存在的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-劫持解决办法"><span class="nav-number">5.3.</span> <span class="nav-text">DNS 劫持解决办法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抓包软件-Charles-的原理是什么？说一下中间人攻击的过程"><span class="nav-number">6.</span> <span class="nav-text">抓包软件 Charles 的原理是什么？说一下中间人攻击的过程</span></a></li></ol></div>
             
 
           </div>
@@ -663,7 +643,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">18.9k</span>
+    <span title="Site words total count">19.8k</span>
   
 </div>
 
