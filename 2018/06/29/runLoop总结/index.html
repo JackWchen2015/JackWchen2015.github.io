@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简介 Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RunLoop">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="简介 Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop_00.jpg">
+<meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
+<meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop_04.png">
+<meta property="og:updated_time" content="2019-12-02T07:47:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RunLoop">
+<meta name="twitter:description" content="简介 Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The">
+<meta name="twitter:image" content="https://github.com/2018/06/29/runLoop总结/runloop_00.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/"/>
+
+
+
+
+
+  <title>RunLoop | 学计算机的那个</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">学计算机的那个</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/29/runLoop总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RunLoop</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-29T08:00:00+08:00">
+                2018-06-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/网络多线程/" itemprop="url" rel="index">
+                    <span itemprop="name">网络多线程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/29/runLoop总结/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/06/29/runLoop总结/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/29/runLoop总结/" class="leancloud_visitors" data-flag-title="RunLoop">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The purpose of a run loop is to keep your thread busy when there is work to do and put your thread to sleep when there is none.</p>
+</blockquote>
+<p>Runloop是与线程相关联的基础架构的一部分，它用来接受循环事件和安排线程的工作，在有工作时让线程处于繁忙状态，没有事件需要处理时让线程休眠；<br><a id="more"></a></p>
+<h2 id="Sources"><a href="#Sources" class="headerlink" title="Sources"></a>Sources</h2><blockquote>
+<p>A run loop receives events from two different types of sources. Input sources deliver asynchronous events, usually messages from another thread or from a different application. Timer sources deliver synchronous events, occurring at a scheduled time or repeating interval. Both types of source use an application-specific handler routine to process the event when it arrives.</p>
+</blockquote>
+<p>RunLoop 接受的事件源有两种大类: <strong>Input sources</strong>, <strong>Timer sources</strong>:</p>
+<ol>
+<li><p>InputSources : 传递递异步事件,通常消息来自另外的线程或者程序;</p>
+</li>
+<li><p>Timer sources：传递同步事件，发生在预定时间或者是重复间隔；</p>
+</li>
+</ol>
+<img src="/2018/06/29/runLoop总结/runloop_00.jpg">
+<p>从上图可以看到，Input sources 传递异步事件给相应的方法处理，并且通过runUntilDate:（由线程对应的NSRunLoop 对象执行）来退出；</p>
+<p>Timer sources 传递同步事件给它们对应的例行程序来执行但是不会导致run loop退出。</p>
+<h3 id="Input-Sources"><a href="#Input-Sources" class="headerlink" title="Input Sources"></a>Input Sources</h3><p>Input sources 异步地传递事件到线程，而事件的源来至于其中一种：Port-based input sources、Custom input sources 这两种souces的实现处理方式都一样</p>
+<ul>
+<li><p>Port-based input sources :监听程序的Mach ports，kernel自动发信号</p>
+</li>
+<li><p>Custom input sources ：监听自定义的活动，在其他线程手动的发信号</p>
+</li>
+</ul>
+<p><strong>Cocoa Perform Selector Sources</strong> : Cocoa 框架定义的Custom input sources</p>
+<h4 id="配置Input-Sources"><a href="#配置Input-Sources" class="headerlink" title="配置Input Sources"></a>配置Input Sources</h4><ul>
+<li><p>Port-Based Sources通过内置的端口相关的对象和函数，配置基于端口的Input source。 (比如在主线程创建子线程时传入一个NSPort对象,主线程和子线程就可以进行通讯。NSPort对象会负责自己创建和配置Input source。)</p>
+</li>
+<li><p>Custom Input Sources我们可以使用Core Foundation里面的CFRunLoopSourceRef类型相关的函数来创建custom input source,系统也有提供一些方法。</p>
+</li>
+<li><p>Cocoa框架为我们定义了一些Custom Input Sources，允许我们在线程中执行一系列selector方法，这些在NSThread类里面。和Port-Based Sources一样，这些selector的请求会在目标线程中序列化，以减缓线程中多个方法执行带来的同步问题。和Port-Based Sources不一样的是，一个selector方法执行完之后会自动从当前Run Loop中移除。</p>
+</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">performSelectorOnMainThread:withObject:waitUntilDone:</span><br><span class="line">performSelectorOnMainThread:withObject:waitUntilDone:modes:</span><br><span class="line"></span><br><span class="line">performSelector:onThread:withObject:waitUntilDone:</span><br><span class="line">performSelector:onThread:withObject:waitUntilDone:modes:</span><br><span class="line"></span><br><span class="line">performSelector:withObject:afterDelay:</span><br><span class="line">performSelector:withObject:afterDelay:inModes:</span><br><span class="line"></span><br><span class="line">cancelPreviousPerformRequestsWithTarget:</span><br><span class="line">cancelPreviousPerformRequestsWithTarget:selector:object:</span><br></pre></td></tr></table></figure>
+<h3 id="Timer-Sources"><a href="#Timer-Sources" class="headerlink" title="Timer Sources"></a>Timer Sources</h3><p>Timer sources 在未来的特定时间同步地传递事件给线程，Timer是一种提醒线程做事的方式。</p>
+<p>尽管Timer是一种基于时间的通知，但是并不是实时机制，如果不是对应的Mode,timer并不会被fire除非切换到对应的Mode.</p>
+<p>如果timer的fire时间，runloop正在处理其他事件，等待超过tolerance，那么这一次fire就会错过，等待下一次来执行，如果runloop退出，那么timer就再也不会fire了。<br>间隔时间是跟上一次之后的间隔，是timer自己调度的，所以可能并不是跟实际时间完全吻合(因为存在等待，这些需要叠加)。</p>
+<h4 id="Timer应用"><a href="#Timer应用" class="headerlink" title="Timer应用"></a>Timer应用</h4><ul>
+<li><p>除了scheduledTimerWithTimeInterval开头的方法创建的Timer都需要手动添加到当前Run Loop中。（scheduledTimerWithTimeInterval 创建的timer会自动以Default Mode加载到当前Run Loop中。）<br>Timer在选择使用一次后，在执行完成时，会从Run Loop中移除。选择循环时，会一直保存在当前Run Loop中，直到调用invalidated方法。</p>
+</li>
+<li><p>一个 Timer 一次只能加入到一个 RunLoop 中。我们日常使用的时候，通常就是加入到当前的 runLoop 的 default mode 中，而 ScrollView 在用户滑动时，主线程 RunLoop 会转到 UITrackingRunLoopMode 。而这个时候， Timer 就不会运行。</p>
+</li>
+</ul>
+<p>有如下两种解决方案：</p>
+<ol>
+<li>设置 RunLoop Mode，例如 NSTimer,我们指定它运行于 NSRunLoopCommonModes ，这是一个 Mode 的集合。注册到这个 Mode 下后，无论当前 runLoop 运行哪个 mode ，事件都能得到执行。</li>
+<li>另一种解决 Timer 的方法是，我们在另外一个线程执行和处理 Timer 事件，然后在主线程更新 UI。</li>
+</ol>
+<h2 id="Runloop-Mode"><a href="#Runloop-Mode" class="headerlink" title="Runloop Mode"></a>Runloop Mode</h2><blockquote>
+<p>A run loop mode is a collection of input sources and timers to be monitored and a collection of run loop observers to be notified</p>
+</blockquote>
+<p>一个run loop mode是一个集合（input sources 和 timers被监测，observers接受通知）</p>
+<p>每次开启runloop都要指定一个mode来运行，在运行期间，只有该mode下对应的事件源才会被监测以及允许传递事件（同样的，该mode对应的observers才能接受runloop进程的通知）,其他mode下的事件源的事件将会等待直到切换到对应的mode.更改mode只能重新开启runloop</p>
+<p>在设置Run Loop Mode后，你的Run Loop会自动过滤和其他Mode相关的事件源，而只监视和当前设置Mode相关的源(通知相关的观察者)。大多数时候，Run Loop都是运行在系统定义的默认模式上。</p>
+<p>Run Loop运行时只能以一种固定的Mode运行，只会监控这个Mode下添加的Timer source和Input source。如果这个Mode下没有添加事件源，Run Loop会立刻返回</p>
+<h2 id="Runloop的Observer"><a href="#Runloop的Observer" class="headerlink" title="Runloop的Observer"></a>Runloop的Observer</h2><p>在处理事件源时，runloop会产生关于这些行为的通知，可以往Run Loop中加入自己的观察者以便监控Run Loop的运行过程。</p>
+<p>Run Loop Observer会与以下事件相关联：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">kCFRunLoopEntry – 进入runloop循环</span><br><span class="line">kCFRunLoopBeforeTimers — runloop即将处理一个timer</span><br><span class="line">kCFRunLoopBeforeSources – runloop即将处理input sources的事件</span><br><span class="line">kCFRunLoopBeforeWaiting – runloop即将休眠</span><br><span class="line">kCFRunLoopAfterWaiting – runloop已经唤醒，但是唤醒runloop的是事件还没有处理。</span><br><span class="line">kCFRunLoopExit – 退出runloop</span><br></pre></td></tr></table></figure>
+<p>和Timer一样，Run Loop Observers也可以使用一次或者选择repeat。如果只使用一次，Observer会在它被执行后自己从Run Loop中移除。而循环的Observer会一直保存在Run Loop中.</p>
+<p>一旦runloop跑起来，线程的runloop就会处理等待的事件并且给observer发送通知</p>
+<img src="/2018/06/29/runLoop总结/runloop.png">
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">int32_t __CFRunLoopRun()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 通知即将进入runloop</span></span><br><span class="line">  	<span class="comment">//创建AutoreleasePool: _objc_autoreleasePoolPush();</span></span><br><span class="line">    __CFRunLoopDoObservers(KCFRunLoopEntry);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">do</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 通知将要处理timer和source</span></span><br><span class="line">        __CFRunLoopDoObservers(kCFRunLoopBeforeTimers);</span><br><span class="line">        __CFRunLoopDoObservers(kCFRunLoopBeforeSources);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 处理非延迟的主线程调用</span></span><br><span class="line">        __CFRunLoopDoBlocks();</span><br><span class="line">        <span class="comment">// 处理UIEvent事件</span></span><br><span class="line">        __CFRunLoopDoSource0();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// GCD dispatch main queue</span></span><br><span class="line">        CheckIfExistMessagesInMainDispatchQueue();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 即将进入休眠</span></span><br><span class="line">      	<span class="comment">//释放并新建AutoreleasePool: _objc_autoreleasePoolPop(); _objc_autoreleasePoolPush();</span></span><br><span class="line">        __CFRunLoopDoObservers(kCFRunLoopBeforeWaiting);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 等待内核mach_msg事件</span></span><br><span class="line">        mach_port_t wakeUpPort = SleepAndWaitForWakingUpPorts();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Zzz...</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 从等待中醒来</span></span><br><span class="line">        __CFRunLoopDoObservers(kCFRunLoopAfterWaiting);</span><br><span class="line">                </span><br><span class="line">        <span class="keyword">if</span> (wakeUpPort == timerPort)&#123;<span class="comment">// 处理因timer的唤醒</span></span><br><span class="line">          __CFRunLoopDoTimers();</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (wakeUpPort == mainDispatchQueuePort)&#123;<span class="comment">// 处理异步方法唤醒,如dispatch_async</span></span><br><span class="line">          __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__()</span><br><span class="line">        &#125; <span class="keyword">else</span>&#123;<span class="comment">// UI刷新,动画显示</span></span><br><span class="line">          __CFRunLoopDoSource1();</span><br><span class="line">        &#125;   </span><br><span class="line">        <span class="comment">// 再次确保是否有同步的方法需要调用</span></span><br><span class="line">        __CFRunLoopDoBlocks();</span><br><span class="line">        </span><br><span class="line">    &#125; <span class="keyword">while</span> (!stop &amp;&amp; !timeout);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 通知即将退出runloop</span></span><br><span class="line">  	<span class="comment">//释放AutoreleasePool: _objc_autoreleasePoolPop();</span></span><br><span class="line">    __CFRunLoopDoObservers(<span class="built_in">CFRunLoopExit</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<img src="/2018/06/29/runLoop总结/runloop_04.png">
+<h2 id="什么时候才需要使用runloop"><a href="#什么时候才需要使用runloop" class="headerlink" title="什么时候才需要使用runloop"></a>什么时候才需要使用runloop</h2><p>只有在你开启了子线程的情况下才需要运行runloop</p>
+<p>对于子线程，是否需要运行runloop取决于实际需要，并不是所有的子线程都需要运行runloop。如果子线程要跑一个确定的而且长的任务，就没必要开启runloop。runloop更适合当你需要与线程更多交互的情景。以下情景需要开启runloop:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">使用ports或者自定义input sources与其他线程联通</span><br><span class="line">在线程上使用Timer</span><br><span class="line">使用performSelector这类方法</span><br><span class="line">保持线程执行定期周期任务</span><br></pre></td></tr></table></figure>
+<p>如果你在子线程运行了runloop，你要准备好在合适的时候退出该子线程，因为相比于强制让runloop终止，通过让线程终止来让runloop退出更好。</p>
+<p>子线程的runloop是要手动开启的，一个runloop必须有至少一个input source或者timer去监听，否则会立即退出。</p>
+<h2 id="Runloop和线程的关系"><a href="#Runloop和线程的关系" class="headerlink" title="Runloop和线程的关系"></a>Runloop和线程的关系</h2><ol>
+<li>一个线程对应一个Runloop</li>
+<li>主线程的默认就有Runloop</li>
+<li>子线程的Runloop以懒加载的形式创建</li>
+<li>Runloop存储在一个全局的可变字典里吃，线程是key，Runloop是value。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="http://www.helloted.com/ios/2017/04/10/Runloop_1/" target="_blank" rel="noopener">Runloop</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>化点缘</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/aipay.png" alt="Jack Chen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/28/AutoreleasePool总结/" rel="next" title="AutoreleasePool总结">
+                <i class="fa fa-chevron-left"></i> AutoreleasePool总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/30/RunLoop应用/" rel="prev" title="RunLoop应用">
+                RunLoop应用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Jack Chen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sources"><span class="nav-number">2.</span> <span class="nav-text">Sources</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Input-Sources"><span class="nav-number">2.1.</span> <span class="nav-text">Input Sources</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置Input-Sources"><span class="nav-number">2.1.1.</span> <span class="nav-text">配置Input Sources</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Timer-Sources"><span class="nav-number">2.2.</span> <span class="nav-text">Timer Sources</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Timer应用"><span class="nav-number">2.2.1.</span> <span class="nav-text">Timer应用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop-Mode"><span class="nav-number">3.</span> <span class="nav-text">Runloop Mode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop的Observer"><span class="nav-number">4.</span> <span class="nav-text">Runloop的Observer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么时候才需要使用runloop"><span class="nav-number">5.</span> <span class="nav-text">什么时候才需要使用runloop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop和线程的关系"><span class="nav-number">6.</span> <span class="nav-text">Runloop和线程的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">56.2k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz',
+        appKey: 'v2zdWxJV3kOujBALKftRvt2i',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz", "v2zdWxJV3kOujBALKftRvt2i");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
