@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="前言为什么要在主线程刷新UI操作由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。 何为渲染渲染就是把我们代码里设置的代码的视图和数据结合，最后绘制成一张图呈现在用户的面前。每秒绘制60张图，用户看着就是流畅的界面呈现，如果不到60帧，那么越少用户看着就会越卡。 利用Runloop解释一下页面的渲染的过程当我们调用 [UIVi">
+<meta name="description" content="前言由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS异步绘制">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/08/02/iOS异步绘制/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="前言为什么要在主线程刷新UI操作由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。 何为渲染渲染就是把我们代码里设置的代码的视图和数据结合，最后绘制成一张图呈现在用户的面前。每秒绘制60张图，用户看着就是流畅的界面呈现，如果不到60帧，那么越少用户看着就会越卡。 利用Runloop解释一下页面的渲染的过程当我们调用 [UIVi">
+<meta property="og:description" content="前言由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/08/02/iOS异步绘制/setNeedsDisplay.png">
 <meta property="og:image" content="https://github.com/2018/08/02/iOS异步绘制/drawLayer.png">
 <meta property="og:image" content="https://github.com/2018/08/02/iOS异步绘制/displayLayer.png">
-<meta property="og:updated_time" content="2019-03-11T02:26:36.000Z">
+<meta property="og:updated_time" content="2019-05-31T08:08:37.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS异步绘制">
-<meta name="twitter:description" content="前言为什么要在主线程刷新UI操作由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。 何为渲染渲染就是把我们代码里设置的代码的视图和数据结合，最后绘制成一张图呈现在用户的面前。每秒绘制60张图，用户看着就是流畅的界面呈现，如果不到60帧，那么越少用户看着就会越卡。 利用Runloop解释一下页面的渲染的过程当我们调用 [UIVi">
+<meta name="twitter:description" content="前言由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。">
 <meta name="twitter:image" content="https://github.com/2018/08/02/iOS异步绘制/setNeedsDisplay.png">
 
 
@@ -164,7 +164,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -298,8 +298,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之UI/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之UI</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index">
+                    <span itemprop="name">UI</span>
                   </a>
                 </span>
 
@@ -350,7 +361,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  845
+                  833
                 </span>
               
 
@@ -387,7 +398,7 @@
       
 
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><h4 id="为什么要在主线程刷新UI操作"><a href="#为什么要在主线程刷新UI操作" class="headerlink" title="为什么要在主线程刷新UI操作"></a>为什么要在主线程刷新UI操作</h4><p>由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。<br><a id="more"></a></p>
 <h4 id="何为渲染"><a href="#何为渲染" class="headerlink" title="何为渲染"></a>何为渲染</h4><p>渲染就是把我们代码里设置的代码的视图和数据结合，最后绘制成一张图呈现在用户的面前。每秒绘制60张图，用户看着就是流畅的界面呈现，如果不到60帧，那么越少用户看着就会越卡。</p>
 <h3 id="利用Runloop解释一下页面的渲染的过程"><a href="#利用Runloop解释一下页面的渲染的过程" class="headerlink" title="利用Runloop解释一下页面的渲染的过程"></a>利用Runloop解释一下页面的渲染的过程</h3><p>当我们调用 [UIView setNeedsDisplay] 时，这时会调用当前 View.layer 的 [view.layer setNeedsDisplay]方法。</p>
 <p>这等于给当前的 layer 打上了一个脏标记，而此时并没有直接进行绘制工作。而是会到当前的 Runloop 即将休眠，也就是 beforeWaiting 时才会进行绘制工作。</p>
@@ -464,8 +475,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/05/ReactiveCocoa学习/" rel="next" title="ReactiveCocoa学习">
-                <i class="fa fa-chevron-left"></i> ReactiveCocoa学习
+              <a href="/2018/07/03/iOS常用技巧/" rel="next" title="iOS常用技巧">
+                <i class="fa fa-chevron-left"></i> iOS常用技巧
               </a>
             
           </div>
@@ -556,7 +567,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -567,7 +578,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -602,7 +613,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要在主线程刷新UI操作"><span class="nav-number">1.1.</span> <span class="nav-text">为什么要在主线程刷新UI操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#何为渲染"><span class="nav-number">1.2.</span> <span class="nav-text">何为渲染</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用Runloop解释一下页面的渲染的过程"><span class="nav-number">2.</span> <span class="nav-text">利用Runloop解释一下页面的渲染的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是异步绘制"><span class="nav-number">3.</span> <span class="nav-text">什么是异步绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现异步"><span class="nav-number">4.</span> <span class="nav-text">如何实现异步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#调用链："><span class="nav-number">4.1.</span> <span class="nav-text">调用链：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章引用"><span class="nav-number">5.</span> <span class="nav-text">文章引用</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#何为渲染"><span class="nav-number">1.1.</span> <span class="nav-text">何为渲染</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用Runloop解释一下页面的渲染的过程"><span class="nav-number">2.</span> <span class="nav-text">利用Runloop解释一下页面的渲染的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是异步绘制"><span class="nav-number">3.</span> <span class="nav-text">什么是异步绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现异步"><span class="nav-number">4.</span> <span class="nav-text">如何实现异步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#调用链："><span class="nav-number">4.1.</span> <span class="nav-text">调用链：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章引用"><span class="nav-number">5.</span> <span class="nav-text">文章引用</span></a></li></ol></div>
             
 
           </div>
@@ -622,7 +633,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -636,7 +647,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

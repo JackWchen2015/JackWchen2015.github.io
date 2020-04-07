@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="以后就在这里写博客了，本篇记录下Hexo安装遇到的问题 安装完后Hexo s 运行报错1.提示你 执行  npm install hexo –save执行后会报warningnpm WARN engine hexo@3.7.1: wanted: {“node”:”&amp;gt;=6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})这个时候需要更新下nod">
+<meta name="description" content="什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hexo安装遇坑笔记">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/01/hexo安装遇坑/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="以后就在这里写博客了，本篇记录下Hexo安装遇到的问题 安装完后Hexo s 运行报错1.提示你 执行  npm install hexo –save执行后会报warningnpm WARN engine hexo@3.7.1: wanted: {“node”:”&amp;gt;=6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})这个时候需要更新下nod">
+<meta property="og:description" content="什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页.">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-07T16:13:35.000Z">
+<meta property="og:updated_time" content="2019-06-06T11:27:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo安装遇坑笔记">
-<meta name="twitter:description" content="以后就在这里写博客了，本篇记录下Hexo安装遇到的问题 安装完后Hexo s 运行报错1.提示你 执行  npm install hexo –save执行后会报warningnpm WARN engine hexo@3.7.1: wanted: {“node”:”&amp;gt;=6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})这个时候需要更新下nod">
+<meta name="twitter:description" content="什么是 Hexo？Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页.">
 
 
 
@@ -160,7 +160,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -346,7 +346,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  259
+                  310
                 </span>
               
 
@@ -383,13 +383,14 @@
       
 
       
-        <p>以后就在这里写博客了，本篇记录下Hexo安装遇到的问题</p>
+        <h2 id="什么是-Hexo？"><a href="#什么是-Hexo？" class="headerlink" title="什么是 Hexo？"></a>什么是 Hexo？</h2><p>Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页.<br><a id="more"></a></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">hexo官方文档</a></p>
 <h2 id="安装完后Hexo-s-运行报错"><a href="#安装完后Hexo-s-运行报错" class="headerlink" title="安装完后Hexo s 运行报错"></a>安装完后Hexo s 运行报错</h2><p>1.提示你 执行  npm install hexo –save<br>执行后会报warning<br>npm WARN engine <a href="mailto:hexo@3.7.1" target="_blank" rel="noopener">hexo@3.7.1</a>: wanted: {“node”:”&gt;=6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})<br>这个时候需要更新下node版本<br>2.升级方法</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo npm cache clean -f</span><br><span class="line">  sudo npm install -g n</span><br><span class="line">  sudo n stable</span><br></pre></td></tr></table></figure>
 <p>重启终端后 查看版本</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ node -v</span><br></pre></td></tr></table></figure>
 <h2 id="Hexo-s运行-yml脚本报错"><a href="#Hexo-s运行-yml脚本报错" class="headerlink" title="Hexo s运行 *.yml脚本报错"></a>Hexo s运行 *.yml脚本报错</h2><p>编辑yml文件后，运行报某行的值不能为空的错，这里要吐槽下hexo的脚本解析能力真是太弱了。</p>
-<p>##常用命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean <span class="comment">#清除缓存 网页正常情况下可以忽略此条命令</span></span><br><span class="line">hexo g <span class="comment">#生成静态网页</span></span><br><span class="line">hexo d <span class="comment">#开始部署</span></span><br></pre></td></tr></table></figure></p>
+<p>##常用命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hexo s  <span class="comment">#启动服务器 本地调试使用</span></span><br><span class="line">hexo clean <span class="comment">#清除缓存 网页正常情况下可以忽略此条命令</span></span><br><span class="line">hexo g <span class="comment">#生成静态网页</span></span><br><span class="line">hexo d <span class="comment">#开始部署</span></span><br></pre></td></tr></table></figure></p>
 <h3 id="常见错误："><a href="#常见错误：" class="headerlink" title="常见错误："></a>常见错误：</h3><p>1.key:后面没有空格<br>2.缩进问题</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ deploy: </span><br><span class="line">    <span class="built_in">type</span>: git</span><br><span class="line">    repo: https://github.com/JackWchen2015/JackWchen2015.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
 <h2 id="Hexo-报TypeError-Cannot-read-property-‘utcOffset’-of-null"><a href="#Hexo-报TypeError-Cannot-read-property-‘utcOffset’-of-null" class="headerlink" title="Hexo 报TypeError: Cannot read property ‘utcOffset’ of null"></a>Hexo 报TypeError: Cannot read property ‘utcOffset’ of null</h2><p>解决方法：编辑yml文件</p>
@@ -442,6 +443,10 @@
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/14/网络模型/" rel="next" title="网络模型">
+                <i class="fa fa-chevron-left"></i> 网络模型
+              </a>
             
           </div>
 
@@ -531,7 +536,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -542,7 +547,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -577,7 +582,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装完后Hexo-s-运行报错"><span class="nav-number">1.</span> <span class="nav-text">安装完后Hexo s 运行报错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-s运行-yml脚本报错"><span class="nav-number">2.</span> <span class="nav-text">Hexo s运行 *.yml脚本报错</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常见错误："><span class="nav-number">2.1.</span> <span class="nav-text">常见错误：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-报TypeError-Cannot-read-property-‘utcOffset’-of-null"><span class="nav-number">3.</span> <span class="nav-text">Hexo 报TypeError: Cannot read property ‘utcOffset’ of null</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">4.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-Hexo？"><span class="nav-number">1.</span> <span class="nav-text">什么是 Hexo？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装完后Hexo-s-运行报错"><span class="nav-number">3.</span> <span class="nav-text">安装完后Hexo s 运行报错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-s运行-yml脚本报错"><span class="nav-number">4.</span> <span class="nav-text">Hexo s运行 *.yml脚本报错</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常见错误："><span class="nav-number">4.1.</span> <span class="nav-text">常见错误：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hexo-报TypeError-Cannot-read-property-‘utcOffset’-of-null"><span class="nav-number">5.</span> <span class="nav-text">Hexo 报TypeError: Cannot read property ‘utcOffset’ of null</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">6.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
             
 
           </div>
@@ -597,7 +602,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -611,7 +616,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

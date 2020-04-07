@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。 1.内存泄漏iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。 1.1循环引用可以使用腾讯开源的 MLeaksFinder 控件来实">
+<meta name="description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS性能优化">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/24/iOS性能优化/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。 1.内存泄漏iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。 1.1循环引用可以使用腾讯开源的 MLeaksFinder 控件来实">
+<meta property="og:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-07T16:21:09.000Z">
+<meta property="og:updated_time" content="2019-05-31T08:08:10.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS性能优化">
-<meta name="twitter:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。 1.内存泄漏iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。 1.1循环引用可以使用腾讯开源的 MLeaksFinder 控件来实">
+<meta name="twitter:description" content="以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。">
 
 
 
@@ -160,7 +160,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -294,8 +294,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS性能监控与优化/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS性能监控与优化</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/性能监控与优化/" itemprop="url" rel="index">
+                    <span itemprop="name">性能监控与优化</span>
                   </a>
                 </span>
 
@@ -383,14 +394,14 @@
       
 
       
-        <p>以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。</p>
+        <p>以前喜欢在写代码的时候，注重每个细节的性能，后来发现这样效率很低，常常在细枝末节上浪费过多时间，印证了那句过早的优化是万恶之源，所以现在更倾向于用性能检测手段检查出问题所在，有目的的优化。<br><a id="more"></a></p>
 <h3 id="1-内存泄漏"><a href="#1-内存泄漏" class="headerlink" title="1.内存泄漏"></a>1.内存泄漏</h3><p>iOS使用引用计数来来管理对象的释放，借鉴的C++的智能指针的机制，但这种机制本身也有问题，常见的有循环引用导致对象不能被释放。</p>
 <h4 id="1-1循环引用"><a href="#1-1循环引用" class="headerlink" title="1.1循环引用"></a>1.1循环引用</h4><p>可以使用腾讯开源的 MLeaksFinder 控件来实现监测。</p>
 <p>原理</p>
 <p>为基类NSObject添加一个方法 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-willDealloc</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-willDealloc</span><br></pre></td></tr></table></figure>
 <p>方法的作用是，先用一个弱指针指向 self，并在一小段时间(3秒)后，通过这个弱指针调用 -assertNotDealloc，而 -assertNotDealloc 主要作用是直接中断言。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)willDealloc &#123;</span><br><span class="line">    __weak id weakSelf = self;</span><br><span class="line">    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        [weakSelf assertNotDealloc];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">return</span> YES;</span><br><span class="line">&#125;</span><br><span class="line">- (void)assertNotDealloc &#123;</span><br><span class="line">     NSAssert(NO, @“”);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">BOOL</span>)willDealloc &#123;</span><br><span class="line">    __<span class="keyword">weak</span> <span class="keyword">id</span> weakSelf = <span class="keyword">self</span>;</span><br><span class="line">    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(<span class="number">3</span> * <span class="built_in">NSEC_PER_SEC</span>)), dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        [weakSelf assertNotDealloc];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="keyword">void</span>)assertNotDealloc &#123;</span><br><span class="line">     <span class="built_in">NSAssert</span>(<span class="literal">NO</span>, @“”);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="2-主线程流畅性监控"><a href="#2-主线程流畅性监控" class="headerlink" title="2.主线程流畅性监控"></a>2.主线程流畅性监控</h3><p>由于UIkit是线程不安全的，所以苹果规定把UI相关的刷新操纵放在主线程里执行，所以监控主线程的流畅度就能测量出App是否流畅，而App流畅，一般是监测FPS值，FPS达到60/s是理想状态，小于这个值就会失帧</p>
 <p>原理：开启一个线程，监控runloop的状态 kCFRunLoopBeforeSources kCFRunLoopBeforeWaiting，计算出两个状态之间的差值，如果时间差大于15ms 即存在失帧。这个时候可以利用第三方不会线程栈，找出耗时的函数。</p>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>1.<a href="http://wereadteam.github.io/2016/02/22/MLeaksFinder/" target="_blank" rel="noopener">MLeadksFinder简介</a></p>
@@ -535,7 +546,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -546,7 +557,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -601,7 +612,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -615,7 +626,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

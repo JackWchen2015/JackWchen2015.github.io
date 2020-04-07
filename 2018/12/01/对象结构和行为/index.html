@@ -79,21 +79,21 @@
 
 
 
-<meta name="description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
+<meta name="description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
 <meta property="og:type" content="article">
 <meta property="og:title" content="对象结构和行为">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/01/对象结构和行为/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
+<meta property="og:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/KVC.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_law.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_deep.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_mutable.png">
-<meta property="og:updated_time" content="2019-03-13T01:11:52.000Z">
+<meta property="og:updated_time" content="2019-07-04T05:53:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对象结构和行为">
-<meta name="twitter:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展  KVO 和 KVCKVOKVO实现：使用 isa-swizzling 来实现KVO  当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_">
+<meta name="twitter:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
 <meta name="twitter:image" content="https://github.com/2018/12/01/对象结构和行为/KVC.png">
 
 
@@ -165,7 +165,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -299,8 +299,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之OC/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之OC</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -398,12 +409,14 @@
 <li>只以声明的形式存在，多数情况下寄生于宿主类的.m中</li>
 <li>不能为系统类添加扩展</li>
 </ul>
+<a id="more"></a>
 <h3 id="KVO-和-KVC"><a href="#KVO-和-KVC" class="headerlink" title="KVO 和 KVC"></a>KVO 和 KVC</h3><h4 id="KVO"><a href="#KVO" class="headerlink" title="KVO"></a>KVO</h4><p>KVO实现：使用 isa-swizzling 来实现KVO</p>
 
 <p>当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_A 类，同时将A的isa指针指向 NSKVONorifying_A</p>
 <p>子类拥有自己的set方法实现，内部会调用</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-willChangeValueForKey:</span><br><span class="line">原来的setter</span><br><span class="line">-didChangeValueForKey:这个方法内部又会调用监听器(observer)的监听方法</span><br></pre></td></tr></table></figure>
-<h4 id="KVC"><a href="#KVC" class="headerlink" title="KVC"></a>KVC</h4><p>主要有这俩个方法<br>通过一副流程图看一下 valueForKey 的实现逻辑<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-(id)valueForKey:(NSString *)key</span><br><span class="line">-(void)setValue:(id)value forkey:(NSString *)key;</span><br></pre></td></tr></table></figure></p>
+<h4 id="KVC"><a href="#KVC" class="headerlink" title="KVC"></a>KVC</h4><p>主要有这俩个方法<br>通过一副流程图看一下 valueForKey 的实现逻辑</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="keyword">id</span>)valueForKey:(<span class="built_in">NSString</span> *)key</span><br><span class="line">-(<span class="keyword">void</span>)setValue:(<span class="keyword">id</span>)value forkey:(<span class="built_in">NSString</span> *)key;</span><br></pre></td></tr></table></figure>
 <img src="/2018/12/01/对象结构和行为/KVC.png">
 <p>首先系统会判断访问的key是否有对应的getter方法，存在就直接进行调用，不存在就判断实例变量是否存在，通过 accessInstanceVariablesDirectly 来判断 ，默认是YES。 如果不存在，会调用 UndefinedKey ，抛出异常.</p>
 <h4 id="KVC-VS-KVO"><a href="#KVC-VS-KVO" class="headerlink" title="KVC VS KVO"></a>KVC VS KVO</h4><p>KVC，即是指 NSKeyValueCoding，一个非正式的 Protocol，提供一种机制来间接访问对象的属性。KVO 就是基于 KVC 实现的关键技术之一。<br>一个对象拥有某些属性。比如说，一个 Person 对象有一个 name 和一个 address 属性。以 KVC 说法，Person 对象分别有一个 value 对应他的 name 和 address 的 key。 key 只是一个字符串，它对应的值可以是任意类型的对象。从最基础的层次上看，KVC 有两个方法：一个是设置 key 的值，另一个是获取 key 的值</p>
@@ -556,7 +569,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -567,7 +580,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -622,7 +635,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -636,7 +649,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

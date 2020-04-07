@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常 函数函数的四要素  名称   SEL   name 返回值 const char* types 参数  const c">
+<meta name="description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常">
 <meta property="og:type" content="article">
 <meta property="og:title" content="消息发送和转发">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/01/01/消息发送和转发/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常 函数函数的四要素  名称   SEL   name 返回值 const char* types 参数  const c">
+<meta property="og:description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2019/01/01/消息发送和转发/self_send.png">
 <meta property="og:image" content="https://github.com/2019/01/01/消息发送和转发/super_send.png">
 <meta property="og:image" content="https://github.com/2019/01/01/消息发送和转发/msg_transfer.png">
-<meta property="og:updated_time" content="2019-03-13T10:55:53.000Z">
+<meta property="og:updated_time" content="2019-07-04T05:53:26.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="消息发送和转发">
-<meta name="twitter:description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常 函数函数的四要素  名称   SEL   name 返回值 const char* types 参数  const c">
+<meta name="twitter:description" content="消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现； 消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常">
 <meta name="twitter:image" content="https://github.com/2019/01/01/消息发送和转发/self_send.png">
 
 
@@ -164,7 +164,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -298,8 +298,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之OC/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之OC</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -388,7 +399,7 @@
 
       
         <p>消息发送（Messaging）是 Runtime 通过 selector 快速查找 IMP 的过程，有了函数指针就可以执行对应的方法实现；</p>
-<p>消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常</p>
+<p>消息转发（Message Forwarding）是在查找 IMP 失败后执行一系列转发流程的慢速通道，如果不作转发处理，则会打日志和抛出异常<br><a id="more"></a></p>
 <h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><p>函数的四要素</p>
 <ol>
 <li>名称   SEL   name</li>
@@ -402,9 +413,9 @@
 <p><code>typedef void (*IMP)(void /* id, SEL, ... */ );</code></p>
 <p>它就是一个函数指针，这是由编译器生成的。当你发起一个 ObjC 消息之后，最终它会执行的那段代码，就是由这个函数指针指定的。而 IMP 这个函数指针就指向了这个方法的实现。</p>
 <h3 id="objc-msgSend"><a href="#objc-msgSend" class="headerlink" title="objc_msgSend"></a>objc_msgSend</h3><p>伪代码如下或类似的逻辑，反正就是获取 IMP 并调用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id objc_msgSend(id self, SEL _cmd, ...) &#123;</span><br><span class="line">  Class class = object_getClass(self);</span><br><span class="line">  IMP imp = class_getMethodImplementation(class, _cmd);</span><br><span class="line">  <span class="built_in">return</span> imp ? imp(self, _cmd, ...) : 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">id</span> objc_msgSend(<span class="keyword">id</span> <span class="keyword">self</span>, SEL _cmd, ...) &#123;</span><br><span class="line">  Class <span class="keyword">class</span> = object_getClass(<span class="keyword">self</span>);</span><br><span class="line">  IMP imp = class_getMethodImplementation(<span class="keyword">class</span>, _cmd);</span><br><span class="line">  <span class="keyword">return</span> imp ? imp(<span class="keyword">self</span>, _cmd, ...) : <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="self-和-super"><a href="#self-和-super" class="headerlink" title="self 和 super"></a>self 和 super</h3><p>看一个问题</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">@interface Phone:Mobile</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line">@implementation Phone</span><br><span class="line"></span><br><span class="line">-(id)init</span><br><span class="line">&#123;</span><br><span class="line">	self=[super init];</span><br><span class="line">	<span class="keyword">if</span>(self)</span><br><span class="line">	&#123;</span><br><span class="line">		NSLog(@<span class="string">"%@"</span>,NSStringFromClass([self class]));</span><br><span class="line">		NSLog(@<span class="string">"%@"</span>,NSStringFromClass([super class]));</span><br><span class="line">	&#125;</span><br><span class="line">	retrurn self;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Phone</span>:<span class="title">Mobile</span></span></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Phone</span></span></span><br><span class="line"></span><br><span class="line">-(<span class="keyword">id</span>)init</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">self</span>=[<span class="keyword">super</span> init];</span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">self</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">NSLog</span>(<span class="string">@"%@"</span>,<span class="built_in">NSStringFromClass</span>([<span class="keyword">self</span> <span class="keyword">class</span>]));</span><br><span class="line">		<span class="built_in">NSLog</span>(<span class="string">@"%@"</span>,<span class="built_in">NSStringFromClass</span>([<span class="keyword">super</span> <span class="keyword">class</span>]));</span><br><span class="line">	&#125;</span><br><span class="line">	retrurn <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
 <p>结果是都打印出来 Phone。</p>
 <p>来看一下[self class],[super class]的消息传递</p>
 <img src="/2019/01/01/消息发送和转发/self_send.png">
@@ -477,8 +488,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/01/28/iOS网络Http协议/" rel="prev" title="iOS网络Http协议">
-                iOS网络Http协议 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/01/28/网络Http协议/" rel="prev" title="HTTP协议">
+                HTTP协议 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -559,7 +570,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -570,7 +581,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -625,7 +636,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -639,7 +650,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

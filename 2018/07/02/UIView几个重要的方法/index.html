@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-09T11:51:15.000Z">
+<meta property="og:updated_time" content="2019-05-31T08:09:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="UIView 几个重要的方法">
 <meta name="twitter:description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
@@ -160,7 +160,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -294,8 +294,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之UI/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之UI</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index">
+                    <span itemprop="name">UI</span>
                   </a>
                 </span>
 
@@ -384,7 +395,9 @@
 
       
         <h2 id="layout"><a href="#layout" class="headerlink" title="layout"></a>layout</h2><h3 id="layoutSubviews在以下情况下回被调用"><a href="#layoutSubviews在以下情况下回被调用" class="headerlink" title="layoutSubviews在以下情况下回被调用"></a>layoutSubviews在以下情况下回被调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1、init初始化不会触发layoutSubviews</span><br><span class="line">但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发</span><br><span class="line"></span><br><span class="line">2、addSubview会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化</span><br><span class="line"></span><br><span class="line">4、滚动一个UIScrollView会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">5、旋转Screen会触发父UIView上的layoutSubviews事件</span><br><span class="line"></span><br><span class="line">6、改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件</span><br></pre></td></tr></table></figure>
-<p>注意<br>苹果官方文档强调</p>
+<p>注意</p>
+<a id="more"></a>
+<p>苹果官方文档强调</p>
 <p>You should override this method only if the autoresizing behaviors of the subviews do not offer the behavior you want.</p>
 <p>也就是说layoutSubviews, 当我们在某个类的内部调整子视图位置时，需要调用。</p>
 <p>反过来的意思就是说：如果你想要在外部设置subviews的位置，就不要重写。</p>
@@ -463,8 +476,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/29/runLoop总结/" rel="next" title="RunLoop总结">
-                <i class="fa fa-chevron-left"></i> RunLoop总结
+              <a href="/2018/07/02/事件传递和响应机制/" rel="next" title="事件传递和响应机制">
+                <i class="fa fa-chevron-left"></i> 事件传递和响应机制
               </a>
             
           </div>
@@ -473,8 +486,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/07/02/事件传递和响应机制/" rel="prev" title="事件传递和响应机制">
-                事件传递和响应机制 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/07/03/iOS常用技巧/" rel="prev" title="iOS常用技巧">
+                iOS常用技巧 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -555,7 +568,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -566,7 +579,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -621,7 +634,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -635,7 +648,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

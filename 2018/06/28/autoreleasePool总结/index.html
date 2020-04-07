@@ -79,17 +79,19 @@
 
 
 
-<meta name="description" content="1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？避免内存峰值，及时释放不需要的内存空间 2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autorele">
+<meta name="description" content="一个很经典的面试题123456 for (int i = 0; i &amp;lt; MAXFLOAT; i++) &amp;#123;        NSString *string = @&quot;stdy&quot;;        string = [string lowercaseString];        string = [string stringByAppendingString:@&quot;123&quot;];">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AutoreleasePool总结">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/06/28/AutoreleasePool总结/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？避免内存峰值，及时释放不需要的内存空间 2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autorele">
+<meta property="og:description" content="一个很经典的面试题123456 for (int i = 0; i &amp;lt; MAXFLOAT; i++) &amp;#123;        NSString *string = @&quot;stdy&quot;;        string = [string lowercaseString];        string = [string stringByAppendingString:@&quot;123&quot;];">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-11T03:19:40.000Z">
+<meta property="og:image" content="https://github.com/2018/06/28/AutoreleasePool总结/autorelease.jpg">
+<meta property="og:updated_time" content="2019-07-09T06:22:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AutoreleasePool总结">
-<meta name="twitter:description" content="1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？避免内存峰值，及时释放不需要的内存空间 2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autorele">
+<meta name="twitter:description" content="一个很经典的面试题123456 for (int i = 0; i &amp;lt; MAXFLOAT; i++) &amp;#123;        NSString *string = @&quot;stdy&quot;;        string = [string lowercaseString];        string = [string stringByAppendingString:@&quot;123&quot;];">
+<meta name="twitter:image" content="https://github.com/2018/06/28/AutoreleasePool总结/autorelease.jpg">
 
 
 
@@ -160,7 +162,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -294,8 +296,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之OC/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之OC</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -346,7 +359,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  499
+                  1.1k
                 </span>
               
 
@@ -362,7 +375,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  1
+                  4
                 </span>
               
             </div>
@@ -383,13 +396,25 @@
       
 
       
-        <h3 id="1-为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？"><a href="#1-为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？" class="headerlink" title="1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？"></a>1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？</h3><p>避免内存峰值，及时释放不需要的内存空间</p>
-<h3 id="2-访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><a href="#2-访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？" class="headerlink" title="2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？"></a>2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</h3><p>肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autoreleasePool 中，以延缓释放。</p>
-<h3 id="3-函数返回一个对象时，会对对象-autorelease-么？为什么？"><a href="#3-函数返回一个对象时，会对对象-autorelease-么？为什么？" class="headerlink" title="3.函数返回一个对象时，会对对象 autorelease 么？为什么？"></a>3.函数返回一个对象时，会对对象 autorelease 么？为什么？</h3><p>会 ，为了延长返回对象的生命周期，给其他使用者留足调用的时间</p>
-<h3 id="4-简要说一下-autoreleasePool-的数据结构？"><a href="#4-简要说一下-autoreleasePool-的数据结构？" class="headerlink" title="4.简要说一下 @autoreleasePool 的数据结构？"></a>4.简要说一下 @autoreleasePool 的数据结构？</h3><p>简单说是双向链表，每张链表头尾相接，有 parent、child指针</p>
-<p>每创建一个池子，会在首部创建一个 哨兵 对象,作为标记</p>
-<p>最外层池子的顶端会有一个next指针。当链表容量满了，就会在链表的顶端，并指向下一张表。</p>
-<h3 id="5-autoreleasrPool-的释放时机？"><a href="#5-autoreleasrPool-的释放时机？" class="headerlink" title="5.@autoreleasrPool 的释放时机？"></a>5.@autoreleasrPool 的释放时机？</h3><p>App启动后，苹果在主线程 RunLoop 里注册了两个 Observer，其回调都是 _wrapRunLoopWithAutoreleasePoolHandler()。</p>
+        <h3 id="一个很经典的面试题"><a href="#一个很经典的面试题" class="headerlink" title="一个很经典的面试题"></a>一个很经典的面试题</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *string = <span class="string">@"stdy"</span>;</span><br><span class="line">        string = [string lowercaseString];</span><br><span class="line">        string = [string stringByAppendingString:<span class="string">@"123"</span>];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"--%@"</span>, string);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>上述的这种写法，会使内存慢慢增加，如何解决呢？自动释放池<br><a id="more"></a></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">            <span class="built_in">NSString</span> *string = <span class="string">@"stdy"</span>;</span><br><span class="line">            string = [string lowercaseString];</span><br><span class="line">            string = [string stringByAppendingString:<span class="string">@"123"</span>];</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@"--%@"</span>, string);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="autoreleasePool爆栈的问题"><a href="#autoreleasePool爆栈的问题" class="headerlink" title="autoreleasePool爆栈的问题"></a>autoreleasePool爆栈的问题</h3><p>autoreleasePool 的自动 drain是靠runLoop进入空闲来触发的。那么如果你在执行一个很重的任务（如一个很多次数的循环）导致runLoop一直不能进入空闲。 那么autoreleasePool 里面对象会越来越多。导致内存爆掉。因此建议如果是循环次数很大的循环，要么循环里面不要产生autorelease的对象，要么就要手动 添加 @autorelease {}来避免内存爆掉。</p>
+<h3 id="为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？"><a href="#为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？" class="headerlink" title="为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？"></a>为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？</h3><p>避免内存峰值，及时释放不需要的内存空间</p>
+<h3 id="什么时间会创建自动释放池？"><a href="#什么时间会创建自动释放池？" class="headerlink" title="什么时间会创建自动释放池？"></a>什么时间会创建自动释放池？</h3><p> 从程序启动到加载完成是一个完整的运行循环，然后会停下来，等待用户交互，用户的每一次交互都会启动一次运行循环，来处理用户所有的点击事件、触摸事件，运行循环检测到事件并启动后，就会创建自动释放池。 子线程的 runloop 默认是不工作，无法主动创建，必须手动创建。 自定义的 NSOperation 和 NSThread 需要手动创建自动释放池。比如：自定义的 NSOperation 类中的 main 方法里就必须添加自动释放池。否则出了作用域后，自动释放对象会因为没有自动释放池去处理它，而造成内存泄露。</p>
+<p>但对于 blockOperation 和 invocationOperation 这种默认的Operation ，系统已经帮我们封装好了，不需要手动创建自动释放池。</p>
+<p>@autoreleasepool 当自动释放池被销毁或者耗尽时，会向自动释放池中的所有对象发送 release 消息，释放自动释放池中的所有对象。</p>
+<p>如果在一个vc的viewDidLoad中创建一个 Autorelease对象，那么该对象会在 viewDidAppear 方法执行前就被销毁了。</p>
+<h3 id="访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><a href="#访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？" class="headerlink" title="访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？"></a>访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</h3><p>肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autoreleasePool 中，以延缓释放。</p>
+<h3 id="函数返回一个对象时，会对对象-autorelease-么？为什么？"><a href="#函数返回一个对象时，会对对象-autorelease-么？为什么？" class="headerlink" title="函数返回一个对象时，会对对象 autorelease 么？为什么？"></a>函数返回一个对象时，会对对象 autorelease 么？为什么？</h3><p>会 ，为了延长返回对象的生命周期，给其他使用者留足调用的时间</p>
+<h3 id="简要说一下-autoreleasePool-的数据结构？"><a href="#简要说一下-autoreleasePool-的数据结构？" class="headerlink" title="简要说一下 @autoreleasePool 的数据结构？"></a>简要说一下 @autoreleasePool 的数据结构？</h3><p>一个双向链表组成的栈<br><img src="/2018/06/28/AutoreleasePool总结/autorelease.jpg"></p>
+<ol>
+<li>AutoreleasePoolPage 组成了一个双向链表，每个page里面都有一个一页的大小的数组，如iOS上一页 0x4000。 每个AutoreleasePoolPage都有个next指针指向下一个可以存储的位置。当next是结尾的时候，这个page就full了。再压入对象就要创建新的page了。</li>
+<li>一般情况下链表最尾端的一个page是 hotPage. 一般autorelease时对象指针会压入这个page。</li>
+<li>objc_autoreleasePoolPush 会返回当前page的 next的地址作为 token. 然后objc_autoreleasePoolPop 会一直倾倒到这个token的地址。</li>
+<li>push和pop一般出现的地方就是： ① @autorelease {} 所包围的代码的前后； ② runLoop 进入和退出时；③ runLoop进入kCFRunLoopBeforeWaiting状态时，也就是常常说的idle时，会先pop, 再 push.</li>
+</ol>
+<h3 id="autoreleasrPool-的释放时机？"><a href="#autoreleasrPool-的释放时机？" class="headerlink" title="@autoreleasrPool 的释放时机？"></a>@autoreleasrPool 的释放时机？</h3><p>App启动后，苹果在主线程 RunLoop 里注册了两个 Observer，其回调都是 _wrapRunLoopWithAutoreleasePoolHandler()。</p>
 <p>第一个 Observer 监视的事件是 Entry(即将进入Loop)，其回调内会调用 _objc_autoreleasePoolPush() 创建自动释放池。其 order 是 -2147483647，优先级最高，保证创建释放池发生在其他所有回调之前。</p>
 <p>第二个 Observer 监视了两个事件： BeforeWaiting(准备进入休眠) 时调用_objc_autoreleasePoolPop() 和 _objc_autoreleasePoolPush() 释放旧的池并创建新池；Exit(即将退出Loop) 时调用 _objc_autoreleasePoolPop() 来释放自动释放池。这个 Observer 的 order 是 2147483647，优先级最低，保证其释放池子发生在其他所有回调之后。</p>
 <p>在主线程执行的代码，通常是写在诸如事件回调、Timer回调内的。这些回调会被 RunLoop 创建好的 AutoreleasePool 环绕着，所以不会出现内存泄漏，开发者也不必显示创建 Pool 了。</p>
@@ -452,8 +477,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/06/29/runLoop总结/" rel="prev" title="RunLoop总结">
-                RunLoop总结 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/06/29/runLoop总结/" rel="prev" title="RunLoop">
+                RunLoop <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -534,7 +559,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -545,7 +570,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -580,7 +605,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？"><span class="nav-number">1.</span> <span class="nav-text">1.为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><span class="nav-number">2.</span> <span class="nav-text">2.访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-函数返回一个对象时，会对对象-autorelease-么？为什么？"><span class="nav-number">3.</span> <span class="nav-text">3.函数返回一个对象时，会对对象 autorelease 么？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-简要说一下-autoreleasePool-的数据结构？"><span class="nav-number">4.</span> <span class="nav-text">4.简要说一下 @autoreleasePool 的数据结构？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-autoreleasrPool-的释放时机？"><span class="nav-number">5.</span> <span class="nav-text">5.@autoreleasrPool 的释放时机？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">6.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一个很经典的面试题"><span class="nav-number">1.</span> <span class="nav-text">一个很经典的面试题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#autoreleasePool爆栈的问题"><span class="nav-number">2.</span> <span class="nav-text">autoreleasePool爆栈的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么已经有了-ARC-但还是需要-AutoreleasePool-的存在？"><span class="nav-number">3.</span> <span class="nav-text">为什么已经有了 ARC ,但还是需要 @AutoreleasePool 的存在？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时间会创建自动释放池？"><span class="nav-number">4.</span> <span class="nav-text">什么时间会创建自动释放池？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><span class="nav-number">5.</span> <span class="nav-text">访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数返回一个对象时，会对对象-autorelease-么？为什么？"><span class="nav-number">6.</span> <span class="nav-text">函数返回一个对象时，会对对象 autorelease 么？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简要说一下-autoreleasePool-的数据结构？"><span class="nav-number">7.</span> <span class="nav-text">简要说一下 @autoreleasePool 的数据结构？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#autoreleasrPool-的释放时机？"><span class="nav-number">8.</span> <span class="nav-text">@autoreleasrPool 的释放时机？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">9.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
             
 
           </div>
@@ -600,7 +625,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -614,7 +639,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

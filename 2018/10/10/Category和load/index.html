@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
+<meta name="description" content="问题 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Category和load">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/10/10/Category和load/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
+<meta property="og:description" content="问题 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2018/10/10/Category和load/laod_initial.png">
-<meta property="og:updated_time" content="2019-03-12T09:47:01.000Z">
+<meta property="og:updated_time" content="2019-07-04T05:53:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Category和load">
-<meta name="twitter:description" content="一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？ +load+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执">
+<meta name="twitter:description" content="问题 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？">
 <meta name="twitter:image" content="https://github.com/2018/10/10/Category和load/laod_initial.png">
 
 
@@ -162,7 +162,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -296,8 +296,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之OC/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之OC</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
                   </a>
                 </span>
 
@@ -364,7 +375,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  3
+                  4
                 </span>
               
             </div>
@@ -385,7 +396,8 @@
       
 
       
-        <p> 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？</p>
+        <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p> 一个类的分类重写了这个类的方法后，那么这个类的这个方法将失效，那么原方法失效，分类方法生效的原因是什么？</p>
+<a id="more"></a>
 <h3 id="load"><a href="#load" class="headerlink" title="+load"></a>+load</h3><p>+load 方法是当类或分类被添加到 Objective-C runtime 时被调用的，实现这个方法可以让我们在类加载的时候执行一些类相关的行为。子类的 +load 方法会在它的所有父类的 +load 方法之后执行，而分类的 +load 方法会在它的主类的 +load 方法之后执行。但是不同的类之间的 +load 方法的调用顺序是不确定的。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">原因就在这里，因为加载顺序是父类先+load，然后子类+load，然后分类+load，那么如果分类重写子类方法：首先子类+load，将方法添加到类的方法列表methodLists，然后分类+load，将重写的方法添加到方法列表中</span><br></pre></td></tr></table></figure>
 <p>但是这里存在几点疑问：</p>
@@ -393,7 +405,7 @@
 <li>方法列表methodLists里是否会有两个SEL相同的方法？</li>
 <li>如果会有，这两个方法在方法列表中的顺序是怎样的？(顺序决定哪个被调用)</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#import "TestCategory.h"</span></span><br><span class="line">/*主类实现*/</span><br><span class="line">@implementation TestCategory</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"主类"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"><span class="comment">#import "TestCategory+add.h"</span></span><br><span class="line">/*分类一实现*/</span><br><span class="line">@implementation TestCategory (add)</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"分类一"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#import &lt;objc/runtime.h&gt;</span></span><br><span class="line"><span class="comment">#import "TestCategory.h"</span></span><br><span class="line">@implementation ViewController</span><br><span class="line"></span><br><span class="line">- (void)viewDidLoad &#123;</span><br><span class="line">    [super viewDidLoad];</span><br><span class="line"></span><br><span class="line">    id LenderClass = objc_getClass(<span class="string">"TestCategory"</span>);</span><br><span class="line">    unsigned int outCount, i;</span><br><span class="line">    //获取实例方法列表</span><br><span class="line">    Method *methodList = class_copyMethodList(LenderClass, &amp;outCount);</span><br><span class="line">    <span class="keyword">for</span> (i=0; i&lt;outCount; i++) &#123;</span><br><span class="line">        Method method = methodList[i];</span><br><span class="line">        NSLog(@<span class="string">"instanceMethod：%@"</span>, NSStringFromSelector(method_getName(method)));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    //调用一下</span><br><span class="line">    TestCategory *tCategory = [[TestCategory alloc]init];</span><br><span class="line">    [tCategory newMethod];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"TestCategory.h"</span></span></span><br><span class="line"><span class="comment">/*主类实现*/</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">TestCategory</span></span></span><br><span class="line">- (<span class="keyword">void</span>)newMethod &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"主类"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">"TestCategory+add.h"</span></span></span><br><span class="line"><span class="comment">/*分类一实现*/</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">TestCategory</span> (<span class="title">add</span>)</span></span><br><span class="line">- (<span class="keyword">void</span>)newMethod &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"分类一"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">&lt;objc/runtime.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"TestCategory.h"</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="keyword">super</span> viewDidLoad];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">id</span> LenderClass = objc_getClass(<span class="string">"TestCategory"</span>);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> outCount, i;</span><br><span class="line">    <span class="comment">//获取实例方法列表</span></span><br><span class="line">    Method *methodList = class_copyMethodList(LenderClass, &amp;outCount);</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;outCount; i++) &#123;</span><br><span class="line">        Method method = methodList[i];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"instanceMethod：%@"</span>, <span class="built_in">NSStringFromSelector</span>(method_getName(method)));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//调用一下</span></span><br><span class="line">    TestCategory *tCategory = [[TestCategory alloc]init];</span><br><span class="line">    [tCategory newMethod];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>看输出：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2017-07-19 21:38:13.593 TestRuntimeProperty[27827:1306334] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:38:13.593 TestRuntimeProperty[27827:1306334] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:38:13.594 TestRuntimeProperty[27827:1306334] 分类一</span><br></pre></td></tr></table></figure>
 <p>可见：</p>
@@ -404,7 +416,7 @@
 <p>答案已经很明确了：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">后+load的类的方法，后添加到方法列表，而这时的添加方式又是插入顶部添加，即[methodLists insertObject:category_method atIndex:0]; 所以objc_msgSend遍历方法列表查找SEL 对应的IMP时，会先找到分类重写的那个，调用执行。然后添加到缓存列表中，这样主类方法实现永远也不会调到。</span><br></pre></td></tr></table></figure>
 <h3 id="多个category实现同一个方法"><a href="#多个category实现同一个方法" class="headerlink" title="多个category实现同一个方法"></a>多个category实现同一个方法</h3><p>如果多个分类同时重写同一个方法，执行顺序又是怎样的呢？<br>对于多个分类同时重写同一个方法，Xcode在运行时是根据buildPhases-&gt;Compile Sources里面的顺序从上至下编译的，那么很明显就像子类和分类一样，后编译的后load，即后添加到方法列表，所以后编译的分类，方法会放到方法列表顶部，调用的时候先执行。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#import "TestCategory+addAgain.h"</span></span><br><span class="line">/*分类二实现*/</span><br><span class="line">@implementation TestCategory (addAgain)</span><br><span class="line">- (void)newMethod &#123;</span><br><span class="line">    NSLog(@<span class="string">"分类二"</span>);</span><br><span class="line">&#125;</span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"TestCategory+addAgain.h"</span></span></span><br><span class="line"><span class="comment">/*分类二实现*/</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">TestCategory</span> (<span class="title">addAgain</span>)</span></span><br><span class="line">- (<span class="keyword">void</span>)newMethod &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"分类二"</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
 <p>看输出：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">2017-07-19 22:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 22:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 21:18:13.593 TestRuntimeProperty[28385:1331972] instanceMethod：newMethod</span><br><span class="line">2017-07-19 22:18:13.594 TestRuntimeProperty[28385:1331972] 分类一</span><br></pre></td></tr></table></figure></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">总结:类的加载顺序，决定方法的添加顺序，调用的时候，后添加的方法会先被找到，所以调用的始终是后加载的类的方法实现。</span><br></pre></td></tr></table></figure>
 <h3 id="initialize"><a href="#initialize" class="headerlink" title="+initialize"></a>+initialize</h3><p>+initialize 方法是在类或它的子类收到第一条消息之前被调用的，这里所指的消息包括实例方法和类方法的调用。也就是说 +initialize 方法是以懒加载的方式被调用的，如果程序一直没有给某个类或它的子类发送消息，那么这个类的 +initialize 方法是永远不会被调用的。那这样设计有什么好处呢？好处是显而易见的，那就是节省系统资源，避免浪费。</p>
@@ -553,7 +565,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -564,7 +576,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -599,7 +611,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#load"><span class="nav-number">1.</span> <span class="nav-text">+load</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多个category实现同一个方法"><span class="nav-number">2.</span> <span class="nav-text">多个category实现同一个方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#initialize"><span class="nav-number">3.</span> <span class="nav-text">+initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load-VS-initialize"><span class="nav-number">4.</span> <span class="nav-text">load VS initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">5.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load"><span class="nav-number">2.</span> <span class="nav-text">+load</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多个category实现同一个方法"><span class="nav-number">3.</span> <span class="nav-text">多个category实现同一个方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#initialize"><span class="nav-number">4.</span> <span class="nav-text">+initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#load-VS-initialize"><span class="nav-number">5.</span> <span class="nav-text">load VS initialize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">6.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
             
 
           </div>
@@ -619,7 +631,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -633,7 +645,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

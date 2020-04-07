@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="设计模式框架设计模式大致可分三种类型以及MVX架构系列  设计模式详解创建型模式原型模式（Prototype）： 定义：原型模式是通过克隆已有的对象来创建新的对象，已有的对象称为原型。通俗来讲，原型模式就是允许你创建现有对象的副本并根据需要进行修改，而不是从头开始创建对象并进行设置。 使用场景：通过初始化产生一个对象需要非常繁琐的准备步骤，也就是新生成一个对象的代价比较大，则可以考虑使用原型模式。">
+<meta name="description" content="设计模式定义每一个设计模式描述了一个在我们周围不断重复发生的问题，以及该问题的解决方案的核心。这样，你就能重复使用该方案。  一个模式的四个基本要素   模式名称（助记词） 问题（描述了应该在何时使用模式） 解决方案（描述的设计组成成分） 效果（描述了模式应用的效果及使用模式应权衡的问题）  设计模式对于面向对象而言，其作用好比数据结构对于面向过程 面向对象系统追求的目标就是尽可能的提高系统模块内">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS设计模式详解">
+<meta property="og:title" content="设计模式详解">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/03/02/iOS设计模式详解/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="设计模式框架设计模式大致可分三种类型以及MVX架构系列  设计模式详解创建型模式原型模式（Prototype）： 定义：原型模式是通过克隆已有的对象来创建新的对象，已有的对象称为原型。通俗来讲，原型模式就是允许你创建现有对象的副本并根据需要进行修改，而不是从头开始创建对象并进行设置。 使用场景：通过初始化产生一个对象需要非常繁琐的准备步骤，也就是新生成一个对象的代价比较大，则可以考虑使用原型模式。">
+<meta property="og:description" content="设计模式定义每一个设计模式描述了一个在我们周围不断重复发生的问题，以及该问题的解决方案的核心。这样，你就能重复使用该方案。  一个模式的四个基本要素   模式名称（助记词） 问题（描述了应该在何时使用模式） 解决方案（描述的设计组成成分） 效果（描述了模式应用的效果及使用模式应权衡的问题）  设计模式对于面向对象而言，其作用好比数据结构对于面向过程 面向对象系统追求的目标就是尽可能的提高系统模块内">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2019/03/02/iOS设计模式详解/design_Category.png">
-<meta property="og:updated_time" content="2019-03-12T09:50:30.000Z">
+<meta property="og:updated_time" content="2020-04-07T06:47:57.510Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iOS设计模式详解">
-<meta name="twitter:description" content="设计模式框架设计模式大致可分三种类型以及MVX架构系列  设计模式详解创建型模式原型模式（Prototype）： 定义：原型模式是通过克隆已有的对象来创建新的对象，已有的对象称为原型。通俗来讲，原型模式就是允许你创建现有对象的副本并根据需要进行修改，而不是从头开始创建对象并进行设置。 使用场景：通过初始化产生一个对象需要非常繁琐的准备步骤，也就是新生成一个对象的代价比较大，则可以考虑使用原型模式。">
+<meta name="twitter:title" content="设计模式详解">
+<meta name="twitter:description" content="设计模式定义每一个设计模式描述了一个在我们周围不断重复发生的问题，以及该问题的解决方案的核心。这样，你就能重复使用该方案。  一个模式的四个基本要素   模式名称（助记词） 问题（描述了应该在何时使用模式） 解决方案（描述的设计组成成分） 效果（描述了模式应用的效果及使用模式应权衡的问题）  设计模式对于面向对象而言，其作用好比数据结构对于面向过程 面向对象系统追求的目标就是尽可能的提高系统模块内">
 <meta name="twitter:image" content="https://github.com/2019/03/02/iOS设计模式详解/design_Category.png">
 
 
@@ -127,7 +127,7 @@
 
 
 
-  <title>iOS设计模式详解 | 学计算机的那个</title>
+  <title>设计模式详解 | 学计算机的那个</title>
   
 
 
@@ -162,7 +162,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -261,7 +261,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">iOS设计模式详解</h1>
+          <h1 class="post-title" itemprop="name headline">设计模式详解</h1>
         
 
         <div class="post-meta">
@@ -296,8 +296,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS设计模式/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS设计模式</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/设计模式/" itemprop="url" rel="index">
+                    <span itemprop="name">设计模式</span>
                   </a>
                 </span>
 
@@ -323,7 +334,7 @@
 
           
           
-             <span id="/2019/03/02/iOS设计模式详解/" class="leancloud_visitors" data-flag-title="iOS设计模式详解">
+             <span id="/2019/03/02/iOS设计模式详解/" class="leancloud_visitors" data-flag-title="设计模式详解">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -348,7 +359,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  5.2k
+                  5.6k
                 </span>
               
 
@@ -364,7 +375,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  17
+                  19
                 </span>
               
             </div>
@@ -385,9 +396,23 @@
       
 
       
-        <h3 id="设计模式框架"><a href="#设计模式框架" class="headerlink" title="设计模式框架"></a>设计模式框架</h3><p>设计模式大致可分三种类型以及MVX架构系列</p>
+        <h3 id="设计模式定义"><a href="#设计模式定义" class="headerlink" title="设计模式定义"></a>设计模式定义</h3><p>每一个设计模式描述了一个在我们周围不断重复发生的问题，以及该问题的解决方案的核心。这样，你就能重复使用该方案。</p>
+<ul>
+<li>一个模式的四个基本要素</li>
+</ul>
+<ol>
+<li>模式名称（助记词）</li>
+<li>问题（描述了应该在何时使用模式）</li>
+<li>解决方案（描述的设计组成成分）</li>
+<li>效果（描述了模式应用的效果及使用模式应权衡的问题）</li>
+</ol>
+<p><code>设计模式对于面向对象而言，其作用好比数据结构对于面向过程</code></p>
+<p>面向对象系统追求的目标就是尽可能的提高系统模块内部的内聚，尽可能降低模块间的耦合。</p>
+<h3 id="设计模式框架"><a href="#设计模式框架" class="headerlink" title="设计模式框架"></a>设计模式框架</h3><p>设计模式大致可分三种类型以及MVX架构系列</p>
 <img src="/2019/03/02/iOS设计模式详解/design_Category.png">
-<h3 id="设计模式详解"><a href="#设计模式详解" class="headerlink" title="设计模式详解"></a>设计模式详解</h3><h4 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h4><h5 id="原型模式（Prototype）："><a href="#原型模式（Prototype）：" class="headerlink" title="原型模式（Prototype）："></a>原型模式（Prototype）：</h5><ol>
+<a id="more"></a>
+<h3 id="设计模式详解"><a href="#设计模式详解" class="headerlink" title="设计模式详解"></a>设计模式详解</h3><h4 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h4><p>用于描述“怎么创建对象”。它的主要特点是“将对象的创建与使用分离”</p>
+<h5 id="原型模式（Prototype）："><a href="#原型模式（Prototype）：" class="headerlink" title="原型模式（Prototype）："></a>原型模式（Prototype）：</h5><ol>
 <li>定义：原型模式是通过克隆已有的对象来创建新的对象，已有的对象称为原型。通俗来讲，原型模式就是允许你创建现有对象的副本并根据需要进行修改，而不是从头开始创建对象并进行设置。</li>
 <li>使用场景：通过初始化产生一个对象需要非常繁琐的准备步骤，也就是新生成一个对象的代价比较大，则可以考虑使用原型模式。</li>
 <li>具体实现：原型模式实现起来比较简单，iOS实现这个模式用的就是copy方法，如果是类使用copy，那这个类就要实现。NSCopying协议中的copyWithZone方法，告诉程序如何复制该对象。</li>
@@ -403,7 +428,7 @@
 <li>使用场景： 当存在多个类共同实现一个协议或者共同继承一个基类的时候，需要创建不同的对象，这个时候就可以考虑是否有必要使用工厂类进行管理。</li>
 <li>具体实现：工厂方法模式还可以缩小成简单工厂模式，形如：</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//CarFactory.m</span><br><span class="line">+ (Car *)createCarWithType:(NSIntger)passengersCount &#123;</span><br><span class="line">    <span class="keyword">if</span> (passengersCount &lt; 2) &#123;</span><br><span class="line">        <span class="built_in">return</span> [[SportCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (passengersCount &lt; 4) &#123;</span><br><span class="line">        <span class="built_in">return</span> [[NormalCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">return</span> [[SUV alloc] init];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//CarFactory.m</span></span><br><span class="line">+ (Car *)createCarWithType:(<span class="built_in">NSIntger</span>)passengersCount &#123;</span><br><span class="line">    <span class="keyword">if</span> (passengersCount &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[SportCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (passengersCount &lt; <span class="number">4</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[NormalCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [[SUV alloc] init];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>但简单工厂模式的耦合和扩展方面存在一些问题，基本所有使用简单工厂模式的地方都可以用依赖注入来解决掉这个问题</p>
 <ol start="4">
 <li>优点： 1.在工厂方法中，用户只需要知道所要产品的具体工厂，不需要知道具体的创建过程，甚至不需要具体产品类。2.在系统增加新的产品时，我们只需要添加一个具体产品类和对应的实现工厂，无需对原工厂进行任何修改，很好地符合了“开闭原则”。</li>
@@ -423,18 +448,26 @@
 <li>优点： 1.将产品的创建过程与产品本身分离开来，可以使用相同的创建过程来得到不同的产品。2.每一个具体建造者都相对独立，因此可以很方便地替换具体建造者或增加新的具体建造者。</li>
 <li>缺点： 1.建造者模式所创建的产品一般具有较多的共同点，其组成部分相似，如果产品之间的差异性很大，则不适合使用建造者模式，因此其使用范围受到一定的限制。2.如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得很庞大。</li>
 </ol>
-<h4 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h4><h5 id="适配器模式（Adapter）："><a href="#适配器模式（Adapter）：" class="headerlink" title="适配器模式（Adapter）："></a>适配器模式（Adapter）：</h5><ol>
+<h4 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h4><p>用于描述“如何将类或对象按某种布局组成更大的结构”</p>
+<ul>
+<li>类的层次结构</li>
+</ul>
+<ol>
+<li>类的功能层次结构：父类具有基本功能，在子类中增加新的功能（继承）</li>
+<li>类的实现层次结构：父类通过声明抽象方法来定义接口，不同子类通过实现具体的方法来实现接口。（多态）</li>
+</ol>
+<h5 id="适配器模式（Adapter）："><a href="#适配器模式（Adapter）：" class="headerlink" title="适配器模式（Adapter）："></a>适配器模式（Adapter）：</h5><ol>
 <li>定义: 适配器模式将一个类的接口变成调用者所期待的另一种接口，从而使原本因接口不匹配而无法在一起工作的两个类能够在一起工作。(举一个现实中的实例：比如转接头)。</li>
 <li>使用场景： 扩展应用或者组件时，而被集成进来的又不符合现在的接口，这个时候可以考虑使用适配器模式。</li>
 <li>注意事项: 适配器模式一般不是为了解决还处在于开发阶段的问题，一般都是解决正在服役项目的扩展问题。</li>
 </ol>
 <h5 id="桥接模式（Bridge）："><a href="#桥接模式（Bridge）：" class="headerlink" title="桥接模式（Bridge）："></a>桥接模式（Bridge）：</h5><ol>
-<li>定义: 桥接模式就是将抽象部分和实现部分解耦，从而使得两者可以独立的变化。</li>
+<li>定义: 编程时为了使得类变得简洁，类功能明确，往往需要将 <code>类的功能层次结构</code>与<code>类的实现层次结构</code>独立出来，将两种层次结构分离开，必然需要一种“媒介”将他们构成联系，就是bridge。</li>
 <li>使用场景： 重用性要求较高的不希望或不适用使用继承的场景。也就是说当继承N层，达到层级有点爆炸的时候可以考虑使用此模式。</li>
 <li>注意事项: 并不是一涉及继承就要考虑使用桥接模式，不然还要继承做什么？桥接模式的目的就是要对变化进行封装，尽可能的把变化的因素封装到最细最小的单元中，避免风险扩散。所以当发现类的继承有N层的时候，才需要去考虑使用该模式。</li>
 </ol>
 <h5 id="装饰器模式（Decorator）："><a href="#装饰器模式（Decorator）：" class="headerlink" title="装饰器模式（Decorator）："></a>装饰器模式（Decorator）：</h5><ol>
-<li>定义: 装饰模式能动态的给一个对象添加一些额外的职责。就增加功能来说，装饰模式会比通过继承生成子类更为灵活。</li>
+<li>定义: 通过组合的方式动态的给一个对象添加一些额外的职责。就增加功能来说，装饰模式会比通过继承生成子类更为灵活。</li>
 <li>使用场景： 需要动态地给一个对象增加功能，这些功能也可以动态地被撤销。</li>
 <li>具体实现： Objective-C中的Category 就是装饰器模式的一种应用。</li>
 <li>优点： 装饰器模式中定义的行为，能够在不创建大量子类的情况下，组合起来实现复杂的效果，比继承更加灵活。<br>5.缺点： 装饰器模式会导致设计中出现许多的小对象，会让系统变得更加复杂，比如说出错调试时寻找错误可能需要逐级排查。</li>
@@ -459,7 +492,8 @@
 <li>缺点： 增加了系统的复杂度</li>
 <li>注意事项: 1、和适配器模式的区别：适配器模式主要改变所考虑对象的接口，而代理模式不能改变所代理类的接口。 2、和装饰器模式的区别：装饰器模式为了增强功能，而代理模式是为了加以控制。</li>
 </ol>
-<h4 id="行为型模式"><a href="#行为型模式" class="headerlink" title="行为型模式"></a>行为型模式</h4><h5 id="责任链模式（Chain-of-Responsibility）："><a href="#责任链模式（Chain-of-Responsibility）：" class="headerlink" title="责任链模式（Chain of Responsibility）："></a>责任链模式（Chain of Responsibility）：</h5><ol>
+<h4 id="行为型模式"><a href="#行为型模式" class="headerlink" title="行为型模式"></a>行为型模式</h4><p>用于描述“类或对象之间怎样相互协作共同完成单个对象无法单独完成的任务，以及怎样分配职责”。</p>
+<h5 id="责任链模式（Chain-of-Responsibility）："><a href="#责任链模式（Chain-of-Responsibility）：" class="headerlink" title="责任链模式（Chain of Responsibility）："></a>责任链模式（Chain of Responsibility）：</h5><ol>
 <li>定义: 责任链模式（Chain of Responsibility Pattern）为请求创建了一个接收者对象的链。使多个对象都有机会处理请求，从而避免了请求的发送者和接受者之前的耦合关系。将这些对象连成一条链，并沿着这条链传递该请求，知道有对象处理它为止。</li>
 <li>使用场景： 有多个对象可以处理同一个请求，具体哪个对象处理该请求由运行时确定。</li>
 <li>优点： 1.低耦合：将请求和处理分开，请求者可以不用知道是谁处理的。2.新增和修改新的处理类比较容易</li>
@@ -543,6 +577,7 @@
 <li><a href="https://www.jianshu.com/p/55f0e3b30e9c" target="_blank" rel="noopener">iOS设计模式四部曲</a></li>
 <li><a href="https://github.com/maligh/DesignPatterns">Sample Code</a> </li>
 <li><a href="http://design-patterns.readthedocs.io/zh_CN/latest/index.html" target="_blank" rel="noopener">图说设计模式</a></li>
+<li><a href="https://github.com/huang303513/Design-Pattern-For-iOS">Sample Code 2</a></li>
 </ol>
 
       
@@ -592,8 +627,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/02/28/iOS设计模式六大原则/" rel="next" title="iOS设计模式六大原则">
-                <i class="fa fa-chevron-left"></i> iOS设计模式六大原则
+              <a href="/2019/02/28/iOS设计模式六大原则/" rel="next" title="设计模式六大原则">
+                <i class="fa fa-chevron-left"></i> 设计模式六大原则
               </a>
             
           </div>
@@ -601,6 +636,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/02/CocoaPods Setup，更新repo缓慢/" rel="prev" title="CocoaPods Setup，更新repo缓慢">
+                CocoaPods Setup，更新repo缓慢 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -680,7 +719,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -691,7 +730,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -726,7 +765,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#设计模式框架"><span class="nav-number">1.</span> <span class="nav-text">设计模式框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计模式详解"><span class="nav-number">2.</span> <span class="nav-text">设计模式详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建型模式"><span class="nav-number">2.1.</span> <span class="nav-text">创建型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原型模式（Prototype）："><span class="nav-number">2.1.1.</span> <span class="nav-text">原型模式（Prototype）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#单例模式（Singleton）："><span class="nav-number">2.1.2.</span> <span class="nav-text">单例模式（Singleton）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工厂方法模式（FactoryMethod）："><span class="nav-number">2.1.3.</span> <span class="nav-text">工厂方法模式（FactoryMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#抽象工厂模式（AbstractFactory）："><span class="nav-number">2.1.4.</span> <span class="nav-text">抽象工厂模式（AbstractFactory）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#建造者模式（Builder）："><span class="nav-number">2.1.5.</span> <span class="nav-text">建造者模式（Builder）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结构型模式"><span class="nav-number">2.2.</span> <span class="nav-text">结构型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#适配器模式（Adapter）："><span class="nav-number">2.2.1.</span> <span class="nav-text">适配器模式（Adapter）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#桥接模式（Bridge）："><span class="nav-number">2.2.2.</span> <span class="nav-text">桥接模式（Bridge）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#装饰器模式（Decorator）："><span class="nav-number">2.2.3.</span> <span class="nav-text">装饰器模式（Decorator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#组合模式（Composite）："><span class="nav-number">2.2.4.</span> <span class="nav-text">组合模式（Composite）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#享元模式（Flyweight）："><span class="nav-number">2.2.5.</span> <span class="nav-text">享元模式（Flyweight）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代理模式（Proxy）："><span class="nav-number">2.2.6.</span> <span class="nav-text">代理模式（Proxy）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行为型模式"><span class="nav-number">2.3.</span> <span class="nav-text">行为型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#责任链模式（Chain-of-Responsibility）："><span class="nav-number">2.3.1.</span> <span class="nav-text">责任链模式（Chain of Responsibility）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#命令模式（Command）："><span class="nav-number">2.3.2.</span> <span class="nav-text">命令模式（Command）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#中介者模式（Mediator）："><span class="nav-number">2.3.3.</span> <span class="nav-text">中介者模式（Mediator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#观察者模式（Observer）："><span class="nav-number">2.3.4.</span> <span class="nav-text">观察者模式（Observer）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#备忘录模式（Memento）："><span class="nav-number">2.3.5.</span> <span class="nav-text">备忘录模式（Memento）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#策略模式（Strategy）："><span class="nav-number">2.3.6.</span> <span class="nav-text">策略模式（Strategy）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#访问者模式（Visitor）："><span class="nav-number">2.3.7.</span> <span class="nav-text">访问者模式（Visitor）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#模板方法模式（TemplateMethod）："><span class="nav-number">2.3.8.</span> <span class="nav-text">模板方法模式（TemplateMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态模式（State）："><span class="nav-number">2.3.9.</span> <span class="nav-text">状态模式（State）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#迭代器模式（Iterator）："><span class="nav-number">2.3.10.</span> <span class="nav-text">迭代器模式（Iterator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解释器模式（Interpreter）："><span class="nav-number">2.3.11.</span> <span class="nav-text">解释器模式（Interpreter）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">3.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#设计模式定义"><span class="nav-number">1.</span> <span class="nav-text">设计模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计模式框架"><span class="nav-number">2.</span> <span class="nav-text">设计模式框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计模式详解"><span class="nav-number">3.</span> <span class="nav-text">设计模式详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建型模式"><span class="nav-number">3.1.</span> <span class="nav-text">创建型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原型模式（Prototype）："><span class="nav-number">3.1.1.</span> <span class="nav-text">原型模式（Prototype）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#单例模式（Singleton）："><span class="nav-number">3.1.2.</span> <span class="nav-text">单例模式（Singleton）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#工厂方法模式（FactoryMethod）："><span class="nav-number">3.1.3.</span> <span class="nav-text">工厂方法模式（FactoryMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#抽象工厂模式（AbstractFactory）："><span class="nav-number">3.1.4.</span> <span class="nav-text">抽象工厂模式（AbstractFactory）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#建造者模式（Builder）："><span class="nav-number">3.1.5.</span> <span class="nav-text">建造者模式（Builder）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结构型模式"><span class="nav-number">3.2.</span> <span class="nav-text">结构型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#适配器模式（Adapter）："><span class="nav-number">3.2.1.</span> <span class="nav-text">适配器模式（Adapter）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#桥接模式（Bridge）："><span class="nav-number">3.2.2.</span> <span class="nav-text">桥接模式（Bridge）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#装饰器模式（Decorator）："><span class="nav-number">3.2.3.</span> <span class="nav-text">装饰器模式（Decorator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#组合模式（Composite）："><span class="nav-number">3.2.4.</span> <span class="nav-text">组合模式（Composite）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#享元模式（Flyweight）："><span class="nav-number">3.2.5.</span> <span class="nav-text">享元模式（Flyweight）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#代理模式（Proxy）："><span class="nav-number">3.2.6.</span> <span class="nav-text">代理模式（Proxy）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行为型模式"><span class="nav-number">3.3.</span> <span class="nav-text">行为型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#责任链模式（Chain-of-Responsibility）："><span class="nav-number">3.3.1.</span> <span class="nav-text">责任链模式（Chain of Responsibility）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#命令模式（Command）："><span class="nav-number">3.3.2.</span> <span class="nav-text">命令模式（Command）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#中介者模式（Mediator）："><span class="nav-number">3.3.3.</span> <span class="nav-text">中介者模式（Mediator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#观察者模式（Observer）："><span class="nav-number">3.3.4.</span> <span class="nav-text">观察者模式（Observer）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#备忘录模式（Memento）："><span class="nav-number">3.3.5.</span> <span class="nav-text">备忘录模式（Memento）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#策略模式（Strategy）："><span class="nav-number">3.3.6.</span> <span class="nav-text">策略模式（Strategy）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#访问者模式（Visitor）："><span class="nav-number">3.3.7.</span> <span class="nav-text">访问者模式（Visitor）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#模板方法模式（TemplateMethod）："><span class="nav-number">3.3.8.</span> <span class="nav-text">模板方法模式（TemplateMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#状态模式（State）："><span class="nav-number">3.3.9.</span> <span class="nav-text">状态模式（State）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#迭代器模式（Iterator）："><span class="nav-number">3.3.10.</span> <span class="nav-text">迭代器模式（Iterator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解释器模式（Interpreter）："><span class="nav-number">3.3.11.</span> <span class="nav-text">解释器模式（Interpreter）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">4.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
             
 
           </div>
@@ -746,7 +785,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -760,7 +799,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 

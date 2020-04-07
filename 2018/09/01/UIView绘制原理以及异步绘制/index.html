@@ -89,7 +89,7 @@
 <meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_Display.jpeg">
 <meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_DisplayBySystem.jpeg">
 <meta property="og:image" content="https://github.com/2018/09/01/UIView绘制原理以及异步绘制/UIView_DrawAsync.jpeg">
-<meta property="og:updated_time" content="2019-03-09T12:10:07.000Z">
+<meta property="og:updated_time" content="2019-05-31T08:09:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="UIView绘制原理以及异步绘制">
 <meta name="twitter:description" content="UIView绘制流程UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CAL">
@@ -164,7 +164,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到的，你给不了我，给了我也拿不住;只有我自己觉到、悟到的，我才有可能做到，我能做到的才是我的.</p>
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -298,8 +298,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS之UI/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS之UI</span>
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index">
+                    <span itemprop="name">UI</span>
                   </a>
                 </span>
 
@@ -390,6 +401,7 @@
         <h3 id="UIView绘制流程"><a href="#UIView绘制流程" class="headerlink" title="UIView绘制流程"></a>UIView绘制流程</h3><p>UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?<br>当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CALayer的display方法,才会真正的进入当前视图的绘制流程当中,所以视图的绘制时机,是在当前runloop即将结束的时候才会开始。</p>
 <p>CALayer的display方法的内部实现,首先会判断layer的delegete是否响应display方法,如果代理不响应就会进入到系统的绘制流程当中,如果响应,实际上就为我们提供了异步绘制的接口,这样就构成了UIView的绘制原理</p>
 <img src="/2018/09/01/UIView绘制原理以及异步绘制/UIView_Display.jpeg">
+<a id="more"></a>
 <h3 id="系统的绘制流程"><a href="#系统的绘制流程" class="headerlink" title="系统的绘制流程"></a>系统的绘制流程</h3><p>首先CALayer会在内部创建一个backing store(CGContextRef),我们一般在drawRect中可以通过上下文堆栈当中拿到当前栈顶的context.然后layer判断是否有代理,如果没有代理会调用layer的drawInContext方法,如果实现了代理就会调用delegete的drawLayer:inContext方法,这是在发生在系统内部当中的,然后在合适的时机给予回调方法,也就是View的drawRect方法.可以通过drawRect方法做一些其他的绘制工作.然后无论哪两个分支,都有calayer上传backing store (最终的位图)到CPU.然后结束系统的绘制流程.</p>
 <img src="/2018/09/01/UIView绘制原理以及异步绘制/UIView_DisplayBySystem.jpeg">
 <h3 id="异步绘制"><a href="#异步绘制" class="headerlink" title="异步绘制"></a>异步绘制</h3><p>怎么进行异步绘制呢,其实就是基于系统给我们开的口子layer.delegate,如果遵从或者实现了displayLayer方法,我们就可以进入到异步绘制流程当中,在异步绘制的过程当中</p>
@@ -538,7 +550,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -549,7 +561,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -604,7 +616,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
@@ -618,7 +630,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">20.6k</span>
+    <span title="Site words total count">56.2k</span>
   
 </div>
 
