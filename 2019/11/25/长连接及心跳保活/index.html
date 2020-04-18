@@ -89,7 +89,7 @@
 <meta property="og:image" content="https://github.com/2019/11/25/长连接及心跳保活/shorttime.png">
 <meta property="og:image" content="https://github.com/2019/11/25/长连接及心跳保活/tcphand.png">
 <meta property="og:image" content="https://github.com/2019/11/25/长连接及心跳保活/tcpAlive.png">
-<meta property="og:updated_time" content="2019-11-25T09:52:23.000Z">
+<meta property="og:updated_time" content="2020-04-10T03:26:12.625Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="长连接及心跳保活">
 <meta name="twitter:description" content="短连接的使用有很大的瓶颈，所以才会有长连接的使用空间，但是长连接也会因为某些原因断开。">
@@ -392,7 +392,10 @@
 <h2 id="短连接"><a href="#短连接" class="headerlink" title="短连接"></a>短连接</h2><p>早期HTTP1.0的协议都是建立在TCP协议基础上，其特点就是传输完数据后，立马就释放掉该TCP链接，所以就有了形象的短连接这个称号。</p>
 <p>下图形象的展示出了在一个事务的处理过程中，各个阶段的处理时长：</p>
 <img src="/2019/11/25/长连接及心跳保活/shorttime.png">
-<p>可以看到，与建立TCP连接，以及传输请求和响应报文的时间相比，事务处理时间可能是很短的。短连接的性能瓶颈主要集中在如下几个方面：</p>
+<p>可以看到，与建立TCP连接，以及传输请求和响应报文的时间相比，事务处理时间可能是很短的。</p>
+<ul>
+<li>短连接的性能瓶颈主要集中在如下几个方面：</li>
+</ul>
 <ol>
 <li><p>TCP连接的握手时延</p>
 <img src="/2019/11/25/长连接及心跳保活/tcphand.png">
@@ -408,26 +411,33 @@
 </ol>
 <h2 id="长连接保活，Keep-Alive与心跳保活技术"><a href="#长连接保活，Keep-Alive与心跳保活技术" class="headerlink" title="长连接保活，Keep-Alive与心跳保活技术"></a>长连接保活，Keep-Alive与心跳保活技术</h2><h3 id="心跳保活"><a href="#心跳保活" class="headerlink" title="心跳保活"></a>心跳保活</h3><p>App实现长连接保活的方式通常是采用应用层心跳，通过心跳包的超时和其他条件(网络切换)来执行重连操作。心跳一般是指某端(绝大多数情况下是客户端)每隔一定时间向对端发送自定义指令，以判断双方是否存活，因其按照一定间隔发送，类似于心跳，故被称为心跳指令。</p>
 <h3 id="Keep-Alive能否实现保活"><a href="#Keep-Alive能否实现保活" class="headerlink" title="Keep-Alive能否实现保活"></a>Keep-Alive能否实现保活</h3><ol>
-<li><p>HTTP中的Keep-Alive<br>实现HTTP/1.0 keep-alive连接的客户端可以通过包含Connection:Keep-Alive首部请求将一条连接保持在打开状态，如果服务器愿意为下一条请求将连接保持在打开状态，就在响应中包含相同的首部。如果响应中没有Connection: Keep-Alive首部，客户端就认为服务器不支持keep-alive，会在发回响应报文之后关闭连接。HTTP/1.1以后Keep-Alive是默认打开的。</p>
+<li><p>HTTP中的Keep-Alive<br>实现HTTP/1.0 keep-alive连接的客户端可以通过包含Connection:Keep-Alive首部请求将一条连接保持在打开状态，如果服务器愿意为下一条请求将连接保持在打开状态，就在响应中包含相同的首部。如果响应中没有Connection: Keep-Alive首部，客户端就认为服务器不支持keep-alive，会在发回响应报文之后关闭连接。<code>HTTP/1.1以后Keep-Alive是默认打开的。</code></p>
 </li>
 <li><p>TCP中的Keep-Alive<br>TCP协议的实现中，提供了KeepAlive报文，用来探测连接的对端是否存活。在应用交互的过程中，可能存在以下几种情况：</p>
 </li>
+<li><p>客户端或服务器意外断电，死机，崩溃，重启；</p>
+</li>
+<li>中间网络已经中断，而客户端与服务器并不知道；</li>
 </ol>
-<blockquote>
-<p>客户端或服务器意外断电，死机，崩溃，重启；<br>中间网络已经中断，而客户端与服务器并不知道；</p>
-</blockquote>
-<p>TCP保活报文交互过程如下：</p>
- <img src="/2019/11/25/长连接及心跳保活/tcpAlive.png">
-<p> 虽然TCP提供了KeepAlive机制，但是并不能替代应用层心跳保活</p>
-<p> <strong>HTTP协议的Keep-Alive意图在于TCP连接复用，同一个连接上串行方式传递请求-响应数据；TCP的Keepalive机制意图在于探测连接的对端是否存活。</strong></p>
+<ul>
+<li><p>TCP保活报文交互过程如下：</p>
+<img src="/2019/11/25/长连接及心跳保活/tcpAlive.png">
+<p>虽然TCP提供了KeepAlive机制，但是并不能替代应用层心跳保活</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.HTTP协议的Keep-Alive意图在于TCP连接复用，同一个连接上串行方式传递请求-响应数据；</span><br><span class="line"> 2. TCP的Keepalive机制意图在于探测连接的对端是否存活。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 <h3 id="影响心跳频率的关键因素"><a href="#影响心跳频率的关键因素" class="headerlink" title="影响心跳频率的关键因素"></a>影响心跳频率的关键因素</h3><p>心跳过于频繁会带来耗电和耗流量的弊病，心跳频率过低则会影响连接检测的实时性。业内关于心跳时间的设置和优化，主要基于如下几个因素：</p>
 <ol>
 <li>NAT超时–大部分移动无线网络运营商在链路一段时间没有数据通讯时，会淘汰 NAT表中的对应项，造成链路中断；</li>
 <li>DHCP租期–DHCP租期到了需要主动续约，否则会继续使用过期IP导致长连接偶然的断连；</li>
 <li>网络状态变化–手机网络和WIFI网络切换、网络断开和连上等情况有网络状态的变化，也会使长连接变为无效连接；</li>
 </ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://caofengbin.github.io/2018/03/16/dhcp-and-nat/" target="_blank" rel="noopener">1.长连接及心跳保活原理简介</a></p>
-<p><a href="https://blog.csdn.net/weixin_41783335/article/details/95739900" target="_blank" rel="noopener">2.tcp长连接保活与心跳机制</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><p><a href="https://caofengbin.github.io/2018/03/16/dhcp-and-nat/" target="_blank" rel="noopener">长连接及心跳保活原理简介</a></p>
+</li>
+<li><p><a href="https://blog.csdn.net/weixin_41783335/article/details/95739900" target="_blank" rel="noopener">tcp长连接保活与心跳机制</a></p>
+</li>
+</ol>
 
       
     </div>
@@ -476,8 +486,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/11/25/HTTPS原理/" rel="next" title="HTTPS原理">
-                <i class="fa fa-chevron-left"></i> HTTPS原理
+              <a href="/2019/11/19/从URL输入到页面展现发生什么/" rel="next" title="从URL输入到页面展现发生什么？">
+                <i class="fa fa-chevron-left"></i> 从URL输入到页面展现发生什么？
               </a>
             
           </div>
@@ -486,8 +496,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/11/29/UITableview优化/" rel="prev" title="UITableView优化">
-                UITableView优化 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/11/25/HTTPS原理/" rel="prev" title="HTTPS原理">
+                HTTPS原理 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -568,7 +578,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-count">44</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -648,7 +658,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">56.2k</span>
+    <span title="Site words total count">57.7k</span>
   
 </div>
 
