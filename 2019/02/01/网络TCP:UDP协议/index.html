@@ -92,6 +92,9 @@
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP01.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP02.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP04.png">
+<meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP10.png">
+<meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP11.png">
+<meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP12.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP05.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP06.jpeg">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/TCP07.png">
@@ -99,7 +102,7 @@
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/tcp_byte.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/tcp_winddow.png">
 <meta property="og:image" content="https://github.com/2019/02/01/网络TCP:UDP协议/tcp_control.png">
-<meta property="og:updated_time" content="2020-04-21T05:19:10.589Z">
+<meta property="og:updated_time" content="2020-04-27T11:02:15.863Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP&#x2F;UDP协议">
 <meta name="twitter:description" content="传输层协议 TCP, 传输控制协议 UDP,用户数据报协议 无连接，尽最大努力交付  TCP TCP 提供一种面向连接的、可靠的字节流服务 在一个 TCP 连接中，仅有两方进行彼此通信。广播和多播不能用于 TCP TCP 使用校验和，确认和重传机制来保证可靠传输 TCP 给数据分节进行排序，并使用累积确认保证数据的顺序不变和非重复 TCP 使用滑动窗口机制来实现流量控制，通过动态改变窗口的大小进行">
@@ -360,7 +363,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  4.6k
+                  4.9k
                 </span>
               
 
@@ -376,7 +379,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  16
+                  17
                 </span>
               
             </div>
@@ -469,7 +472,7 @@
 <li>选择确认：当报文未按序到达时，若这些在接收窗口范围内，接收方就先收下然后将准确信息告诉发送方，让它不要重复发送。</li>
 <li>流量控制和拥塞控制：通过发送窗口和接收窗口大小来实现。</li>
 </ol>
-<h4 id="停止等待协议"><a href="#停止等待协议" class="headerlink" title="停止等待协议"></a>停止等待协议</h4><p>停止等待就是每发送完一个分组就停止发送，等待对方的确认，在收到确认后再发送下一个分组，停止等待协议分为以下几种情况：</p>
+<h4 id="停止等待协议-（发送窗口-1，接收窗口-1）"><a href="#停止等待协议-（发送窗口-1，接收窗口-1）" class="headerlink" title="停止等待协议  （发送窗口=1，接收窗口=1）"></a>停止等待协议  （发送窗口=1，接收窗口=1）</h4><p>停止等待就是每发送完一个分组就停止发送，等待对方的确认，在收到确认后再发送下一个分组，停止等待协议分为以下几种情况：</p>
 <ol>
 <li><p>无差错情况<br>A发送分组M1，发完就暂停发送，等待B的确认。B收到M1后就向A确认，A在收到对M1的确认后，就再发送下一个分组M2。同样在收到B对M2的确认后，再发送M3</p>
 <img src="/2019/02/01/网络TCP:UDP协议/TCP01.png">
@@ -488,16 +491,18 @@
 <li>确认超时<br>传输过程中没有出现差错，但B对分组M1的确认迟到了，A会收到重复的确认，对重复的确认的处理很简单：收下后丢弃。B仍然会收到重复的M1，并且同样要丢弃重复的M1，并重传确认分组。</li>
 </ol>
 <img src="/2019/02/01/网络TCP:UDP协议/TCP04.png">
-<h4 id="滑动窗口协议"><a href="#滑动窗口协议" class="headerlink" title="滑动窗口协议"></a>滑动窗口协议</h4><p>停止等待协议每发送一帧就要停止等待知道接收到确认帧，这样每次等待的时候不能传送数据使得传输效率很低，</p>
+<h4 id="滑动窗口协议"><a href="#滑动窗口协议" class="headerlink" title="滑动窗口协议"></a>滑动窗口协议</h4><p>停止等待协议的接受方的窗口和发送方的窗口大小都是1，1个比特就够表示了，所以也叫1比特滑动窗口协议，发送方这时自然发送每次只能发送一个，并且必须等待这个数据包的ACK，才能发送下一个。<br>停止等待协议每发送一帧就要停止等待知道接收到确认帧，这样每次等待的时候不能传送数据使得传输效率很低，</p>
+<img src="/2019/02/01/网络TCP:UDP协议/TCP10.png">
+<p>那么我们就不能先连发几个包等他一起确认吗？<br><img src="/2019/02/01/网络TCP:UDP协议/TCP11.png"><br>把两个包一起发送，然后一起确认，所花的时间只是一个来回的时间<br>每次发送多少个包过去是最优解呢？<br>把第一个和第二个包发送过去后，收到第一个确认包就把第三个包发送过去，而不是等到第二个包的确认包才去发第三个包<br><img src="/2019/02/01/网络TCP:UDP协议/TCP12.png"></p>
 <img src="/2019/02/01/网络TCP:UDP协议/TCP05.png">
 <p>位于发送窗口内的5个分组都可以连续发送出去，而不需要等待对方的确认。这样，信道利用率就提高了，连续ARQ协议规定，发送方每收到一个确认，就把发送窗口向前滑动一个分组的位置。</p>
 <p>接收方采用累积确认的方式，这就是说，接收方不必对收到的分组逐个发送确认，而是可以在收到几个分组后，对按序到达的最后一个分组发送确认，这就表示到这个分组为止的所有分组都已正确收到了。</p>
 <p>滑动窗口协议分为两种，一种是后退N帧协议，一种是选择重传协议。</p>
-<h5 id="后退N帧协议"><a href="#后退N帧协议" class="headerlink" title="后退N帧协议"></a>后退N帧协议</h5><p>如果发送方发送了前9个分组，而中间的第2个分组丢失，这是接收方只能对前两个分组发出确认，发送方无法知道后面7个分组的下落，而只好把后面的7个分组都再重传一次，这就叫做Go-back-N（回退N），表示需要再退回来重传已发送的N个分组<br><img src="/2019/02/01/网络TCP:UDP协议/TCP06.jpeg"></p>
-<h5 id="选择重传协议"><a href="#选择重传协议" class="headerlink" title="选择重传协议"></a>选择重传协议</h5><p>返回N协议简化了接收方的处理过程，接收方只需要跟踪一个变量，并且不需要对失序到达的分组缓存，而是简单地把失序到达的分组他们丢掉。</p>
-<p>选择重传协议是在后退N帧的基础上进行了改进，选择重传协议  只重传真正丢失的分组</p>
+<h5 id="后退N帧协议-（发送窗口-gt-1，接收窗口-1）"><a href="#后退N帧协议-（发送窗口-gt-1，接收窗口-1）" class="headerlink" title="后退N帧协议  （发送窗口&gt;1，接收窗口=1）"></a>后退N帧协议  （发送窗口&gt;1，接收窗口=1）</h5><p>如果发送方发送了前9个分组，而中间的第2个分组丢失，这是接收方只能对前两个分组发出确认，发送方无法知道后面7个分组的下落，而只好把后面的7个分组都再重传一次，这就叫做Go-back-N（回退N），表示需要再退回来重传已发送的N个分组<br><img src="/2019/02/01/网络TCP:UDP协议/TCP06.jpeg"></p>
+<h5 id="选择重传协议-（发送窗口-gt-1，接收窗口-gt-1）"><a href="#选择重传协议-（发送窗口-gt-1，接收窗口-gt-1）" class="headerlink" title="选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）"></a>选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）</h5><p>返回N协议简化了接收方的处理过程，接收方只需要跟踪一个变量，并且不需要对失序到达的分组缓存，而是简单地把失序到达的分组他们丢掉。</p>
+<p>选择重传协议是在后退N帧的基础上进行了改进，选择重传协议原理很简单，<code>接收端总会缓存所有收到的帧，当某个帧出现错误时，只会要求重传这一个帧，只有当某个序号后的所有帧都正确收到后，才会一起提交给高层应用</code></p>
 <p>选择重传协议的接收窗口和发送窗口一样大(2^m-1) 比返回N协议的窗口(2^m)小了一倍<br><img src="/2019/02/01/网络TCP:UDP协议/TCP07.png"></p>
-<p>选择重传的接收窗口与发送窗口一样大.选择重传协议允许与接受窗口一样多的分组失序到达,并保存这些失序到达的分组,直到连续的一组分组被交付给应用层.因为发送窗口与接收窗口是相同的,所以发送出来的所有分组都可以失序到达,而且会被保留直到交付为止.但是必须强调一点,在一个可靠的协议中,接收方永远不会把分组失序地交给应用层.在他们被交付给应用层之前,先要等待那些更早发出来的分组到达.<br><img src="/2019/02/01/网络TCP:UDP协议/TCP08.png"></p>
+<p><code>选择重传的接收窗口与发送窗口一样大</code>.选择重传协议允许与接受窗口一样多的分组失序到达,并保存这些失序到达的分组,直到连续的一组分组被交付给应用层.因为发送窗口与接收窗口是相同的,所以发送出来的所有分组都可以失序到达,而且会被保留直到交付为止.但是必须强调一点,在一个可靠的协议中,接收方永远不会把分组失序地交给应用层.在他们被交付给应用层之前,先要等待那些更早发出来的分组到达.<br><img src="/2019/02/01/网络TCP:UDP协议/TCP08.png"></p>
 <p>理论上选择重传协议要为每个分组使用一个计时器.当某个计时器超时后,只有相应的分组被重传.换而言之,返回N协议将所有的分组当做一个整体对待,而选择重传协议则分别对待每一个分组.但是大多数SR的运输层仅使用了一个计时器. 注意只使用一个计时器而做到跟踪所有发出去的分组的情况的做法是:标记发出分组,当ACK=Sf 时,将窗口滑过所有连续的已确认的分组,如果还有未确认的分组,则则重发所有检测到的未被确认的分组并重启计时器,如果所有分组都被确认了则停止计时器.</p>
 <h4 id="面向字节流"><a href="#面向字节流" class="headerlink" title="面向字节流"></a>面向字节流</h4><img src="/2019/02/01/网络TCP:UDP协议/tcp_byte.png">
 <p>不管发送方一次性提交给 TCP 的缓冲是多大的数据，对于TCP本身来说它会根据实际的情况来进行划分，比如发送方发送10字节，TCP 并不是一次性传递10字节数据，它可能是拆分成3个字节和7个字节分俩次发送给接收方</p>
@@ -505,7 +510,7 @@
 <p>滑动窗口协议是传输层进行流控的一种措施，接收方通过通告发送方自己的窗口大小，从而控制发送方的发送速度，从而达到防止发送方发送速度过快而导致自己被淹没的目的。</p>
 <img src="/2019/02/01/网络TCP:UDP协议/tcp_winddow.png">
 <p>对照上图，现在假如发送窗口是客户端，接收窗口是服务端。当我们现在要继续发送数据的时候，可能由于接收方的接收窗口没有那么大，而发送方的发送窗口非常大，就会以更快的速率往后发，需要由接收窗口通过向TCP的报文首部字段中去更改窗口值去调整发送方的发送窗口大小。</p>
-<h5 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h5><p>慢开始，拥塞避免<br>快恢复，快重传<br><img src="/2019/02/01/网络TCP:UDP协议/tcp_control.png"><br>横轴代表 APP 交互或者轮循次数，纵轴代表窗口值的大小<br>上图中，一开始我们可以先发送一个报文，如果没有发生网络拥塞，就继续发送 2 个报文，依然没有发生网络拥塞，就继续翻倍，直到 16 个报文，这就是慢开始算法<br>当到达 16 报文数的时候，会采用拥塞避免的策略来进行发送报文的一个数量的线性增长。<br>当报文数到 24 的时候，就会发生网络拥塞，采用拥塞避免的乘法减小到值发送 1 一个报文，来减少对网络层面带来的压力，然后再重新开始 慢开始算法增长，同时限定一个新的门限值.</p>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>TCP的四种拥塞控制算法<br>慢开始<br>拥塞避免<br>快恢复<br>快重传<br><img src="/2019/02/01/网络TCP:UDP协议/tcp_control.png"><br>横轴代表 APP 交互或者轮循次数，纵轴代表窗口值的大小<br>上图中，一开始我们可以先发送一个报文，如果没有发生网络拥塞，就继续发送 2 个报文，依然没有发生网络拥塞，就继续翻倍，直到 16 个报文，这就是慢开始算法<br>当到达 16 报文数的时候，会采用拥塞避免的策略来进行发送报文的一个数量的线性增长。<br>当报文数到 24 的时候，就会发生网络拥塞，采用拥塞避免的乘法减小到值发送 1 一个报文，来减少对网络层面带来的压力，然后再重新开始 慢开始算法增长，同时限定一个新的门限值.</p>
 <h2 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h2><p>UDP 是一个简单的传输层协议。和 TCP 相比，UDP 有下面几个显著特性：</p>
 <ol>
 <li><p>UDP 缺乏可靠性。UDP 本身不提供确认，序列号，超时重传等机制。UDP 数据报可能在网络中被复制，被重新排序。即 UDP 不保证数据报会到达其最终目的地，也不保证各个数据报的先后顺序，也不保证每个数据报只到达一次</p>
@@ -709,7 +714,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#传输层协议"><span class="nav-number">1.</span> <span class="nav-text">传输层协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP"><span class="nav-number">2.</span> <span class="nav-text">TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP连接"><span class="nav-number">2.1.</span> <span class="nav-text">TCP连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP可靠传输的精髓"><span class="nav-number">2.2.</span> <span class="nav-text">TCP可靠传输的精髓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三次握手"><span class="nav-number">2.3.</span> <span class="nav-text">三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么是”三次握手”？"><span class="nav-number">2.3.1.</span> <span class="nav-text">为什么是”三次握手”？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SYN攻击"><span class="nav-number">2.3.2.</span> <span class="nav-text">SYN攻击</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四次挥手"><span class="nav-number">2.4.</span> <span class="nav-text">四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要”四次挥手”"><span class="nav-number">2.4.1.</span> <span class="nav-text">为什么要”四次挥手”</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可靠传输"><span class="nav-number">2.5.</span> <span class="nav-text">可靠传输</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#停止等待协议"><span class="nav-number">2.5.1.</span> <span class="nav-text">停止等待协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#滑动窗口协议"><span class="nav-number">2.5.2.</span> <span class="nav-text">滑动窗口协议</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#后退N帧协议"><span class="nav-number">2.5.2.1.</span> <span class="nav-text">后退N帧协议</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#选择重传协议"><span class="nav-number">2.5.2.2.</span> <span class="nav-text">选择重传协议</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#面向字节流"><span class="nav-number">2.5.3.</span> <span class="nav-text">面向字节流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#流量控制"><span class="nav-number">2.5.3.1.</span> <span class="nav-text">流量控制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#拥塞控制"><span class="nav-number">2.5.3.2.</span> <span class="nav-text">拥塞控制</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UDP"><span class="nav-number">3.</span> <span class="nav-text">UDP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#传输层协议"><span class="nav-number">1.</span> <span class="nav-text">传输层协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP"><span class="nav-number">2.</span> <span class="nav-text">TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP连接"><span class="nav-number">2.1.</span> <span class="nav-text">TCP连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP可靠传输的精髓"><span class="nav-number">2.2.</span> <span class="nav-text">TCP可靠传输的精髓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三次握手"><span class="nav-number">2.3.</span> <span class="nav-text">三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么是”三次握手”？"><span class="nav-number">2.3.1.</span> <span class="nav-text">为什么是”三次握手”？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SYN攻击"><span class="nav-number">2.3.2.</span> <span class="nav-text">SYN攻击</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四次挥手"><span class="nav-number">2.4.</span> <span class="nav-text">四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要”四次挥手”"><span class="nav-number">2.4.1.</span> <span class="nav-text">为什么要”四次挥手”</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可靠传输"><span class="nav-number">2.5.</span> <span class="nav-text">可靠传输</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#停止等待协议-（发送窗口-1，接收窗口-1）"><span class="nav-number">2.5.1.</span> <span class="nav-text">停止等待协议  （发送窗口=1，接收窗口=1）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#滑动窗口协议"><span class="nav-number">2.5.2.</span> <span class="nav-text">滑动窗口协议</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#后退N帧协议-（发送窗口-gt-1，接收窗口-1）"><span class="nav-number">2.5.2.1.</span> <span class="nav-text">后退N帧协议  （发送窗口&gt;1，接收窗口=1）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#选择重传协议-（发送窗口-gt-1，接收窗口-gt-1）"><span class="nav-number">2.5.2.2.</span> <span class="nav-text">选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#面向字节流"><span class="nav-number">2.5.3.</span> <span class="nav-text">面向字节流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#流量控制"><span class="nav-number">2.5.3.1.</span> <span class="nav-text">流量控制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拥塞控制"><span class="nav-number">2.6.</span> <span class="nav-text">拥塞控制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UDP"><span class="nav-number">3.</span> <span class="nav-text">UDP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
@@ -743,7 +748,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">63.5k</span>
+    <span title="Site words total count">64.8k</span>
   
 </div>
 
