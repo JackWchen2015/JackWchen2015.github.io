@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_law.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_deep.png">
 <meta property="og:image" content="https://github.com/2018/12/01/对象结构和行为/copy_mutable.png">
-<meta property="og:updated_time" content="2019-07-04T05:53:35.000Z">
+<meta property="og:updated_time" content="2020-05-02T03:38:07.600Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="对象结构和行为">
 <meta name="twitter:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
@@ -362,7 +362,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  488
+                  675
                 </span>
               
 
@@ -378,7 +378,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  1
+                  2
                 </span>
               
             </div>
@@ -429,6 +429,9 @@
 <li>不可变对象的copy是浅拷贝，mutableCopy是深拷贝</li>
 <li>copy方法返回的都是不可变对象</li>
 </ol>
+<h3 id="成员变量捕获"><a href="#成员变量捕获" class="headerlink" title="成员变量捕获"></a>成员变量捕获</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)catchIvar</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">void</span> (^blockA)() = ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>,_ivarA);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="keyword">void</span>)catchIvar</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">void</span> (^blockA)() = ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>,<span class="keyword">self</span>-&gt;_ivarA);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面两份代码是等价的，系统为什么要转化成self-&gt;_ivarA的形式去捕获self呢？而不是直接捕获_ivarA</p>
+<p>正常的方法中，直接使用成员变量ivar，编译器都会自动转化为self-&gt;ivar，之所以这样做，是因为正常的消息发送中，self是会作为一个参数，传递到objc_send方法中的。所以在任何方法中都可以直接获取到self，而成员变量ivar，并没有作为任何参数传入到方法中，所以为了访问到ivar，正常都会转化为self-&gt;ivar来访问。</p>
 
       
     </div>
@@ -569,7 +572,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -580,7 +583,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -615,7 +618,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#拓展-VS-分类"><span class="nav-number">1.</span> <span class="nav-text">拓展 VS 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一般用扩展做什么？"><span class="nav-number">1.1.</span> <span class="nav-text">一般用扩展做什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩展的特点-和分类的区别"><span class="nav-number">1.2.</span> <span class="nav-text">扩展的特点 (和分类的区别)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO-和-KVC"><span class="nav-number">2.</span> <span class="nav-text">KVO 和 KVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">2.1.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC"><span class="nav-number">2.2.</span> <span class="nav-text">KVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC-VS-KVO"><span class="nav-number">2.3.</span> <span class="nav-text">KVC VS KVO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copy-属性关键字"><span class="nav-number">3.</span> <span class="nav-text">Copy    属性关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#浅拷贝和深拷贝的概念"><span class="nav-number">3.1.</span> <span class="nav-text">浅拷贝和深拷贝的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Copy-修饰对象"><span class="nav-number">3.2.</span> <span class="nav-text">Copy    修饰对象</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#拓展-VS-分类"><span class="nav-number">1.</span> <span class="nav-text">拓展 VS 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一般用扩展做什么？"><span class="nav-number">1.1.</span> <span class="nav-text">一般用扩展做什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩展的特点-和分类的区别"><span class="nav-number">1.2.</span> <span class="nav-text">扩展的特点 (和分类的区别)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO-和-KVC"><span class="nav-number">2.</span> <span class="nav-text">KVO 和 KVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">2.1.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC"><span class="nav-number">2.2.</span> <span class="nav-text">KVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC-VS-KVO"><span class="nav-number">2.3.</span> <span class="nav-text">KVC VS KVO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copy-属性关键字"><span class="nav-number">3.</span> <span class="nav-text">Copy    属性关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#浅拷贝和深拷贝的概念"><span class="nav-number">3.1.</span> <span class="nav-text">浅拷贝和深拷贝的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Copy-修饰对象"><span class="nav-number">3.2.</span> <span class="nav-text">Copy    修饰对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#成员变量捕获"><span class="nav-number">4.</span> <span class="nav-text">成员变量捕获</span></a></li></ol></div>
             
 
           </div>
@@ -649,7 +652,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">64.8k</span>
+    <span title="Site words total count">68.8k</span>
   
 </div>
 
