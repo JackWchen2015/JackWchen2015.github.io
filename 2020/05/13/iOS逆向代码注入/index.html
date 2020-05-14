@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前段时间把&amp;lt;&amp;lt;硅谷&amp;gt;&amp;gt;追完了，剧中撒旦教崇拜者Gilfoyle，当时破解了智能冰箱的固件，仔细想想，似忽不存在无法破解的软件，就好像不存在不透风的墙一样，开发人员开发，编译，链接生成一个可执行文件，Mach-O或者ELF，PE，其实本质上都是二进制文件，这当然就可以编辑，不过是在运行的时候添加了非对称加密的认证，对原始文件的一致性会进行认证。可是又有谁能保证非对称加密（RS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS逆向代码注入">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/13/iOS逆向代码注入/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前段时间把&amp;lt;&amp;lt;硅谷&amp;gt;&amp;gt;追完了，剧中撒旦教崇拜者Gilfoyle，当时破解了智能冰箱的固件，仔细想想，似忽不存在无法破解的软件，就好像不存在不透风的墙一样，开发人员开发，编译，链接生成一个可执行文件，Mach-O或者ELF，PE，其实本质上都是二进制文件，这当然就可以编辑，不过是在运行的时候添加了非对称加密的认证，对原始文件的一致性会进行认证。可是又有谁能保证非对称加密（RS">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-05-14T04:10:07.302Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS逆向代码注入">
+<meta name="twitter:description" content="前段时间把&amp;lt;&amp;lt;硅谷&amp;gt;&amp;gt;追完了，剧中撒旦教崇拜者Gilfoyle，当时破解了智能冰箱的固件，仔细想想，似忽不存在无法破解的软件，就好像不存在不透风的墙一样，开发人员开发，编译，链接生成一个可执行文件，Mach-O或者ELF，PE，其实本质上都是二进制文件，这当然就可以编辑，不过是在运行的时候添加了非对称加密的认证，对原始文件的一致性会进行认证。可是又有谁能保证非对称加密（RS">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/13/iOS逆向代码注入/"/>
+
+
+
+
+
+  <title>iOS逆向代码注入 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">学计算机的那个</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/13/iOS逆向代码注入/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS逆向代码注入</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-13T08:00:00+08:00">
+                2020-05-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/性能监控与优化/" itemprop="url" rel="index">
+                    <span itemprop="name">性能监控与优化</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/13/iOS逆向代码注入/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/05/13/iOS逆向代码注入/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/05/13/iOS逆向代码注入/" class="leancloud_visitors" data-flag-title="iOS逆向代码注入">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前段时间把&lt;&lt;硅谷&gt;&gt;追完了，剧中撒旦教崇拜者Gilfoyle，当时破解了智能冰箱的固件，仔细想想，似忽不存在无法破解的软件，就好像不存在不透风的墙一样，开发人员开发，编译，链接生成一个可执行文件，Mach-O或者ELF，PE，其实本质上都是二进制文件，这当然就可以编辑，不过是在运行的时候添加了非对称加密的认证，对原始文件的一致性会进行认证。可是又有谁能保证非对称加密（RSA）的无法破解性呢？最后一季，他们的去中心化系统通过深度学习，充分发挥分布式计算的算力成功破解了最先进的加密算法!</p>
+<a id="more"></a>
+<blockquote>
+<p>代码注入有两种方案：通过Framework和dylib</p>
+</blockquote>
+<h2 id="App重签名"><a href="#App重签名" class="headerlink" title="App重签名"></a>App重签名</h2><ol>
+<li>通过Xcode新建任意工程，然后运行在手机上，此时当前App的描述文件，证书已经正常安装在了手机上。</li>
+<li>添加shell运行脚本AppSign.sh</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># $&#123;SRCROOT&#125; 它是工程文件所在的目录</span></span><br><span class="line">TEMP_PATH=<span class="string">"<span class="variable">$&#123;SRCROOT&#125;</span>/Temp"</span></span><br><span class="line"><span class="comment">#资源文件夹，我们提前在工程目录下新建一个APP文件夹，里面放ipa包</span></span><br><span class="line">ASSETS_PATH=<span class="string">"<span class="variable">$&#123;SRCROOT&#125;</span>/APP"</span></span><br><span class="line"><span class="comment">#目标ipa包路径</span></span><br><span class="line">TARGET_IPA_PATH=<span class="string">"<span class="variable">$&#123;ASSETS_PATH&#125;</span>/*.ipa"</span></span><br><span class="line"><span class="comment">#清空Temp文件夹</span></span><br><span class="line">rm -rf <span class="string">"<span class="variable">$&#123;SRCROOT&#125;</span>/Temp"</span></span><br><span class="line">mkdir -p <span class="string">"<span class="variable">$&#123;SRCROOT&#125;</span>/Temp"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 1. 解压IPA到Temp下</span></span><br><span class="line">unzip -oqq <span class="string">"<span class="variable">$TARGET_IPA_PATH</span>"</span> -d <span class="string">"<span class="variable">$TEMP_PATH</span>"</span></span><br><span class="line"><span class="comment"># 拿到解压的临时的APP的路径</span></span><br><span class="line">TEMP_APP_PATH=$(<span class="built_in">set</span> -- <span class="string">"<span class="variable">$TEMP_PATH</span>/Payload/"</span>*.app;<span class="built_in">echo</span> <span class="string">"<span class="variable">$1</span>"</span>)</span><br><span class="line"><span class="comment"># echo "路径是:$TEMP_APP_PATH"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 2. 将解压出来的.app拷贝进入工程下</span></span><br><span class="line"><span class="comment"># BUILT_PRODUCTS_DIR 工程生成的APP包的路径</span></span><br><span class="line"><span class="comment"># TARGET_NAME target名称</span></span><br><span class="line">TARGET_APP_PATH=<span class="string">"<span class="variable">$BUILT_PRODUCTS_DIR</span>/<span class="variable">$TARGET_NAME</span>.app"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"app路径:<span class="variable">$TARGET_APP_PATH</span>"</span></span><br><span class="line"></span><br><span class="line">rm -rf <span class="string">"<span class="variable">$TARGET_APP_PATH</span>"</span></span><br><span class="line">mkdir -p <span class="string">"<span class="variable">$TARGET_APP_PATH</span>"</span></span><br><span class="line">cp -rf <span class="string">"<span class="variable">$TEMP_APP_PATH</span>/"</span> <span class="string">"<span class="variable">$TARGET_APP_PATH</span>"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 3. 删除extension和WatchAPP.个人证书没法签名Extention</span></span><br><span class="line">rm -rf <span class="string">"<span class="variable">$TARGET_APP_PATH</span>/PlugIns"</span></span><br><span class="line">rm -rf <span class="string">"<span class="variable">$TARGET_APP_PATH</span>/Watch"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 4. 更新info.plist文件 CFBundleIdentifier</span></span><br><span class="line"><span class="comment">#  设置:"Set : KEY Value" "目标文件路径"</span></span><br><span class="line">/usr/libexec/PlistBuddy -c <span class="string">"Set :CFBundleIdentifier <span class="variable">$PRODUCT_BUNDLE_IDENTIFIER</span>"</span> <span class="string">"<span class="variable">$TARGET_APP_PATH</span>/Info.plist"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 5. 给MachO文件上执行权限</span></span><br><span class="line"><span class="comment"># 拿到MachO文件的路径</span></span><br><span class="line">APP_BINARY=`plutil -convert xml1 -o - <span class="variable">$TARGET_APP_PATH</span>/Info.plist|grep -A1 Exec|tail -n1|cut -f2 -d\&gt;|cut -f1 -d\&lt;`</span><br><span class="line"><span class="comment">#上可执行权限</span></span><br><span class="line">chmod +x <span class="string">"<span class="variable">$TARGET_APP_PATH</span>/<span class="variable">$APP_BINARY</span>"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#----------------------------------------</span></span><br><span class="line"><span class="comment"># 6. 重签名第三方 FrameWorks</span></span><br><span class="line">TARGET_APP_FRAMEWORKS_PATH=<span class="string">"<span class="variable">$TARGET_APP_PATH</span>/Frameworks"</span></span><br><span class="line"><span class="keyword">if</span> [ -d <span class="string">"<span class="variable">$TARGET_APP_FRAMEWORKS_PATH</span>"</span> ];</span><br><span class="line"><span class="keyword">then</span></span><br><span class="line"><span class="keyword">for</span> FRAMEWORK <span class="keyword">in</span> <span class="string">"<span class="variable">$TARGET_APP_FRAMEWORKS_PATH</span>/"</span>*</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#签名</span></span><br><span class="line">/usr/bin/codesign --force --sign <span class="string">"<span class="variable">$EXPANDED_CODE_SIGN_IDENTITY</span>"</span> <span class="string">"<span class="variable">$FRAMEWORK</span>"</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>在项目目录下新建APP文件夹，放入砸壳之后的ipa包</li>
+<li>运行就可以调试砸壳之后的ipa包</li>
+</ol>
+<h2 id="Framework注入"><a href="#Framework注入" class="headerlink" title="Framework注入"></a>Framework注入</h2><ol>
+<li>在当前工程中点击Xcode中File-&gt;Target新增一个Framework，HookFrame</li>
+<li>在Framework中添加你想添加的类HookDemo添加load方法<br><code>现在framework有了，但是不会被dyld加载</code></li>
+<li><p>动态库注入yololib</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.将yololib复制粘贴到/usr/local/bin目录下</span><br><span class="line">2.在签名脚本AppSign.sh末尾添加注入命令</span><br><span class="line">#注入</span><br><span class="line">#yololib &quot;$TARGET_APP_PATH/$APP_BINARY&quot; &quot;Frameworks/HookFrame.framework/HookFrame&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>运行，现在可以执行HookDemo类中的load方法了</p>
+</li>
+</ol>
+<ul>
+<li>注意</li>
+</ul>
+<ol>
+<li>Mach-0文件浏览工具<a href="https://sourceforge.net/projects/machoview/" target="_blank" rel="noopener">machoview</a>，是<a href="https://github.com/gdbinit/MachOView">开源</a>的<br><code>安装时如果提示：程序已损坏，打不开。您应该将它移到废纸篓</code>这是macOS Sierra 10 取消了安全性与隐私中的“允许任何来源”选项，导致的问题，可以打开终端，输入一下命令解决。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo spctl --master-disable</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="dylib注入"><a href="#dylib注入" class="headerlink" title="dylib注入"></a><a href="iOS逆向 代码注入+Hook">dylib注入</a></h2><h2 id="HOOK某个按钮触发事件"><a href="#HOOK某个按钮触发事件" class="headerlink" title="HOOK某个按钮触发事件"></a>HOOK某个按钮触发事件</h2><p>1.通过Xcode ViewDebug调试，可以找到某个页面的Controller，和UIButton的Action，Target<br><code>可以通过lldb po命令打印内存地址获取类名，然后通过类型转换和KVC获取成员对象</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(lldb) po 0x133800600</span><br><span class="line">&lt;XXXViewController: 0x133800600&gt;</span><br><span class="line"></span><br><span class="line">(lldb) po [(XXXViewController *)0x133800600 valueForKey:@<span class="string">"_textFieldPwd"</span>]</span><br><span class="line">&lt;XXXextFieldItem: 0x28231f180&gt;</span><br><span class="line"></span><br><span class="line">(lldb) po [(XXXextFieldItem *)0x28231f180 valueForKey:@<span class="string">"m_textField"</span>]</span><br><span class="line">&lt;XXXUITextField: 0x13090d600; baseClass = UITextField; frame = (20 0; 345 44); text = <span class="string">'Felix'</span>; opaque = NO; autoresize = W+H; tintColor = UIExtendedSRGBColorSpace 0.00784314 0.733333 0 1; gestureRecognizers = &lt;NSArray: 0x280891650&gt;; layer = &lt;CALayer: 0x280612560&gt;&gt;</span><br></pre></td></tr></table></figure></p>
+<ol start="2">
+<li>利用class-dump工具导出Mach-o文件的所有头文件<br><code>文本查找你要找的Controller，如果开发者没做代码混淆的话，这里就很直观的找到你想要找的成员对象，比如pwd之类</code></li>
+<li>Hook</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">void</span>)load &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 1、给哪个类添加方法</span></span><br><span class="line"><span class="comment">     * 2、方法编号</span></span><br><span class="line"><span class="comment">     * 3、方法实现（地址）</span></span><br><span class="line"><span class="comment">     * 4、v代表Void @代表id类型 ：代表@selecter类型（可以在帮助文档查看这个方法）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">BOOL</span> didAddMethod = class_addMethod(objc_getClass(<span class="string">"XXXViewController"</span>), <span class="keyword">@selector</span>(FX_onNext), FX_onNext, <span class="string">"v@:"</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (didAddMethod) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"添加方法成功"</span>);</span><br><span class="line">        Method oldMethod = class_getInstanceMethod(objc_getClass(<span class="string">"XXXViewController"</span>), <span class="keyword">@selector</span>(onNext));</span><br><span class="line">        Method newMethod = class_getInstanceMethod(objc_getClass(<span class="string">"XXXViewController"</span>), <span class="keyword">@selector</span>(FX_onNext));</span><br><span class="line">        method_exchangeImplementations(oldMethod, newMethod);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//方法实现IMP</span></span><br><span class="line"><span class="keyword">void</span> FX_onNext(<span class="keyword">id</span> <span class="keyword">self</span>, SEL _cmd) &#123;</span><br><span class="line">    <span class="built_in">UITextField</span> *accountTF = [[<span class="keyword">self</span> valueForKey:<span class="string">@"_textFieldUserNameItem"</span>] valueForKey:<span class="string">@"m_textField"</span>];</span><br><span class="line">    <span class="built_in">UITextField</span> *passwordTF = [[<span class="keyword">self</span> valueForKey:<span class="string">@"_textFieldPwdItem"</span>] valueForKey:<span class="string">@"m_textField"</span>];</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"账号：“%@” 密码：“%@”"</span>, accountTF.text, passwordTF.text);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//使用原来逻辑</span></span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(FX_onNext)];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里突然有点明白为什么Apple要退出swift了，因为OC的runtime过于强大，有威胁。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://juejin.im/post/5dc42055e51d4573042fb627" target="_blank" rel="noopener">iOS逆向 代码注入</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>化点缘</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/aipay.png" alt="Jack Chen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/16/iOS录音生成Wav格式问题/" rel="next" title="iOS录音生成Wav格式问题">
+                <i class="fa fa-chevron-left"></i> iOS录音生成Wav格式问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Jack Chen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#App重签名"><span class="nav-number">1.</span> <span class="nav-text">App重签名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Framework注入"><span class="nav-number">2.</span> <span class="nav-text">Framework注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dylib注入"><span class="nav-number">3.</span> <span class="nav-text">dylib注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HOOK某个按钮触发事件"><span class="nav-number">4.</span> <span class="nav-text">HOOK某个按钮触发事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">71.5k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz',
+        appKey: 'v2zdWxJV3kOujBALKftRvt2i',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz", "v2zdWxJV3kOujBALKftRvt2i");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -93,7 +93,7 @@
 <meta property="og:image" content="https://github.com/2019/11/25/HTTPS协议/digtitalFinal.png">
 <meta property="og:image" content="https://github.com/2019/11/25/HTTPS协议/https05.png">
 <meta property="og:image" content="https://github.com/2019/11/25/HTTPS协议/https_conn.png">
-<meta property="og:updated_time" content="2020-04-25T11:47:21.851Z">
+<meta property="og:updated_time" content="2020-05-11T10:59:43.416Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HTTPS协议">
 <meta name="twitter:description" content="HTTP 主要有这些不足，例举如下  通信使用明文(不加密)，内容可能会被窃听  不验证通信方的身份，因此有可能遭遇伪装    无法证明报文的完整性，所以有可能已遭篡改">
@@ -404,7 +404,7 @@
 <h2 id="加密方式"><a href="#加密方式" class="headerlink" title="加密方式"></a>加密方式</h2><h3 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h3><p>对称加密：指的就是加、解密使用的同是一串密钥，所以被称做对称加密。对称加密只有一个密钥作为私钥。<br>常见的对称加密算法：DES，AES等。<br><img src="/2019/11/25/HTTPS协议/duicheng.png"></p>
 <p>优缺点：加解密的效率要高得多、加密速度快。但是缺陷在于对于密钥的管理和分发上比较困难，不是非常安全，密钥管理负担很重。</p>
 <h3 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h3><p>非对称加密：指的是加、解密使用不同的密钥，一把作为公开的公钥，另一把作为私钥。公钥加密的信息，只有私钥才能解密。反之，私钥加密的信息，只有公钥才能解密。 </p>
-<p>见的对称加密算法：RSA</p>
+<p>见的非对称加密算法：RSA</p>
 <img src="/2019/11/25/HTTPS协议/noduicheng.png">
 <p>优缺点：</p>
 <p>安全性更高，公钥是公开的，密钥是自己保存的，不需要将私钥给别人。缺点：加密和解密花费时间长、速度慢，只适合对少量数据进行加密。</p>
@@ -458,9 +458,9 @@
 <li>TLS 四次握手</li>
 </ul>
 <ol>
-<li>第一步，客户端向服务器发起请求，请求种包括使用的协议版本号，生成的一个随机数、以及客户端支持的加密方法。</li>
-<li>第二部，服务端收到请求后，确认双方使用的加密方法、并给出服务器的证书、以及一个服务器生成的随机数</li>
-<li>第三部，客户端确认服务器证书有效后，生成一个新的随机数，并使用数字证书中的公钥，加密这个随机数，然后发给服务器。并且还会提供一个前面所有内容的hash的值，用来供服务器检验。</li>
+<li>第一步，客户端向服务器发起请求，请求种包括使用的协议版本号，生成的一个随机数C、以及客户端支持的加密方法。</li>
+<li>第二部，服务端收到请求后，确认双方使用的加密方法、并给出服务器的证书、以及一个服务器生成的随机数S</li>
+<li>第三部，客户端确认服务器证书有效后，生成一个新的随机数（预主密钥），并使用数字证书中的公钥，加密这个随机数，然后发给服务器。并且还会提供一个前面所有内容的hash的值，用来供服务器检验。</li>
 <li>服务器使用自己的私钥，来解密客户端发送过来的随机数。并提供前面所有内容的hash值来供客户端检验。这个时候双方都有了三个随机数，按照之前约定的加密方法，使用这三个随机数生成对话密钥，以后的对话过程都使用这个密钥来加密信息。</li>
 </ol>
 <ul>
@@ -630,7 +630,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-count">46</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -641,7 +641,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -710,7 +710,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">68.8k</span>
+    <span title="Site words total count">71.5k</span>
   
 </div>
 
