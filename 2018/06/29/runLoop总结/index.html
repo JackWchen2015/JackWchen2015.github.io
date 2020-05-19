@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop_00.jpg">
 <meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop.png">
 <meta property="og:image" content="https://github.com/2018/06/29/runLoop总结/runloop_04.png">
-<meta property="og:updated_time" content="2020-05-14T00:32:04.261Z">
+<meta property="og:updated_time" content="2020-05-17T14:40:23.904Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="RunLoop">
 <meta name="twitter:description" content="简介 Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The">
@@ -362,7 +362,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3k
+                  3.5k
                 </span>
               
 
@@ -378,7 +378,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  11
+                  13
                 </span>
               
             </div>
@@ -403,8 +403,23 @@
 <p>Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The purpose of a run loop is to keep your thread busy when there is work to do and put your thread to sleep when there is none.</p>
 </blockquote>
 <p>Runloop是与线程相关联的基础架构的一部分，它用来接受循环事件和安排线程的工作，在有工作时让线程处于繁忙状态，没有事件需要处理时让线程休眠；</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RunLoop管理事件，让线程在没有消息时休眠以避免占用资源，在消息到来时被唤醒，这种机制，叫做“事件循环”机制。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RunLoop管理事件，让线程在没有消息时休眠以避免占用资源，由用户态切换到内核态；在消息到来时被唤醒，由内核态切换到用户态，这种机制，叫做“事件循环”机制。</span><br></pre></td></tr></table></figure>
 <a id="more"></a>
+<h2 id="用户态和内核态"><a href="#用户态和内核态" class="headerlink" title="用户态和内核态"></a>用户态和内核态</h2><h3 id="内核态"><a href="#内核态" class="headerlink" title="内核态"></a>内核态</h3><p>内核是一种特殊的软件程序，控制计算机的硬件资源，例如协调CPU资源，分配内存资源，并且提供稳定的环境供应用程序进行。</p>
+<h3 id="用户态"><a href="#用户态" class="headerlink" title="用户态"></a>用户态</h3><p>用户态就是提供应用程序运行的空间</p>
+<h3 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h3><p>为了使应用程序访问到内核管理的资源如CPU，内存，I/O。内核提供一组通用的访问接口，这些接口就叫系统调用。系统调用是操作系统的最小功能单位。</p>
+<h3 id="为什么要区分用户态与内核态"><a href="#为什么要区分用户态与内核态" class="headerlink" title="为什么要区分用户态与内核态"></a>为什么要区分用户态与内核态</h3><p>在CPU的所有指令中，有一些指令是非常危险的，如果错用，将导致整个系统崩溃。比如：清内存、设置时钟等。CPU指令分为特权指令，和非特权指令，Intel的CPU将特权指令分为4个等级，RING0（内核态），RING1，RING2，RING3（用户态）.</p>
+<p>CPU总处于以下状态中的一种</p>
+<ol>
+<li>内核态，运行于进程上下文，内核代表进程运行于内核空间</li>
+<li>内核态，运行于中断上下文，内核代表硬件运行于内核空间</li>
+<li>用户态，运行于用户空间</li>
+</ol>
+<h3 id="用户态到内核态怎样切换"><a href="#用户态到内核态怎样切换" class="headerlink" title="用户态到内核态怎样切换"></a>用户态到内核态怎样切换</h3><ol>
+<li>系统调用，比如fork()</li>
+<li>异常，比如缺页异常</li>
+<li>外设中断，比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作</li>
+</ol>
 <h2 id="Runloop和线程的关系"><a href="#Runloop和线程的关系" class="headerlink" title="Runloop和线程的关系"></a>Runloop和线程的关系</h2><ol>
 <li>一个线程对应一个Runloop</li>
 <li>主线程的默认就有Runloop</li>
@@ -447,8 +462,10 @@
 <h4 id="Input-Sources"><a href="#Input-Sources" class="headerlink" title="Input Sources"></a>Input Sources</h4><p>Input sources 异步地传递事件到线程，而事件的源来至于其中一种：Port-based input sources、Custom input sources 这两种souces的实现处理方式都一样</p>
 <ul>
 <li>Port-based input sources :监听程序的Mach ports，kernel自动发信号<br>Source1：基于mach_Port，来自系统内核活着其他进程或线程的事件，可以主动唤醒休眠中的RunLoop（mach_port可以理解成进程间通信的一种机制）</li>
-<li>Custom input sources ：监听自定义的活动，在其他线程手动的发信号<br>Source0事件<br><strong>Cocoa Perform Selector Sources</strong> : Cocoa 框架定义的Custom input sources</li>
+<li>Custom input sources ：监听自定义的活动，在其他线程手动的发信号</li>
+<li>Cocoa Perform Selector Sources : Cocoa 框架定义的Custom input sources</li>
 </ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Source0 :只包含一个函数指针（回调方法），不能自动触发，只能手动触发，触发方式是先通过CFRunLoopSourceSignal(source)将这个Source标记为待处理，然后再调用CFRunLoopWakeUp(runloop) 来唤醒RunLoop处理这个事件。</span><br><span class="line"></span><br><span class="line">Source1 :基于port的Source源，包含一个port和一个函数指针（回调方法）。该Source源可通过内核和其他线程相互发送消息，而且可以主动唤醒RunLoop。</span><br></pre></td></tr></table></figure>
 <h4 id="配置Input-Sources"><a href="#配置Input-Sources" class="headerlink" title="配置Input Sources"></a>配置Input Sources</h4><ul>
 <li><p>Port-Based Sources通过内置的端口相关的对象和函数，配置基于端口的Input source。 (比如在主线程创建子线程时传入一个NSPort对象,主线程和子线程就可以进行通讯。NSPort对象会负责自己创建和配置Input source。)</p>
 </li>
@@ -492,6 +509,7 @@
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a href="http://www.helloted.com/ios/2017/04/10/Runloop_1/" target="_blank" rel="noopener">Runloop</a></li>
 <li><a href="https://zhuanlan.zhihu.com/p/62605958" target="_blank" rel="noopener">关于RunLoop你想知道的事</a></li>
+<li><a href="https://juejin.im/post/5e5226de6fb9a07c8678f84f" target="_blank" rel="noopener">用户态和内核态</a></li>
 </ol>
 
       
@@ -679,7 +697,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop和线程的关系"><span class="nav-number">2.</span> <span class="nav-text">Runloop和线程的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RunLoop的作用"><span class="nav-number">2.1.</span> <span class="nav-text">RunLoop的作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop内部结构"><span class="nav-number">3.</span> <span class="nav-text">RunLoop内部结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopModelRef"><span class="nav-number">3.1.</span> <span class="nav-text">CFRunLoopModelRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopSourceRef"><span class="nav-number">3.2.</span> <span class="nav-text">CFRunLoopSourceRef</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Input-Sources"><span class="nav-number">3.2.1.</span> <span class="nav-text">Input Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置Input-Sources"><span class="nav-number">3.2.2.</span> <span class="nav-text">配置Input Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Timer-Sources"><span class="nav-number">3.2.3.</span> <span class="nav-text">Timer Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Timer应用"><span class="nav-number">3.2.4.</span> <span class="nav-text">Timer应用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopObserverRef"><span class="nav-number">3.3.</span> <span class="nav-text">CFRunLoopObserverRef</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop生命周期"><span class="nav-number">4.</span> <span class="nav-text">RunLoop生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么时候才需要使用runloop"><span class="nav-number">5.</span> <span class="nav-text">什么时候才需要使用runloop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop在休息的时候是一个什么状态"><span class="nav-number">6.</span> <span class="nav-text">RunLoop在休息的时候是一个什么状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用户态和内核态"><span class="nav-number">2.</span> <span class="nav-text">用户态和内核态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内核态"><span class="nav-number">2.1.</span> <span class="nav-text">内核态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户态"><span class="nav-number">2.2.</span> <span class="nav-text">用户态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统调用"><span class="nav-number">2.3.</span> <span class="nav-text">系统调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要区分用户态与内核态"><span class="nav-number">2.4.</span> <span class="nav-text">为什么要区分用户态与内核态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户态到内核态怎样切换"><span class="nav-number">2.5.</span> <span class="nav-text">用户态到内核态怎样切换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runloop和线程的关系"><span class="nav-number">3.</span> <span class="nav-text">Runloop和线程的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RunLoop的作用"><span class="nav-number">3.1.</span> <span class="nav-text">RunLoop的作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop内部结构"><span class="nav-number">4.</span> <span class="nav-text">RunLoop内部结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopModelRef"><span class="nav-number">4.1.</span> <span class="nav-text">CFRunLoopModelRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopSourceRef"><span class="nav-number">4.2.</span> <span class="nav-text">CFRunLoopSourceRef</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Input-Sources"><span class="nav-number">4.2.1.</span> <span class="nav-text">Input Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置Input-Sources"><span class="nav-number">4.2.2.</span> <span class="nav-text">配置Input Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Timer-Sources"><span class="nav-number">4.2.3.</span> <span class="nav-text">Timer Sources</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Timer应用"><span class="nav-number">4.2.4.</span> <span class="nav-text">Timer应用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopObserverRef"><span class="nav-number">4.3.</span> <span class="nav-text">CFRunLoopObserverRef</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop生命周期"><span class="nav-number">5.</span> <span class="nav-text">RunLoop生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么时候才需要使用runloop"><span class="nav-number">6.</span> <span class="nav-text">什么时候才需要使用runloop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop在休息的时候是一个什么状态"><span class="nav-number">7.</span> <span class="nav-text">RunLoop在休息的时候是一个什么状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
@@ -713,7 +731,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">76.2k</span>
+    <span title="Site words total count">77.2k</span>
   
 </div>
 
