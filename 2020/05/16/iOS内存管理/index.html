@@ -90,7 +90,7 @@
 <meta property="og:image" content="https://github.com/2020/05/16/iOS内存管理/virtual_mem.png">
 <meta property="og:image" content="https://github.com/2020/05/16/iOS内存管理/killMem.png">
 <meta property="og:image" content="https://github.com/2020/05/16/iOS内存管理/mrc.jpg">
-<meta property="og:updated_time" content="2020-05-17T07:46:01.812Z">
+<meta property="og:updated_time" content="2020-05-22T07:28:23.143Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS内存管理">
 <meta name="twitter:description" content="苹果公司在2011年的全球开发者大会上指出，90%的应用崩溃与内存管理有关，其中最主要的原因是错误的内存访问和保留环所引起的内存泄漏。">
@@ -362,7 +362,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3.5k
+                  4.1k
                 </span>
               
 
@@ -378,7 +378,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  13
+                  15
                 </span>
               
             </div>
@@ -523,10 +523,23 @@
 <li>单例模式的滥用，会导致单例对象一直持有资源，在内存紧张的时候要进行释放。</li>
 <li>进行缓存更推荐使用NSCache而不是NSDictionary，就是因为NSCache不仅线程安全，而且对存在compressed memory情况下的内存警告也做了优化，可以由系统自动释放内存。</li>
 </ol>
+<h3 id="NSString内存管理"><a href="#NSString内存管理" class="headerlink" title="NSString内存管理"></a>NSString内存管理</h3><p>NSString在OC的内存管理策略中是一个特殊的存在，因为其在编译和运行中做了一些优化处理。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//宏定义</span></span><br><span class="line"><span class="meta">#define XWLog(_var) (&#123; NSString *name = @#_var; NSLog(@<span class="meta-string">"变量名=%@，类型=%@， 地址=%p，值=%@，引用计数=%d"</span>, name, [_var class], _var, _var, (int)[_var retainCount]); &#125;)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//测试代码</span></span><br><span class="line">    <span class="built_in">NSString</span> *a = <span class="string">@"string"</span>;</span><br><span class="line">    <span class="built_in">NSString</span> *b = [[<span class="built_in">NSString</span> alloc]init];</span><br><span class="line">    <span class="built_in">NSString</span> *c = [[<span class="built_in">NSString</span> alloc]initWithString:<span class="string">@"string"</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *d = [[<span class="built_in">NSString</span> alloc]initWithFormat:<span class="string">@"string"</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *e = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"string"</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *f = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"123456789"</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *g = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"1234567890"</span>];</span><br><span class="line">    XWLog(a); XWLog(b); XWLog(c); XWLog(d); XWLog(e); XWLog(f); XWLog(g);</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//打印结果</span></span><br><span class="line">变量名=a，类型=__NSCFConstantString， 地址=<span class="number">0x1015f3120</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=b，类型=__NSCFConstantString， 地址=<span class="number">0x1019808d0</span>，值=，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=c，类型=__NSCFConstantString， 地址=<span class="number">0x1015f3120</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=d，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa00676e697274736</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=e，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa00676e697274736</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=f，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa1ea1f72bb30ab19</span>，值=<span class="number">123456789</span>，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=g，类型=__NSCFString， 地址=<span class="number">0x60800002b580</span>，值=<span class="number">1234567890</span>，引用计数=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h4 id="NSCFString"><a href="#NSCFString" class="headerlink" title="__NSCFString"></a>__NSCFString</h4><p>对象类型的字符串，在运行时创建，存储在堆区，服从OC的对象内存管理策略，长度不能太小（内容若包含中文字符，不论长度大小，都是NSCFString），否则创建的是NSTaggedPointerString类型，例如上面f与g</p>
+<h4 id="NSTaggedPointerString"><a href="#NSTaggedPointerString" class="headerlink" title="NSTaggedPointerString"></a>NSTaggedPointerString</h4><p>对于64位程序，为了节省内存和提高运行速度，苹果引入了Tagged Point技术，在运行时创建时对字符串的内容和长度作出判断，若字符串内容是由ASCII构成且长度较小（大概10个字符以内），这是创建的字符串就是NSTaggedPointerString类型，字符串直接存储在指针里，引用计数同样为-1，不适用对象的内存管理策略。</p>
+<blockquote>
+<p>Tagged Pointer指针的值不再是地址，而是真正的值，所以它不再是一个对象，只是一个披着对象皮的普通变量而已。它的内存并不存储在堆中，OC对象的内存管理对其无效。</p>
+</blockquote>
+<h4 id="NSCFConstantString"><a href="#NSCFConstantString" class="headerlink" title="__NSCFConstantString"></a>__NSCFConstantString</h4><p>常量字符串，该类型的字符串是以字面量创建的，是在编译期创建的，保存在常量区</p>
+<blockquote>
+<p>文字常量区存放常量字符串，程序结束后由系统释放，也就是说指向常量表的指针不受引用计数管理，OC的内存管理策略对其无效。</p>
+</blockquote>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a href="https://hello-david.github.io/archives/e94ffa1c.html" target="_blank" rel="noopener">iOS中的内存布局与管理</a></li>
 <li><a href="https://www.jianshu.com/p/f95b9bfda4a0" target="_blank" rel="noopener">iOS 内存管理与优化</a></li>
 <li><a href="https://xta0.me/2012/07/10/iOS-Memory-1.html" target="_blank" rel="noopener">理解iOS中的内存结构</a></li>
+<li><a href="https://www.jianshu.com/p/462adf281fde" target="_blank" rel="noopener">NSString 的内存问题</a></li>
 </ol>
 
       
@@ -585,6 +598,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/20/iOS逆向攻防/" rel="prev" title="iOS逆向攻防">
+                iOS逆向攻防 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -664,7 +681,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">49</span>
+                  <span class="site-state-item-count">50</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -710,7 +727,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存和物理内存"><span class="nav-number">1.</span> <span class="nav-text">虚拟内存和物理内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟内存到物理内存的映射"><span class="nav-number">1.1.</span> <span class="nav-text">虚拟内存到物理内存的映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存分页"><span class="nav-number">1.2.</span> <span class="nav-text">内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程中RAM被写满后怎么办？"><span class="nav-number">1.3.</span> <span class="nav-text">进程中RAM被写满后怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程访问的地址找不到怎么办？"><span class="nav-number">1.4.</span> <span class="nav-text">进程访问的地址找不到怎么办？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#脏内存和干净内存"><span class="nav-number">2.</span> <span class="nav-text">脏内存和干净内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Clean-Memory"><span class="nav-number">2.1.</span> <span class="nav-text">Clean Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dirty-Memory"><span class="nav-number">2.2.</span> <span class="nav-text">Dirty Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Private和Shared-Memory"><span class="nav-number">2.3.</span> <span class="nav-text">Private和Shared Memory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存之间的关系"><span class="nav-number">3.</span> <span class="nav-text">内存之间的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS内存管理机制"><span class="nav-number">4.</span> <span class="nav-text">iOS内存管理机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Compressed-Memory"><span class="nav-number">4.1.</span> <span class="nav-text">Compressed Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存警报"><span class="nav-number">4.2.</span> <span class="nav-text">内存警报</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jetsam"><span class="nav-number">4.3.</span> <span class="nav-text">Jetsam</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序级内存管理"><span class="nav-number">5.</span> <span class="nav-text">程序级内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MRC"><span class="nav-number">5.1.</span> <span class="nav-text">MRC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARC"><span class="nav-number">5.2.</span> <span class="nav-text">ARC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化技巧"><span class="nav-number">5.3.</span> <span class="nav-text">优化技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Block循环引用"><span class="nav-number">5.3.1.</span> <span class="nav-text">Block循环引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#降低内存峰值"><span class="nav-number">5.3.2.</span> <span class="nav-text">降低内存峰值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#图片的读取"><span class="nav-number">5.3.3.</span> <span class="nav-text">图片的读取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSData-amp-内存映射文件"><span class="nav-number">5.3.4.</span> <span class="nav-text">NSData &amp; 内存映射文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSAutoReleasePool"><span class="nav-number">5.3.5.</span> <span class="nav-text">NSAutoReleasePool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存警告处理"><span class="nav-number">5.3.6.</span> <span class="nav-text">内存警告处理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟内存和物理内存"><span class="nav-number">1.</span> <span class="nav-text">虚拟内存和物理内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟内存到物理内存的映射"><span class="nav-number">1.1.</span> <span class="nav-text">虚拟内存到物理内存的映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存分页"><span class="nav-number">1.2.</span> <span class="nav-text">内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程中RAM被写满后怎么办？"><span class="nav-number">1.3.</span> <span class="nav-text">进程中RAM被写满后怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进程访问的地址找不到怎么办？"><span class="nav-number">1.4.</span> <span class="nav-text">进程访问的地址找不到怎么办？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#脏内存和干净内存"><span class="nav-number">2.</span> <span class="nav-text">脏内存和干净内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Clean-Memory"><span class="nav-number">2.1.</span> <span class="nav-text">Clean Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dirty-Memory"><span class="nav-number">2.2.</span> <span class="nav-text">Dirty Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Private和Shared-Memory"><span class="nav-number">2.3.</span> <span class="nav-text">Private和Shared Memory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存之间的关系"><span class="nav-number">3.</span> <span class="nav-text">内存之间的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS内存管理机制"><span class="nav-number">4.</span> <span class="nav-text">iOS内存管理机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Compressed-Memory"><span class="nav-number">4.1.</span> <span class="nav-text">Compressed Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存警报"><span class="nav-number">4.2.</span> <span class="nav-text">内存警报</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jetsam"><span class="nav-number">4.3.</span> <span class="nav-text">Jetsam</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#程序级内存管理"><span class="nav-number">5.</span> <span class="nav-text">程序级内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MRC"><span class="nav-number">5.1.</span> <span class="nav-text">MRC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ARC"><span class="nav-number">5.2.</span> <span class="nav-text">ARC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化技巧"><span class="nav-number">5.3.</span> <span class="nav-text">优化技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Block循环引用"><span class="nav-number">5.3.1.</span> <span class="nav-text">Block循环引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#降低内存峰值"><span class="nav-number">5.3.2.</span> <span class="nav-text">降低内存峰值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#图片的读取"><span class="nav-number">5.3.3.</span> <span class="nav-text">图片的读取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSData-amp-内存映射文件"><span class="nav-number">5.3.4.</span> <span class="nav-text">NSData &amp; 内存映射文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSAutoReleasePool"><span class="nav-number">5.3.5.</span> <span class="nav-text">NSAutoReleasePool</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存警告处理"><span class="nav-number">5.3.6.</span> <span class="nav-text">内存警告处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NSString内存管理"><span class="nav-number">5.4.</span> <span class="nav-text">NSString内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NSCFString"><span class="nav-number">5.4.1.</span> <span class="nav-text">__NSCFString</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSTaggedPointerString"><span class="nav-number">5.4.2.</span> <span class="nav-text">NSTaggedPointerString</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NSCFConstantString"><span class="nav-number">5.4.3.</span> <span class="nav-text">__NSCFConstantString</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
@@ -744,7 +761,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">79.1k</span>
+    <span title="Site words total count">80.9k</span>
   
 </div>
 
