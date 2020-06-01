@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一个UIImageView添加到视图上以后,内部是如何渲染到手机上的,请简述其流程？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS图像加载和处理">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/06/01/iOS图像加载和处理/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="一个UIImageView添加到视图上以后,内部是如何渲染到手机上的,请简述其流程？">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image01.png">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image02.png">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image03.png">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image04.png">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image05.png">
+<meta property="og:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image06.png">
+<meta property="og:updated_time" content="2020-06-01T14:54:05.759Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS图像加载和处理">
+<meta name="twitter:description" content="一个UIImageView添加到视图上以后,内部是如何渲染到手机上的,请简述其流程？">
+<meta name="twitter:image" content="https://github.com/2020/06/01/iOS图像加载和处理/image01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/06/01/iOS图像加载和处理/"/>
+
+
+
+
+
+  <title>iOS图像加载和处理 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">学计算机的那个</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/06/01/iOS图像加载和处理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS图像加载和处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-01T08:00:00+08:00">
+                2020-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/性能监控与优化/" itemprop="url" rel="index">
+                    <span itemprop="name">性能监控与优化</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/01/iOS图像加载和处理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/06/01/iOS图像加载和处理/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/01/iOS图像加载和处理/" class="leancloud_visitors" data-flag-title="iOS图像加载和处理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>一个UIImageView添加到视图上以后,内部是如何渲染到手机上的,请简述其流程？</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="图片的显示"><a href="#图片的显示" class="headerlink" title="图片的显示"></a>图片的显示</h3><p>图片的显示分为三步，加载，解码，渲染。</p>
+<p>通常，我们操作的只有加载，解码和渲染是由UIKit进行。</p>
+<img src="/2020/06/01/iOS图像加载和处理/image01.png">
+<h4 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h4><p>以UIImageVIew为例，当其显示在屏幕上时，需要UIImage作为数据源，UIImage持有的数据是未解码的数据，能节省较多的内存和加快存储。</p>
+<p>当UIImage被赋值给UIImage时，<code>imageView.image=image;</code>图像数据会被解码，变成RGB颜色数据。</p>
+<p>解码是一个计算量较大的任务，且需要CPU来执行，并且解码出来的图片体积与图片的宽高有关系，而与图片原来的体积无关。</p>
+<p>体积大小可简单描述为：<code>宽 * 高 * 每个像素点的大小 = width * height * 4 bytes</code></p>
+<img src="/2020/06/01/iOS图像加载和处理/image02.png">
+<h4 id="图片解码存在的问题"><a href="#图片解码存在的问题" class="headerlink" title="图片解码存在的问题"></a>图片解码存在的问题</h4><p>以UITableVIew和UICollectionView为例，假如我们使用一个多图片显示的功能，在上下滑动的过程中，会在cellFor的方法加载UIImage图片，赋值给UIImagevIew，相当于在主线程同时进行IO操作，解码操作等，会造成内存迅速增长和CPU负载瞬间提升</p>
+<h4 id="降采样来降内存"><a href="#降采样来降内存" class="headerlink" title="降采样来降内存"></a>降采样来降内存</h4><p>在滑动的过程中，图片显示的宽高远比真实图片要小，我们可以采用缩略图的方式减少图片的占用内存。</p>
+<img src="/2020/06/01/iOS图像加载和处理/image03.png">
+<p>加载jpeg的图片，然后进行相关设置，解码后根据生成CGImage缩略图，最后包装成UIImage，最终传递给UIImageView渲染。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">downsample</span><span class="params">(imageAt imageURL: URL, to pointSize: CGSize, scale: CGFloat)</span></span> -&gt; <span class="type">UIImage</span> &#123;</span><br><span class="line"><span class="keyword">let</span> imageSourceOptions = [kCGImageSourceShouldCache: <span class="literal">false</span>] <span class="keyword">as</span> <span class="type">CFDictionary</span></span><br><span class="line"><span class="keyword">let</span> imageSource = <span class="type">CGImageSourceCreateWithURL</span>(imageURL <span class="keyword">as</span> <span class="type">CFURL</span>, imageSourceOptions)!</span><br><span class="line"><span class="keyword">let</span> maxDimensionInPixels = <span class="built_in">max</span>(pointSize.width, pointSize.height) * scale</span><br><span class="line"><span class="keyword">let</span> downsampleOptions = [kCGImageSourceCreateThumbnailFromImageAlways: <span class="literal">true</span>,</span><br><span class="line">kCGImageSourceShouldCacheImmediately: <span class="literal">true</span>,</span><br><span class="line">kCGImageSourceCreateThumbnailWithTransform: <span class="literal">true</span>,</span><br><span class="line">kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] <span class="keyword">as</span> <span class="type">CFDictionary</span></span><br><span class="line"><span class="keyword">let</span> downsampledImage = <span class="type">CGImageSourceCreateThumbnailAtIndex</span>(imageSource, <span class="number">0</span>, downsampleOptions)!</span><br><span class="line"><span class="keyword">return</span> <span class="type">UIImage</span>(cgImage: downsampledImage)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="异步处理来分摊主线程负载"><a href="#异步处理来分摊主线程负载" class="headerlink" title="异步处理来分摊主线程负载"></a>异步处理来分摊主线程负载</h4><img src="/2020/06/01/iOS图像加载和处理/image04.png">
+<p>预处理的时候把降采样放到子线程进行处理，因为降采样过程就包括解码操作。</p>
+<img src="/2020/06/01/iOS图像加载和处理/image05.png">
+<p>Prefecching回调中，把降采样的操作放到串行队列中，处理完毕后抛给主线程进行update操作。</p>
+<img src="/2020/06/01/iOS图像加载和处理/image06.png">
+<ul>
+<li>为什么要用串行队列？<br>为了防止线程爆炸<blockquote>
+<p>Thread Explosion（线程爆炸）<br>More images to decode than available CPUs（解码图像数量大于CPU数量）<br>GCD continues creating threads as new work is enqueued（GCD创建新线程处理新的任务）<br>Each thread gets less time to actually decode images（每个线程获得很少的时间解码图像）</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="图片的加载流程"><a href="#图片的加载流程" class="headerlink" title="图片的加载流程"></a>图片的加载流程</h3><ol>
+<li>假设我们使用<code>+imageWithContentOfFile:</code>方法从磁盘中加载一张图片，这个时候的图片并没有压缩；</li>
+<li>然后将生成的    <code>UIImage</code>赋值给<code>UIImageView</code>；</li>
+<li>接着一个隐式的<code>CATransaction</code>    捕获到<code>UIImageView</code>图层树的变化；</li>
+<li>在主线程的下一个<code>runloop</code>到来时，<code>Core Animation</code>提交了这个隐式的<code>transaction</code>，这个过程可能会对图片进行copy操作，而受图片是否字节对齐等因素的影响，这个copy操作可能会涉及以下不会或全部步骤：<blockquote>
+<p>分配内存缓冲区用于管理IO和解压缩操作<br>将文件数据从磁盘读到内存中<br>将压缩的图片数据解码成位图形式，这是一个非常耗时的CPU操作<br>最后Core Animtaion中CALayer使用未压缩的位图数据渲染UIImageVIew的涂层<br>CPU计算好图片的Frame，对图片解压之后，就会交给GPU来做图片渲染</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="图片的渲染"><a href="#图片的渲染" class="headerlink" title="图片的渲染"></a>图片的渲染</h3><ol>
+<li>GPU获取图片的坐标</li>
+<li>将坐标交给顶点着色器（顶点计算）</li>
+<li>将图片光栅化（获取图片对应屏幕上的像素点）</li>
+<li>片远着色器计算（计算每个像素点的最终显示的颜色值）</li>
+<li>从帧缓冲区中渲染到屏幕上</li>
+</ol>
+<h3 id="图片的解压缩"><a href="#图片的解压缩" class="headerlink" title="图片的解压缩"></a>图片的解压缩</h3><h4 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h4><p>位图就是一个像素数组，数组中个每一个像素就代表着图片中的一个点，我们在应用中经常用到的JPEG和PNG图片就是位图</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UIImage</span> *image = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@"text.png"</span>];</span><br><span class="line"><span class="built_in">CFDataRef</span> rawData = <span class="built_in">CGDataProviderCopyData</span>(<span class="built_in">CGImageGetDataProvider</span>(image.CGImage));</span><br></pre></td></tr></table></figure>
+<p>打印rawData，这里就是图片的原始数据。JPEG和PNG都是一种压缩的位图图形格式，PNG是无损压缩，并且支持alpha通道，而JPEG图片则是有损压缩，可以指定0-100%的压缩比</p>
+<p>在将磁盘中的图片渲染到屏幕之前，必须先要得到图片的原始像素数据，才能执行后续的绘制操作，这就是为什么要对图片解压缩的原因。</p>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>通常系统会在主线程对图片进行解压缩，所以可以在子线程提前对图片进行强制解压缩来均衡主线程的负载。而强制解压缩的原理就是对图片进行重绘，得到一张新的解压缩后的位图，核心函数就是<code>CGBitmapContextCreate</code></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">CG_EXTERN</span> <span class="built_in">CGContextRef</span> __<span class="keyword">nullable</span> <span class="built_in">CGBitmapContextCreate</span>(<span class="keyword">void</span> * __nul lable data,</span><br><span class="line">     size_t width, size_t height, size_t bitsPerComponent, size_t byte</span><br><span class="line"> sPerRow,</span><br><span class="line">     <span class="built_in">CGColorSpaceRef</span> cg_nullable space, uint32_t bitmapInfo)</span><br><span class="line">     <span class="built_in">CG_AVAILABLE_STARTING</span>(__MAC_10_0, __IPHONE_2_0);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">data 􏱎􏴤:如果不为􏴓􏱭􏳭 NULL，那么它应该指向一块大小至少为 􏰬􏳔􏰩􏳐􏱢􏴭􏴑􏴮􏰒􏴯􏳫􏴰􏴱􏴲􏳭 bytesPerRow * height 􏲭􏲮􏰥􏱨􏱩􏲖􏴤􏴓字节的内存；如果为NULL那么系统将会为我们自动分配和释放所需的内存，所以一般指定为􏲌􏱙􏳭􏰙􏰚􏴳􏳡􏰦􏲷􏲺􏴴􏴵 􏴶􏰯􏰥􏱨􏱩􏰬􏴶􏲵􏰒􏴷􏴑􏳳 NULL 􏴸􏱮􏲖</span><br><span class="line">width 􏲺和height 􏱎􏲽􏰫􏰥􏴹􏴺􏲺􏴻􏴺􏰬􏰦􏴼􏲚􏲛􏳭􏰫􏰭􏰥􏱀􏱁􏴹􏴺􏲺􏱀􏱁􏴻 􏴺􏴸􏱮􏲖：位图的宽高度，分别赋值为图片的像素宽度和像素高度</span><br><span class="line">bitsPerComponent 􏱎􏱀􏱁􏰥􏳍􏱝􏳎􏳈􏰦􏳬􏲐􏱣􏰥 ：像素的每个颜色分量使用的bit数，在 􏰵􏰬􏰇 RGB颜色空间下指定为 􏳎􏴽 􏲄􏰗􏴑􏳳 8 􏴸􏱮􏲖</span><br><span class="line">bytesPerRow 􏱎􏲽􏰫􏰥􏳍􏰒􏲨􏲐􏱣􏰥􏲭􏲮􏰵􏰬􏳫􏴰􏴱􏴲􏳭 ：位图的每一行使用的字节数，大小至少为width * bytes per pixel 􏲭􏲮􏱉􏳕􏰙􏰚􏴑􏳳 字节，当我们指定0/NULL 􏱊􏰬􏱗􏱘􏱭􏴾􏱙􏳭􏰙􏰚􏴳􏳡􏰄􏰅􏰬􏲪 􏳏􏳮􏱙􏲧􏲨 系统不仅会为我们自动计算，而且还会进行cache line alignment 􏰥􏴿􏲣的优化</span><br><span class="line">space 􏱎􏲌􏰊􏰙􏰚􏴙􏴢􏲥􏱄􏰥􏳎􏳈􏴽􏲄􏰬􏰒􏴷􏲐􏱣 ：颜色空间，一般使用GGB</span><br><span class="line">bitmapInfo 􏱎􏲽􏰫􏰥􏵀􏵁􏱌􏵂：位图的布局信息.kCGImageAlphaPremultipliedFirst</span><br></pre></td></tr></table></figure>
+<h3 id="使用-Image-Asset-Catalogs"><a href="#使用-Image-Asset-Catalogs" class="headerlink" title="使用 Image Asset Catalogs"></a>使用 Image Asset Catalogs</h3><p>Apple推荐的图片资源管理工具，压缩效率更高，在iOS 12的机器上有10~20%的空间节约，并且每个版本Apple都会持续对其进行优化。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://www.jianshu.com/p/7d8a82115060" target="_blank" rel="noopener">iOS性能优化——图片加载和处理</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>化点缘</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/aipay.png" alt="Jack Chen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/20/iOS逆向攻防/" rel="next" title="iOS逆向攻防">
+                <i class="fa fa-chevron-left"></i> iOS逆向攻防
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Jack Chen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">51</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#图片的显示"><span class="nav-number">1.</span> <span class="nav-text">图片的显示</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#解码"><span class="nav-number">1.1.</span> <span class="nav-text">解码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#图片解码存在的问题"><span class="nav-number">1.2.</span> <span class="nav-text">图片解码存在的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#降采样来降内存"><span class="nav-number">1.3.</span> <span class="nav-text">降采样来降内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#异步处理来分摊主线程负载"><span class="nav-number">1.4.</span> <span class="nav-text">异步处理来分摊主线程负载</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片的加载流程"><span class="nav-number">2.</span> <span class="nav-text">图片的加载流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片的渲染"><span class="nav-number">3.</span> <span class="nav-text">图片的渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片的解压缩"><span class="nav-number">4.</span> <span class="nav-text">图片的解压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#位图"><span class="nav-number">4.1.</span> <span class="nav-text">位图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原理"><span class="nav-number">4.2.</span> <span class="nav-text">原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-Image-Asset-Catalogs"><span class="nav-number">5.</span> <span class="nav-text">使用 Image Asset Catalogs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">82.4k</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz',
+        appKey: 'v2zdWxJV3kOujBALKftRvt2i',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("bYu9Wnyi329yjcLVW2AxH6PI-gzGzoHsz", "v2zdWxJV3kOujBALKftRvt2i");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
