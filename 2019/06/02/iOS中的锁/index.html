@@ -79,17 +79,19 @@
 
 
 
-<meta name="description" content="新版本的Mac OS系统在安装openssl的时候会报错Error while installing pod: “cp: file.tgz: No such file or directory”错误详情">
+<meta name="description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Pod openssl报错">
-<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/04/Pod openssl报错/index.html">
+<meta property="og:title" content="iOS中的锁">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/02/iOS中的锁/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="新版本的Mac OS系统在安装openssl的时候会报错Error while installing pod: “cp: file.tgz: No such file or directory”错误详情">
+<meta property="og:description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-04-05T00:59:14.000Z">
+<meta property="og:image" content="https://github.com/2019/06/02/iOS中的锁/syn01.png">
+<meta property="og:updated_time" content="2020-06-02T02:14:50.426Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Pod openssl报错">
-<meta name="twitter:description" content="新版本的Mac OS系统在安装openssl的时候会报错Error while installing pod: “cp: file.tgz: No such file or directory”错误详情">
+<meta name="twitter:title" content="iOS中的锁">
+<meta name="twitter:description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
+<meta name="twitter:image" content="https://github.com/2019/06/02/iOS中的锁/syn01.png">
 
 
 
@@ -119,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/04/Pod openssl报错/"/>
+  <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/02/iOS中的锁/"/>
 
 
 
 
 
-  <title>Pod openssl报错 | 学计算机的那个</title>
+  <title>iOS中的锁 | 学计算机的那个</title>
   
 
 
@@ -242,7 +244,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/04/Pod openssl报错/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/02/iOS中的锁/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -259,7 +261,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Pod openssl报错</h1>
+          <h1 class="post-title" itemprop="name headline">iOS中的锁</h1>
         
 
         <div class="post-meta">
@@ -271,8 +273,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-04T08:00:00+08:00">
-                2019-04-04
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-02T08:00:00+08:00">
+                2019-06-02
               </time>
             
 
@@ -294,8 +296,19 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/工具/" itemprop="url" rel="index">
-                    <span itemprop="name">工具</span>
+                  <a href="/categories/操作系统/" itemprop="url" rel="index">
+                    <span itemprop="name">操作系统</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/操作系统/多线程/" itemprop="url" rel="index">
+                    <span itemprop="name">多线程</span>
                   </a>
                 </span>
 
@@ -312,8 +325,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/04/04/Pod openssl报错/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/04/Pod openssl报错/" itemprop="commentCount"></span>
+                <a href="/2019/06/02/iOS中的锁/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/06/02/iOS中的锁/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -321,7 +334,7 @@
 
           
           
-             <span id="/2019/04/04/Pod openssl报错/" class="leancloud_visitors" data-flag-title="Pod openssl报错">
+             <span id="/2019/06/02/iOS中的锁/" class="leancloud_visitors" data-flag-title="iOS中的锁">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -346,7 +359,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  317
+                  787
                 </span>
               
 
@@ -362,7 +375,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  1
+                  2
                 </span>
               
             </div>
@@ -383,19 +396,32 @@
       
 
       
-        <p>新版本的Mac OS系统在安装openssl的时候会报错<br><strong>Error while installing pod: “cp: file.tgz: No such file or directory”</strong><a href="https://github.com/FredericJacobs/OpenSSL-Pod/issues/49">错误详情</a></p>
+        <blockquote>
+<p>在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，<br>锁分为建议锁和强制锁<br>建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。<br>强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。</p>
+</blockquote>
 <a id="more"></a>
-<h3 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h3><p>是因为临时路径问题导致的。</p>
-<p>看了下podspec文件里的pre command,发现它是将压缩文件放到一个临时目录，再解压，然后编译成库。再回去看cocoaPod的下载库，也是下载到一个它内部使用的临时目录，然后解压到目标目录，发现两者的流程并没有串起来的，而且最近一次更新添加了删除下载下来的压缩包的代码，所以导致pre command里的当前目标目录下并没有这个压缩文件。</p>
-<p>解决办法，就是把解压好的文件再拷回到原本要解压的临时目录去，然后去掉解压命令。。。</p>
-<ol>
-<li>找到openssl的podspec文件路径</li>
+<p>iOS中，锁分为互斥锁，递归锁，信号量，条件锁，自旋锁，读写锁，分布式锁</p>
+<h3 id="互斥锁-synchronized-NSLock"><a href="#互斥锁-synchronized-NSLock" class="headerlink" title="互斥锁   (@synchronized,NSLock)"></a>互斥锁   (@synchronized,NSLock)</h3><blockquote>
+<p>在编程中，引入对象互斥锁的的概念，来保证共享数据操作的完整性，每个对象都对应于一个可称为“互斥锁”的标记，这个标记用来保证在任一时刻，只能有一个线程访问对象。</p>
+</blockquote>
+<p>@synchronized要一个参数，这个参数相当于信号量</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用在防止多线程访问属性上比较多</span></span><br><span class="line">- (<span class="keyword">void</span>)setTestInt:(<span class="built_in">NSInteger</span>)testInt &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _testInt = testInt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Dispatch-Semaphore（信号量）"><a href="#Dispatch-Semaphore（信号量）" class="headerlink" title="Dispatch Semaphore（信号量）"></a>Dispatch Semaphore（信号量）</h3><p>信号量其实就是用来保证访问资源的线程数，当信号量大于等于1时，资源可以访问，否则无法访问资源，直到其它线程释放资源。</p>
+<p>主要有三个函数</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dispatch_semaphore_t dispatch_semaphore_create(<span class="keyword">long</span> value);  <span class="comment">//创建一个dispatch_semaphore_t，value为初始信号量</span></span><br><span class="line"><span class="keyword">long</span> dispatch_semaphore_wait(dispatch_semaphore_t dsema, dispatch_time_t timeout);   <span class="comment">//信号量-1</span></span><br><span class="line"><span class="keyword">long</span> dispatch_semaphore_signal(dispatch_semaphore_t dsema);   <span class="comment">//信号量+1</span></span><br></pre></td></tr></table></figure>
+<p>注意：<br>同一个信号的dispatch_semaphore_wait与 异步操作不能在同一个线程中，否则异步操作会被卡住，也就不会执行到dispatch_semaphore_signal</p>
+<p>两个线程交替打印Hello，world循环100次，如何实现？</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="keyword">void</span>)Action</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span>  queueA=dispatch_queue_create(<span class="string">"com.Jack.SerialA"</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span>  queueB=dispatch_queue_create(<span class="string">"com.Jack.SerialB"</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    dispatch_semaphore_t  semaphoreA=dispatch_semaphore_create(<span class="number">0</span>);</span><br><span class="line">    dispatch_semaphore_t  semaphoreB=dispatch_semaphore_create(<span class="number">1</span>);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queueA, ^&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; ++i) &#123;</span><br><span class="line">             dispatch_semaphore_wait(semaphoreB, DISPATCH_TIME_FOREVER);</span><br><span class="line">             <span class="built_in">NSLog</span>(<span class="string">@"%dHello"</span>,i+<span class="number">1</span>);</span><br><span class="line">            dispatch_semaphore_signal(semaphoreA);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queueB, ^&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; ++i) &#123;</span><br><span class="line">            dispatch_semaphore_wait(semaphoreA, DISPATCH_TIME_FOREVER);</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@"%dWorld!"</span>,i+<span class="number">1</span>);</span><br><span class="line">            dispatch_semaphore_signal(semaphoreB);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><blockquote>
+<p>读写锁实际是一种特殊的自旋锁，它把对共享资源的访问者划分为读者和写者，读者只对共享资源进行读访问，写者只对共享资源进行写操作。允许同时有多个读者来访问共享资源，最大可能的读者数为实际的逻辑CPU数，写者是排他性的，一个读写锁同时只能有一个写者或多个读者，但不能同时既有读者又有写者。</p>
+</blockquote>
+<h4 id="dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><a href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）" class="headerlink" title="dispatch_barrier_async和dispatch_barrier_sync（栅栏）"></a><code>dispatch_barrier_async</code>和<code>dispatch_barrier_sync</code>（栅栏）</h4><img src="/2019/06/02/iOS中的锁/syn01.png">
+<p>相同：这两个函数的作用差不多，都是把它前面和它后面的函数分隔开，使它前面的任务先执行，再执行它添加的任务，最后执行它后面的任务</p>
+<p>不同：提交任务的方式不同，一个是同步，一个是异步。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://juejin.im/post/5b4c179ee51d4518e3117c9f" target="_blank" rel="noopener">iOS中常见的几种锁</a></li>
+<li><a href="https://juejin.im/post/5a0a92996fb9a0451f307479" target="_blank" rel="noopener">iOS多线程的锁</a></li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/&lt;username&gt;/.cocoapods/repos/master/Specs/e/e/3/OpenSSL/1.0.210</span><br></pre></td></tr></table></figure>
-<p>2.编辑版本的podspec文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cp -rf <span class="string">"<span class="variable">$&#123;BASEPATH&#125;</span>/"</span> <span class="string">"<span class="variable">$&#123;CURRENTPATH&#125;</span>/openssl-<span class="variable">$&#123;VERSION&#125;</span>"</span></span><br><span class="line"><span class="comment">#cp "file.tgz" "$&#123;CURRENTPATH&#125;/file.tgz"</span></span><br><span class="line"><span class="built_in">cd</span> <span class="string">"<span class="variable">$&#123;CURRENTPATH&#125;</span>"</span></span><br><span class="line"><span class="comment">#tar -xzf file.tgz</span></span><br><span class="line"><span class="built_in">cd</span> <span class="string">"openssl-<span class="variable">$&#123;VERSION&#125;</span>"</span></span><br></pre></td></tr></table></figure>
-<p>或者用下面的直接内容替换<br><a href="https://github.com/JackWchen2015/Attachment">编辑过后的podsepc文件</a></p>
-<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><p>1.<a href="https://blog.csdn.net/Mamong/article/details/80709449" target="_blank" rel="noopener">pod openssl引入失败cp: file.tgz:No such file or directory</a></p>
 
       
     </div>
@@ -444,8 +470,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/04/03/iOS组建化/" rel="next" title="iOS组建化">
-                <i class="fa fa-chevron-left"></i> iOS组建化
+              <a href="/2019/05/31/iOS中的多线程/" rel="next" title="iOS中的多线程">
+                <i class="fa fa-chevron-left"></i> iOS中的多线程
               </a>
             
           </div>
@@ -454,8 +480,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/04/20/iOS发布静态Framework/" rel="prev" title="iOS发布静态Framework">
-                iOS发布静态Framework <i class="fa fa-chevron-right"></i>
+              <a href="/2019/06/26/UIApperance协议/" rel="prev" title="UIApperance协议">
+                UIApperance协议 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -582,7 +608,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#解决"><span class="nav-number">1.</span> <span class="nav-text">解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文章参考"><span class="nav-number">2.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#互斥锁-synchronized-NSLock"><span class="nav-number">1.</span> <span class="nav-text">互斥锁   (@synchronized,NSLock)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatch-Semaphore（信号量）"><span class="nav-number">2.</span> <span class="nav-text">Dispatch Semaphore（信号量）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读写锁"><span class="nav-number">3.</span> <span class="nav-text">读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><span class="nav-number">3.1.</span> <span class="nav-text">dispatch_barrier_async和dispatch_barrier_sync（栅栏）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
