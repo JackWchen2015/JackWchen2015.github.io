@@ -2105,7 +2105,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/HTTPS协议/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/长连接及心跳保活/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -2124,7 +2124,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/11/25/HTTPS协议/" itemprop="url">HTTPS协议</a></h1>
+                <a class="post-title-link" href="/2019/11/25/长连接及心跳保活/" itemprop="url">长连接及心跳保活</a></h1>
         
 
         <div class="post-meta">
@@ -2177,8 +2177,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/11/25/HTTPS协议/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/25/HTTPS协议/" itemprop="commentCount"></span>
+                <a href="/2019/11/25/长连接及心跳保活/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/25/长连接及心跳保活/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -2186,7 +2186,7 @@
 
           
           
-             <span id="/2019/11/25/HTTPS协议/" class="leancloud_visitors" data-flag-title="HTTPS协议">
+             <span id="/2019/11/25/长连接及心跳保活/" class="leancloud_visitors" data-flag-title="长连接及心跳保活">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -2211,7 +2211,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3.4k
+                  1.3k
                 </span>
               
 
@@ -2227,7 +2227,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  11
+                  4
                 </span>
               
             </div>
@@ -2249,14 +2249,10 @@
 
       
         
-          <p>HTTP 主要有这些不足，例举如下</p>
-<ol>
-<li>通信使用明文(不加密)，内容可能会被窃听 </li>
-<li>不验证通信方的身份，因此有可能遭遇伪装   </li>
-<li><p>无法证明报文的完整性，所以有可能已遭篡改</p>
+          <p>短连接的使用有很大的瓶颈，所以才会有长连接的使用空间，但是长连接也会因为某些原因断开。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/11/25/HTTPS协议/#more" rel="contents">
+            <a class="btn" href="/2019/11/25/长连接及心跳保活/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2408,7 +2404,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">82.9k</span>
+    <span title="Site words total count">83k</span>
   
 </div>
 
