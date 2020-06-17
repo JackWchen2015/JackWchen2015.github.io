@@ -87,7 +87,7 @@
 <meta property="og:description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/2019/06/02/iOS中的锁/syn01.png">
-<meta property="og:updated_time" content="2020-06-02T02:14:50.426Z">
+<meta property="og:updated_time" content="2020-06-07T08:46:26.697Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS中的锁">
 <meta name="twitter:description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
@@ -359,7 +359,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  787
+                  1.2k
                 </span>
               
 
@@ -375,7 +375,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  2
+                  4
                 </span>
               
             </div>
@@ -406,6 +406,15 @@
 </blockquote>
 <p>@synchronized要一个参数，这个参数相当于信号量</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用在防止多线程访问属性上比较多</span></span><br><span class="line">- (<span class="keyword">void</span>)setTestInt:(<span class="built_in">NSInteger</span>)testInt &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _testInt = testInt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h3><blockquote>
+<p>何谓自旋锁？它是为实现保护共享资源而提出一种锁机制，其实，自旋锁与互斥锁比较类似，他们都是为了解决对某项资源的互斥使用。无论是互斥锁还是自旋锁，在任何时刻，最多只能有一个保持着，也就说，在任何时刻最多只能有一个执行单元获得锁，但是两者在调度机制上略有不同，对于互斥锁，如果资源已经被占用， 资源申请者只能进入睡眠状态，但是自旋锁不会引起调用者睡眠，如果自旋锁已经被别的执行单元保持，调用者就一直循环在那里看是否该自旋锁的保持者已经释放了锁，“自旋”一词就是因此而得名。</p>
+</blockquote>
+<h4 id="OSSpinLock"><a href="#OSSpinLock" class="headerlink" title="OSSpinLock"></a>OSSpinLock</h4><p>使用方式</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化</span></span><br><span class="line">spinLock = OS_SPINKLOCK_INIT;</span><br><span class="line"><span class="comment">// 加锁</span></span><br><span class="line">OSSpinLockLock(&amp;spinLock);</span><br><span class="line"><span class="comment">// 解锁</span></span><br><span class="line">OSSpinLockUnlock(&amp;spinLock);</span><br></pre></td></tr></table></figure>
+<p>这个自旋锁存在优先级反转的问题,已经不再线程安全。</p>
+<h4 id="自旋锁和互斥锁对比"><a href="#自旋锁和互斥锁对比" class="headerlink" title="自旋锁和互斥锁对比"></a>自旋锁和互斥锁对比</h4><p>自旋锁会忙等：所谓忙等，即在访问被锁资源时，调用者线程不会休眠，而是不停循环在那里，直到被锁资源释放锁。</p>
+<p>互斥锁会休眠：所谓休眠，即在访问被锁资源时，调用者线程会休眠，此时CPU可以调度其他线程工作，直到被锁资源释放锁，此时会唤醒休眠线程。</p>
+<p>如果能在短时间内获得锁，自旋锁的效率远高于互斥锁，如果不能在很短的时间获得锁，会使CPU效率降低，自旋锁不能实现递归调用。</p>
 <h3 id="Dispatch-Semaphore（信号量）"><a href="#Dispatch-Semaphore（信号量）" class="headerlink" title="Dispatch Semaphore（信号量）"></a>Dispatch Semaphore（信号量）</h3><p>信号量其实就是用来保证访问资源的线程数，当信号量大于等于1时，资源可以访问，否则无法访问资源，直到其它线程释放资源。</p>
 <p>主要有三个函数</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dispatch_semaphore_t dispatch_semaphore_create(<span class="keyword">long</span> value);  <span class="comment">//创建一个dispatch_semaphore_t，value为初始信号量</span></span><br><span class="line"><span class="keyword">long</span> dispatch_semaphore_wait(dispatch_semaphore_t dsema, dispatch_time_t timeout);   <span class="comment">//信号量-1</span></span><br><span class="line"><span class="keyword">long</span> dispatch_semaphore_signal(dispatch_semaphore_t dsema);   <span class="comment">//信号量+1</span></span><br></pre></td></tr></table></figure>
@@ -562,7 +571,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">52</span>
+                  <span class="site-state-item-count">54</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -573,7 +582,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -608,7 +617,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#互斥锁-synchronized-NSLock"><span class="nav-number">1.</span> <span class="nav-text">互斥锁   (@synchronized,NSLock)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatch-Semaphore（信号量）"><span class="nav-number">2.</span> <span class="nav-text">Dispatch Semaphore（信号量）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读写锁"><span class="nav-number">3.</span> <span class="nav-text">读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><span class="nav-number">3.1.</span> <span class="nav-text">dispatch_barrier_async和dispatch_barrier_sync（栅栏）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#互斥锁-synchronized-NSLock"><span class="nav-number">1.</span> <span class="nav-text">互斥锁   (@synchronized,NSLock)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自旋锁"><span class="nav-number">2.</span> <span class="nav-text">自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OSSpinLock"><span class="nav-number">2.1.</span> <span class="nav-text">OSSpinLock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自旋锁和互斥锁对比"><span class="nav-number">2.2.</span> <span class="nav-text">自旋锁和互斥锁对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatch-Semaphore（信号量）"><span class="nav-number">3.</span> <span class="nav-text">Dispatch Semaphore（信号量）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#读写锁"><span class="nav-number">4.</span> <span class="nav-text">读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><span class="nav-number">4.1.</span> <span class="nav-text">dispatch_barrier_async和dispatch_barrier_sync（栅栏）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
@@ -642,7 +651,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">83k</span>
+    <span title="Site words total count">86.6k</span>
   
 </div>
 
