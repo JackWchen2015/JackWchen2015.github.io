@@ -157,7 +157,7 @@
       </a>
     </div>
       
-        <p class="site-subtitle">只要不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
+        <p class="site-subtitle">不是我觉到、悟到，你给不了我，给了也拿不住;只有自己觉到、悟到，才有可能做到，能做到的才是我的.</p>
       
   </div>
 
@@ -1513,7 +1513,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/20/iOS发布静态Framework/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/20/iOS Pod私有库发布/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Jack Chen">
@@ -1532,7 +1532,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/04/20/iOS发布静态Framework/" itemprop="url">iOS发布静态Framework</a></h1>
+                <a class="post-title-link" href="/2019/04/20/iOS Pod私有库发布/" itemprop="url">iOS Pod私有库发布</a></h1>
         
 
         <div class="post-meta">
@@ -1596,8 +1596,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/04/20/iOS发布静态Framework/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/20/iOS发布静态Framework/" itemprop="commentCount"></span>
+                <a href="/2019/04/20/iOS Pod私有库发布/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/20/iOS Pod私有库发布/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1605,7 +1605,7 @@
 
           
           
-             <span id="/2019/04/20/iOS发布静态Framework/" class="leancloud_visitors" data-flag-title="iOS发布静态Framework">
+             <span id="/2019/04/20/iOS Pod私有库发布/" class="leancloud_visitors" data-flag-title="iOS Pod私有库发布">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1630,7 +1630,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.5k
+                  1.9k
                 </span>
               
 
@@ -1646,7 +1646,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  5
+                  7
                 </span>
               
             </div>
@@ -1668,12 +1668,10 @@
 
       
         
-          <h2 id="静态库制作"><a href="#静态库制作" class="headerlink" title="静态库制作"></a>静态库制作</h2><h3 id="运行时便无法找到对应的selector？"><a href="#运行时便无法找到对应的selector？" class="headerlink" title="运行时便无法找到对应的selector？"></a>运行时便无法找到对应的selector？</h3><h4 id="编译-链接过程"><a href="#编译-链接过程" class="headerlink" title="编译/链接过程"></a>编译/链接过程</h4><ul>
-<li>编译器在编译的过程中首先会将 .c/.cc/.cpp/.m/.mm 的源文件编译成后缀为 .o 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 .a(archive) 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</li>
-</ul>
+          <p>为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/04/20/iOS发布静态Framework/#more" rel="contents">
+            <a class="btn" href="/2019/04/20/iOS Pod私有库发布/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2430,7 +2428,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">91.2k</span>
+    <span title="Site words total count">91.5k</span>
   
 </div>
 
