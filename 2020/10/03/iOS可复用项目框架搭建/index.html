@@ -28,7 +28,7 @@
 <meta property="og:description" content="入职了一家公司，刚好处于项目启动阶段，花了一周时间搭建了项目框架，现在总结一下。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://github.com/2020/10/03/iOS可复用项目框架搭建/ViewModel.png">
-<meta property="og:updated_time" content="2020-10-03T13:41:33.892Z">
+<meta property="og:updated_time" content="2020-10-06T03:54:03.055Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS可复用项目框架搭建">
 <meta name="twitter:description" content="入职了一家公司，刚好处于项目启动阶段，花了一周时间搭建了项目框架，现在总结一下。">
@@ -185,10 +185,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-10-03 08:00:00 / 修改时间：21:41:33" itemprop="dateCreated datePublished" datetime="2020-10-03T08:00:00+08:00">2020-10-03</time>
+              <time title="创建时间：2020-10-03 08:00:00" itemprop="dateCreated datePublished" datetime="2020-10-03T08:00:00+08:00">2020-10-03</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-06 11:54:03" itemprop="dateModified" datetime="2020-10-06T11:54:03+08:00">2020-10-06</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -245,7 +251,8 @@
 <li>用来包含一些全部的头文件(整个项目中都用得上的头文件)</li>
 <li>能自动打开或者关闭日志输出功能</li>
 </ol>
-<h4 id="Base基类"><a href="#Base基类" class="headerlink" title="Base基类"></a>Base基类</h4><p>继承作为一种强关联的高耦合方式，在开发的时候是要慎用的，一般都是建议使用组合方式进行替换，基于OC的语言特性，可以使用相应的分类实现。</p>
+<h4 id="Base基类"><a href="#Base基类" class="headerlink" title="Base基类"></a>Base基类</h4><p>继承作为一种强关联的高耦合方式，在开发的时候是要慎用的，一般都是建议使用组合方式进行替换，基于OC的语言特性，可以使用相应的分类实现。(实际中组合(Composition)往往结合接口、委托(delegation)这两种技术手段来解决继承的问题 )</p>
+<p><code>继承是一种is-a的关系，而组合是一种has-a关系</code></p>
 <ul>
 <li>BaseViewController</li>
 </ul>
@@ -258,6 +265,7 @@
 <li><a href="https://juejin.im/post/6844903487721963527" target="_blank" rel="noopener">YTKNetwork学习</a></li>
 <li><a href="https://www.jianshu.com/p/985f662e15e3" target="_blank" rel="noopener">iOS项目架构设计</a></li>
 <li><a href="https://juejin.im/post/6844903623252525064" target="_blank" rel="noopener">今日头条：iOS 架构设计杂谈</a></li>
+<li><a href="https://github.com/JackWchen2015/UniversalProject">Demo</a></li>
 <li><a href="https://github.com/XuYang8026/UniversalProject">Code</a></li>
 </ol>
 
@@ -278,7 +286,10 @@
     <a href="/2020/07/20/排序算法/" rel="prev" title="排序算法">
       <i class="fa fa-chevron-left"></i> 排序算法
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/25/多分支 if-else重构/" rel="next" title="多分支 if-else 重构">
+      多分支 if-else 重构 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -351,7 +362,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
