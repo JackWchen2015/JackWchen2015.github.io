@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="iOS应用程序的基础框架Cocoa Touch框架内容丰富、结构优美，通过将各种设计模式应用到其基础结构中，为第三方开发者提供了很好的可扩展性和灵活性。因此，要充分利用这一框架，应当深刻理解并恰当应用设计模式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C编程之道：iOS设计模式解析 读书笔记 下">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="iOS应用程序的基础框架Cocoa Touch框架内容丰富、结构优美，通过将各种设计模式应用到其基础结构中，为第三方开发者提供了很好的可扩展性和灵活性。因此，要充分利用这一框架，应当深刻理解并恰当应用设计模式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-26T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-27T23:01:59.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Objective-C编程之道：iOS设计模式解析 读书笔记 下 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Objective-C编程之道：iOS设计模式解析 读书笔记 下
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-26 08:00:00" itemprop="dateCreated datePublished" datetime="2021-09-26T08:00:00+08:00">2021-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-09-28 07:01:59" itemprop="dateModified" datetime="2021-09-28T07:01:59+08:00">2021-09-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>iOS应用程序的基础框架Cocoa Touch框架内容丰富、结构优美，通过将各种设计模式应用到其基础结构中，为第三方开发者提供了很好的可扩展性和灵活性。因此，要充分利用这一框架，应当深刻理解<br>并恰当应用设计模式。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="抽象集合"><a href="#抽象集合" class="headerlink" title="抽象集合"></a>抽象集合</h2><h3 id="组合"><a href="#组合" class="headerlink" title="组合"></a>组合</h3><p>把组合想象为一个实体，它包含着同一类型的其他实体。整个结构就像由父节点实体和子节点实体连接而成的树，这种树状结构形成<code>部分-整体</code>的层次结构</p>
+
+
+<p>组合模式的静态结构类图如下</p>
+
+
+<blockquote>
+<p>将对象组合成树形结构以表示“部分-整体”的层次结构，组合使得用户对单个对象和组合对象的使用具有一致性。</p>
+</blockquote>
+<ul>
+<li>在Cocoa Touch框架中使用组合模式</li>
+</ul>
+<p><code>UIView</code>被组织成一个组合结构，每个UIView的实例可以包含UIView的其他实例，形成统一的树形结构，让客户端对单个UIView对象和UIView的组合统一对待。</p>
+
+
+<p>总结</p>
+<p>组合模式的主要意图是让树形结构中的每个节点具有相同的抽象接口。这样整个结构可作为一个统一的抽象结构使用，而不暴露其内部表示。对每个节点（叶节点或组合体）的任何操作，可以通过协议或抽象基类中定义的相同接口来表示。</p>
+<h3 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h3><p>迭代器提供了一种顺序访问聚合对象（集合）中元素的方法，而无需暴露结构的底层表示和细节。</p>
+<ul>
+<li>Cocoa Touch中使用迭代器模式<br>基础框架中NSEnumarator类实现了迭代器模式。抽象NSEnumater类的私有具体子类返回枚举器对象，能够顺序遍历各种集合-数组、集、字典，把集合中的对象返回给客户端</li>
+</ul>
+
+
+<p>总结<br>迭代器模式与访问者模式有些类似，尤其是把便利算法放到访问者模式中或者在便利聚合体时让内部迭代器对元素执行操作的时候。组合模式常常依靠迭代器来便利其递归结构。</p>
+<h2 id="行为扩展"><a href="#行为扩展" class="headerlink" title="行为扩展"></a>行为扩展</h2><h3 id="访问者"><a href="#访问者" class="headerlink" title="访问者"></a>访问者</h3><p>访问者模式涉及两个关键组件，访问者和它访问的元素。元素可以是任何对象，但通常是“部分-整体”结构中的节点</p>
+<blockquote>
+<p>访问者模式：表示一个作用于某对象结构中各元素的操作，它让我们可以在不改变各元素的类的前提下定义作用于这些元素的新操作</p>
+</blockquote>
+<p>访问者模式时扩展组合结构功能的一种强有力的方式，如果组合结构具有精心设计的基本操作，而且结构将来也不会变更，就可以使用访问者模式，用各种不同用途的访问者，以同样的方式访问这个组合结构。</p>
+<h3 id="装饰"><a href="#装饰" class="headerlink" title="装饰"></a>装饰</h3><blockquote>
+<p>动态地给一个对象添加一些职责，就扩展功能来说，装饰模式相比生成子类更为灵活。</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch中使用装饰模式<br><code>Categoty</code>是一个<code>Objective-C</code>的语言功能，通过它可以向类添加行为（方法的接口与实现），而不必进行子类化。然而，<code>Categoty</code>并不是一种严格的实现，它实现了模式的意图，但确是一种变体，由<code>Category</code>添加的行为是编译时绑定的，虽然<code>Objective-C</code>原本支持动态绑定。<code>Category</code>实际上没有封装被扩展的类的实例。</li>
+</ul>
+<h3 id="责任链"><a href="#责任链" class="headerlink" title="责任链"></a>责任链</h3><p>对象引用了同一类型的另一个对象，形成一条链，链中的每个对象实现了同样的方法，处理链中第一个对象发起的同一个请求。如果一个对象不知道如何处理请求，它就把请求传给下一个响应器。这个过程会一直进行下去，直到请求被传到链中的最后一个Handller</p>
+<h2 id="算法封装"><a href="#算法封装" class="headerlink" title="算法封装"></a>算法封装</h2><h3 id="模版方法"><a href="#模版方法" class="headerlink" title="模版方法"></a>模版方法</h3><p>在抽象类的一个方法中定义“标准”算法。在这个方法中调用的基本操作应由子类重载予以实现。这个方法被称为<code>模版</code></p>
+<blockquote>
+<p>模版方法模式：定义一个操作中算法的框架，而将一些步骤延迟到子类中，模版方法使子类可以重定义算法的某些特定步骤而不改变该算法的结构。</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch框架中使用模版方法<br>框架设计师可以把算法中应用程序相关的元素留给应用程序去实现。</li>
+</ul>
+<ol>
+<li>UIView类中的定制绘图<code>-（void）drawRect：（CGRect）rect</code></li>
+<li>UIViewController定义了一些让用户程序处理设备不同方向的方法。</li>
+</ol>
+<h3 id="策略"><a href="#策略" class="headerlink" title="策略"></a>策略</h3><p>策略模式中的一个关键组件是策略类，它为所有支持的或相关的算法声明了一个共同接口。</p>
+<blockquote>
+<p>定义一系列算法，把它们一个个封装起来，并且使他们可相互替换。本模式可使得算法可独立于使用它的客户而变化。</p>
+</blockquote>
+<h3 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h3><p>把指令封装在各种命令对象中，命令对象可以被传递并且在指定时刻被不同的客户端复用。</p>
+<blockquote>
+<p>命令模式：将请求封装为一个对象，从而可用不同的请求对客户进行参数化，对请求排队或记录请求日志，以及支持可撤销的操作。</p>
+</blockquote>
+<p>命令对象另一个为人熟知的应用是推迟调用器的执行。</p>
+<ul>
+<li>Cocoa Touch框架中使用命令模式<br>NSInvocation、NSUndoManager和目标-动作机制是框架中对这个模式的典型应用。</li>
+</ul>
+<h2 id="性能与对象访问"><a href="#性能与对象访问" class="headerlink" title="性能与对象访问"></a>性能与对象访问</h2><h3 id="享元（Flyweight-pattern）"><a href="#享元（Flyweight-pattern）" class="headerlink" title="享元（Flyweight pattern）"></a>享元（Flyweight pattern）</h3><p>专门用于设计可共享对象的一种设计模式。<br>实现享元模式需要两个关键组件，通常是可共享的享元对象和保存它们的池。</p>
+<h3 id="代理"><a href="#代理" class="headerlink" title="代理"></a>代理</h3><p>代理的一个常见用处是作为一个轻量的替身对象，它允许客户端首先访问某些廉价的信息或功能。</p>
+<blockquote>
+<p>代理模式：为其他对象提供一种代理以控制对这个对象的访问。</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch框架中使用代理模式<br>NSProxy实现了NSObject协议，所以NSProxy对象实际上也是NSObject类型，NSProxy的主要作用是，为其他对象的替身对象定义一个API。发给代理对象的消息会被转发给实体对象，或者，让代理加载实体对象或把代理自身变成实体对象</li>
+</ul>
+<h2 id="对象状态"><a href="#对象状态" class="headerlink" title="对象状态"></a>对象状态</h2><h3 id="备忘录"><a href="#备忘录" class="headerlink" title="备忘录"></a>备忘录</h3><p>用来保存对象的状态并在后来进行恢复</p>
+<blockquote>
+<p>备忘录模式：在不破坏封装的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样以后就可将该对象恢复到原先保存的状态。</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch框架中的备忘录模式<br>Cocoa Touch框架在归档、属性列表序列化、和核心数据中采用了备忘录模式。Cocoa的归档是对对象及其熟悉还有其他对象间的关系进行编码，形成一个文档，该文档可保存于文件系统，也可在进程或网络间传送。被编码与解码的对象必须遵守NSCoding协议并实现一下方法：</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-（<span class="type">id</span>）initWithCoder：（<span class="built_in">NSCoder</span>*）coer；</span><br><span class="line">-（<span class="type">void</span>）encodeWithCoder：（<span class="built_in">NSCoder</span>*）coder；</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/" rel="prev" title="Objective-C编程之道：iOS设计模式解析 读书笔记 上">
+      <i class="fa fa-chevron-left"></i> Objective-C编程之道：iOS设计模式解析 读书笔记 上
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/" rel="next" title="Objective-C方法缓存实现">
+      Objective-C方法缓存实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E9%9B%86%E5%90%88"><span class="nav-number">1.</span> <span class="nav-text">抽象集合</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E5%90%88"><span class="nav-number">1.1.</span> <span class="nav-text">组合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8"><span class="nav-number">1.2.</span> <span class="nav-text">迭代器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%8C%E4%B8%BA%E6%89%A9%E5%B1%95"><span class="nav-number">2.</span> <span class="nav-text">行为扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%80%85"><span class="nav-number">2.1.</span> <span class="nav-text">访问者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A3%85%E9%A5%B0"><span class="nav-number">2.2.</span> <span class="nav-text">装饰</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%A3%E4%BB%BB%E9%93%BE"><span class="nav-number">2.3.</span> <span class="nav-text">责任链</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%B0%81%E8%A3%85"><span class="nav-number">3.</span> <span class="nav-text">算法封装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E7%89%88%E6%96%B9%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">模版方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%96%E7%95%A5"><span class="nav-number">3.2.</span> <span class="nav-text">策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%B8%8E%E5%AF%B9%E8%B1%A1%E8%AE%BF%E9%97%AE"><span class="nav-number">4.</span> <span class="nav-text">性能与对象访问</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%AB%E5%85%83%EF%BC%88Flyweight-pattern%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">享元（Flyweight pattern）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86"><span class="nav-number">4.2.</span> <span class="nav-text">代理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%8A%B6%E6%80%81"><span class="nav-number">5.</span> <span class="nav-text">对象状态</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%87%E5%BF%98%E5%BD%95"><span class="nav-number">5.1.</span> <span class="nav-text">备忘录</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="离屏渲染是在哪一步进行的？为什么？设置cornerRadius一定会触发离屏渲染吗？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS离屏渲染">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="离屏渲染是在哪一步进行的？为什么？设置cornerRadius一定会触发离屏渲染吗？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-c448aaebe3cf19e37101ce16a799cdd2_1440w.png">
+<meta property="og:image" content="https://github.com/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-24394bcd0b84005553320df018e06999_1440w.png">
+<meta property="og:image" content="https://github.com/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-2f45a2d49c0a4bb97ed975054f0534b5_1440w.jpg">
+<meta property="article:published_time" content="2019-07-31T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-09-25T13:11:25.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-c448aaebe3cf19e37101ce16a799cdd2_1440w.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS离屏渲染 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS离屏渲染
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-07-31 08:00:00" itemprop="dateCreated datePublished" datetime="2019-07-31T08:00:00+08:00">2019-07-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-09-25 21:11:25" itemprop="dateModified" datetime="2021-09-25T21:11:25+08:00">2021-09-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7%E4%B8%8E%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能监控与优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>离屏渲染是在哪一步进行的？为什么？<br>设置cornerRadius一定会触发离屏渲染吗？</p>
+<span id="more"></span>
+
+<p>iOS渲染在Application这一层中主要是CPU在操作，而到了<code>Render Server</code>这一层，CoreAnimation会将具体操作转换成发送给GPU的draw calls（以前是call OpenGL ES，现在慢慢转到了Metal），<br>显然CPU和GPU双方同处于一个流水线中，协作完成整个渲染工作</p>
+<h2 id="离屏渲染的定义"><a href="#离屏渲染的定义" class="headerlink" title="离屏渲染的定义"></a>离屏渲染的定义</h2><p>如果要在显示屏上显示内容，我们至少需要一块与屏幕像素数据量一样大的<code>frame buffer</code>，作为像素数据存储区域，而这也是GPU存储渲染结果的地方。</p>
+<p>如果有时因为面临一些限制，无法把渲染结果直接写入frame buffer，而是先暂存在另外的内存区域，之后再写入frame buffer，那么这个过程被称之为离屏渲染。</p>
+<img src="/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-c448aaebe3cf19e37101ce16a799cdd2_1440w.png" class="">
+<p>渲染结果先经过了离屏buffer，再到frame buffer</p>
+<h3 id="CPU”离屏渲染“"><a href="#CPU”离屏渲染“" class="headerlink" title="CPU”离屏渲染“"></a>CPU”离屏渲染“</h3><p>如果我们在UIView中实现了<code>drawRect</code>方法，就算它的函数体内部实际没有代码，系统也会为这个view申请一块内存区域，等待CoreGraphics可能的绘画操作。</p>
+<p>根据苹果工程师的说法，CPU渲染并非真正意义上的离屏渲染。另一个证据是，如果你的<code>view</code>实现了<code>drawRect</code>，此时打开Xcode调试的“Color offscreen rendered yellow”开关，你会发现这片区域不会被标记为黄色，说明Xcode并不认为这属于离屏渲染。</p>
+<p>通过CPU渲染就是俗称的“<code>软件渲染</code>”，而真正的离屏渲染发生在GPU</p>
+<h3 id="GPU离屏渲染"><a href="#GPU离屏渲染" class="headerlink" title="GPU离屏渲染"></a>GPU离屏渲染</h3><p>主要的渲染操作都是由CoreAnimation的<code>Render Server</code>模块，通过调用显卡驱动所提供的<code>OpenGL/Metal</code>接口来执行的。<br>通常对于每一层layer，Render Server会遵循“<code>画家算法</code>”，按次序输出到<code>frame buffer</code>，后一层覆盖前一层，就能得到最终的显示结果（值得一提的是，与一般桌面架构不同，<code>在iOS中，设备主存和GPU的显存共享物理内存</code>，这样可以省去一些数据传输开销）</p>
+<img src="/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-24394bcd0b84005553320df018e06999_1440w.png" class="">
+<p>”画家算法“，把每一层依次输出到画布</p>
+<p>然而有些场景并没有那么简单。作为“画家”的GPU虽然可以一层一层往画布上进行输出，但是无法在某一层渲染完成之后，再回过头来擦除&#x2F;改变其中的某个部分——因为在这一层之前的若干层layer像素数据，已经在渲染中被永久覆盖了。这就意味着，对于每一层layer，要么能<code>找到一种通过单次遍历就能完成渲染的算法</code>，要么就不得不<code>另开一块内存，借助这个临时中转区域来完成一些更复杂的、多次的修改/剪裁操作</code>。</p>
+<ul>
+<li>绘制一个带有圆角并剪切圆角以外内容的容器</li>
+</ul>
+<ol>
+<li><p>将一个layer的内容裁剪成圆角，可能不存在一次遍历就能完成的方法</p>
+</li>
+<li><p>容器的子layer因为父容器有圆角，那么也会需要被裁剪，而这时它们还在渲染队列中排队，尚未被组合到一块画布上，自然也无法统一裁剪</p>
+</li>
+</ol>
+<p>此时我们就不得不开辟一块独立于<code>frame buffer</code>的空白内存，先把容器以及其所有子layer依次画好，然后把四个角“剪”成圆形，再把结果画到frame buffer中。这就是GPU的离屏渲染。</p>
+<h4 id="常见触发离屏渲染的操作"><a href="#常见触发离屏渲染的操作" class="headerlink" title="常见触发离屏渲染的操作"></a>常见触发离屏渲染的操作</h4><ul>
+<li><p>cornerRadius+clipsToBounds</p>
+</li>
+<li><p>shadow</p>
+</li>
+</ul>
+<p>阴影默认是作用在其中”非透明区域“的，而且需要显示在所有layer内容的下方，因此根据画家算法必须被渲染在先。但矛盾在于此时阴影的本体（layer和其子layer）都还没有被组合到一起，怎么可能在第一步就画出只有完成最后一步之后才能知道的形状呢？这样一来又只能另外申请一块内存，把本体内容都先画好，再根据渲染结果的形状，添加阴影到frame buffer，最后把内容画上去（这只是我的猜测，实际情况可能更复杂）。不过如果我们能够预先告诉CoreAnimation（通过shadowPath属性）阴影的几何形状，那么阴影当然可以先被独立渲染出来，不需要依赖layer本体，也就不再需要离屏渲染了。</p>
+<ul>
+<li>group opacity</li>
+</ul>
+<p>alpha并不是分别应用在每一层之上，而是只有到整个layer树画完之后，再统一加上alpha，最后和底下其他layer的像素进行组合。显然也无法通过一次遍历就得到最终结果。</p>
+<ul>
+<li>mask</li>
+</ul>
+<p>mask是应用在layer和其所有子layer的组合之上的，而且可能带有透明度，那么其实和group opacity的原理类似，不得不在离屏渲染中完成。</p>
+<ul>
+<li>UIBlurEffect</li>
+</ul>
+<p>总结：</p>
+<blockquote>
+<p>原理也都是类似：如果你无法仅仅使用frame buffer来画出最终结果，那就只能另开一块内存空间来储存中间结果。</p>
+</blockquote>
+<h2 id="离屏渲染的性能影响"><a href="#离屏渲染的性能影响" class="headerlink" title="离屏渲染的性能影响"></a>离屏渲染的性能影响</h2><p>GPU的操作是<code>高度流水线化</code>的。本来所有计算工作都在有条不紊地正在向frame buffer输出，此时突然收到指令，需要输出到另一块内存，那么流水线中正在进行的一切都不得不被丢弃，切换到只能服务于我们当前的“切圆角”操作。等到完成以后再次清空，再回到向frame buffer输出的正常流程。</p>
+<p>在tableView或者collectionView中，滚动的每一帧变化都会触发每个cell的重新绘制，因此一旦存在离屏渲染，上面提到的上下文切换就会每秒发生60次，并且很可能每一帧有几十张的图片要求这么做，对于GPU的性能冲击可想而知（GPU非常擅长大规模并行计算，但是我想频繁的上下文切换显然不在其设计考量之中）</p>
+<h3 id="什么时候使用离屏渲染？"><a href="#什么时候使用离屏渲染？" class="headerlink" title="什么时候使用离屏渲染？"></a>什么时候使用离屏渲染？</h3><p>把结果缓存下来，那么下一帧渲染就可以复用这个成果，不需要再重新画一遍了</p>
+<p>CALayer为这个方案提供了对应的解法：<code>shouldRasterize</code>。一旦被设置为true，Render Server就会强制把layer的渲染结果（包括其子layer，以及圆角、阴影、group opacity等等）保存在一块内存中，这样一来在下一帧仍然可以被复用，而不会再次触发离屏渲染。</p>
+<ul>
+<li>注意：</li>
+</ul>
+<ol>
+<li><code>shouldRasterize</code>的主旨在于降低性能损失，但总是<code>至少会触发一次离屏渲染</code>。如果你的layer本来并不复杂，也没有圆角阴影等等，打开这个开关反而会增加一次不必要的离屏渲染</li>
+<li><code>离屏渲染缓存有空间上限，最多不超过屏幕总像素的2.5倍大小</code></li>
+<li>一旦缓存超过100ms没有被使用，会自动被丢弃</li>
+<li>layer的内容（包括子layer）必须是静态的，因为一旦发生变化（如resize，动画），之前辛苦处理得到的缓存就失效了。如果这件事频繁发生，我们就又回到了“每一帧都需要离屏渲染”的情景，而这正是开发者需要极力避免的。针对这种情况，Xcode提供了“Color Hits Green and Misses Red”的选项，帮助我们查看缓存的使用是否符合预期</li>
+<li>其实除了解决多次离屏渲染的开销，<code>shouldRasterize</code>在另一个场景中也可以使用：如果layer的子结构非常复杂，渲染一次所需时间较长，同样可以打开这个开关，把layer绘制到一块缓存，然后在接下来复用这个结果，这样就不需要每次都重新绘制整个layer树了</li>
+</ol>
+<h3 id="什么时候需要CPU渲染"><a href="#什么时候需要CPU渲染" class="headerlink" title="什么时候需要CPU渲染"></a>什么时候需要CPU渲染</h3><p>渲染性能的调优，其实始终是在做一件事：<code>平衡CPU和GPU的负载，让他们尽量做各自最擅长的工作</code>。</p>
+<p>绝大多数情况下，得益于GPU针对图形处理的优化，我们都会倾向于<code>让GPU来完成渲染任务</code>，而<code>给CPU留出足够时间处理各种各样复杂的App逻辑</code>。为此Core Animation做了大量的工作，尽量把渲染工作转换成适合GPU处理的形式（也就是所谓的硬件加速，如layer composition，设置backgroundColor等等）。</p>
+<p>但是对于一些情况，如<code>文字（CoreText使用CoreGraphics渲染）</code>和<code>图片（ImageIO）渲染</code>，由于<code>GPU并不擅长做这些工作，不得不先由CPU来处理好以后，再把结果作为texture传给GPU</code>。除此以外，有时候也会遇到GPU实在忙不过来的情况，而CPU相对空闲（GPU瓶颈），这时可以让CPU分担一部分工作，提高整体效率。</p>
+<img src="/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/v2-2f45a2d49c0a4bb97ed975054f0534b5_1440w.jpg" class="">
+<p>Core Text基于Core Graphics</p>
+<p>eg：<br>使用CoreGraphics给图片加上圆角（将图片中圆角以外的部分渲染成透明）。整个过程全部是由CPU完成的。这样一来既然我们已经得到了想要的效果，就不需要再另外给图片容器设置cornerRadius。另一个好处是，我们可以灵活地控制裁剪和缓存的时机，巧妙避开CPU和GPU最繁忙的时段，达到平滑性能波动的目的</p>
+<ul>
+<li>注意</li>
+</ul>
+<ol>
+<li>渲染不是CPU的强项，调用<code>CoreGraphics</code>会消耗其相当一部分计算时间，并且我们也不愿意因此阻塞用户操作，因此一般来说CPU渲染都在后台线程完成（这也是<code>AsyncDisplayKit</code>的主要思想），然后再回到主线程上，把渲染结果传回CoreAnimation。这样一来，多线程间数据同步会增加一定的复杂度</li>
+<li>同样因为CPU渲染速度不够快，因此<code>只适合渲染静态的元素，如文字、图片</code>（想象一下没有硬件加速的视频解码，性能惨不忍睹）</li>
+<li>作为渲染结果的bitmap数据量较大（形式上一般为解码后的UIImage），消耗内存较多，所以应该在使用完及时释放，并在需要的时候重新生成，否则很容易导致OOM</li>
+<li>如果你选择使用CPU来做渲染，那么就没有理由再触发GPU的离屏渲染了，否则会同时存在两块内容相同的内存，而且CPU和GPU都会比较辛苦</li>
+<li>一定要使用Instruments的不同工具来测试性能，而不是仅凭猜测来做决定</li>
+</ol>
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><ol>
+<li>大量应用<code>AsyncDisplayKit</code>(Texture)作为主要渲染框架，对于文字和图片的异步渲染操作交由框架来处理。关于这方面可以看我之前的一些介绍</li>
+<li>对于图片的圆角，统一采用“precomposite”的策略，也就是不经由容器来做剪切，而是预先使用CoreGraphics为图片裁剪圆角</li>
+<li>对于视频的圆角，由于实时剪切非常消耗性能，我们会创建四个白色弧形的layer盖住四个角，从视觉上制造圆角的效果</li>
+<li>对于view的圆形边框，如果没有backgroundColor，可以放心使用cornerRadius来做</li>
+<li>对于所有的阴影，使用shadowPath来规避离屏渲染</li>
+<li>对于特殊形状的view，使用layer mask并打开<code>shouldRasterize</code>来对渲染结果进行缓存</li>
+<li>对于模糊效果，不采用系统提供的UIVisualEffect，而是另外实现模糊效果（CIGaussianBlur），并手动管理渲染结果</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/72653360">关于iOS离屏渲染的深入研究</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" rel="prev" title="iOS本地数据存储">
+      <i class="fa fa-chevron-left"></i> iOS本地数据存储
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/04/iOS%E5%9B%BE%E6%A0%87%E7%89%88%E6%9C%AC%E5%8C%96/" rel="next" title="iOS图标版本化">
+      iOS图标版本化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">离屏渲染的定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU%E2%80%9D%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E2%80%9C"><span class="nav-number">1.1.</span> <span class="nav-text">CPU”离屏渲染“</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPU%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="nav-number">1.2.</span> <span class="nav-text">GPU离屏渲染</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E8%A7%A6%E5%8F%91%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.1.</span> <span class="nav-text">常见触发离屏渲染的操作</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E6%80%A7%E8%83%BD%E5%BD%B1%E5%93%8D"><span class="nav-number">2.</span> <span class="nav-text">离屏渲染的性能影响</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BD%BF%E7%94%A8%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">什么时候使用离屏渲染？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E9%9C%80%E8%A6%81CPU%E6%B8%B2%E6%9F%93"><span class="nav-number">2.2.</span> <span class="nav-text">什么时候需要CPU渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

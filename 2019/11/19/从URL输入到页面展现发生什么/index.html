@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="从开发角度来看，总体来说分以下几个过程  URL解析 DNS解析：将域名解析成IP地址 TCP连接：三次握手 发送HTTP请求 服务器处理请求并返回HTTP报文 浏览器解析渲染页面 TCP断开连接：四次挥手">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在浏览器中输入URL到页面展现发生什么？">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="从开发角度来看，总体来说分以下几个过程  URL解析 DNS解析：将域名解析成IP地址 TCP连接：三次握手 发送HTTP请求 服务器处理请求并返回HTTP报文 浏览器解析渲染页面 TCP断开连接：四次挥手">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/01.png">
+<meta property="og:image" content="https://github.com/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/02.png">
+<meta property="article:published_time" content="2019-11-19T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-29T09:21:37.418Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="DNS">
+<meta property="article:tag" content="URL">
+<meta property="article:tag" content="CDN">
+<meta property="article:tag" content="WebSocket">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>在浏览器中输入URL到页面展现发生什么？ | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在浏览器中输入URL到页面展现发生什么？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-19 08:00:00" itemprop="dateCreated datePublished" datetime="2019-11-19T08:00:00+08:00">2019-11-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-29 17:21:37" itemprop="dateModified" datetime="2022-06-29T17:21:37+08:00">2022-06-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>从开发角度来看，总体来说分以下几个过程</p>
+<ul>
+<li>URL解析</li>
+<li>DNS解析：将域名解析成IP地址</li>
+<li>TCP连接：三次握手</li>
+<li>发送HTTP请求</li>
+<li>服务器处理请求并返回HTTP报文</li>
+<li>浏览器解析渲染页面</li>
+<li>TCP断开连接：四次挥手<span id="more"></span></li>
+</ul>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><h3 id="URL解析"><a href="#URL解析" class="headerlink" title="URL解析"></a>URL解析</h3><p>分析所需要使用的传输协议和请求资源的路径，如果输入的URL中的协议或者主机名不合法，<br>将会把地址栏中输入的内容传递给搜索引擎，如果没有问题，浏览器会检查URL中是否出现了非法字符，如果存在非法字符，则对非法字符进行转义后再进行下一过程。</p>
+<h3 id="缓存检查"><a href="#缓存检查" class="headerlink" title="缓存检查"></a>缓存检查</h3><p>浏览器会判断所请求的资源是否在缓存里，如果请求的资源在缓存里并且没有失败，那么就直接使用，否则向服务器发起新的请求。</p>
+<h3 id="DNS解析"><a href="#DNS解析" class="headerlink" title="DNS解析"></a>DNS解析</h3><p>首先会判断本地是否有该域名的IP地址的缓存，如果没有则向本地DNS服务器发起请求，本地DNS服务器也会先检查是否存在缓存，如果没有就会先向根域名服务器发起请求，获得负责的顶级域名服务器的地址后，再向顶级域名服务器请求，然后获得负责的权威域名服务器的地址后，再向权威域名服务器发起请求，最终获得域名的 IP 地址后，本地 DNS 服务器再将这个 IP 地址返回给请求的用户。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用户向本地DNS服务器发起请求属于递归请求</span><br><span class="line">本地DNS服务器向各级域名服务器发起请求属于迭代请求。</span><br></pre></td></tr></table></figure>
+
+<h3 id="套接字生成"><a href="#套接字生成" class="headerlink" title="套接字生成"></a>套接字生成</h3><p>当浏览器得到IP地址后，数据传输还需要知道目的主机的MAC地址，因为应用层发送数据给传输层，TCP协议会指定元端口号和目的端口号，然后下发给网络层，网络层会将本机地址作为源地址，获取的IP地址作为目的地址，然后下发给数据链路层，数据链路层的发送需要加入通信双方的MAC地址，我们本机的MAC地址作为源MAC地址，目的MAC地址需要按分情况处理。通过将IP地址与我们本机的子网掩码相与，我们可以判断我们是否与请求主机在同一个子网里，如果在同一个子网里，可以使用ARP协议获取到目的主机的MAC地址，如果不在一个子网里，那么我们的请求应该转发给我们的网关，由它代为转发，此时通过ARP协议来获取网关的MAC地址。此时目的主机的MAC地址应该为该网关的地址。</p>
+<h3 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h3><p>…</p>
+<h3 id="HTTPS协议的话，还会有TLS的一个四次握手的过程"><a href="#HTTPS协议的话，还会有TLS的一个四次握手的过程" class="headerlink" title="HTTPS协议的话，还会有TLS的一个四次握手的过程"></a>HTTPS协议的话，还会有TLS的一个四次握手的过程</h3><p>…</p>
+<h3 id="服务器处理请求并返回HTTP报文"><a href="#服务器处理请求并返回HTTP报文" class="headerlink" title="服务器处理请求并返回HTTP报文"></a>服务器处理请求并返回HTTP报文</h3><p>当页面请求发送到服务端后，服务端会返回一个html文件作为响应，浏览器接收到响应后，开始对html文件进行解析，开始页面的渲染过程。</p>
+<h3 id="浏览器解析渲染页面"><a href="#浏览器解析渲染页面" class="headerlink" title="浏览器解析渲染页面"></a>浏览器解析渲染页面</h3><p>浏览器首先会根据 html 文件构建 DOM 树，根据解析到的 css 文件构建 CSSOM 树，如果遇到 script 标签，则判端<br>是否含有 defer 或者 async 属性，要不然 script 的加载和执行会造成页面的渲染的阻塞。当 DOM 树和 CSSOM 树建<br>立好后，根据它们来构建渲染树。渲染树构建好后，会根据渲染树来进行布局。布局完成后，最后使用浏览器的 UI 接口对页<br>面进行绘制。这个时候整个页面就显示出来了。</p>
+<h3 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h3><p>…</p>
+<h2 id="Tips"><a href="#Tips" class="headerlink" title="Tips"></a>Tips</h2><h3 id="CDN"><a href="#CDN" class="headerlink" title="CDN"></a>CDN</h3><p>CDN是一个内容分发网络，通过对源网站资源的缓存，利用本身多台位于不同地域，不同运营商的服务器，向用户提供资源就近访问的功能，也就是说用户的请求并不是直接发送给源网站，而是发送给CDN服务器，由CDN服务器将请求定位到最近的含有该资源的服务器上去请求，这样有利于提高网站的访问速度，同时通过这种方式也减轻了源服务器的访问压力。</p>
+<h3 id="正向代理和反向代理"><a href="#正向代理和反向代理" class="headerlink" title="正向代理和反向代理"></a>正向代理和反向代理</h3><p>常说的代理就是指正向代理，正向代理的过程隐藏了真实的请求客户端，服务端不知道真实的客户端是谁，客户端请求的服务都被代理服务器代替来请求。</p>
+<img src="/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/01.png" class="">
+
+<p>反向代理隐藏了真实的服务端，当我们请求一个网站的时候，背后可能有成千上万台服务器为我们服务，但具体是哪一台，也不需要知道，我们只需要知道反向代理是谁就好了，反向代理服务器会帮我们把请求转发到真实的服务器那里去。 反向代理一般用来实现负载均衡。</p>
+<img src="/2019/11/19/%E4%BB%8EURL%E8%BE%93%E5%85%A5%E5%88%B0%E9%A1%B5%E9%9D%A2%E5%B1%95%E7%8E%B0%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88/02.png" class="">
+<h3 id="负载均衡的两种实现方式"><a href="#负载均衡的两种实现方式" class="headerlink" title="负载均衡的两种实现方式"></a>负载均衡的两种实现方式</h3><ol>
+<li>反向代理<br>用户的请求都发送到反向代理服务上，然后由反向代理服务器来转发请求到真实的服务器上，以此来实现集群的负载均衡。</li>
+<li>DNS方式<br>DNS可以用于在冗余的服务器上实现负载均衡，因为现在一般的大型网站使用多台服务器提供服务，因此一个域名可能会对应多个服务器地址,当用户向网站域名请求的时候，DNS 服务器返回这个域名所对应的服务器 IP 地址的集合，但在<br>每个回答中，会循环这些 IP 地址的顺序，用户一般会选择排在前面的地址发送请求。以此将用户的请求均衡的分配到各个不同的服务器上，这样来实现负载均衡。这种方式有一个<code>缺点就是，由于 DNS 服务器中存在缓存，所以有可能一个服务器出现故障后，域名解析仍然返回的是那个 IP 地址，就会造成访问的问题</code>。</li>
+</ol>
+<h3 id="URL"><a href="#URL" class="headerlink" title="URL"></a>URL</h3><p>URL（Uniform Resource Locator），统一资源定位符，用于定位互联网上资源，俗称网址。</p>
+<p><strong>scheme: &#x2F;&#x2F; host.domain:port &#x2F; path &#x2F; filename ? abc &#x3D; 123 # 456789</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scheme       - 定义因特网服务的类型。常见的协议有 http、https、ftp、file，</span><br><span class="line">               其中最常见的类型是 http，而 https 则是进行加密的网络传输。</span><br><span class="line">host         - 定义域主机（http 的默认主机是 www）</span><br><span class="line">domain       - 定义因特网域名，比如 baidu.com</span><br><span class="line">port         - 定义主机上的端口号（http 的默认端口号是 80）</span><br><span class="line">path         - 定义服务器上的路径（如果省略，则文档必须位于网站的根目录中）。</span><br><span class="line">filename     - 定义文档/资源的名称</span><br><span class="line">query        - 即查询参数</span><br><span class="line">fragment     - 即 <span class="comment"># 后的hash值，一般用来定位到某个位置</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="即时通讯的实现，短轮询、长轮询、SSE-和-WebSocket-间的区别"><a href="#即时通讯的实现，短轮询、长轮询、SSE-和-WebSocket-间的区别" class="headerlink" title="即时通讯的实现，短轮询、长轮询、SSE 和 WebSocket 间的区别"></a>即时通讯的实现，短轮询、长轮询、SSE 和 WebSocket 间的区别</h3><p>短轮询和长轮询的目的都是用于实现客户端和服务器端的一个即时通讯。</p>
+<h4 id="短轮询"><a href="#短轮询" class="headerlink" title="短轮询"></a>短轮询</h4><p>短轮询的基本思路就是浏览器每隔一段时间向服务器发送 http 请求，服务器端在收到请求后，不论是否有数据更新，都直接进行响应。这种方式实现的即时通信，本质上还是浏览器发送请求，服务器接受请求的一个过程，通过让客户端不断的进行请求，使得客户端能够模拟实时地收到服务器端的数据的变化。这种方式的优点是比较简单，易于理解。缺点是这种方式由于需要不断的建立 http 连接，严重浪费了服务器端和客户端的资源。当用户增加时，服务器端的压力就会变大，这是很不合理的。</p>
+<h4 id="长轮询"><a href="#长轮询" class="headerlink" title="长轮询"></a>长轮询</h4><p>长轮询的基本思路是，首先由客户端向服务器发起请求，当服务器收到客户端发来的请求后，服务器端不会直接进行响应，而是先将这个请求挂起，然后判断服务器端数据是否有更新。如果有更新，则进行响应，如果一直没有数据，则到达一定的时间限制才返回。<br>客户端 JavaScript 响应处理函数会在处理完服务器返回的信息后，再次发出请求，重新建立连接。长轮询和短轮询比起来，它的优点是明显减少了很多不必要的 http 请求次数，相比之下节约了资源。长轮询的缺点在于，连接挂起也会导致资源的浪费。</p>
+<h4 id="SSE"><a href="#SSE" class="headerlink" title="SSE"></a>SSE</h4><p>SSE 的基本思想是，服务器使用流信息向服务器推送信息。严格地说，http 协议无法做到服务器主动推送信息。但是，有一种变通方法，就是服务器向客户端声明，接下来要发送的是流信息。也就是说，发送的不是一次性的数据包，而是一个数据流，会连续不断地发送过来。这时，客户端不会关闭连接，会一直等着服务器发过来的新的数据流，<code>视频播放就是这样的例子。SSE 就是利用这种机制，使用流信息向浏览器推送信息</code>。它基于 http 协议，目前除了 IE&#x2F;Edge，其他浏览器都支持。它相对于前面两种方式来说，不需要建立过多的 http 请求，相比之下节约了资源。</p>
+<h4 id="WebSocket"><a href="#WebSocket" class="headerlink" title="WebSocket"></a>WebSocket</h4><p>WebSocket 是 Html5 定义的一个新协议，与传统的 http 协议不同，该协议允许由服务器主动的向客户端推送信息。使用 WebSocket 协议的缺点是在服务器端的配置比较复杂。WebSocket 是一个全双工的协议，也就是通信双方是平等的，可以相互发送消息，而 SSE 的方式是单向通信的，只能由服务器端向客户端推送信息，如果客户端需要发送信息就是属于下一个 http 请求了。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://juejin.im/post/5c7646f26fb9a049fd108380">从URL输入到页面展现到底发生什么？</a></li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022350860">关于计算机网络，助你查漏补缺</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/DNS/" rel="tag"># DNS</a>
+              <a href="/tags/URL/" rel="tag"># URL</a>
+              <a href="/tags/CDN/" rel="tag"># CDN</a>
+              <a href="/tags/WebSocket/" rel="tag"># WebSocket</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/10/15/ReactiveCocoa%E5%AD%A6%E4%B9%A0/" rel="prev" title="ReactiveCocoa学习">
+      <i class="fa fa-chevron-left"></i> ReactiveCocoa学习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/11/25/%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%8F%8A%E5%BF%83%E8%B7%B3%E4%BF%9D%E6%B4%BB/" rel="next" title="长连接及心跳保活">
+      长连接及心跳保活 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B"><span class="nav-number">1.</span> <span class="nav-text">开始</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#URL%E8%A7%A3%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">URL解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%A3%80%E6%9F%A5"><span class="nav-number">1.2.</span> <span class="nav-text">缓存检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS%E8%A7%A3%E6%9E%90"><span class="nav-number">1.3.</span> <span class="nav-text">DNS解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A5%97%E6%8E%A5%E5%AD%97%E7%94%9F%E6%88%90"><span class="nav-number">1.4.</span> <span class="nav-text">套接字生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">1.5.</span> <span class="nav-text">三次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS%E5%8D%8F%E8%AE%AE%E7%9A%84%E8%AF%9D%EF%BC%8C%E8%BF%98%E4%BC%9A%E6%9C%89TLS%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9B%9B%E6%AC%A1%E6%8F%A1%E6%89%8B%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">1.6.</span> <span class="nav-text">HTTPS协议的话，还会有TLS的一个四次握手的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%A4%84%E7%90%86%E8%AF%B7%E6%B1%82%E5%B9%B6%E8%BF%94%E5%9B%9EHTTP%E6%8A%A5%E6%96%87"><span class="nav-number">1.7.</span> <span class="nav-text">服务器处理请求并返回HTTP报文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E8%A7%A3%E6%9E%90%E6%B8%B2%E6%9F%93%E9%A1%B5%E9%9D%A2"><span class="nav-number">1.8.</span> <span class="nav-text">浏览器解析渲染页面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">1.9.</span> <span class="nav-text">四次挥手</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tips"><span class="nav-number">2.</span> <span class="nav-text">Tips</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CDN"><span class="nav-number">2.1.</span> <span class="nav-text">CDN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E5%92%8C%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">正向代理和反向代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">2.3.</span> <span class="nav-text">负载均衡的两种实现方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#URL"><span class="nav-number">2.4.</span> <span class="nav-text">URL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%B3%E6%97%B6%E9%80%9A%E8%AE%AF%E7%9A%84%E5%AE%9E%E7%8E%B0%EF%BC%8C%E7%9F%AD%E8%BD%AE%E8%AF%A2%E3%80%81%E9%95%BF%E8%BD%AE%E8%AF%A2%E3%80%81SSE-%E5%92%8C-WebSocket-%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.5.</span> <span class="nav-text">即时通讯的实现，短轮询、长轮询、SSE 和 WebSocket 间的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9F%AD%E8%BD%AE%E8%AF%A2"><span class="nav-number">2.5.1.</span> <span class="nav-text">短轮询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%95%BF%E8%BD%AE%E8%AF%A2"><span class="nav-number">2.5.2.</span> <span class="nav-text">长轮询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SSE"><span class="nav-number">2.5.3.</span> <span class="nav-text">SSE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WebSocket"><span class="nav-number">2.5.4.</span> <span class="nav-text">WebSocket</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">2.6.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

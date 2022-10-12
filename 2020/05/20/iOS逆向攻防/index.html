@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="OC的消息传递，可以通过Method Swizzle进行Hook，但是遇到共享库里的C函数呢，如何Hook？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS逆向攻防">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/20/iOS%E9%80%86%E5%90%91%E6%94%BB%E9%98%B2/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="OC的消息传递，可以通过Method Swizzle进行Hook，但是遇到共享库里的C函数呢，如何Hook？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-20T00:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-30T14:25:26.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/20/iOS%E9%80%86%E5%90%91%E6%94%BB%E9%98%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS逆向攻防 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/20/iOS%E9%80%86%E5%90%91%E6%94%BB%E9%98%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS逆向攻防
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-20 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-20T08:00:00+08:00">2020-05-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-30 22:25:26" itemprop="dateModified" datetime="2020-06-30T22:25:26+08:00">2020-06-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E9%80%86%E5%90%91%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">逆向安全</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>OC的消息传递，可以通过Method Swizzle进行Hook，但是遇到共享库里的C函数呢，如何Hook？</p>
+<span id="more"></span>
+
+<h2 id="fishhook"><a href="#fishhook" class="headerlink" title="fishhook"></a>fishhook</h2><p>fishhook是Facebook提供的一个动态修改链接mach-o文件的工具，它利用Mach-o文件加载原理，通过修改懒加载和非懒加载两个表的指针达到<code>Hook C函数</code>的目的。</p>
+<h3 id="Hook使用"><a href="#Hook使用" class="headerlink" title="Hook使用"></a>Hook使用</h3><p>只有两个文件 “fishhook.h”和“fishhook.c”,它提供的接口仅有一个结构体和两个函数:<br>rebinding结构体用来确定你要HOOK的函数和要交换的函数地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struce rebinding&#123;</span><br><span class="line">	constchar*  name;<span class="comment">//需要hook的函数名称，C字符串</span></span><br><span class="line">	<span class="type">void</span> * replaement；<span class="comment">//新函数的地址</span></span><br><span class="line">	<span class="type">void</span>** replaced；<span class="comment">//原始函数地址的指针！</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">     arg1: 存放rebinding 结构体的数组</span></span><br><span class="line"><span class="comment">     arg2: 数组的长度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">rebind_symbols</span><span class="params">(<span class="keyword">struct</span> rebinding rebindings[], <span class="type">size_t</span> rebindings_nel)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">rebind_symbols_image</span><span class="params">(<span class="type">void</span> *header,<span class="type">intptr_t</span> slide,<span class="keyword">struct</span> rebinding rebindings[],<span class="type">size_t</span> rebindings_nel)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>eg:使用Demo Hook一下NSLog</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//函数指针</span></span><br><span class="line">staticvoid(*sys_nslog)(<span class="built_in">NSString</span>* format,...);</span><br><span class="line"></span><br><span class="line"><span class="comment">//定义一个新的函数。HOOK成功后NSLog调用时，会来到这里</span></span><br><span class="line"><span class="type">void</span> myNSLog(<span class="built_in">NSString</span>* format,...)&#123;</span><br><span class="line">    format = [format stringByAppendingString:<span class="string">@&quot;\n上钩了！\n\n&quot;</span>];</span><br><span class="line">    sys_nslog(format);<span class="comment">//调用系统的NSLog，HOOK成功后sys_nslog指针保存的是Fundation中NSLog的地址</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">//准备rebinding结构体</span></span><br><span class="line">    <span class="keyword">struct</span> rebinding nslog;</span><br><span class="line">    nslog.name = <span class="string">&quot;NSLog&quot;</span>;</span><br><span class="line">    <span class="comment">//需要HOOK的函数名称</span></span><br><span class="line">    nslog.replacement = myNSLog;</span><br><span class="line">    <span class="comment">//新函数的地址</span></span><br><span class="line">    nslog.replaced = (<span class="type">void</span> *)&amp;sys_nslog;</span><br><span class="line">    <span class="comment">//原始函数指针</span></span><br><span class="line">    <span class="comment">//准备数组，将一个或多个 rebinding 结构体放进去。</span></span><br><span class="line">    <span class="keyword">struct</span> rebinding rebs[<span class="number">1</span>] = &#123;nslog&#125;;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     arg1: 存放rebinding 结构体的数组</span></span><br><span class="line"><span class="comment">     arg2: 数组的长度</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    rebind_symbols(rebs, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h3><h4 id="MachO"><a href="#MachO" class="headerlink" title="MachO"></a>MachO</h4><p>我们生成的ipa包，里面就包含MachO文件，这个文件里包含程序的数据和指令，比如你定义的类，方法，全局变量，方法实现等等。</p>
+<ul>
+<li>自定义函数和系统函数的区别</li>
+</ul>
+<ol>
+<li>自定义函数在MachO文件中，在运行时刻进入内存，自定义函数在本镜像文件中。</li>
+<li>系统函数在系统框架中，在运行时刻进入内存，系统函数在系统的动态库中，比如NSLog在Fundtaion这个镜像文件中。</li>
+</ol>
+<p>自定义的函数，在编译时刻，编译器就可以确定函数的实现地址（在MachO文件中的偏移地址），但是系统函数是没办法知道的，那么在CPU执行系统函数的时候，如何知道系统函数的地址呢？</p>
+<h4 id="PIC（position-Independ-code）技术"><a href="#PIC（position-Independ-code）技术" class="headerlink" title="PIC（position Independ code）技术"></a>PIC（position Independ code）技术</h4><p>翻译过来就是位置独立代码。</p>
+<blockquote>
+<p>当你的程序要调用一个MachO外部函数的时候，编译器是没办法知道该函数的地址的，所以它在MachO文件里面生成一个列表，这个列表里放指针，让当前的系统函数调用指向这个列表里面对应的指针，等到我们的MachO文件加载进内存时，再将系统函数的真实地址，一个一个的赋值给列表中的指针。</p>
+</blockquote>
+<ul>
+<li>这个列表就是符号表</li>
+<li>列表里的指针，成为符号</li>
+<li>给里面的指针赋值的过程，称为符号绑定</li>
+</ul>
+<p>所以fishhook之所以Hook不了自定义的函数，就是因为自定义的函数，没有通过符号寻找地址这个过程，而系统函数是通过符号去绑定实现地址的。fishhook就是修改了系统函数的符号达到Hook的目的。</p>
+<p><code>fishhook应用，可以hook 函数objc_msgSend 二进制重排减少page fault 来达到启动优化</code></p>
+<h2 id="一次逆向"><a href="#一次逆向" class="headerlink" title="一次逆向"></a>一次逆向</h2><p>在技术群里，偶然看到一个直播APP链接，好奇驱动下，下载安装，然后打开了新世界的大门，无法自拔….看着这些诱人又年轻活泼的小姐姐，当然要发挥一下我的聊骚本领，可是发现聊天，加好友，刷礼物都需要金币，这些都是要充值RMB的，我是穷人呀…然后想试试是否可以破解给自己充值。</p>
+<h3 id="获取脱壳ipa包"><a href="#获取脱壳ipa包" class="headerlink" title="获取脱壳ipa包"></a>获取脱壳ipa包</h3><p>因为是通过企业证书安装的方式，所以并不需要脱壳，所以这一步只需要获取ipa安装包即可，这个App的安装方式是通过一个plist文件（里面包含ipa的真实url），然后会自动安装，所以要想获取ipa的url路径，需要先获取到这个plist文件，这里借助charles来查看app安装链接跳转后的plist文件路径，和返回的ipa的url。</p>
+<h3 id="重签名调试"><a href="#重签名调试" class="headerlink" title="重签名调试"></a>重签名调试</h3><p>这里就跟之前博客里介绍过的流程一样。</p>
+<h3 id="HooK业务"><a href="#HooK业务" class="headerlink" title="HooK业务"></a>HooK业务</h3><p>这里Hook了UserModel的一些相关属性，比如金币，level…的getter方法，但是发现并没有什么作用，只是改变了App界面上的数据显示，实际发送礼物等需要消耗金币的操作，后台会去做校验，充值模块又是直接用的H5页面…看来App的破解顶多也只是做个路由转发，并没太大实际作用，再者就是破解优质App，分析别人的技术实现方案了.</p>
+<p>想起来之前github上有看到过一个某度网盘的下载限制破解的仓库，于是我去看了下破解方法，下载完代码之后一看，居然也是粗暴的将Uer Model的vip属性getter方法Hook返回为true，然后你就看到可以一直使用vip的下载试用了….想不到大厂的代码也不过如此，再想到我每次面试大厂时的卑微姿态，真的是…</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c0331869b6af">fishHook原理探究</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/P9gE3zuDHLRrRfW4hvRP">一行代码解决！iOS 二进制重排启动优化</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="prev" title="iOS内存管理">
+      <i class="fa fa-chevron-left"></i> iOS内存管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/25/iDA%20Pro%E5%AE%89%E8%A3%85/" rel="next" title="iDA Pro安装">
+      iDA Pro安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#fishhook"><span class="nav-number">1.</span> <span class="nav-text">fishhook</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook%E4%BD%BF%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">Hook使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MachO"><span class="nav-number">1.2.1.</span> <span class="nav-text">MachO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PIC%EF%BC%88position-Independ-code%EF%BC%89%E6%8A%80%E6%9C%AF"><span class="nav-number">1.2.2.</span> <span class="nav-text">PIC（position Independ code）技术</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1%E9%80%86%E5%90%91"><span class="nav-number">2.</span> <span class="nav-text">一次逆向</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E8%84%B1%E5%A3%B3ipa%E5%8C%85"><span class="nav-number">2.1.</span> <span class="nav-text">获取脱壳ipa包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E7%AD%BE%E5%90%8D%E8%B0%83%E8%AF%95"><span class="nav-number">2.2.</span> <span class="nav-text">重签名调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HooK%E4%B8%9A%E5%8A%A1"><span class="nav-number">2.3.</span> <span class="nav-text">HooK业务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

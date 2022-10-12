@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对象结构和行为">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="拓展 VS 分类一般用扩展做什么？ 声明私有属性 声明私有方法 声明私有成员变量  扩展的特点 (和分类的区别) 编译时决议 只以声明的形式存在，多数情况下寄生于宿主类的.m中 不能为系统类添加扩展">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/KVC.png">
+<meta property="og:image" content="https://github.com/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_law.png">
+<meta property="og:image" content="https://github.com/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_deep.png">
+<meta property="og:image" content="https://github.com/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_mutable.png">
+<meta property="article:published_time" content="2018-12-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-01T12:57:17.139Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="KVC">
+<meta property="article:tag" content="KVO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/KVC.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>对象结构和行为 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          对象结构和行为
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-01 08:00:00" itemprop="dateCreated datePublished" datetime="2018-12-01T08:00:00+08:00">2018-12-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-01 20:57:17" itemprop="dateModified" datetime="2022-07-01T20:57:17+08:00">2022-07-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="拓展-VS-分类"><a href="#拓展-VS-分类" class="headerlink" title="拓展 VS 分类"></a>拓展 VS 分类</h3><h4 id="一般用扩展做什么？"><a href="#一般用扩展做什么？" class="headerlink" title="一般用扩展做什么？"></a>一般用扩展做什么？</h4><ul>
+<li>声明私有属性</li>
+<li>声明私有方法</li>
+<li>声明私有成员变量</li>
+</ul>
+<h4 id="扩展的特点-和分类的区别"><a href="#扩展的特点-和分类的区别" class="headerlink" title="扩展的特点 (和分类的区别)"></a>扩展的特点 (和分类的区别)</h4><ul>
+<li>编译时决议</li>
+<li>只以声明的形式存在，多数情况下寄生于宿主类的.m中</li>
+<li>不能为系统类添加扩展</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="KVO-和-KVC"><a href="#KVO-和-KVC" class="headerlink" title="KVO 和 KVC"></a>KVO 和 KVC</h3><h4 id="KVO"><a href="#KVO" class="headerlink" title="KVO"></a>KVO</h4><p>KVO实现：使用 isa-swizzling 来实现KVO</p>
+
+
+<p>当调用了 addObserver:forkeypath 方法之后，系统会动态创建 NSKVONorifying_A 类，同时将A的isa指针指向 NSKVONorifying_A</p>
+<p>子类拥有自己的set方法实现，内部会调用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-willChangeValueForKey:</span><br><span class="line">原来的setter</span><br><span class="line">-didChangeValueForKey:这个方法内部又会调用监听器(observer)的监听方法</span><br></pre></td></tr></table></figure>
+
+<h4 id="KVC"><a href="#KVC" class="headerlink" title="KVC"></a>KVC</h4><p>主要有这俩个方法<br>通过一副流程图看一下 valueForKey 的实现逻辑</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="type">id</span>)valueForKey:(<span class="built_in">NSString</span> *)key</span><br><span class="line">-(<span class="type">void</span>)setValue:(<span class="type">id</span>)value forkey:(<span class="built_in">NSString</span> *)key;</span><br></pre></td></tr></table></figure>
+<img src="/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/KVC.png" class="">
+
+<p>首先系统会判断访问的key是否有对应的getter方法，存在就直接进行调用，不存在就判断实例变量是否存在，通过 accessInstanceVariablesDirectly 来判断 ，默认是YES。 如果不存在，会调用 UndefinedKey ，抛出异常.</p>
+<h4 id="KVC-VS-KVO"><a href="#KVC-VS-KVO" class="headerlink" title="KVC VS KVO"></a>KVC VS KVO</h4><p>KVC，即是指 NSKeyValueCoding，一个非正式的 Protocol，提供一种机制来间接访问对象的属性。KVO 就是基于 KVC 实现的关键技术之一。<br>一个对象拥有某些属性。比如说，一个 Person 对象有一个 name 和一个 address 属性。以 KVC 说法，Person 对象分别有一个 value 对应他的 name 和 address 的 key。 key 只是一个字符串，它对应的值可以是任意类型的对象。从最基础的层次上看，KVC 有两个方法：一个是设置 key 的值，另一个是获取 key 的值</p>
+<h3 id="Copy属性关键字"><a href="#Copy属性关键字" class="headerlink" title="Copy	属性关键字"></a>Copy	属性关键字</h3><h4 id="浅拷贝和深拷贝的概念"><a href="#浅拷贝和深拷贝的概念" class="headerlink" title="浅拷贝和深拷贝的概念"></a>浅拷贝和深拷贝的概念</h4><img src="/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_law.png" class="">
+<img src="/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_deep.png" class="">
+
+<h4 id="Copy修饰对象"><a href="#Copy修饰对象" class="headerlink" title="Copy	修饰对象"></a>Copy	修饰对象</h4><img src="/2018/12/01/%E5%AF%B9%E8%B1%A1%E7%BB%93%E6%9E%84%E5%92%8C%E8%A1%8C%E4%B8%BA/copy_mutable.png" class="">
+
+<p>总结下来三点</p>
+<ol>
+<li>可变对象的 copy 和mutableCopy都是深拷贝</li>
+<li>不可变对象的copy是浅拷贝，mutableCopy是深拷贝</li>
+<li><pre><code>copy方法返回的都是不可变对象
+</code></pre>
+</li>
+</ol>
+<h3 id="成员变量捕获"><a href="#成员变量捕获" class="headerlink" title="成员变量捕获"></a>成员变量捕获</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)catchIvar</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">void</span> (^blockA)() = ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>,_ivarA);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">void</span>)catchIvar</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">void</span> (^blockA)() = ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>,<span class="keyword">self</span>-&gt;_ivarA);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面两份代码是等价的，系统为什么要转化成self-&gt;_ivarA的形式去捕获self呢？而不是直接捕获_ivarA</p>
+<p>正常的方法中，直接使用成员变量ivar，编译器都会自动转化为self-&gt;ivar，之所以这样做，是因为正常的消息发送中，self是会作为一个参数，传递到objc_send方法中的。所以在任何方法中都可以直接获取到self，而成员变量ivar，并没有作为任何参数传入到方法中，所以为了访问到ivar，正常都会转化为self-&gt;ivar来访问。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/KVC/" rel="tag"># KVC</a>
+              <a href="/tags/KVO/" rel="tag"># KVO</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/10/Category%E5%92%8Cload/" rel="prev" title="Category和load">
+      <i class="fa fa-chevron-left"></i> Category和load
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/01/%E6%B6%88%E6%81%AF%E5%8F%91%E9%80%81%E5%92%8C%E8%BD%AC%E5%8F%91/" rel="next" title="消息发送和转发">
+      消息发送和转发 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%93%E5%B1%95-VS-%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">拓展 VS 分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E7%94%A8%E6%89%A9%E5%B1%95%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">一般用扩展做什么？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E7%9A%84%E7%89%B9%E7%82%B9-%E5%92%8C%E5%88%86%E7%B1%BB%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.</span> <span class="nav-text">扩展的特点 (和分类的区别)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KVO-%E5%92%8C-KVC"><span class="nav-number">2.</span> <span class="nav-text">KVO 和 KVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KVO"><span class="nav-number">2.1.</span> <span class="nav-text">KVO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC"><span class="nav-number">2.2.</span> <span class="nav-text">KVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KVC-VS-KVO"><span class="nav-number">2.3.</span> <span class="nav-text">KVC VS KVO</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copy%E5%B1%9E%E6%80%A7%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">3.</span> <span class="nav-text">Copy	属性关键字</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">3.1.</span> <span class="nav-text">浅拷贝和深拷贝的概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Copy%E4%BF%AE%E9%A5%B0%E5%AF%B9%E8%B1%A1"><span class="nav-number">3.2.</span> <span class="nav-text">Copy	修饰对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7"><span class="nav-number">4.</span> <span class="nav-text">成员变量捕获</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

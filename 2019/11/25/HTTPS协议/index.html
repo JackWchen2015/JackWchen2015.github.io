@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="HTTP 主要有这些不足，例举如下  通信使用明文(不加密)，内容可能会被窃听  不验证通信方的身份，因此有可能遭遇伪装    无法证明报文的完整性，所以有可能已遭篡改">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTTPS协议">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="HTTP 主要有这些不足，例举如下  通信使用明文(不加密)，内容可能会被窃听  不验证通信方的身份，因此有可能遭遇伪装    无法证明报文的完整性，所以有可能已遭篡改">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/duicheng.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/noduicheng.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digitalsign.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digitalcer.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digtitalFinal.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/https05.png">
+<meta property="og:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/https_conn.png">
+<meta property="article:published_time" content="2019-11-25T00:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-11T10:59:43.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/duicheng.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>HTTPS协议 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HTTPS协议
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-25 08:00:00" itemprop="dateCreated datePublished" datetime="2019-11-25T08:00:00+08:00">2019-11-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-11 18:59:43" itemprop="dateModified" datetime="2020-05-11T18:59:43+08:00">2020-05-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>HTTP 主要有这些不足，例举如下</p>
+<ol>
+<li>通信使用明文(不加密)，内容可能会被窃听 </li>
+<li>不验证通信方的身份，因此有可能遭遇伪装   </li>
+<li>无法证明报文的完整性，所以有可能已遭篡改</li>
+</ol>
+ <span id="more"></span>
+<h2 id="通讯加密"><a href="#通讯加密" class="headerlink" title="通讯加密"></a>通讯加密</h2><p>HTTP 协议中没有加密机制，但可以通过和 SSL(Secure Socket Layer，安全套接层)或 TLS(Transport Layer Security，安全层传输协议)的组合使用， 加密 HTTP 的通信内容。用 SSL 建立安全通信线路之后，就可以在这条线路上进行HTTP 通信了。与 SSL 组合使用的 HTTP 被称为 HTTPS(HTTP Secure，超文本传输安全协议)或 HTTP over SSL</p>
+<h2 id="验证通信方身份"><a href="#验证通信方身份" class="headerlink" title="验证通信方身份"></a>验证通信方身份</h2><p>使用证书，以证明通信方就是意料中的服务器。另外，客户端持有证书即可完成个人身份的确认，也可用于对 Web 网站的认证环节</p>
+<h2 id="加密方式"><a href="#加密方式" class="headerlink" title="加密方式"></a>加密方式</h2><h3 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h3><p>对称加密：指的就是加、解密使用的同是一串密钥，所以被称做对称加密。对称加密只有一个密钥作为私钥。<br>常见的对称加密算法：DES，AES等。</p>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/duicheng.png" class="">
+
+
+<p>优缺点：加解密的效率要高得多、加密速度快。但是缺陷在于对于密钥的管理和分发上比较困难，不是非常安全，密钥管理负担很重。</p>
+<h3 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h3><p>非对称加密：指的是加、解密使用不同的密钥，一把作为公开的公钥，另一把作为私钥。公钥加密的信息，只有私钥才能解密。反之，私钥加密的信息，只有公钥才能解密。 </p>
+<p>见的非对称加密算法：RSA</p>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/noduicheng.png" class="">
+
+<p>优缺点：</p>
+<p>安全性更高，公钥是公开的，密钥是自己保存的，不需要将私钥给别人。缺点：加密和解密花费时间长、速度慢，只适合对少量数据进行加密。</p>
+<p>举例：假设A要发送一封Email给B，他不想让任何其他人在传输中看到Email的内容，做法就是使用B的公钥对Email加密，只有B的私钥能够解密（B的私钥唯一性保证信件不会泄露）。<br>某天出意外了，有黑客冒充A给B发送Email，并且也用B的公钥加密，导致B无法区分这封邮件是否来自A。怎么办？此时A可以用自己的私钥加密，那么B收到邮件后如果用A的公钥可以解密邮件，那么证明这封信肯定来自于A</p>
+<p>公钥的作用：对内容本身加密，保证不被其他人看到。<br>私钥的作用：证明内容的来源</p>
+<h3 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h3><p>上面发邮件的例子，A用自己的私钥对Email加密发送，这存在下面问题<br><strong>对文件本身加密可能是个耗时过程，比如这封Email足够大，那么私钥加密整个文件以及拿到文件后的解密无疑是巨大的开销。</strong></p>
+<p>数字签名可以解决这个问题：<br>1.A先对这封Email执行哈希运算得到hash值简称“摘要”，取名h1<br>2.然后用自己私钥对摘要加密，生成的东西叫“数字签名”<br>3.把数字签名加在Email正文后面，一起发送给B<br>4.B收到邮件后用A的公钥对数字签名解密，成功则代表Email确实来自A，失败说明有人冒充<br>5.B对邮件正文执行哈希运算得到hash值，取名h2<br>6.B 会对比第4步数字签名的hash值h1和自己运算得到的h2，一致则说明邮件未被篡改。</p>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digitalsign.png" class="">
+
+<p><strong>数字签名的作用就是验证数据来源以及数据完整性！解密过程则称为数字签名验证</strong></p>
+<p>数字签名流程有两个问题：</p>
+<ol>
+<li><p>如果中间人同时篡改了Email正文和数字签名，那B收到邮件无法察觉啊。<br>答案：数字签名的生成需要对方私钥，所以数字签名很难被伪造。万一私钥泄漏了呢，不好意思，你私钥都能弄丢了那这篇文章当我白写。（私钥绝对保密不参与传输）</p>
+</li>
+<li><p>公钥是公开的并且可以自行导入到电脑，如果有人比如C偷偷在B的电脑用自己公钥替换了A的公钥，然后用自己的私钥给B发送Email，这时B收到邮件其实是被C冒充的但是他无法察觉。<br>答案：确实存在这种情况！解决办法就是数字证书，一环套一环请接着看。</p>
+</li>
+</ol>
+<h3 id="数字证书"><a href="#数字证书" class="headerlink" title="数字证书"></a>数字证书</h3><p>数字证书如何生成？</p>
+<ol>
+<li>首先A去找”证书中心”（certificate authority，简称CA），为公钥做认证。证书中心用自己的私钥，对A的公钥和一些相关信息一起加密，生成”数字证书”（Digital Certificate）</li>
+</ol>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digitalcer.png" class="">
+
+<ol start="2">
+<li>A在邮件正文下方除了数字签名，另外加上这张数字证书</li>
+</ol>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/digtitalFinal.png" class="">
+
+<ol start="3">
+<li>B收到Email后用CA的公钥解密这份数字证书，拿到A的公钥，然后验证数字签名，后面流程就和图1的流程一样了，不再赘述。</li>
+</ol>
+<p>问题：</p>
+<ol>
+<li><p>假设数字证书被伪造了呢？<br>传输中数字证书有可能被篡改。因此数字证书也是经过数字签名的，上文说道数字签名的作用就是验证数据来源以及数据完整性！B收到邮件后可以先验证这份数字证书的可靠性，通过后再验证数字签名。</p>
+</li>
+<li><p>要是有1万个人要给B发邮件，难道B要保存1万份不同的CA公钥吗？<br>不需要，CA认证中心给可以给B一份“根证书”，里面存储CA公钥来验证所有CA分中心颁发的数字证书。</p>
+</li>
+<li><p>证书验证的过程依赖于证书信任链。</p>
+</li>
+</ol>
+<p>所谓证书信任链，即一个证书要依靠上一级证书来证明自己是可信的，最顶层的证书被称为根证书，拥有根证书的机构被称为根 CA。</p>
+<p>以 Github 为例，在浏览器中我们可以看到它的证书信任链如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DigiCert High Assurance EV Root CA -&gt; DigiCert SHA2 </span><br><span class="line">Extended Validation Server CA -&gt; Github.com</span><br></pre></td></tr></table></figure>
+
+<p>从上到下即 Root CA -&gt; 二级 CA -&gt; 网站。</p>
+<ol start="4">
+<li>如何验证根证书可靠性？<br>无法验证。根证书是自验证证书，CA机构是获得社会绝对认可和有绝对权威的第三方机构，这一点保证了根证书的绝对可靠。</li>
+</ol>
+<h2 id="HTTP-加密-认证-完整性保护-x3D-HTTPS"><a href="#HTTP-加密-认证-完整性保护-x3D-HTTPS" class="headerlink" title="HTTP+ 加密 + 认证 + 完整性保护 &#x3D; HTTPS"></a>HTTP+ 加密 + 认证 + 完整性保护 &#x3D; HTTPS</h2><p>HTTPS 并非是应用层的一种新协议。只是HTTP通信接口部分用 SSL(Secure Socket Layer)和 TLS(Transport Layer Security)协议代 替而已。</p>
+<p>HTTP 直接和 TCP 通信。当使用 SSL 时，则演变成先和 SSL 通 信，再由 SSL 和 TCP通信了。简言之，所谓 HTTPS，其实就是身披 SSL 协议这层外壳的 HTTP</p>
+<p><strong>SSL 是独立于 HTTP 的协议,是 当今世界上应用最为广泛的网络安全技术</strong></p>
+<img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/https05.png" class="">
+
+<h2 id="HTTPS连接过程"><a href="#HTTPS连接过程" class="headerlink" title="HTTPS连接过程"></a>HTTPS连接过程</h2><h3 id="HTTPS-连接的建立流程是怎样的"><a href="#HTTPS-连接的建立流程是怎样的" class="headerlink" title="HTTPS 连接的建立流程是怎样的?"></a>HTTPS 连接的建立流程是怎样的?</h3><img src="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/https_conn.png" class="">
+<p>会话秘钥 &#x3D; random S + random C + 预主秘钥</p>
+<ul>
+<li>TLS 四次握手</li>
+</ul>
+<ol>
+<li>第一步，客户端向服务器发起请求，请求种包括使用的协议版本号，生成的一个随机数C、以及客户端支持的加密方法。</li>
+<li>第二部，服务端收到请求后，确认双方使用的加密方法、并给出服务器的证书、以及一个服务器生成的随机数S</li>
+<li>第三部，客户端确认服务器证书有效后，生成一个新的随机数（预主密钥），并使用数字证书中的公钥，加密这个随机数，然后发给服务器。并且还会提供一个前面所有内容的hash的值，用来供服务器检验。</li>
+<li>服务器使用自己的私钥，来解密客户端发送过来的随机数。并提供前面所有内容的hash值来供客户端检验。这个时候双方都有了三个随机数，按照之前约定的加密方法，使用这三个随机数生成对话密钥，以后的对话过程都使用这个密钥来加密信息。</li>
+</ol>
+<ul>
+<li><p>为什么一定要用三个随机数，来生成“会话密钥”？<br>客户端和服务端都需要生成随机数，以此来保证每次生成的密钥都不相同，使用三个随机数，是因为SSL的协议默认不信任每个主机都能产生完全随机的数。三个伪随机数就很接近于随机了，因此可以使用这种方法来保持生成密钥的随机性和安全性。</p>
+</li>
+<li><p>SSL连接断开后如何恢复？<br>一共有两种方法来恢复断开的SSL连接，一种是session ID，一种是session ticket。</p>
+</li>
+</ul>
+<ol>
+<li>使用session ID<br>每一次的会话都有一个编号，当对话中断后，下一次重新连接时，只要客户端给出这个编号，服务器如果有这个编号，那么双方就可以继续使用以前的密钥，而不用重新生成一把。<br>缺点：session ID只能够存在一台服务器上，如果我们的请求通过负载均衡被转移到其他的服务器上，那么就无法恢复对话。</li>
+<li>使用session ticket<br>session ticket是服务器在上一次对话中发送给客户的，这个ticket是加密的，只有服务器能解密，里面包含了本次会话的信息，比如对话密钥和加密算法等。这样不管我们的请求是否转移到其他的服务器上，当服务器将ticket解密以后，就能够获取上次对话的信息，就不用生成新的对话密钥。</li>
+</ol>
+<h3 id="HTTPS都使用了哪些加密手段"><a href="#HTTPS都使用了哪些加密手段" class="headerlink" title="HTTPS都使用了哪些加密手段?"></a>HTTPS都使用了哪些加密手段?</h3><p>在交换密钥环节（连接建立过程中）使用公开密钥加密方式（非对称加密），之后的建立通信交换报文阶段（通信过程中）则使用共享密钥加密方式（对称加密）。</p>
+<h3 id="如何证明收到的公开密钥就是原本预想的那台服务器发行的公开密钥？"><a href="#如何证明收到的公开密钥就是原本预想的那台服务器发行的公开密钥？" class="headerlink" title="如何证明收到的公开密钥就是原本预想的那台服务器发行的公开密钥？"></a>如何证明收到的公开密钥就是原本预想的那台服务器发行的公开密钥？</h3><p>使用由数字证书认证机构(CA，Certificate Authority)和其相关机关颁发的公开密钥证书。</p>
+<p>数字证书认证机构在判明提出申请者的身份之后，会对已申请的公开密钥做数字签名，然后分配这个已签名的公开密钥，并将该公开密钥放入公钥证书 后绑定在一起。</p>
+<p>服务器会将这份由数字证书认证机构颁发的公钥证书发送给客户端，以进行公开密钥加密方式通信。公钥证书也可叫做数字证书或直接称为证书。</p>
+<p>接到证书的客户端可使用数字证书认证机构的公开密钥，对那张证书上的数字签名进行验证，一旦验证通过，客户端便可明确两件事: 一，认证服务器的公开密钥的是真实有效的数字证书认证机构。二， 服务器的公开密钥是值得信赖的。</p>
+<p>认证机关的公开密钥必须安全地转交给客户端。使用通信方式 时，如何安全转交是一件很困难的事，因此，多数浏览器开发商发布 版本时，会事先在内部植入常用认证机关的公开密钥</p>
+<p>证书的一个作用是用来证明作为通信一方的服务器是否规范，另 外一个作用是可确认对方服务器背后运营的企业是否真实存在</p>
+<h2 id="SSL剥离"><a href="#SSL剥离" class="headerlink" title="SSL剥离"></a>SSL剥离</h2><p>SSL 剥离即阻止用户使用 HTTPS 访问网站。由于并不是所有网站都只支持 HTTPS，大部分网站会同时支持 HTTP 和 HTTPS 两种协议。用户在访问网站时，也可能会在地址栏中输入 http:&#x2F;&#x2F; 的地址，第一次的访问完全是明文的，这就给了攻击者可乘之机。通过攻击 DNS 响应，攻击者可以将自己变成中间人。</p>
+<blockquote>
+<p>DNS 作为基于 UDP 的协议是相当不安全的，为了保证 DNS 的安全可以使用 DNS over TCP 等机制</p>
+</blockquote>
+<p><strong>解决：HSTS（HTTP Strict Transport Security）用于强制浏览器使用 HTTPS 访问网站的一种机制</strong></p>
+<h2 id="伪造证书攻击"><a href="#伪造证书攻击" class="headerlink" title="伪造证书攻击"></a>伪造证书攻击</h2><p>即使在全程使用 HTTPS 的情况下，我们仍然有可能被监听</p>
+<p>假设我们想访问 <code>www.google.com</code>，但我们的 DNS 服务器被攻击了，指向的 IP 地址并非 Google 的服务器，而是攻击者的 IP。当攻击者的服务器也有合法的证书的时候，我们的浏览器就会认为对方是 Google 服务器，从而信任对方。这样，攻击者便可以监听我们和谷歌之前的所有通信了</p>
+<p>击者有两步需要操作，第一步是需要攻击 DNS 服务器。第二步是攻击者自己的证书需要被用户信任，这一步对于用户来说是很难控制的，需要证书颁发机构能够控制自己不滥发证书</p>
+<p><strong>解决：HPKP（Public Key Pinning Extension for HTTP）在 HSTS 上更进一步，HPKP 直接在返回头中存储服务器的公钥指纹信息，一旦发现指纹和实际接受到的公钥有差异，浏览器就可以认为正在被攻击</strong></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/4932cb1499bf">1.通俗理解数字签名，数字证书和https</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/11/25/%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%8F%8A%E5%BF%83%E8%B7%B3%E4%BF%9D%E6%B4%BB/" rel="prev" title="长连接及心跳保活">
+      <i class="fa fa-chevron-left"></i> 长连接及心跳保活
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/11/29/UITableview%E4%BC%98%E5%8C%96/" rel="next" title="UITableView优化">
+      UITableView优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%AE%AF%E5%8A%A0%E5%AF%86"><span class="nav-number">1.</span> <span class="nav-text">通讯加密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E9%80%9A%E4%BF%A1%E6%96%B9%E8%BA%AB%E4%BB%BD"><span class="nav-number">2.</span> <span class="nav-text">验证通信方身份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">加密方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">3.1.</span> <span class="nav-text">对称加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86"><span class="nav-number">3.2.</span> <span class="nav-text">非对称加密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D"><span class="nav-number">3.3.</span> <span class="nav-text">数字签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6"><span class="nav-number">3.4.</span> <span class="nav-text">数字证书</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-%E5%8A%A0%E5%AF%86-%E8%AE%A4%E8%AF%81-%E5%AE%8C%E6%95%B4%E6%80%A7%E4%BF%9D%E6%8A%A4-x3D-HTTPS"><span class="nav-number">4.</span> <span class="nav-text">HTTP+ 加密 + 认证 + 完整性保护 &#x3D; HTTPS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS%E8%BF%9E%E6%8E%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">HTTPS连接过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS-%E8%BF%9E%E6%8E%A5%E7%9A%84%E5%BB%BA%E7%AB%8B%E6%B5%81%E7%A8%8B%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84"><span class="nav-number">5.1.</span> <span class="nav-text">HTTPS 连接的建立流程是怎样的?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTPS%E9%83%BD%E4%BD%BF%E7%94%A8%E4%BA%86%E5%93%AA%E4%BA%9B%E5%8A%A0%E5%AF%86%E6%89%8B%E6%AE%B5"><span class="nav-number">5.2.</span> <span class="nav-text">HTTPS都使用了哪些加密手段?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%AF%81%E6%98%8E%E6%94%B6%E5%88%B0%E7%9A%84%E5%85%AC%E5%BC%80%E5%AF%86%E9%92%A5%E5%B0%B1%E6%98%AF%E5%8E%9F%E6%9C%AC%E9%A2%84%E6%83%B3%E7%9A%84%E9%82%A3%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%8F%91%E8%A1%8C%E7%9A%84%E5%85%AC%E5%BC%80%E5%AF%86%E9%92%A5%EF%BC%9F"><span class="nav-number">5.3.</span> <span class="nav-text">如何证明收到的公开密钥就是原本预想的那台服务器发行的公开密钥？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL%E5%89%A5%E7%A6%BB"><span class="nav-number">6.</span> <span class="nav-text">SSL剥离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%AA%E9%80%A0%E8%AF%81%E4%B9%A6%E6%94%BB%E5%87%BB"><span class="nav-number">7.</span> <span class="nav-text">伪造证书攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

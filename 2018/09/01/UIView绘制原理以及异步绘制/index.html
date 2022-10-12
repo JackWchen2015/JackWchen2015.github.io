@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UIView绘制原理以及异步绘制">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前言由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_Display.jpeg">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_DisplayBySystem.jpeg">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/setNeedsDisplay.png">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/drawLayer.png">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/displayLayer.png">
+<meta property="og:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_DrawAsync.jpeg">
+<meta property="article:published_time" content="2018-09-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-11T01:33:06.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_Display.jpeg">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>UIView绘制原理以及异步绘制 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          UIView绘制原理以及异步绘制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-09-01 08:00:00" itemprop="dateCreated datePublished" datetime="2018-09-01T08:00:00+08:00">2018-09-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-01-11 09:33:06" itemprop="dateModified" datetime="2022-01-11T09:33:06+08:00">2022-01-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>由于UIKit框架的线程不安全性，苹果规定UI渲染相关操作要放在主线程来执行，不过CoreGraphic框架是线程安全的。</p>
+<span id="more"></span>
+
+<h3 id="UIView绘制流程"><a href="#UIView绘制流程" class="headerlink" title="UIView绘制流程"></a>UIView绘制流程</h3><p>UIView调用setNeedsDisplay方法后,实际上并没有发生当前视图的绘制工作,而是在之后的某一时机进行绘制工作,为什么会在之后的某一时机进行绘制工作呢?<br>当UIView调用setNeedDisplay之后,系统会调用view对应layer的 setNeedsDisplay方法,相当于在当前layer上打上了一个脏标记,然后会在当前runloop即将结束的时候调用CALayer的display方法,才会真正的进入当前视图的绘制流程当中,所以视图的绘制时机,是在当前runloop即将结束的时候才会开始。</p>
+<p>CALayer的display方法的内部实现,首先会判断layer的delegete是否响应display方法,如果代理不响应就会进入到系统的绘制流程当中,如果响应,实际上就为我们提供了异步绘制的接口,这样就构成了UIView的绘制原理</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_Display.jpeg" class="">
+
+
+<h3 id="系统的绘制流程"><a href="#系统的绘制流程" class="headerlink" title="系统的绘制流程"></a>系统的绘制流程</h3><p>首先CALayer会在内部创建一个backing store(CGContextRef),我们一般在drawRect中可以通过上下文堆栈当中拿到当前栈顶的context.然后layer判断是否有代理,如果没有代理会调用layer的drawInContext方法,如果实现了代理就会调用delegete的drawLayer:inContext方法,这是在发生在系统内部当中的,然后在合适的时机给予回调方法,也就是View的drawRect方法.可以通过drawRect方法做一些其他的绘制工作.然后无论哪两个分支,都有calayer上传backing store (最终的位图)到CPU.然后结束系统的绘制流程.</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_DisplayBySystem.jpeg" class="">
+
+
+<h3 id="何为渲染"><a href="#何为渲染" class="headerlink" title="何为渲染"></a>何为渲染</h3><p>渲染就是把我们代码里设置的代码的视图和数据结合，最后绘制成一张图呈现在用户的面前。每秒绘制60张图，用户看着就是流畅的界面呈现，如果不到60帧，那么越少用户看着就会越卡。</p>
+<h3 id="利用Runloop解释一下页面的渲染的过程"><a href="#利用Runloop解释一下页面的渲染的过程" class="headerlink" title="利用Runloop解释一下页面的渲染的过程"></a>利用Runloop解释一下页面的渲染的过程</h3><p>当我们调用 [UIView setNeedsDisplay] 时，这时会调用当前 View.layer 的 [view.layer setNeedsDisplay]方法。</p>
+<p>这等于给当前的 layer 打上了一个脏标记，而此时并没有直接进行绘制工作。而是会到当前的 Runloop 即将休眠，也就是 beforeWaiting 时才会进行绘制工作。</p>
+<p>紧接着会调用 [CALayer display]，进入到真正绘制的工作。CALayer 层会判断自己的 delegate 有没有实现异步绘制的代理方法 displayer:，这个代理方法是异步绘制的入口，如果没有实现这个方法，那么会继续进行系统绘制的流程，然后绘制结束。</p>
+<p>过程可以用下面这张图来解释：</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/setNeedsDisplay.png" class="">
+
+<p>CALayer 内部会创建一个 Backing Store，用来获取图形上下文。接下来会判断这个 layer 是否有 delegate。</p>
+<p>如果有的话，会调用 [layer.delegate drawLayer:inContext:]，并且会返回给我们 [UIView DrawRect:] 的回调，让我们在系统绘制的基础之上再做一些事情。</p>
+<p>如果没有 delegate，那么会调用 [CALayer drawInContext:]。</p>
+<p>以上两个分支，最终 CALayer 都会将位图提交到 Backing Store，最后提交给 GPU。</p>
+<p>至此绘制的过程结束。</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/drawLayer.png" class="">
+
+
+<h3 id="什么是异步绘制"><a href="#什么是异步绘制" class="headerlink" title="什么是异步绘制"></a>什么是异步绘制</h3><p>异步绘制，就是可以在子线程把需要绘制的图形，提前在子线程处理好。将准备好的图像数据直接返给主线程使用，这样可以降低主线程的压力。</p>
+<p>异步绘制的过程<br>要通过系统的 [view.delegate displayLayer:] 这个入口来实现异步绘制。</p>
+<p>代理负责生成对应的 Bitmap<br>设置该 Bitmap 为 layer.contents 属性的值。<br>整个过程可以通过一张图来说明</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/displayLayer.png" class="">
+
+<h3 id="异步绘制"><a href="#异步绘制" class="headerlink" title="异步绘制"></a>异步绘制</h3><p>怎么进行异步绘制呢,其实就是基于系统给我们开的口子layer.delegate,如果遵从或者实现了displayLayer方法,我们就可以进入到异步绘制流程当中,在异步绘制的过程当中</p>
+<p>就由delegete去负责生成bitmap位图<br>设置改bitmap作为layer.content属性的值</p>
+<p>通过一副时序图来了解异步绘制的机制和流程</p>
+<img src="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/UIView_DrawAsync.jpeg" class="">
+
+
+<h3 id="如何实现异步"><a href="#如何实现异步" class="headerlink" title="如何实现异步"></a>如何实现异步</h3><ol>
+<li>开辟子线程</li>
+</ol>
+<p>在子线程使用CoreGraphic生成一张图片然后再在主线程将图片设置到View或者Layer</p>
+<ol start="2">
+<li>监听MainRunloop的空闲时间，进行渲染（YYAsyncLayer）</li>
+</ol>
+<p>注册一个RunloopObserver，监听MainRunloop在kCFRunLoopCommonModes（包含kCFRunLoopDefaultMode、UITrackingRunLoopMode）下的kCFRunLoopBeforeWaiting（Runloop将要进入休眠）和kCFRunLoopExit（即将退出本次Runloop）的状态，也就是说在一次Runloop空闲时去执行更新显示的操作。</p>
+<h4 id="调用链："><a href="#调用链：" class="headerlink" title="调用链："></a>调用链：</h4><p>对一个包含了<code>YYAsyncLayer</code>的view，比如<code>YYLable</code>重写<code>layoutSubviews</code>方法添加对layer的<code>setNeedsDisplay</code>方法的调用。</p>
+<p>这样一个调用链就形成了：用户操作-&gt;[view layoutSubviews]-&gt;[view.layer setNeedsDisplay]-&gt;[layer display]-&gt;[layer _displayAsync]异步绘制开始（准确的说是<code>_displayAsync</code>方法的参数为<em></em>true**的时候开始异步绘制）。</p>
+<p>但是这并没有用到<em>RunLoop</em>。所以代码会修改为每次调用<code>layoutSubviews</code>的时候给RunLoop提交一个异步绘制的任务：在runloop空闲时回调执行。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/a0ef0838e0e0">UIView绘制原理,异步绘制</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1007314">iOS的异步绘制–YYAsyncLayer源码分析</a></li>
+<li><a target="_blank" rel="noopener" href="https://zsisme.gitbooks.io/ios-/content/chapter2/custom-drawing.html">Custom Drawing iOS核心动画高级技巧</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/03/iOS%E7%89%B9%E6%AE%8A%E6%8A%80%E5%B7%A7/" rel="prev" title="iOS特殊技巧">
+      <i class="fa fa-chevron-left"></i> iOS特殊技巧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/10/Category%E5%92%8Cload/" rel="next" title="Category和load">
+      Category和load <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UIView%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">UIView绘制流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">系统的绘制流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%95%E4%B8%BA%E6%B8%B2%E6%9F%93"><span class="nav-number">4.</span> <span class="nav-text">何为渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8Runloop%E8%A7%A3%E9%87%8A%E4%B8%80%E4%B8%8B%E9%A1%B5%E9%9D%A2%E7%9A%84%E6%B8%B2%E6%9F%93%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">5.</span> <span class="nav-text">利用Runloop解释一下页面的渲染的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6"><span class="nav-number">6.</span> <span class="nav-text">什么是异步绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6"><span class="nav-number">7.</span> <span class="nav-text">异步绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%BC%82%E6%AD%A5"><span class="nav-number">8.</span> <span class="nav-text">如何实现异步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E9%93%BE%EF%BC%9A"><span class="nav-number">8.1.</span> <span class="nav-text">调用链：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

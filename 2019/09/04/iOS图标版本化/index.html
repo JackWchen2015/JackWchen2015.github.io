@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="写在前面通常一个App会有多个版本，企业版，调试版等，不同版本下也会有debug，release之分，有时候需要知道测试所测的版本是否是最新的，虽然可以在App内部添加版本信息进去，但是试想一下如果直接在ICON上添加这些信息是不是更显而易见。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS图标版本化">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/04/iOS%E5%9B%BE%E6%A0%87%E7%89%88%E6%9C%AC%E5%8C%96/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="写在前面通常一个App会有多个版本，企业版，调试版等，不同版本下也会有debug，release之分，有时候需要知道测试所测的版本是否是最新的，虽然可以在App内部添加版本信息进去，但是试想一下如果直接在ICON上添加这些信息是不是更显而易见。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-09-04T00:00:00.000Z">
+<meta property="article:modified_time" content="2019-09-05T11:33:16.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/04/iOS%E5%9B%BE%E6%A0%87%E7%89%88%E6%9C%AC%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS图标版本化 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/04/iOS%E5%9B%BE%E6%A0%87%E7%89%88%E6%9C%AC%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS图标版本化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-04 08:00:00" itemprop="dateCreated datePublished" datetime="2019-09-04T08:00:00+08:00">2019-09-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-09-05 19:33:16" itemprop="dateModified" datetime="2019-09-05T19:33:16+08:00">2019-09-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>通常一个App会有多个版本，企业版，调试版等，不同版本下也会有debug，release之分，有时候需要知道测试所测的版本是否是最新的，虽然可以在App内部添加版本信息进去，但是试想一下如果直接在ICON上添加这些信息是不是更显而易见。</p>
+<span id="more"></span>
+
+<h3 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// 1. 判断执行 Build 的机器是否安装了 ImageMagic</span><br><span class="line">//    |- 如果没有安装：提示安装，退出脚本</span><br><span class="line">//    |- 如果安装：继续执行</span><br><span class="line">// 2. 获取 commit 号 <span class="built_in">hash</span> 值、分支名、build 号，并将其拼接成一个字符串</span><br><span class="line">// 3. 判断编译环境</span><br><span class="line">//    |- 如果是 Release 环境：提示当前是 Release 环境，退出脚本</span><br><span class="line">//    |- 如果是非 Release 环境：继续执行</span><br><span class="line">// 4. 获取 Plist 中 CFBundleIconFiles 的数量</span><br><span class="line">// 5. 根据数量循环，执行调用『生成记号图方法』</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 『生成记号图方法』 </span><br><span class="line">// <span class="keyword">function</span> <span class="function"><span class="title">generateIcon</span></span>() &#123;</span><br><span class="line">// 1. 模糊图片</span><br><span class="line">// 2. 截取图片下半部分</span><br><span class="line">// 3. 添加 commit+brach+build 组成的字符串在截取图片上</span><br><span class="line">// 4. 合成截取图片和原图</span><br><span class="line">// 5. 清除多余图片</span><br><span class="line">// &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ImageMagick"><a href="#ImageMagick" class="headerlink" title="ImageMagick"></a>ImageMagick</h4><blockquote>
+<p>ImageMagick 可以创建、编辑、合成或转换图片。它可以读和写各种格式的图像（超过 200 种格式）包括 PNG、JPEG、JPEG - 2000、GIF、TIFF、DPX、EXR、WebP、Postscript、PDF、SVG。ImageMagick 可以调整、翻转、镜像、旋转、扭曲、剪切和转换图像、图像色彩调整，适用于各种特殊效果,或绘制文本、线、多边形、椭圆和贝塞尔曲线。</p>
+</blockquote>
+<h4 id="安装-建议翻墙"><a href="#安装-建议翻墙" class="headerlink" title="安装(建议翻墙)"></a>安装(建议翻墙)</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">brew update</span><br><span class="line"></span><br><span class="line">brew install ImageMagick</span><br><span class="line"></span><br><span class="line">brew install ghostscript</span><br></pre></td></tr></table></figure>
+
+<h4 id="常用用法："><a href="#常用用法：" class="headerlink" title="常用用法："></a>常用用法：</h4><ol>
+<li>查看图片信息</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">identify original.png </span><br><span class="line">original.png PNG 120x120 120x120+0+0 8-bit sRGB 46c 2.58KB 0.010u 0:00.000</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>合并图像<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给图片添加水印</span></span><br><span class="line">convert original.png -compose over watermark.png -composite new-image.png</span><br></pre></td></tr></table></figure></li>
+<li>高斯模糊<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">convert -blur 80x5 original.jpg blur.png</span><br><span class="line">-blur radiusxsigma，两个分别是高斯模糊需要的两个参数</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="存在的问题-unhandled-critical-chunk"><a href="#存在的问题-unhandled-critical-chunk" class="headerlink" title="存在的问题  unhandled critical chunk"></a>存在的问题  unhandled critical chunk</h3><p>error: CgBI: unhandled critical chunk <a href="mailto:&#65;&#112;&#x70;&#x49;&#x63;&#x6f;&#110;&#50;&#48;&#x78;&#x32;&#48;&#x40;&#x32;&#120;&#46;&#x70;&#110;&#x67;">&#65;&#112;&#x70;&#x49;&#x63;&#x6f;&#110;&#50;&#48;&#x78;&#x32;&#48;&#x40;&#x32;&#120;&#46;&#x70;&#110;&#x67;</a></p>
+<h4 id="分析原因"><a href="#分析原因" class="headerlink" title="分析原因"></a>分析原因</h4><p>在 Xcode 7.3以后,在 Xcode build 项目时,默认会把 png 压缩 和 修改.然后得到新的png图片,ImageMagick 在修改是会遇到上述的问题.<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/36595799/libpng-error-cgbi-unhandled-critical-chunk-xcode-7-3">stackoverflow</a></p>
+<h4 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h4><p>build settting里面设置Compress PNG FIles debug模式下为NO（注意只有项目路径下存在png图片资源时build setting才会有该选项）</p>
+<h3 id="存在的问题-ICON未发生更改"><a href="#存在的问题-ICON未发生更改" class="headerlink" title="存在的问题 ICON未发生更改"></a>存在的问题 ICON未发生更改</h3><p>项目路径下的ICON已经更改，但是没有显示</p>
+<h4 id="分析原因-1"><a href="#分析原因-1" class="headerlink" title="分析原因"></a>分析原因</h4><p>使用 Xcode9 构建 iOS11 系统的 App 图标，默认读取资源文件，而非App包的Icon图标，导致不显示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Xcode管理app的icon，通过asset资源目录。</span><br><span class="line">Xcode还包含app的icon文件和Info.plist，是为了向后兼容。</span><br><span class="line">该脚本替换了app根目录中的文件，而不是asset资源目录，在iOS11中使用asset资源目录，而不是app根目录中的文件。</span><br></pre></td></tr></table></figure>
+
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>通过生成独立的 AppIcon_Debug资源文件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.对AppIcon.appiconset文件的每一图标。</span><br><span class="line">2.添加模糊效果，版本信息，提交信息。</span><br><span class="line">3.将处理好的图标，复制到AppIcon_Debug.appiconset文件。</span><br><span class="line">4.Xcode中配置使用AppIcon_Debug图标资源文件。</span><br><span class="line">5.删除无用的构建生成的图标。</span><br></pre></td></tr></table></figure>
+
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="http://zhoulingyu.com/2017/04/04/iOS%E2%80%94%E2%80%94%E5%86%99%E4%B8%80%E4%B8%AA%E5%BF%AB%E9%80%9F%E5%AE%9A%E4%BD%8D%E9%97%AE%E9%A2%98%E7%9A%84%E8%84%9A%E6%9C%AC/#more">iOS—写一个快速定位问题的脚本</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/93b6a3087f04">iOS App图标版本化</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/a37e114b7e66">iOS APP图标版本化</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/" rel="prev" title="iOS离屏渲染">
+      <i class="fa fa-chevron-left"></i> iOS离屏渲染
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/" rel="next" title="Java注解">
+      Java注解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E5%89%8D%E9%9D%A2"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">如何实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ImageMagick"><span class="nav-number">2.1.</span> <span class="nav-text">ImageMagick</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-%E5%BB%BA%E8%AE%AE%E7%BF%BB%E5%A2%99"><span class="nav-number">2.2.</span> <span class="nav-text">安装(建议翻墙)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%94%A8%E6%B3%95%EF%BC%9A"><span class="nav-number">2.3.</span> <span class="nav-text">常用用法：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98-unhandled-critical-chunk"><span class="nav-number">3.</span> <span class="nav-text">存在的问题  unhandled critical chunk</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%8E%9F%E5%9B%A0"><span class="nav-number">3.1.</span> <span class="nav-text">分析原因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3"><span class="nav-number">3.2.</span> <span class="nav-text">如何解决</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98-ICON%E6%9C%AA%E5%8F%91%E7%94%9F%E6%9B%B4%E6%94%B9"><span class="nav-number">4.</span> <span class="nav-text">存在的问题 ICON未发生更改</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%8E%9F%E5%9B%A0-1"><span class="nav-number">4.1.</span> <span class="nav-text">分析原因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3"><span class="nav-number">4.2.</span> <span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

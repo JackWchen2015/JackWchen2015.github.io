@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="传输层协议 TCP, 传输控制协议 UDP,用户数据报协议 无连接，尽最大努力交付  TCP TCP 提供一种面向连接的、可靠的字节流服务 在一个 TCP 连接中，仅有两方进行彼此通信。广播和多播不能用于 TCP TCP 使用校验和，确认和重传机制来保证可靠传输 TCP 给数据分节进行排序，并使用累积确认保证数据的顺序不变和非重复 TCP 使用滑动窗口机制来实现流量控制，通过动态改变窗口的大小进行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP&#x2F;UDP协议">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="传输层协议 TCP, 传输控制协议 UDP,用户数据报协议 无连接，尽最大努力交付  TCP TCP 提供一种面向连接的、可靠的字节流服务 在一个 TCP 连接中，仅有两方进行彼此通信。广播和多播不能用于 TCP TCP 使用校验和，确认和重传机制来保证可靠传输 TCP 给数据分节进行排序，并使用累积确认保证数据的顺序不变和非重复 TCP 使用滑动窗口机制来实现流量控制，通过动态改变窗口的大小进行">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcpconn.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/netConn3detail.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcpconnfin4.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP01.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP02.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP04.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP10.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP11.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP12.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP05.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP06.jpeg">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP07.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP08.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_byte.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_winddow.png">
+<meta property="og:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_control.png">
+<meta property="article:published_time" content="2019-02-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-01T13:01:59.600Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="TCP">
+<meta property="article:tag" content="UDP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcpconn.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>TCP/UDP协议 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TCP/UDP协议
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-02-01 08:00:00" itemprop="dateCreated datePublished" datetime="2019-02-01T08:00:00+08:00">2019-02-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-01 21:01:59" itemprop="dateModified" datetime="2022-07-01T21:01:59+08:00">2022-07-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="传输层协议"><a href="#传输层协议" class="headerlink" title="传输层协议"></a>传输层协议</h2><ul>
+<li>TCP, 传输控制协议</li>
+<li>UDP,用户数据报协议 无连接，尽最大努力交付</li>
+</ul>
+<h2 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h2><ul>
+<li>TCP 提供一种面向连接的、可靠的字节流服务</li>
+<li>在一个 TCP 连接中，仅有两方进行彼此通信。广播和多播不能用于 TCP</li>
+<li>TCP 使用校验和，确认和重传机制来保证可靠传输</li>
+<li>TCP 给数据分节进行排序，并使用累积确认保证数据的顺序不变和非重复</li>
+<li>TCP 使用滑动窗口机制来实现流量控制，通过动态改变窗口的大小进行拥塞控制</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">注意：TCP 并不能保证数据一定会被对方接收到，因为这是不可能的。TCP 能够做到的是，如果有可能，就把数据递</span><br><span class="line">送到接收方，否则就（通过放弃重传并且中断连接这一手段）通知用户。因此准确说 TCP 也不是 100% 可靠的协议，</span><br><span class="line">它所能提供的是数据的可靠递送或故障的可靠通知。</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+
+<h3 id="TCP连接"><a href="#TCP连接" class="headerlink" title="TCP连接"></a>TCP连接</h3><p>每一条TCP连接唯一地被通信两端的两个端点（即两个套接字）所确定</p>
+<p><code>TCP连接 :: = &#123; socket1,socket2&#125; = &#123;(IP1 : port1),(IP2 : port2)&#125;</code></p>
+<p>IP1和IP2是两个端点的IP地址，port1和port2是两个主机应用的端口号，TCP连接的端点是套接字。</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcpconn.png" class="">
+
+<p>数据传输开始之前，需要建立连接(三次握手)。 数据传输结束之后，需要释放连接(四次挥手)</p>
+<h3 id="TCP可靠传输的精髓"><a href="#TCP可靠传输的精髓" class="headerlink" title="TCP可靠传输的精髓"></a>TCP可靠传输的精髓</h3><p>TCP连接的一方A，由操作系统动态随机选取一个32位长的序列号（Initial Sequence Number），假设A的初始序列号为1000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，1001，1002，1003…，并把自己的初始序列号ISN告诉B，让B有一个思想准备，什么样编号的数据是合法的，什么编号是非法的，比如编号900就是非法的，同时B还可以对A每一个编号的字节数据进行确认。如果A收到B确认编号为2001，则意味着字节编号为1001-2000，共1000个字节已经安全到达。</p>
+<p>同理B也是类似的操作，假设B的初始序列号ISN为2000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，2001，2002，2003…，并把自己的初始序列号ISN告诉A，以便A可以确认B发送的每一个字节。如果B收到A确认编号为4001，则意味着字节编号为2001-4000，共2000个字节已经安全到达。</p>
+<p><strong>TCP连接握手，握的是啥？通信双方数据原点的序列号！</strong></p>
+<h3 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">SYN(synchronous建立联机)</span><br><span class="line">ACK(acknowledgement 确认)</span><br><span class="line">FIN(finish结束)</span><br><span class="line">Sequence number(顺序号码)</span><br><span class="line">Acknowledge number(确认号码)</span><br></pre></td></tr></table></figure>
+
+<p><strong>建立一个 TCP 连接时，需要客户端和服务器总共发送3个包</strong>.</p>
+<p>三次握手的目的是连接服务器指定端口，建立 TCP 连接，并同步连接双方的序列号和确认号，交换 TCP 窗口大小信息。</p>
+<p><code>在 socket 编程中，客户端执行 connect() 时。将触发三次握手。</code></p>
+<ul>
+<li><p>第一次握手(SYN&#x3D;1, seq&#x3D;x)<br>由客户端向服务端发送 SYN 标志位置1的包 ,指明客户端打算连接的服务器的端口，以及初始序号 X。</p>
+</li>
+<li><p>第二次握手(SYN&#x3D;1, ACK&#x3D;1, seq&#x3D;y, ACKnum&#x3D;x+1):<br>服务器发回确认包(ACK)应答。即 SYN 标志位和 ACK 标志位均为1。服务器端选择自己 ISN 序列号，放到 Seq 域里，同时将确认序号(Acknowledgement Number)设置为客户的 ISN 加1，即X+1</p>
+</li>
+<li><p>第三次握手(ACK&#x3D;1，ACKnum&#x3D;y+1)<br>客户端再次发送确认包(ACK)，SYN 标志位为0，ACK 标志位为1，并且把服务器发来 ACK 的序号字段+1，放在确定字段中发送给对方，并且在数据段放写ISN的+1</p>
+</li>
+</ul>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/netConn3detail.png" class="">
+
+<h4 id="为什么是”三次握手”？"><a href="#为什么是”三次握手”？" class="headerlink" title="为什么是”三次握手”？"></a>为什么是”三次握手”？</h4><p>两次握手的过程：<br>2.1 A 发送同步信号SYN + A’s ISN（Initial sequence number）<br>2.2 B发送同步信号SYN+B’s ISN+B‘s ACK sequence number</p>
+<p>这里有一个问题，A与B就A的初始序列号达成了一致，这里是1000。但是B无法知道A是否已经接收到自己的同步信号，如果这个同步信号丢失了，A和B就B的初始序列号将无法达成一致</p>
+<ul>
+<li>如果A发给B的确认丢了，该如何？<br>A会超时重传这个ACK吗？不会！TCP不会为没有数据的ACK超时重传。B如果没有收到A的ACK，会超时重传自己的SYN同步信号，一直到收到A的ACK为止(SYN攻击埋下伏笔)。</li>
+</ul>
+<h4 id="SYN攻击"><a href="#SYN攻击" class="headerlink" title="SYN攻击"></a>SYN攻击</h4><p>在三次握手过程中，服务器发送 SYN-ACK 之后，收到客户端的 ACK 之前的 TCP 连接称为半连接(half-open connect)。此时服务器处于 SYN_RCVD 状态。当收到 ACK 后，服务器才能转入 ESTABLISHED 状态.</p>
+<p>SYN 攻击指的是，<strong>攻击客户端在短时间内伪造大量不存在的IP地址，向服务器不断地发送SYN包，服务器回复确认包，并等待客户的确认。由于源地址是不存在的，服务器需要不断的重发直至超时，这些伪造的SYN包将长时间占用未连接队列，正常的SYN请求被丢弃，导致目标系统运行缓慢，严重者会引起网络堵塞甚至系统瘫痪</strong>。</p>
+<p><code>SYN 攻击是一种典型的 DoS/DDoS 攻击。</code></p>
+<ul>
+<li>如何检测 SYN 攻击？</li>
+</ul>
+<p>检测 SYN 攻击非常的方便，当你在服务器上看到大量的半连接状态时，特别是源IP地址是随机的，基本上可以断定这是一次SYN攻击。在 Linux&#x2F;Unix 上可以使用系统自带的 netstats 命令来检测 SYN 攻击。</p>
+<ul>
+<li>如何防御 SYN 攻击？</li>
+</ul>
+<p>SYN攻击不能完全被阻止，除非将TCP协议重新设计。我们所做的是尽可能的减轻SYN攻击的危害，常见的防御 SYN 攻击的方法有如下几种：</p>
+<p>缩短超时（SYN Timeout）时间<br>增加最大半连接数<br>过滤网关防护<br>SYN cookies技术</p>
+<h3 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h3><img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcpconnfin4.png" class="">
+
+<p>TCP 的连接的拆除需要发送四个包，因此称为四次挥手(Four-way handshake)，也叫做改进的三次握手。客户端或服务器均可主动发起挥手动作，在 socket 编程中，任何一方执行 close() 操作即可产生挥手操作。</p>
+<h4 id="为什么要”四次挥手”"><a href="#为什么要”四次挥手”" class="headerlink" title="为什么要”四次挥手”"></a>为什么要”四次挥手”</h4><p>由于TCP连接是全双工的，因此每个方向都必须单独进行关闭。这个原则是当一方完成它的数据发送任务后就能发送一个FIN来终止这个方向的连接。收到一个 FIN只意味着这一方向上没有数据流动，一个TCP连接在收到一个FIN后仍能发送数据。首先进行关闭的一方将执行主动关闭，而另一方执行被动关闭</p>
+<p>TCP协议的连接是全双工连接，一个TCP连接存在双向的读写通道。</p>
+<p>简单说来是 “先关读，后关写”，一共需要四个阶段。以客户机发起关闭连接为例：<br>1.服务器读通道关闭<br>2.客户机写通道关闭<br>3.客户机读通道关闭<br>4.服务器写通道关闭</p>
+<ul>
+<li>挥手过程</li>
+</ul>
+<p>第一阶段 客户机发送完数据之后，向服务器发送一个FIN数据段，序列号为i；<br>1.服务器收到FIN(i)后，返回确认段ACK，序列号为i+1，关闭服务器读通道；<br>2.客户机收到ACK(i+1)后，关闭客户机写通道；<br>（此时，客户机仍能通过读通道读取服务器的数据，服务器仍能通过写通道写数据）</p>
+<p>第二阶段 服务器发送完数据之后，向客户机发送一个FIN数据段，序列号为j；<br>3.客户机收到FIN(j)后，返回确认段ACK，序列号为j+1，关闭客户机读通道；<br>4.服务器收到ACK(j+1)后，关闭服务器写通道。<br>这是标准的TCP关闭两个阶段，服务器和客户机都可以发起关闭，完全对称。</p>
+<h3 id="可靠传输"><a href="#可靠传输" class="headerlink" title="可靠传输"></a>可靠传输</h3><p>TCP如何保证可靠传输呢?<br>TCP发送的报文段是交给IP层传送的，IP层只能提供尽最大努力服务，也就是不可靠服务，因此TCP必须采用恰当的措施才能使得两个传输层之间的通信变得可靠。</p>
+<ul>
+<li>TCP保证可靠传输的方式如下：</li>
+</ul>
+<ol>
+<li>数据包校验： TCP会对整个报文段进行检验</li>
+<li>滑动窗口机制： 以字节为单位进行</li>
+<li>超时重传机制： 发送方在规定时间内没有收到确认就要重新发送报文</li>
+<li>选择确认：当报文未按序到达时，若这些在接收窗口范围内，接收方就先收下然后将准确信息告诉发送方，让它不要重复发送。</li>
+<li>流量控制和拥塞控制：通过发送窗口和接收窗口大小来实现。</li>
+</ol>
+<h4 id="停止等待协议-（发送窗口-x3D-1，接收窗口-x3D-1）"><a href="#停止等待协议-（发送窗口-x3D-1，接收窗口-x3D-1）" class="headerlink" title="停止等待协议  （发送窗口&#x3D;1，接收窗口&#x3D;1）"></a>停止等待协议  （发送窗口&#x3D;1，接收窗口&#x3D;1）</h4><p>停止等待就是每发送完一个分组就停止发送，等待对方的确认，在收到确认后再发送下一个分组，停止等待协议分为以下几种情况：</p>
+<ol>
+<li><p>无差错情况<br>A发送分组M1，发完就暂停发送，等待B的确认。B收到M1后就向A确认，A在收到对M1的确认后，就再发送下一个分组M2。同样在收到B对M2的确认后，再发送M3</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP01.png" class="">
+</li>
+<li><p>超时重传<br>可靠传输协议是只要超过了一段时间仍然没有收到确认，就认为刚才发送的分组丢失了，因而重传前面发送过的分组，这就叫超时重传，要实现超时重传，就要在每发送完一个分组设置一个超时计时器，如果在超时计时器到期之前收到之前对方的确认，就撤销已设置的超时计时器。</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP02.png" class=""></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">注意：</span><br><span class="line">1.A发送完一个分组后，必须暂时保留发送分组的副本（为发生超时重传时使用），收到确认后清除</span><br><span class="line">2.分组和确认分组必须进行编号，这样才能明确是哪一个发送出去的分组收到了确认</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>确认丢失<br>B发送的对M1的确认丢失，A在设定的超时重传时间内没有收到确认，A在超时计时器到期后就要重传M1，现在应注意B的动作，假设B又收到了重传的分组M1，这时应该采取两个行动：</li>
+</ol>
+<p>1.1  丢弃重复的M1，不向上层交付<br>1.2 重新向A发送确认，不能认为已经发送给确认就不再发送，因为A之所以重传M2就表示A没有收到对M2的确认。</p>
+
+
+<ol start="4">
+<li>确认超时<br>传输过程中没有出现差错，但B对分组M1的确认迟到了，A会收到重复的确认，对重复的确认的处理很简单：收下后丢弃。B仍然会收到重复的M1，并且同样要丢弃重复的M1，并重传确认分组。</li>
+</ol>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP04.png" class="">
+
+<h4 id="滑动窗口协议"><a href="#滑动窗口协议" class="headerlink" title="滑动窗口协议"></a>滑动窗口协议</h4><p>停止等待协议的接受方的窗口和发送方的窗口大小都是1，1个比特就够表示了，所以也叫1比特滑动窗口协议，发送方这时自然发送每次只能发送一个，并且必须等待这个数据包的ACK，才能发送下一个。<br>停止等待协议每发送一帧就要停止等待知道接收到确认帧，这样每次等待的时候不能传送数据使得传输效率很低，</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP10.png" class="">
+
+<p>那么我们就不能先连发几个包等他一起确认吗？</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP11.png" class="">
+<p>把两个包一起发送，然后一起确认，所花的时间只是一个来回的时间<br>每次发送多少个包过去是最优解呢？<br>把第一个和第二个包发送过去后，收到第一个确认包就把第三个包发送过去，而不是等到第二个包的确认包才去发第三个包</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP12.png" class="">
+
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP05.png" class="">
+
+<p>位于发送窗口内的5个分组都可以连续发送出去，而不需要等待对方的确认。这样，信道利用率就提高了，连续ARQ协议规定，发送方每收到一个确认，就把发送窗口向前滑动一个分组的位置。</p>
+<p>接收方采用累积确认的方式，这就是说，接收方不必对收到的分组逐个发送确认，而是可以在收到几个分组后，对按序到达的最后一个分组发送确认，这就表示到这个分组为止的所有分组都已正确收到了。</p>
+<p>滑动窗口协议分为两种，一种是后退N帧协议，一种是选择重传协议。</p>
+<h5 id="后退N帧协议-（发送窗口-gt-1，接收窗口-x3D-1）"><a href="#后退N帧协议-（发送窗口-gt-1，接收窗口-x3D-1）" class="headerlink" title="后退N帧协议  （发送窗口&gt;1，接收窗口&#x3D;1）"></a>后退N帧协议  （发送窗口&gt;1，接收窗口&#x3D;1）</h5><p>如果发送方发送了前9个分组，而中间的第2个分组丢失，这是接收方只能对前两个分组发出确认，发送方无法知道后面7个分组的下落，而只好把后面的7个分组都再重传一次，这就叫做Go-back-N（回退N），表示需要再退回来重传已发送的N个分组</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP06.jpeg" class="">
+
+<h5 id="选择重传协议-（发送窗口-gt-1，接收窗口-gt-1）"><a href="#选择重传协议-（发送窗口-gt-1，接收窗口-gt-1）" class="headerlink" title="选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）"></a>选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）</h5><p>返回N协议简化了接收方的处理过程，接收方只需要跟踪一个变量，并且不需要对失序到达的分组缓存，而是简单地把失序到达的分组他们丢掉。</p>
+<p>选择重传协议是在后退N帧的基础上进行了改进，选择重传协议原理很简单，<code>接收端总会缓存所有收到的帧，当某个帧出现错误时，只会要求重传这一个帧，只有当某个序号后的所有帧都正确收到后，才会一起提交给高层应用</code></p>
+<p>选择重传协议的接收窗口和发送窗口一样大(2^m-1) 比返回N协议的窗口(2^m)小了一倍</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP07.png" class="">
+
+<p><code>选择重传的接收窗口与发送窗口一样大</code>.选择重传协议允许与接受窗口一样多的分组失序到达,并保存这些失序到达的分组,直到连续的一组分组被交付给应用层.因为发送窗口与接收窗口是相同的,所以发送出来的所有分组都可以失序到达,而且会被保留直到交付为止.但是必须强调一点,在一个可靠的协议中,接收方永远不会把分组失序地交给应用层.在他们被交付给应用层之前,先要等待那些更早发出来的分组到达.</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/TCP08.png" class="">
+
+<p>理论上选择重传协议要为每个分组使用一个计时器.当某个计时器超时后,只有相应的分组被重传.换而言之,返回N协议将所有的分组当做一个整体对待,而选择重传协议则分别对待每一个分组.但是大多数SR的运输层仅使用了一个计时器. 注意只使用一个计时器而做到跟踪所有发出去的分组的情况的做法是:标记发出分组,当ACK&#x3D;Sf 时,将窗口滑过所有连续的已确认的分组,如果还有未确认的分组,则则重发所有检测到的未被确认的分组并重启计时器,如果所有分组都被确认了则停止计时器.</p>
+<h4 id="面向字节流"><a href="#面向字节流" class="headerlink" title="面向字节流"></a>面向字节流</h4><img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_byte.png" class="">
+<p>不管发送方一次性提交给 TCP 的缓冲是多大的数据，对于TCP本身来说它会根据实际的情况来进行划分，比如发送方发送10字节，TCP 并不是一次性传递10字节数据，它可能是拆分成3个字节和7个字节分俩次发送给接收方</p>
+<h5 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h5><p>基于滑动窗口协议实现.TCP的滑动窗口主要有两个作用，一是提供TCP的可靠性，二是提供TCP的流控特性。同时滑动窗口机制还体现了TCP面向字节流的设计思路。</p>
+<p>滑动窗口协议是传输层进行流控的一种措施，接收方通过通告发送方自己的窗口大小，从而控制发送方的发送速度，从而达到防止发送方发送速度过快而导致自己被淹没的目的。</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_winddow.png" class="">
+<p>对照上图，现在假如发送窗口是客户端，接收窗口是服务端。当我们现在要继续发送数据的时候，可能由于接收方的接收窗口没有那么大，而发送方的发送窗口非常大，就会以更快的速率往后发，需要由接收窗口通过向TCP的报文首部字段中去更改窗口值去调整发送方的发送窗口大小。</p>
+<h3 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h3><p>TCP的四种拥塞控制算法<br>慢开始<br>拥塞避免<br>快恢复<br>快重传</p>
+<img src="/2019/02/01/%E7%BD%91%E7%BB%9CTCP:UDP%E5%8D%8F%E8%AE%AE/tcp_control.png" class="">
+<p>横轴代表 APP 交互或者轮循次数，纵轴代表窗口值的大小<br>上图中，一开始我们可以先发送一个报文，如果没有发生网络拥塞，就继续发送 2 个报文，依然没有发生网络拥塞，就继续翻倍，直到 16 个报文，这就是慢开始算法<br>当到达 16 报文数的时候，会采用拥塞避免的策略来进行发送报文的一个数量的线性增长。<br>当报文数到 24 的时候，就会发生网络拥塞，采用拥塞避免的乘法减小到值发送 1 一个报文，来减少对网络层面带来的压力，然后再重新开始 慢开始算法增长，同时限定一个新的门限值.</p>
+<h2 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h2><p>UDP 是一个简单的传输层协议。和 TCP 相比，UDP 有下面几个显著特性：</p>
+<ol>
+<li><p>UDP 缺乏可靠性。UDP 本身不提供确认，序列号，超时重传等机制。UDP 数据报可能在网络中被复制，被重新排序。即 UDP 不保证数据报会到达其最终目的地，也不保证各个数据报的先后顺序，也不保证每个数据报只到达一次</p>
+</li>
+<li><p>UDP 数据报是有长度的。每个 UDP 数据报都有长度，如果一个数据报正确地到达目的地，那么该数据报的长度将随数据一起传递给接收方。而 TCP 是一个字节流协议，没有任何（协议上的）记录边界。</p>
+</li>
+<li><p>UDP 是无连接的。UDP 客户和服务器之前不必存在长期的关系。UDP 发送数据报之前也不需要经过握手创建连接的过程。</p>
+</li>
+<li><p>UDP 支持多播和广播。</p>
+</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/24853633">TCP 为什么是三次握手，而不是两次或四次？</a></li>
+<li><a target="_blank" rel="noopener" href="https://hit-alibaba.github.io/interview/basic/network/TCP.html">TCP 的特性</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/smileiam/article/details/78226816">TCP的三次握手、四次挥手–非常详细讲解</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013309870/article/details/77430017">计算机网络–TCP</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/TCP/" rel="tag"># TCP</a>
+              <a href="/tags/UDP/" rel="tag"># UDP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/01/28/%E7%BD%91%E7%BB%9CHttp%E5%8D%8F%E8%AE%AE/" rel="prev" title="HTTP协议">
+      <i class="fa fa-chevron-left"></i> HTTP协议
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/28/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%85%AD%E5%A4%A7%E5%8E%9F%E5%88%99/" rel="next" title="设计模式六大原则">
+      设计模式六大原则 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">传输层协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP"><span class="nav-number">2.</span> <span class="nav-text">TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E8%BF%9E%E6%8E%A5"><span class="nav-number">2.1.</span> <span class="nav-text">TCP连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93%E7%9A%84%E7%B2%BE%E9%AB%93"><span class="nav-number">2.2.</span> <span class="nav-text">TCP可靠传输的精髓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">2.3.</span> <span class="nav-text">三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF%E2%80%9D%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%E2%80%9D%EF%BC%9F"><span class="nav-number">2.3.1.</span> <span class="nav-text">为什么是”三次握手”？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SYN%E6%94%BB%E5%87%BB"><span class="nav-number">2.3.2.</span> <span class="nav-text">SYN攻击</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">2.4.</span> <span class="nav-text">四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E2%80%9D%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E2%80%9D"><span class="nav-number">2.4.1.</span> <span class="nav-text">为什么要”四次挥手”</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E9%9D%A0%E4%BC%A0%E8%BE%93"><span class="nav-number">2.5.</span> <span class="nav-text">可靠传输</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%9C%E6%AD%A2%E7%AD%89%E5%BE%85%E5%8D%8F%E8%AE%AE-%EF%BC%88%E5%8F%91%E9%80%81%E7%AA%97%E5%8F%A3-x3D-1%EF%BC%8C%E6%8E%A5%E6%94%B6%E7%AA%97%E5%8F%A3-x3D-1%EF%BC%89"><span class="nav-number">2.5.1.</span> <span class="nav-text">停止等待协议  （发送窗口&#x3D;1，接收窗口&#x3D;1）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.5.2.</span> <span class="nav-text">滑动窗口协议</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%8E%E9%80%80N%E5%B8%A7%E5%8D%8F%E8%AE%AE-%EF%BC%88%E5%8F%91%E9%80%81%E7%AA%97%E5%8F%A3-gt-1%EF%BC%8C%E6%8E%A5%E6%94%B6%E7%AA%97%E5%8F%A3-x3D-1%EF%BC%89"><span class="nav-number">2.5.2.1.</span> <span class="nav-text">后退N帧协议  （发送窗口&gt;1，接收窗口&#x3D;1）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E9%87%8D%E4%BC%A0%E5%8D%8F%E8%AE%AE-%EF%BC%88%E5%8F%91%E9%80%81%E7%AA%97%E5%8F%A3-gt-1%EF%BC%8C%E6%8E%A5%E6%94%B6%E7%AA%97%E5%8F%A3-gt-1%EF%BC%89"><span class="nav-number">2.5.2.2.</span> <span class="nav-text">选择重传协议  （发送窗口&gt;1，接收窗口&gt;1）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AD%97%E8%8A%82%E6%B5%81"><span class="nav-number">2.5.3.</span> <span class="nav-text">面向字节流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6"><span class="nav-number">2.5.3.1.</span> <span class="nav-text">流量控制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6"><span class="nav-number">2.6.</span> <span class="nav-text">拥塞控制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UDP"><span class="nav-number">3.</span> <span class="nav-text">UDP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

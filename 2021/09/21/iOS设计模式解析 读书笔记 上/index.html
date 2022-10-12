@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C编程之道：iOS设计模式解析 读书笔记 上">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_01.png">
+<meta property="og:image" content="https://github.com/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_02.png">
+<meta property="og:image" content="https://github.com/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_03.png">
+<meta property="og:image" content="https://github.com/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_04.png">
+<meta property="article:published_time" content="2021-09-21T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-10T09:46:59.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Objective-C编程之道：iOS设计模式解析 读书笔记 上 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Objective-C编程之道：iOS设计模式解析 读书笔记 上
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-21 08:00:00" itemprop="dateCreated datePublished" datetime="2021-09-21T08:00:00+08:00">2021-09-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-10 17:46:59" itemprop="dateModified" datetime="2022-02-10T17:46:59+08:00">2022-02-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img src="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_01.png" class="">
+
+<span id="more"></span>
+
+<blockquote>
+<p>iOS应用程序的基础框架Cocoa Touch框架内容丰富、结构优美，通过将各种设计模式应用到其基础结构中，为第三方开发者提供了很好的可扩展性和灵活性。因此，要充分利用这一框架，应当深刻理解<br>并恰当应用设计模式。本书受到GoF的经典著作《设计模式》的启发，旨在引导大家掌握如何在iOS平台上以Objective-C语言实现Cocoa Touch开发所要用到的传统设计模式。</p>
+</blockquote>
+<h2 id="设计模式初体验"><a href="#设计模式初体验" class="headerlink" title="设计模式初体验"></a>设计模式初体验</h2><h3 id="你好，设计模式"><a href="#你好，设计模式" class="headerlink" title="你好，设计模式"></a>你好，设计模式</h3><p>设计模式是有用的抽象化工具，用于解决工程和建筑等其他领域的设计问题。在软件领域，设计模式是为特定场景下的问题而定制的解决方案。</p>
+<p>通过给程序的变动部分定义接口而对其封装和隔离，这些部分的变动就独立于程序的其他部分，因为他们不依赖于任何细节。以后就可以变更或扩展这些可变的部分而不影响程序的其他部分。</p>
+<h4 id="MVC"><a href="#MVC" class="headerlink" title="MVC"></a>MVC</h4><ol>
+<li>在模型对象中封装数据和基本行为<br>理想状况下，模型对象同用于对其进行显示和编辑的用户界面之间不应有任何直接的关联。</li>
+<li>使用视图对象向用户展示信息<br>视图对象通常从应用程序的模型数据获取数据用以展示，它可以跟一个模型对象的部分、整体或者多个模型对象合作。</li>
+<li>用控制器对象联系起模型和视图<br>控制器对象就像视图对象和模型对象的中间人。它建立起沟通渠道，使视图得以知晓模型的变更而给予响应。</li>
+</ol>
+<p>MVC本身并不是最基本的设计模式，它包含了若干更加基本的设计模式。Cocoa Touch的MVC用到的设计模式有：组合、命令、中介者、策略、观察者。</p>
+<p>组合：视图对象之间的协作方式构成一个视图层次体系。其中既可以有复合视图（UITableView），也可以有独立视图（UITextFIeld和UIButton）。每个层次的每个视图节点都可以响应用户的操作并把自己绘制到屏幕上。</p>
+<p>命令：这是一种“目标-动作”机制，视图对象可以延迟其他对象（比如控制器）的执行，让其他对象等到发生了某些事件后再执行。</p>
+<p>中介者： 控制器对象起着中间人的作用。它构成了在模型和视图对象之间传递数据的双向通道。</p>
+<p>策略： 控制器可以是视图对象的一个“策略”。视图对象将自身隔离，以期维持其作为数据展示器的唯一职责，而将一切应用程序特有的界面行为的决定委派给它的“策略”对象。</p>
+<p>观察者：模型对象向它所关注的控制器对象发出内部状态变化的通知。</p>
+<h4 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h4><p>针对接口编程，而不是针对实现编程</p>
+<ul>
+<li>类继承与接口继承（子类型化）的区别在哪里？</li>
+</ul>
+<p>接口定义了类型，接口继承（子类型化）让我们可以用一个对象代替另一个对象。</p>
+<p>类继承是通过复用父类的功能或者只是简单地共享代码和表述，来定义对象的实现和类型的一种机制。</p>
+<p><strong>区别在于一个对象可以具有多种类型而不同类的对象可以有相同的类型</strong></p>
+<p>子类型的所有对象，都可以针对协议或抽象类的接口的请求作出应答。</p>
+<ul>
+<li>使用协议还是抽象基类？<br>协议（@protocol）并不定义任何实现，而只声明方法，以确定符合协议的类的行为。因此协议是只定义了抽象行为的“接口”</li>
+</ul>
+<p>抽象基类（Abstract Base Class） 通过抽象基类，我们可以生成一些其他子类可以共享的默认行为。</p>
+<p><strong>抽象基类与通常的类相似，只是预留了一些可以或应该由子类重载的行为</strong></p>
+<p>变更过去定义的协议可能会破坏实现该协议的类，协议是抽象类型与具体类型之间的一种合约，如果变更合约，所有相关的事项也需要变更。唯一例外是，只使用@optional指定将协议的部分方法变为“可选的”</p>
+<p>抽象基类在接口变更方面要稍微灵活一些。可以向抽象基类随意追加新的方法，而不会破坏继承链的其他部分。而且，对于子类可能用到的占位方法中定义的默认行为，可以随意地进行追加、删除或分解。</p>
+<p>只对一个抽象类型进行子类化的类，可以让它们直接对抽象类型进行子类化。若是以后更改设计，以使抽象类型也能够是UIView等的子类，通常的灵活做法是，首先为不需要子类化其他类的类定义一个抽象基类，然后可以定义一个同名协议，让包括这个抽象基类在内的其他类去实现。例如NSObject基类符合NSObject协议。</p>
+<p>对象组合与类继承<br>子类化常常被称为白箱复用，因为父类的内部描述与细节通常对子类可见<br>对象组合要求被组合的对象具有定义良好的接口，并且通过从其他对象得到的引用在运行时动态定义。所以可以将对象组合到其他对象中，以构建更加复杂的功能。由于对象的内部细节对其他对象不可见，这种类型的复用称为黑箱复用。</p>
+<h2 id="对象创建"><a href="#对象创建" class="headerlink" title="对象创建"></a>对象创建</h2><h3 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h3><p>在许多面向对象的应用程序中，有些对象的创建代价过大或过于复杂，要是可以重建相同的对象并作轻微的改动，事情会容易很多。应用于“复制”操作的模式称为原型（Protorype）模式。复制（cloning）指用同一模具生产一系列的产品。</p>
+<blockquote>
+<p>指针只是存储内存中资源地址的占位符</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch框架中对象复制<br>框架为NSObject的派生类提供了实现深复制的协议，NSObject的子类需要实现NSCopying协议及其方法<code>(id)copywithZone:(NSZone*)zone</code></li>
+</ul>
+<h3 id="工厂方法"><a href="#工厂方法" class="headerlink" title="工厂方法"></a>工厂方法</h3><p>工厂方法也称为虚构造器。它适用于这种情况：一个类无法预期需要生成哪个类的对象，想让其子类来指定所生成的对象。</p>
+<ul>
+<li>Cocoa Touch 框架中应用工厂方法<br><code>[[SomeClass alloc]init]</code>.NSNumber有很多numberWith*方法：numberWithBool：和numberWithChar：</li>
+</ul>
+<h3 id="抽象工厂"><a href="#抽象工厂" class="headerlink" title="抽象工厂"></a>抽象工厂</h3><p>抽象工厂提供一个固定的接口，用于创建一系列有关联或相依存的对象，而不必指定其具体类或其创建的细节。</p>
+<blockquote>
+<p>软件设计的黄金法则：变动需要抽象</p>
+</blockquote>
+<ul>
+<li>Cocoa Touch框架中使用抽象工厂<br>创建Cocoa Touch对象有两种方式，使用allloc再init的方法，或者使用类中的+className…方法。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSNumber</span>* boolNumber = [<span class="built_in">NSNumber</span> numberWithBool:<span class="literal">YES</span>];</span><br><span class="line"><span class="built_in">NSNUmber</span>* charNumber=[<span class="built_in">NSNumber</span> numberWithChar:<span class="string">&#x27;a&#x27;</span>];</span><br><span class="line"><span class="string">&#x27;&#x27;</span><span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>接受不同类型的参数并返回NSNumber实例的类方法是类工厂方法</p>
+<p>类簇是基础框架中一种常见的设计模式，基于抽象工厂模式的思想。将若干相关的私有具体工厂子类集合到一个公有的抽象超类之下。类簇是抽象工厂的一种形式。比如NSNumber本身是一个高度抽象的工厂，而NSCFBollean和NSCFNumber是具体的工厂子类。</p>
+<blockquote>
+<p>其它实现为类簇的基础类有NSData、NSArray、NSDictionary、NSString</p>
+</blockquote>
+<h3 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h3><p>有时构建某些对象有多种不同方式，如果这些逻辑包含在构建这些对象的类的单一方法中，其构建的逻辑会非常混乱（针对各种构建需要一大片嵌套if-else或者swifth-case）。如果能够把构建过程分解为客户-指导者-生成器的关系，那么过程将更容易管理与复用。</p>
+<p>生成器模式能够帮助构建涉及部件与表现的各种组合的对象。</p>
+<h3 id="单例"><a href="#单例" class="headerlink" title="单例"></a>单例</h3><blockquote>
+<p>singleton定义为“有且仅有一个元素的集合”</p>
+</blockquote>
+<p>单例类总是返回自己的同一个实例，它提供了对类的对象所提供的资源的全局访问点。</p>
+<ul>
+<li>在Cocoa Touch框架中使用单例模式<br>UIApplication、UIAccelerometer、NSFileManager</li>
+</ul>
+<h2 id="接口适配"><a href="#接口适配" class="headerlink" title="接口适配"></a>接口适配</h2><h3 id="适配器"><a href="#适配器" class="headerlink" title="适配器"></a>适配器</h3><p>适配器模式，用于连接两种不同种类的对象，使其毫无问题地协同工作。（把类的接口变换为客户端要求的另一种接口）</p>
+<ul>
+<li>两种实现适配器的方式</li>
+</ul>
+<p>第一种是通过继承来适配两个接口，称为类适配器。（c++中类适配器是通过多重继承实现的，Objectivve-C中，类可以实现协议，同时又继承超类，达到C++的多重继承的效果）</p>
+ <img src="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_02.png" class="">
+<p> 第二种方式称为对象适配器，对象适配器不继承被适配者，而是组合了一个对它的引用。</p>
+  <img src="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_03.png" class="">
+<ul>
+<li>在Cocoa Touch框架中使用委托模式<br>  Delegate是Cocoa Touch框架所采用的委托模式的一种形式，这里的客户端是Cocoa Touch框架中的类，Target是委托协议，实现协议的类会是个适配器，应用程序中的其它类是与框架不匹配而需要适配的类。</li>
+</ul>
+<h3 id="桥接"><a href="#桥接" class="headerlink" title="桥接"></a>桥接</h3><p>桥接模式的目的是把抽象层次结构从其实现中分离出来，使其能够独立变更。抽象层定义了供客户端使用的上层的抽象接口，实现层定义了供抽象层次使用的底层接口。实现类的引用被封装于抽象层的实例中时，桥接就形成了。</p>
+  <img src="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_04.png" class="">
+<h3 id="外观"><a href="#外观" class="headerlink" title="外观"></a>外观</h3><p>为系统中的一组接口提供一个统一的接口，外观定一个一个高层接口，让子系统更易于使用</p>
+<h2 id="对象去耦"><a href="#对象去耦" class="headerlink" title="对象去耦"></a>对象去耦</h2><h3 id="中介者"><a href="#中介者" class="headerlink" title="中介者"></a>中介者</h3><p>用一个对象来封装一系列对象的交互方式。中介者使各对象不需要显示地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。</p>
+<blockquote>
+<p>中介者模式以中介者内部的复杂性代替交互的复杂性，因为中介者封装与合并了客户端的各种协作逻辑，自身可能变得比它们任何一个都复杂，这会让中介者本身成为无所不知的庞然大物，并且难以维护，此时，可以考虑使用另一种设计模式把它分解，要创造性的混用和组合设计模式解决同一个问题，每个设计模式就像一个乐高积木块，整个应用程序可能要使用彼此配合的各种“积木块”来建造。</p>
+</blockquote>
+<h3 id="观察者"><a href="#观察者" class="headerlink" title="观察者"></a>观察者</h3><p>观察者模式也叫做发布-订阅模式。定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都能得到通知并被自动更新。</p>
+<ul>
+<li>Cocoa Touch中使用观察者模式</li>
+</ul>
+<ol>
+<li>通知NSNotificationCenter</li>
+<li>健-值观察KVO（基于NSKeyValueObserving非正式协议）</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="">Objective-C 编程之道：iOS设计模式解析</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/17/UML%E7%BB%9F%E4%B8%80%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80/" rel="prev" title="UML统一建模语言">
+      <i class="fa fa-chevron-left"></i> UML统一建模语言
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/" rel="next" title="Objective-C编程之道：iOS设计模式解析 读书笔记 下">
+      Objective-C编程之道：iOS设计模式解析 读书笔记 下 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%88%9D%E4%BD%93%E9%AA%8C"><span class="nav-number">1.</span> <span class="nav-text">设计模式初体验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%A0%E5%A5%BD%EF%BC%8C%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.</span> <span class="nav-text">你好，设计模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVC"><span class="nav-number">1.1.1.</span> <span class="nav-text">MVC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-number">1.1.2.</span> <span class="nav-text">设计原则</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%88%9B%E5%BB%BA"><span class="nav-number">2.</span> <span class="nav-text">对象创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">工厂方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82"><span class="nav-number">2.3.</span> <span class="nav-text">抽象工厂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%99%A8"><span class="nav-number">2.4.</span> <span class="nav-text">生成器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B"><span class="nav-number">2.5.</span> <span class="nav-text">单例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E9%80%82%E9%85%8D"><span class="nav-number">3.</span> <span class="nav-text">接口适配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8"><span class="nav-number">3.1.</span> <span class="nav-text">适配器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%A5%E6%8E%A5"><span class="nav-number">3.2.</span> <span class="nav-text">桥接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E8%A7%82"><span class="nav-number">3.3.</span> <span class="nav-text">外观</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%8E%BB%E8%80%A6"><span class="nav-number">4.</span> <span class="nav-text">对象去耦</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E4%BB%8B%E8%80%85"><span class="nav-number">4.1.</span> <span class="nav-text">中介者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E8%80%85"><span class="nav-number">4.2.</span> <span class="nav-text">观察者</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

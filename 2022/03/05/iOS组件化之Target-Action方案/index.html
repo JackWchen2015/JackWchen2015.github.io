@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="iOS组件化之Target-Action方案">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/moduleStart.png">
+<meta property="og:image" content="https://github.com/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/targetAction.png">
+<meta property="og:image" content="https://github.com/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/actionInterface.png">
+<meta property="article:published_time" content="2022-03-05T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-07T03:41:40.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/moduleStart.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS组件化之Target-Action方案 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS组件化之Target-Action方案
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-05 08:00:00" itemprop="dateCreated datePublished" datetime="2022-03-05T08:00:00+08:00">2022-03-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-07 11:41:40" itemprop="dateModified" datetime="2022-03-07T11:41:40+08:00">2022-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img src="/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/moduleStart.png" class="&#x3D;">
+
+<span id="more"></span>
+
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="蘑菇街组件化方案"><a href="#蘑菇街组件化方案" class="headerlink" title="蘑菇街组件化方案"></a>蘑菇街组件化方案</h3><ol>
+<li>App启动时实例化各组件模块，然后这些组件向ModuleManager注册Url，有些时候不需要实例化，使用class注册。</li>
+<li>当组件A需要调用组件B时，向ModuleManager传递URL，参数跟随URL以GET方式传递，类似openURL。然后由ModuleManager负责调度组件B，最后完成任务。</li>
+</ol>
+<p><strong>问题</strong></p>
+<ol>
+<li>第一步的问题在于，在组件化的过程中，注册URL并不是充分必要条件，组件是不需要向组件管理器注册Url的。而且注册了Url之后，会造成不必要的内存常驻，如果只是注册Class，内存常驻量就小一点，如果是注册实例，内存常驻量就大了。不过这还并不能算是致命错误，只能算是小缺陷。</li>
+</ol>
+<blockquote>
+<p>注册URL的目的其实是一个服务发现的过程，在iOS领域中，服务发现的方式是不需要通过主动注册的，使用runtime就可以了。因为iOS会把所有的文件进行编译，不像静态语言，只编译链接需要的文件。</p>
+</blockquote>
+<ol start="2">
+<li>真正的致命错误在第二步。在iOS领域里，一定是组件化的中间件为openUrl提供服务，而不是openUrl方式为组件化提供服务。</li>
+</ol>
+<blockquote>
+<p>一个App的组件化方案一定不是建立在URL上的，openURL的跨App调用是可以建立在组件化方案上的</p>
+</blockquote>
+<h2 id="casa-方案"><a href="#casa-方案" class="headerlink" title="casa 方案"></a>casa 方案</h2><img src="/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/targetAction.png" class="&#x3D;">
+
+<p>基于Mediator模式和Target-Action模式，中间采用了runtime来完成调用。这套组件化方案将远程应用调用和本地应用调用做了拆分，而且是由本地应用调用为远程应用调用提供服务</p>
+<h3 id="调用方式"><a href="#调用方式" class="headerlink" title="调用方式"></a>调用方式</h3><h4 id="本地应用调用"><a href="#本地应用调用" class="headerlink" title="本地应用调用"></a>本地应用调用</h4><p>本地组件A在某处调用<code>[[CTMediator sharedInstance] performTarget:targetName action:actionName params:@&#123;...&#125;]</code>向CTMediator发起跨组件调用，CTMediator根据获得的target和action信息，通过objective-C的runtime转化生成target实例以及对应的action选择子，然后最终调用到目标业务提供的逻辑，完成需求。</p>
+<h4 id="远程应用调用"><a href="#远程应用调用" class="headerlink" title="远程应用调用"></a>远程应用调用</h4><p>远程应用通过<code>openURL</code>的方式，由iOS系统根据<code>info.plist</code>里的<code>scheme</code>配置找到可以响应URL的应用（在当前我们讨论的上下文中，这就是你自己的应用），应用通过AppDelegate接收到URL之后，调用CTMediator的openUrl:方法将接收到的URL信息传入。当然，CTMediator也可以用openUrl:options:的方式顺便把随之而来的option也接收，这取决于你本地业务执行逻辑时的充要条件是否包含option数据。传入URL之后，CTMediator通过解析URL，将请求路由到对应的target和action，随后的过程就变成了上面说过的<code>本地应用</code>调用的过程了，最终完成响应。</p>
+<blockquote>
+<p>App中做路由解析可以做得简单点，制定URL规范就也能完成，最简单的方式就是scheme:&#x2F;&#x2F;target&#x2F;action这种，简单做个字符串处理就能把target和action信息从URL中提取出来了</p>
+</blockquote>
+<h3 id="组件仅通过Action暴露可调用接口"><a href="#组件仅通过Action暴露可调用接口" class="headerlink" title="组件仅通过Action暴露可调用接口"></a>组件仅通过Action暴露可调用接口</h3><p>模块与模块之间的接口被固化在了Target-Action这一层，避免了实施组件化的改造过程中，对Business的侵入，同时也提高了组件化接口的可维护性</p>
+<img src="/2022/03/05/iOS%E7%BB%84%E4%BB%B6%E5%8C%96%E4%B9%8BTarget-Action%E6%96%B9%E6%A1%88/actionInterface.png" class="&#x3D;">
+
+<blockquote>
+<p>虚线圈起来的地方就是用于跨组件调用的target和action，这种方式避免了由BusinessA直接提供组件间调用会增加的复杂度，而且任何组件如果想要对外提供调用服务，直接挂上target和action就可以了，业务本身在大多数场景下去进行组件化改造时，是基本不用动的。</p>
+</blockquote>
+<h3 id="参数传递"><a href="#参数传递" class="headerlink" title="参数传递"></a>参数传递</h3><p><code>复杂参数</code>是指由普通类型的数据组成的多层级参数。在本文中，我们定义只要是能够被json解析的类型就都是普通类型</p>
+<p><code>非常规参数</code>是指由普通类型以外的类型组成的参数，例如UIImage等这些不能够被json解析的类型。</p>
+<h3 id="去model设计"><a href="#去model设计" class="headerlink" title="去model设计"></a>去model设计</h3><p>组件间调用时，是需要针对参数做去model化的。如果组件间调用不对参数做去model化的设计，就会导致业务形式上被组件化了，实质上依然没有被独立。</p>
+<h4 id="为什么要去Model"><a href="#为什么要去Model" class="headerlink" title="为什么要去Model"></a>为什么要去Model</h4><p>假设模块A和模块B之间采用model化的方案去调用，那么调用方法时传递的参数就会是一个对象</p>
+<p><strong>对象不是一个面向接口的通用对象</strong></p>
+<p>mediator的参数处理就会非常复杂，因为要区分不同的对象类型。如果mediator不处理参数，直接将对象以范型的方式转交给模块B，那么模块B必然要包含对象类型的声明。假设对象声明放在模块A，那么B和A之间的组件化只是个形式主义。如果对象类型声明放在mediator，那么对于B而言，就不得不依赖mediator。但是，大家可以从上面的架构图中看到，对于响应请求的模块而言，依赖mediator并不是必要条件，因此这种依赖是完全不需要的，这种依赖的存在对于架构整体而言，是一种污染。</p>
+<p><strong>参数是一个面向接口的对象</strong><br>mediator对于这种参数的处理其实就没必要了，更多的是直接转给响应方的模块。而且接口的定义就不可能放在发起方的模块中了，只能放在mediator中。响应方如果要完成响应，就也必须要依赖mediator，然而前面我已经说过，响应方对于mediator的依赖是不必要的，因此参数其实也并不适合以面向接口的对象的方式去传递。</p>
+<h4 id="去Model化带来的问题"><a href="#去Model化带来的问题" class="headerlink" title="去Model化带来的问题"></a>去Model化带来的问题</h4><p>去model化的方式去传递，在iOS的开发中，就是以字典的方式去传递。这样就能够做到只有调用方依赖mediator，而响应方不需要依赖mediator。然而在去model化的实践中，由于这种方式自由度太大，我们至少需要保证调用方生成的参数能够被响应方理解，然而在组件化场景中，限制去model化方案的自由度的手段，相比于网络层和持久层更加容易得多。</p>
+<p>因为组件化天然具备了限制手段：参数不对就无法调用！无法调用时直接debug就能很快找到原因。所以接下来要解决的去model化方案的另一个问题就是：如何提高开发效率。</p>
+<p>在去model的组件化方案中，影响效率的点有两个：</p>
+<ol>
+<li>调用方如何知道接收方需要哪些key的参数？</li>
+<li>调用方如何知道有哪些target可以被调用？</li>
+</ol>
+<h4 id="使用category解决"><a href="#使用category解决" class="headerlink" title="使用category解决"></a>使用category解决</h4><p>为什么是category而不是其他：</p>
+<ol>
+<li>category本身就是一种装饰模式，根据不同的分类提供不同的方法，此时每一个组件就是一个分类，因此把每个组件可以支持的调用用category封装是很合理的。</li>
+<li>在category的方法中可以做到参数的验证，在架构中对于保证参数安全是很有必要的。当参数不对时，category就提供了补救的入口。</li>
+<li>category可以很轻松地做请求转发，如果不采用category，请求转发逻辑就非常难做了。</li>
+<li>category统一了所有的组件间调用入口，因此无论是在调试还是源码阅读上，都为工程师提供了极大的方便。</li>
+<li>由于category统一了所有的调用入口，使得在跨模块调用时，对于param的hardcode在整个App中的作用域仅存在于category中，在这种场景下的hardcode就已经变成和调用宏或者调用声明没有任何区别了，因此是可以接受的。</li>
+</ol>
+<p><strong><a href="https://github.com/casatwy/CTMediator">demo</a></strong></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (indexPath.row == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">UIViewController</span> *viewController = [[<span class="built_in">CTMediator</span> sharedInstance] <span class="built_in">CTMediator_viewControllerForDetail</span>];</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获得view controller之后，在这种场景下，到底push还是present，其实是要由使用者决定的，mediator只要给出view controller的实例就好了</span></span><br><span class="line">        [<span class="keyword">self</span> presentViewController:viewController animated:<span class="literal">YES</span> completion:<span class="literal">nil</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (indexPath.row == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="built_in">UIViewController</span> *viewController = [[<span class="built_in">CTMediator</span> sharedInstance] <span class="built_in">CTMediator_viewControllerForDetail</span>];</span><br><span class="line">        [<span class="keyword">self</span>.navigationController pushViewController:viewController animated:<span class="literal">YES</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (indexPath.row == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="comment">// 这种场景下，很明显是需要被present的，所以不必返回实例，mediator直接present了</span></span><br><span class="line">        [[<span class="built_in">CTMediator</span> sharedInstance] <span class="built_in">CTMediator_presentImage</span>:[<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;image&quot;</span>]];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (indexPath.row == <span class="number">3</span>) &#123;</span><br><span class="line">        <span class="comment">// 这种场景下，参数有问题，因此需要在流程中做好处理</span></span><br><span class="line">        [[<span class="built_in">CTMediator</span> sharedInstance] <span class="built_in">CTMediator_presentImage</span>:<span class="literal">nil</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (indexPath.row == <span class="number">4</span>) &#123;</span><br><span class="line">        [[<span class="built_in">CTMediator</span> sharedInstance] <span class="built_in">CTMediator_showAlertWithMessage</span>:<span class="string">@&quot;casa&quot;</span> cancelAction:<span class="literal">nil</span> confirmAction:^(<span class="built_in">NSDictionary</span> *info) &#123;</span><br><span class="line">            <span class="comment">// 做你想做的事</span></span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, info);</span><br><span class="line">        &#125;];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://casatwy.com/iOS-Modulization.html">iOS应用架构谈 组件化方案</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/23/%E3%80%8AEffective%20Objective-C%202.0%E3%80%8B%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="prev" title="《Effective Objective-C 2.0》读书笔记">
+      <i class="fa fa-chevron-left"></i> 《Effective Objective-C 2.0》读书笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/03/07/%E5%85%B3%E4%BA%8EKVC%E7%9A%84%E4%B8%80%E4%BA%9B%E6%80%BB%E7%BB%93/" rel="next" title="关于KVC的一些总结">
+      关于KVC的一些总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%98%91%E8%8F%87%E8%A1%97%E7%BB%84%E4%BB%B6%E5%8C%96%E6%96%B9%E6%A1%88"><span class="nav-number">1.1.</span> <span class="nav-text">蘑菇街组件化方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#casa-%E6%96%B9%E6%A1%88"><span class="nav-number">2.</span> <span class="nav-text">casa 方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">调用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%BA%94%E7%94%A8%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.1.</span> <span class="nav-text">本地应用调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E5%BA%94%E7%94%A8%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.2.</span> <span class="nav-text">远程应用调用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E4%BB%85%E9%80%9A%E8%BF%87Action%E6%9A%B4%E9%9C%B2%E5%8F%AF%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3"><span class="nav-number">2.2.</span> <span class="nav-text">组件仅通过Action暴露可调用接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92"><span class="nav-number">2.3.</span> <span class="nav-text">参数传递</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BBmodel%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.4.</span> <span class="nav-text">去model设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%8E%BBModel"><span class="nav-number">2.4.1.</span> <span class="nav-text">为什么要去Model</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%BBModel%E5%8C%96%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.4.2.</span> <span class="nav-text">去Model化带来的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8category%E8%A7%A3%E5%86%B3"><span class="nav-number">2.4.3.</span> <span class="nav-text">使用category解决</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

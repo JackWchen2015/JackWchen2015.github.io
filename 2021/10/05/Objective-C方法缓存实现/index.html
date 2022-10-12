@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="为什么需要学习Objective-C底层实现，因为底层使用的技术都是值得花时间学习的，特别是使用的数据结构，通常都是权衡使用场景，以及考虑后续可持续迭代的优质代码。 OC为了实现其动态性，将方法的调用包装成了SEL寻找IMP的过程。OC采用了方法缓存的机制来提高调用效率，也就是cache_t，其作用就是缓存已调用的方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C方法缓存实现">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="为什么需要学习Objective-C底层实现，因为底层使用的技术都是值得花时间学习的，特别是使用的数据结构，通常都是权衡使用场景，以及考虑后续可持续迭代的优质代码。 OC为了实现其动态性，将方法的调用包装成了SEL寻找IMP的过程。OC采用了方法缓存的机制来提高调用效率，也就是cache_t，其作用就是缓存已调用的方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-05T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-09T03:11:13.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Objective-C方法缓存实现 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Objective-C方法缓存实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-05 08:00:00" itemprop="dateCreated datePublished" datetime="2021-10-05T08:00:00+08:00">2021-10-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-09 11:11:13" itemprop="dateModified" datetime="2022-02-09T11:11:13+08:00">2022-02-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>为什么需要学习Objective-C底层实现，因为底层使用的技术都是值得花时间学习的，特别是使用的数据结构，通常都是权衡使用场景，以及考虑后续可持续迭代的优质代码。</p>
+<p>OC为了实现其动态性，将方法的调用包装成了<code>SEL</code>寻找<code>IMP</code>的过程。OC采用了方法缓存的机制来提高调用效率，也就是<code>cache_t</code>，其作用就是缓存已调用的方法。</p>
+<span id="more"></span>
+
+<h2 id="cache-t-数据结构"><a href="#cache-t-数据结构" class="headerlink" title="cache_t 数据结构"></a>cache_t 数据结构</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">cache_t</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">bucket_t</span> *_buckets;  <span class="comment">//8		缓存数组，即哈希桶</span></span><br><span class="line">    <span class="type">mask_t</span> _mask;               <span class="comment">//4      typedef uint32_t mask_t;  缓存数组的容量临界值</span></span><br><span class="line">    <span class="type">mask_t</span> _occupied;           <span class="comment">//4		缓存数组中已缓存方法数量</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">bucket_t</span> *<span class="built_in">buckets</span>();</span><br><span class="line">    <span class="function"><span class="type">mask_t</span> <span class="title">mask</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">mask_t</span> <span class="title">occupied</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">incrementOccupied</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setBucketsAndMask</span><span class="params">(<span class="keyword">struct</span> <span class="type">bucket_t</span> *newBuckets, <span class="type">mask_t</span> newMask)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">initializeToEmpty</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">mask_t</span> <span class="title">capacity</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">isConstantEmptyCache</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">canBeFreed</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">size_t</span> <span class="title">bytesForCapacity</span><span class="params">(<span class="type">uint32_t</span> cap)</span></span>;</span><br><span class="line">    <span class="type">static</span> <span class="keyword">struct</span> <span class="title class_">bucket_t</span> * <span class="built_in">endMarker</span>(<span class="keyword">struct</span> <span class="type">bucket_t</span> *b, <span class="type">uint32_t</span> cap);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">expand</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">reallocate</span><span class="params">(<span class="type">mask_t</span> oldCapacity, <span class="type">mask_t</span> newCapacity)</span></span>;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">bucket_t</span> * <span class="built_in">find</span>(SEL sel, id receiver);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">bad_cache</span><span class="params">(id receiver, SEL sel, Class isa)</span> __<span class="title">attribute__</span><span class="params">((noreturn))</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">mask_t</span> <span class="title">cache_t::mask</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> _mask; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">mask_t</span> <span class="title">cache_t::capacity</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mask</span>() ? <span class="built_in">mask</span>()+<span class="number">1</span> : <span class="number">0</span>; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> <span class="type">long</span> 	<span class="type">uintptr_t</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="type">uintptr_t</span> 	<span class="type">cache_key_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">bucket_t</span> &#123;</span><br><span class="line">    <span class="type">cache_key_t</span> _key;</span><br><span class="line">    MethodCacheIMP _imp;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>_buckets</code>：一个指向<code>bucket_t</code>结构体的数组，bucket_t是用来存放方法的<code>SEL内存地址</code>和<code>IMP</code>的；<br> <code>_mask</code>的大小是数组大小 - 1，用作掩码（因为这里维护的数组大小都是2的整数次幂，所以_mask的二进制位000011, 000111, 001111）刚好可以用作hash取余数的掩码。刚好保证相与后不超过缓存大小。<br><code>_occupied</code>是当前已缓存的方法数。即数组中已使用了多少位置</p>
+<p><code>_key</code>:<code>cache_key_t</code> 就是 <code>unsigned long</code>类型，用来存储<code>SEL</code>的内存地址。SEL应该是<code>char*</code>类型的字符串，<code>char*</code>强转<code>unsigned long</code>，其实就是<code>SEL</code>的内存地址。代码如下<br><code>_imp</code>就是方法实现IMP了</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">cache_key_t</span> key = <span class="built_in">getKey</span>(sel);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">cache_key_t</span> <span class="title">getKey</span><span class="params">(SEL sel)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(sel);</span><br><span class="line">    <span class="keyword">return</span> (<span class="type">cache_key_t</span>)sel;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="掩码-mask设计"><a href="#掩码-mask设计" class="headerlink" title="掩码_mask设计"></a>掩码<code>_mask</code>设计</h3><p>如果<code>_mask</code>是0，说明未调用实例方法，即桶的容量为0；<br>当<code>_mask</code>不等于0的时候，意味着已经调用过实例方法，此时桶的容量为_mask + 1。故，_mask从侧面反映了桶的容量。</p>
+<blockquote>
+<p><code>掩码</code>（Mask）在计算机科学及数字逻辑中指的是一串二进制数字，通过与目标数字的按位操作，达到屏蔽指定位而实现需求。（eg：子网掩码）</p>
+</blockquote>
+<h3 id="SEL"><a href="#SEL" class="headerlink" title="SEL"></a>SEL</h3><ul>
+<li><p>使用<code> @selector(hello)</code> 生成的选择子，是否会因为类的不同而不同？<br>使用 <code>@selector()</code> 生成的选择子不会因为类的不同而改变，其内存地址在编译期间就已经确定了。也就是说向不同的类发送相同的消息时，其生成的选择子是完全相同的。</p>
+</li>
+<li><p>SEL特性</p>
+</li>
+</ul>
+<ol>
+<li><code>Objective-C</code> 为我们维护了一个巨大的选择子表</li>
+<li>在使用 @selector() 时会从这个选择子表中根据选择子的名字查找对应的 SEL。如果没有找到，则会生成一个 SEL 并添加到表中</li>
+<li>在编译期间会扫描全部的头文件和实现文件将其中的方法以及使用 @selector() 生成的选择子加入到选择子表中</li>
+</ol>
+<h2 id="cache-t方法缓存原理"><a href="#cache-t方法缓存原理" class="headerlink" title="cache_t方法缓存原理"></a>cache_t方法缓存原理</h2><p>OC方法的本质是消息发送（<code>objc_msgSend</code>),底层是通过方法的<code>SEL</code>查找<code>IMP</code></p>
+<h3 id="cache-t的存入"><a href="#cache-t的存入" class="headerlink" title="cache_t的存入"></a>cache_t的存入</h3><ol>
+<li><p>先看缓存中是否已经存在了该方法，如果已经存在，直接return，不再缓存</p>
+</li>
+<li><p>从class中拿到cache列表，将sel转换为内存地址</p>
+</li>
+</ol>
+<ul>
+<li>如果当前cache还没被初始化，则分配一个大小为4的数组，并设置<code>_mask</code>为3</li>
+<li>如果存入缓存后的大小小于当前大小的3&#x2F;4，则当前缓存大小还可以使用，无需扩容</li>
+<li>否则缓存太满，需要扩容，扩容为原来大小的2倍，放弃旧的缓存，新扩容的缓存为空。</li>
+</ul>
+<ol start="3">
+<li>将_key与_mask相与，因为_mask是原数组的大小-1，所以得到的结果刚好小于数组的大小</li>
+<li>如果得到的位置已经被占用，则往后寻找，直到找到空的位置，把缓存设置到这个位置。</li>
+</ol>
+<h3 id="cache-fill-nolock-方法"><a href="#cache-fill-nolock-方法" class="headerlink" title="cache_fill_nolock 方法"></a><code>cache_fill_nolock</code> 方法</h3><p>这个函数的作用是将方法的SEL和IMP写入<code>_buckets</code>,同时更新<code>_mask</code>和<code>_occupied</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">cache_fill</span><span class="params">(Class cls, SEL sel, IMP imp, id receiver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 因为cache_t内部用来储存的结构其实就是个数组</span></span><br><span class="line">    <span class="comment">// 所以操作的时候需要先加个锁，保证线程安全。</span></span><br><span class="line">    <span class="function"><span class="type">mutex_locker_t</span> <span class="title">lock</span><span class="params">(cacheUpdateLock)</span></span>;</span><br><span class="line">    <span class="built_in">cache_fill_nolock</span>(cls, sel, imp, receiver);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">cache_fill_nolock</span><span class="params">(Class cls, SEL sel, IMP imp, id receiver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cacheUpdateLock.<span class="built_in">assertLocked</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Never cache before +initialize is done</span></span><br><span class="line">    <span class="keyword">if</span> (!cls-&gt;<span class="built_in">isInitialized</span>()) <span class="keyword">return</span>; <span class="comment">//如果类未初始化</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Make sure the entry wasnot added to the cache by some other thread </span></span><br><span class="line">    <span class="comment">// before we grabbed the cacheUpdateLock.</span></span><br><span class="line">    <span class="comment">//判断方法是否已经缓存了，如果缓存了，直接返回，如果没有，则进入下面的逻辑进行缓存。</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">cache_getImp</span>(cls, sel)) <span class="keyword">return</span>; </span><br><span class="line"></span><br><span class="line">    <span class="type">cache_t</span> *cache = <span class="built_in">getCache</span>(cls);</span><br><span class="line">     <span class="comment">// 将方法名转成对应的key</span></span><br><span class="line">    <span class="type">cache_key_t</span> key = <span class="built_in">getKey</span>(sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Use the cache as-is if it is less than 3/4 full</span></span><br><span class="line">    <span class="comment">// 通过cache获取已经缓存的数量occupied，并且+1，得到新的缓存数量。</span></span><br><span class="line">    <span class="type">mask_t</span> newOccupied = cache-&gt;<span class="built_in">occupied</span>() + <span class="number">1</span>;</span><br><span class="line">    <span class="type">mask_t</span> capacity = cache-&gt;<span class="built_in">capacity</span>();</span><br><span class="line">    <span class="keyword">if</span> (cache-&gt;<span class="built_in">isConstantEmptyCache</span>()) &#123;</span><br><span class="line">       <span class="comment">// Cache is read-only. Replace it.</span></span><br><span class="line">        cache-&gt;<span class="built_in">reallocate</span>(capacity, capacity ?: INIT_CACHE_SIZE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (newOccupied &lt;= capacity / <span class="number">4</span> * <span class="number">3</span>) &#123;</span><br><span class="line">        <span class="comment">// Cache is less than 3/4 full. Use it as-is.</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Cache is too full. Expand it.</span></span><br><span class="line">        cache-&gt;<span class="built_in">expand</span>();<span class="comment">//如果大于3/4，就需要expand()即缓存扩容。</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Scan for the first unused slot and insert there.</span></span><br><span class="line">    <span class="comment">// There is guaranteed to be an empty slot because the </span></span><br><span class="line">    <span class="comment">// minimum size is 4 and we resized at 3/4 full.</span></span><br><span class="line">    <span class="comment">// 根据sel获取bucket，此bucket的sel一般为0（说明这个位置还没缓存方法），</span></span><br><span class="line">    <span class="comment">// 也可能与实参sel相等（hash冲突，可能性很低）</span></span><br><span class="line">    <span class="type">bucket_t</span> *bucket = cache-&gt;<span class="built_in">find</span>(sel, receiver);</span><br><span class="line">    <span class="comment">// 当且仅当bucket的sel为0时，执行_occupied++</span></span><br><span class="line">    <span class="keyword">if</span> (bucket-&gt;<span class="built_in">sel</span>() == <span class="number">0</span>) cache-&gt;<span class="built_in">incrementOccupied</span>();</span><br><span class="line">    <span class="comment">// 更新bucket的sel和imp</span></span><br><span class="line">    bucket-&gt;<span class="built_in">set</span>&lt;Atomic&gt;(sel, imp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// INIT_CACHE_SIZE 即为4</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    INIT_CACHE_SIZE_LOG2 = <span class="number">2</span>,</span><br><span class="line">    INIT_CACHE_SIZE      = (<span class="number">1</span> &lt;&lt; INIT_CACHE_SIZE_LOG2)</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">cache_t</span> *<span class="title">getCache</span><span class="params">(Class cls)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(cls);</span><br><span class="line">    <span class="keyword">return</span> &amp;cls-&gt;cache;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">mask_t</span> <span class="title">cache_t::capacity</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mask</span>() ? <span class="built_in">mask</span>()+<span class="number">1</span> : <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><code>cache_getImp</code>的实现是不开源的，同时也是用汇编实现</p>
+</blockquote>
+<h3 id="expand"><a href="#expand" class="headerlink" title="expand"></a>expand</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">cache_t::expand</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cacheUpdateLock.<span class="built_in">assertLocked</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取当前总容量，即_mask+1</span></span><br><span class="line">    <span class="type">uint32_t</span> oldCapacity = <span class="built_in">capacity</span>();</span><br><span class="line">    <span class="comment">// 新的容量 = 旧容量 * 2</span></span><br><span class="line">    <span class="type">uint32_t</span> newCapacity = oldCapacity ? oldCapacity*<span class="number">2</span> : INIT_CACHE_SIZE;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((<span class="type">uint32_t</span>)(<span class="type">mask_t</span>)newCapacity != newCapacity) &#123;</span><br><span class="line">        <span class="comment">// mask overflow - can&#x27;t grow further</span></span><br><span class="line">        <span class="comment">// fixme this wastes one bit of mask</span></span><br><span class="line">        newCapacity = oldCapacity;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">reallocate</span>(oldCapacity, newCapacity);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注意：</p>
+<ol>
+<li>在不超过<code>uint32_t</code>大小（4字节）时，每次扩容为原来的2倍</li>
+<li>如果超过了<code>uint32_t</code>，则重新申请跟原来一样大小的<code>buckets</code></li>
+</ol>
+<h3 id="find"><a href="#find" class="headerlink" title="find"></a>find</h3><p>find具体做的事情就是根据方法的<code>SEL</code>，返回一个复合要求的<code>bucket</code></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bucket_t</span> * <span class="title">cache_t::find</span><span class="params">(SEL s, id receiver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(s != <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">bucket_t</span> *b = <span class="built_in">buckets</span>(); <span class="comment">// 获取当前buckets，即_buckets</span></span><br><span class="line">    <span class="type">mask_t</span> m = <span class="built_in">mask</span>(); <span class="comment">// 获取当前mask，即_mask</span></span><br><span class="line"></span><br><span class="line">    <span class="type">mask_t</span> begin = <span class="built_in">cache_hash</span>(s, m);</span><br><span class="line">    <span class="type">mask_t</span> i = begin;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">    	<span class="comment">// sel为0：说明 i 这个位置尚未缓存方法；</span></span><br><span class="line">    	<span class="comment">// sel等于s：命中缓存，说明 i 这个位置已缓存方法，可能是hash冲突</span></span><br><span class="line">        <span class="keyword">if</span> (b[i].<span class="built_in">sel</span>() == <span class="number">0</span>  ||  b[i].<span class="built_in">sel</span>() == s) &#123;</span><br><span class="line">            <span class="keyword">return</span> &amp;b[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">while</span> ((i = <span class="built_in">cache_next</span>(i, m)) != begin); </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// hack</span></span><br><span class="line">    <span class="comment">// 找不到多余的哈希桶（出错的处理，打印问题）</span></span><br><span class="line">    Class cls = (Class)((<span class="type">uintptr_t</span>)<span class="keyword">this</span> - <span class="built_in">offsetof</span>(objc_class, cache));</span><br><span class="line">    <span class="type">cache_t</span>::<span class="built_in">bad_cache</span>(receiver, (SEL)s, cls);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">mask_t</span> <span class="title">cache_hash</span><span class="params">(SEL sel, <span class="type">mask_t</span> mask)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="type">mask_t</span>)(<span class="type">uintptr_t</span>)sel &amp; mask;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">mask_t</span> <span class="title">cache_next</span><span class="params">(<span class="type">mask_t</span> i, <span class="type">mask_t</span> mask)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (i+<span class="number">1</span>) &amp; mask;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>find</code>找<code>bucket</code>的方式用到了<code>hash</code>的思想：以<code>_buckets</code>作为哈希桶，以<code>cache_hash</code>作为哈希函数，进行哈希运算后得出索引值<code>index</code>（<code>xx &amp; mask</code>，所以<code>index</code>最大值就是<code>_mask</code>的值）.由于所以值是通过哈希运算得出的，其结果自然是无序的。</p>
+<h3 id="mask的作用"><a href="#mask的作用" class="headerlink" title="_mask的作用"></a>_mask的作用</h3><ol>
+<li>反映了cache_t中哈希桶的数量（哈希桶的数量&#x3D;_mask+1）,保证了查找哈希桶时不会出现越界的情况。</li>
+</ol>
+<p>哈希桶的数量一定是<code>&gt;=4且能被4整除</code>的，<code>_mask</code>则等于哈希桶的数量-1，也就是说<code>_mask</code>的二进制位上全都是1，而索引是由<code>xx &amp; _mask</code> 运算得出，因此索引值是小于哈希桶的数量的<code>(index&lt;=_mask</code>,故<code>index&lt;capacity</code>),也就不会出现越界的问题</p>
+<h3 id="扩容临界点3-x2F-4的讨论"><a href="#扩容临界点3-x2F-4的讨论" class="headerlink" title="扩容临界点3&#x2F;4的讨论"></a>扩容临界点3&#x2F;4的讨论</h3><p>一般设定临界点就不得不权衡 <code>空间利用率</code> 和 <code>时间利用率</code> 。在 3&#x2F;4 这个临界点的时候，空间利用率比较高，同时又避免了相当多的哈希冲突，时间利用率也比较高。</p>
+<h2 id="cache-t的取出"><a href="#cache-t的取出" class="headerlink" title="cache_t的取出"></a>cache_t的取出</h2><p><code>cache_t</code>的取出操作为<code>cache_getImp(cls,sel)</code>，该代码是使用汇编语言实现。<code>cache_getImp</code>方法将参数<code>cls</code>放到<code>r10</code>寄存器，然后调用了<code>CacheLookup</code>方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">STATIC_ENTRY _cache_getImp</span><br><span class="line"></span><br><span class="line">// do lookup</span><br><span class="line">movq	%a1, %r10		// move class to r10 for CacheLookup</span><br><span class="line">CacheLookup NORMAL, GETIMP	// returns IMP on success</span><br></pre></td></tr></table></figure>
+<p>将<code>sel</code>放进<code>r11</code>寄存器，然后将 <code>sel</code>和<code>cls-&gt;cache.mask</code>相与的结果放进<code>r11</code>寄存器，找到key与现有的sel比较</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">.macro	CacheLookup</span><br><span class="line">	movq	%a2, %r11		// r11 = _cmd</span><br><span class="line">	andl	24(%r10), %r11d		// r11 = _cmd &amp; class-&gt;cache.mask</span><br><span class="line">	shlq	$$4, %r11		// r11 = offset = (_cmd &amp; mask)&lt;&lt;4</span><br><span class="line">	addq	16(%r10), %r11		// r11 = class-&gt;cache.buckets + offset</span><br><span class="line"></span><br><span class="line">	cmpq	cached_sel(%r11), %a2	// if (bucket-&gt;sel != _cmd)</span><br><span class="line">	jne 	1f			//     scan more</span><br><span class="line">	// CacheHit must always be preceded by a not-taken `jne` instruction</span><br><span class="line">	CacheHit $0, $1			// call or return imp</span><br><span class="line"></span><br><span class="line">1:</span><br><span class="line">	// loop</span><br><span class="line">	cmpq	$$1, cached_sel(%r11)</span><br><span class="line">	jbe	3f			// if (bucket-&gt;sel &lt;= 1) wrap or miss</span><br><span class="line"></span><br><span class="line">	addq	$$16, %r11		// bucket++</span><br><span class="line">2:	</span><br><span class="line">	cmpq	cached_sel(%r11), %a2	// if (bucket-&gt;sel != _cmd)</span><br><span class="line">	jne 	1b			//     scan more</span><br><span class="line">	// CacheHit must always be preceded by a not-taken `jne` instruction</span><br><span class="line">	CacheHit $0, $1			// call or return imp</span><br><span class="line"></span><br><span class="line">3:</span><br><span class="line">	// wrap or miss</span><br><span class="line">	jb	LCacheMiss_f		// if (bucket-&gt;sel &lt; 1) cache miss</span><br><span class="line">	// wrap</span><br><span class="line">	movq	cached_imp(%r11), %r11	// bucket-&gt;imp is really first bucket</span><br><span class="line">	jmp 	2f</span><br><span class="line"></span><br><span class="line">	// Clone scanning loop to miss instead of hang when cache is corrupt.</span><br><span class="line">	// The slow path may detect any corruption and halt later.</span><br><span class="line"></span><br><span class="line">1:</span><br><span class="line">	// loop</span><br><span class="line">	cmpq	$$1, cached_sel(%r11)</span><br><span class="line">	jbe	3f			// if (bucket-&gt;sel &lt;= 1) wrap or miss</span><br><span class="line"></span><br><span class="line">	addq	$$16, %r11		// bucket++</span><br><span class="line">2:	</span><br><span class="line">	cmpq	cached_sel(%r11), %a2	// if (bucket-&gt;sel != _cmd)</span><br><span class="line">	jne 	1b			//     scan more</span><br><span class="line">	// CacheHit must always be preceded by a not-taken `jne` instruction</span><br><span class="line">	CacheHit $0, $1			// call or return imp</span><br><span class="line"></span><br><span class="line">3:</span><br><span class="line">	// double wrap or miss</span><br><span class="line">	jmp	LCacheMiss_f</span><br><span class="line"></span><br><span class="line">.endmacro</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>cache_t</code>是一个开放地址法的hash表</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>1.<a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904070596001806">OC源码分析之方法的缓存原理</a><br>2.<a target="_blank" rel="noopener" href="https://draveness.me/message/">从源代码看 ObjC 中消息的发送</a><br>3.<a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903858762678286">iOS的方法缓存（cache_t）是如何实现</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/" rel="prev" title="Objective-C编程之道：iOS设计模式解析 读书笔记 下">
+      <i class="fa fa-chevron-left"></i> Objective-C编程之道：iOS设计模式解析 读书笔记 下
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/07/Hash%E6%80%9D%E6%83%B3%E4%B8%8EhashTable/" rel="next" title="Hash思想与hashTable">
+      Hash思想与hashTable <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#cache-t-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">cache_t 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A9%E7%A0%81-mask%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">掩码_mask设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SEL"><span class="nav-number">1.2.</span> <span class="nav-text">SEL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cache-t%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">cache_t方法缓存原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cache-t%E7%9A%84%E5%AD%98%E5%85%A5"><span class="nav-number">2.1.</span> <span class="nav-text">cache_t的存入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache-fill-nolock-%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">cache_fill_nolock 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#expand"><span class="nav-number">2.3.</span> <span class="nav-text">expand</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#find"><span class="nav-number">2.4.</span> <span class="nav-text">find</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mask%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">2.5.</span> <span class="nav-text">_mask的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%AE%B9%E4%B8%B4%E7%95%8C%E7%82%B93-x2F-4%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-number">2.6.</span> <span class="nav-text">扩容临界点3&#x2F;4的讨论</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cache-t%E7%9A%84%E5%8F%96%E5%87%BA"><span class="nav-number">3.</span> <span class="nav-text">cache_t的取出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

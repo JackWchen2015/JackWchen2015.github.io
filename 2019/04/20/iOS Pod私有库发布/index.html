@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS Pod私有库发布">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/20/iOS%20Pod%E7%A7%81%E6%9C%89%E5%BA%93%E5%8F%91%E5%B8%83/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-20T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-01T13:04:56.551Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="CocoaPods">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/20/iOS%20Pod%E7%A7%81%E6%9C%89%E5%BA%93%E5%8F%91%E5%B8%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS Pod私有库发布 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/20/iOS%20Pod%E7%A7%81%E6%9C%89%E5%BA%93%E5%8F%91%E5%B8%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS Pod私有库发布
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-04-20 08:00:00" itemprop="dateCreated datePublished" datetime="2019-04-20T08:00:00+08:00">2019-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-01 21:04:56" itemprop="dateModified" datetime="2022-07-01T21:04:56+08:00">2022-07-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7%E4%B8%8E%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能监控与优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。</p>
+<span id="more"></span>
+
+
+<h2 id="静态库生成"><a href="#静态库生成" class="headerlink" title="静态库生成"></a>静态库生成</h2><h3 id="模块说明书PodSpec"><a href="#模块说明书PodSpec" class="headerlink" title="模块说明书PodSpec"></a>模块说明书PodSpec</h3><p>我们把podspec文件上传给cocoapod的master上，当别人配置好CocoaPods就会把我们的podspec.json下载到&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F;下，用户要使用AFNetworking查找本地&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F; 找到这个AFNetworking.podspec.json文件根据内容下载配置。</p>
+<p>podspec文件就是充当了一个我们源代码模块的说明书，告诉开发者我们模块名称，我们用途，可以在哪下载源代码 ，需要如何配置。 </p>
+<h4 id="podspec创建"><a href="#podspec创建" class="headerlink" title="podspec创建"></a>podspec创建</h4><p>pod 还提供了一个一条龙服务的命令：pod lib create 会帮我们创建一个跟项目名称相同podspec文件 测试project 工程 测试框架。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod lib create XXXX</span><br></pre></td></tr></table></figure>
+
+<h4 id="podspec常用属性说明"><a href="#podspec常用属性说明" class="headerlink" title="podspec常用属性说明"></a>podspec常用属性说明</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title class_">Pod::Spec</span>.new <span class="keyword">do</span>|<span class="params">s</span>|</span><br><span class="line">  /<span class="regexp">/项目名</span></span><br><span class="line"><span class="regexp">  s.name =&#x27;Project&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/版本号</span></span><br><span class="line"><span class="regexp">  s.version =&#x27;1.0.1&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/listen文件的类型</span></span><br><span class="line"><span class="regexp">  s.license = &#x27;MIT&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/简单描述</span></span><br><span class="line"><span class="regexp">  s.summary = &#x27;ATest in iOS.&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/项目的getub地址，只支持HTTP和HTTPS地址，不支持ssh的地址</span></span><br><span class="line"><span class="regexp">  s.homepage =&#x27;https:/</span><span class="regexp">/github.com/</span><span class="number">3671932</span>/Project<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //作者和邮箱</span></span><br><span class="line"><span class="string">  s.authors = &#123;&#x27;</span><span class="variable constant_">MMMMM</span><span class="string">&#x27; =&gt; &#x27;</span><span class="variable constant_">XXXXXX</span><span class="variable">@qq</span>.com<span class="string">&#x27; &#125;</span></span><br><span class="line"><span class="string">  //git仓库的https地址</span></span><br><span class="line"><span class="string">  s.source = &#123; :git=&gt; &#x27;</span><span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="number">3671932</span>/Project.git<span class="string">&#x27;, :tag =&gt;s.version&#125;</span></span><br><span class="line"><span class="string">  //是否要求arc（有部分非arc文件情况未考证）</span></span><br><span class="line"><span class="string">  s.requires_arc = true</span></span><br><span class="line"><span class="string"> //在这个属性中声明过的.h文件能够使用&lt;&gt;方法联想调用（这个是可选属性）</span></span><br><span class="line"><span class="string">  s.public_header_files = &#x27;</span>UIKit/*.h<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //表示源文件的路径，这个路径是相对podspec文件而言的。（这属性下面单独讨论）</span></span><br><span class="line"><span class="string">  s.source_files =&#x27;</span>AppInfo/*.*<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //需要用到的frameworks，不需要加.frameworks后缀。（这个没有用到也可以不填）</span></span><br><span class="line"><span class="string">  s.frameworks =&#x27;</span>Foundation<span class="string">&#x27;, &#x27;</span>CoreGraphics<span class="string">&#x27;, &#x27;</span>UIKit<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">  //图片资源可支持xcassets</span></span><br><span class="line"><span class="string">     s.resource_bundles = &#123;</span></span><br><span class="line"><span class="string">     &#x27;</span>WSFBaseService<span class="string">&#x27; =&gt; [&#x27;</span>WSFBaseService/Assets/WSFBaseService.xcassets<span class="string">&#x27;]</span></span><br><span class="line"><span class="string">   &#125;</span></span><br><span class="line"><span class="string">   </span></span><br><span class="line"><span class="string">   //建立名称为Info的子仓库（虚拟路径）</span></span><br><span class="line"><span class="string">  s.subspec &#x27;</span>Info<span class="string">&#x27; do |ss| </span></span><br><span class="line"><span class="string">  ....</span></span><br><span class="line"><span class="string">  end</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="模块说明书的验证"><a href="#模块说明书的验证" class="headerlink" title="模块说明书的验证"></a>模块说明书的验证</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod spec lint test.podspec </span><br></pre></td></tr></table></figure>
+<p>可以设置 –allow-warnings来忽略警告，通过–verbose查看错误具体信息</p>
+<h4 id="模块说明书注意"><a href="#模块说明书注意" class="headerlink" title="模块说明书注意"></a>模块说明书注意</h4><p>一个tag对应一个版本 都会包含一个podspec 文件</p>
+<h3 id="仓库Repo"><a href="#仓库Repo" class="headerlink" title="仓库Repo"></a>仓库Repo</h3><p>存放说明书的地方就是仓库<br>创建自己cocoapod仓库的命令就是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//REPO_NAME 仓库名称</span><br><span class="line">//SOURCE_URL 仓库远程地址</span><br><span class="line">pod repo add REPO_NAME SOURCE_URL</span><br></pre></td></tr></table></figure>
+
+<p> 推送podspec需要添加仓库名称和 podspec文件地址</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod repo push RooboSpecs xxxxxx.podspec</span><br></pre></td></tr></table></figure>
+<h3 id="编译SDK静态库"><a href="#编译SDK静态库" class="headerlink" title="编译SDK静态库"></a>编译SDK静态库</h3><p> 如果需要隐藏源代码，可以把pod库编译成静态库的方式。<br> 可以通过安装cocoapod的编译插件配合我们的cocoapod 文件来编译我们静态库文件 安装cocoapods-packager</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gem install cocoapods-packager</span><br></pre></td></tr></table></figure>
+<ul>
+<li>编译库文件</li>
+</ul>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//pod package NAME [SOURCE]</span><br><span class="line">pod package Roobo_Plus.podspec  --force --embedded</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Pod Package命令含义</li>
+</ul>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"> //强制覆盖之前已经生成过的二进制库 </span><br><span class="line">--force</span><br><span class="line"></span><br><span class="line">//生成静态.framework </span><br><span class="line">--embedded</span><br><span class="line"></span><br><span class="line">//生成静态.a </span><br><span class="line">--library</span><br><span class="line"></span><br><span class="line">//生成动态.framework </span><br><span class="line">--dynamic</span><br><span class="line"></span><br><span class="line">//动态.framework是需要签名的，所以只有生成动态库的时候需要这个BundleId </span><br><span class="line">--bundle-identifier</span><br><span class="line"></span><br><span class="line">//不包含依赖的符号表，生成动态库的时候不能包含这个命令，动态库一定需要包含依赖的符号表。 </span><br><span class="line">--exclude-deps</span><br><span class="line"></span><br><span class="line">//表示生成的库是debug还是release，默认是release。--configuration=Debug </span><br><span class="line">--configuration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--no-mangle</span><br><span class="line">//表示不使用name mangling技术，pod package默认是使用这个技术的。我们能在用pod package生成二进制库的时候会看到终端有输出Mangling symbols和Building mangled framework。表示使用了这个技术。</span><br><span class="line">//如果你的pod库没有其他依赖的话，那么不使用这个命令也不会报错。但是如果有其他依赖，不使用--no-mangle这个命令的话，那么你在工程里使用生成的二进制库的时候就会报错：Undefined symbols for architecture x86_64。</span><br><span class="line"></span><br><span class="line">--subspecs</span><br><span class="line"></span><br><span class="line">//如果你的pod库有subspec，那么加上这个命名表示只给某个或几个subspec生成二进制库，--subspecs=subspec1,subspec2。生成的库的名字就是你podspec的名字，如果你想生成的库的名字跟subspec的名字一样，那么就需要修改podspec的名字。 </span><br><span class="line">这个脚本就是批量生成subspec的二进制库，每一个subspec的库名就是podspecName+subspecName。</span><br><span class="line"></span><br><span class="line">--spec-sources</span><br><span class="line"></span><br><span class="line">//一些依赖的source，如果你有依赖是来自于私有库的，那就需要加上那个私有库的source，默认是cocoapods的Specs仓库。--spec-sources=private,https://github.com/CocoaPods/Specs.git。</span><br></pre></td></tr></table></figure>
+
+<p>注意：<br>使用–library编译出的.a静态库文件，pod package插件有问题的，根部不会生成头文件。所以只能编译framwork的库文件</p>
+<h2 id="静态库制作遇到的坑"><a href="#静态库制作遇到的坑" class="headerlink" title="静态库制作遇到的坑"></a>静态库制作遇到的坑</h2><h3 id="运行时便无法找到对应的selector？"><a href="#运行时便无法找到对应的selector？" class="headerlink" title="运行时便无法找到对应的selector？"></a>运行时便无法找到对应的selector？</h3><h4 id="编译-x2F-链接过程"><a href="#编译-x2F-链接过程" class="headerlink" title="编译&#x2F;链接过程"></a>编译&#x2F;链接过程</h4><ul>
+<li><p>编译器在编译的过程中首先会将 .c&#x2F;.cc&#x2F;.cpp&#x2F;.m&#x2F;.mm 的源文件编译成后缀为 .o 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 .a(archive) 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</p>
+</li>
+<li><p>当需要生产二进制文件或是动态库时，编译器会对静态库 .a(archive) 文件进行处理；编译器将获取静态库中所有的符号表，并检查哪些符号被引用，只有被引用的对象文件才会被链接器真正的加载并处理。例如在静态库中有 10 个对象文件，但被引用到只有 2 个，则链接器只加载被引用的 2 个对象文件，未被使用到的 8 个对象文件则会被忽略。</p>
+</li>
+<li><p>在 C&#x2F;C++ 语言中，这种机制可以很好的工作，因为 C&#x2F;C++ 语言会尽可能的在编译期去做这些事。在 Objective-C 语言中非常依赖运行时特性，Category 就是基于运行时实现，但它并不会像类或者函数一样被创建链接符号，编译器在检查符号表时便不能检查到 Category 对应的符号表，从而 Category 的对象文件就不能被正常的加载，在运行时便无法找到对应的 selector 。</p>
+</li>
+</ul>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ol>
+<li>Other Linker Flags 添加</li>
+</ol>
+<ul>
+<li><p>-all_load  告诉编译器 对于所有静态库中的所有对象文件，不管里面的符号有没有被用到，全部都载入，这种方法可以解决问题，但是会产生比较大的二进制文件</p>
+</li>
+<li><p>-force_load 并指定路径，-force_load $(BUILT_PRODUCTS_DIR)&#x2F;&lt;library_name.a&gt; 这种方法和 -all_load 类似，不同的是它只载入指定的静态库</p>
+</li>
+<li><p>-ObjC  如果在静态库的对象文件中发现了 Objective-C 代码，就把它载入，Category 中肯定会存在 Objective-C 代码。</p>
+</li>
+</ul>
+<ol start="2">
+<li>在 Category 的源文件里添加 Fake symbol，并确保以某种方法在编译时引用了该 Fake symbol，这会使得 Fake symbol 对象文件被加载时它里面 Category 代码也会被载入。该方法可以控制哪些 Category 可以被正常加载，同时也不需要添加编译参数做特殊处理。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="http://www.enkichen.com/2017/09/13/ios-static-library-categories/">iOS 静态库中的 Category 运行时错误</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9eea3e7cb3a1">podspec文件解析</a></li>
+<li><a target="_blank" rel="noopener" href="https://juejin.im/post/6844903559931117581">Pod 库的资源引用</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CocoaPods/" rel="tag"># CocoaPods</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/04/04/Pod%20openssl%E6%8A%A5%E9%94%99/" rel="prev" title="Pod openssl报错">
+      <i class="fa fa-chevron-left"></i> Pod openssl报错
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/05/20/MMKV%E5%88%86%E6%9E%90mmap/" rel="next" title="MMKV分析mmap">
+      MMKV分析mmap <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E7%94%9F%E6%88%90"><span class="nav-number">1.</span> <span class="nav-text">静态库生成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E8%AF%B4%E6%98%8E%E4%B9%A6PodSpec"><span class="nav-number">1.1.</span> <span class="nav-text">模块说明书PodSpec</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#podspec%E5%88%9B%E5%BB%BA"><span class="nav-number">1.1.1.</span> <span class="nav-text">podspec创建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#podspec%E5%B8%B8%E7%94%A8%E5%B1%9E%E6%80%A7%E8%AF%B4%E6%98%8E"><span class="nav-number">1.1.2.</span> <span class="nav-text">podspec常用属性说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E8%AF%B4%E6%98%8E%E4%B9%A6%E7%9A%84%E9%AA%8C%E8%AF%81"><span class="nav-number">1.1.3.</span> <span class="nav-text">模块说明书的验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E8%AF%B4%E6%98%8E%E4%B9%A6%E6%B3%A8%E6%84%8F"><span class="nav-number">1.1.4.</span> <span class="nav-text">模块说明书注意</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%93%E5%BA%93Repo"><span class="nav-number">1.2.</span> <span class="nav-text">仓库Repo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91SDK%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.3.</span> <span class="nav-text">编译SDK静态库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E5%88%B6%E4%BD%9C%E9%81%87%E5%88%B0%E7%9A%84%E5%9D%91"><span class="nav-number">2.</span> <span class="nav-text">静态库制作遇到的坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E4%BE%BF%E6%97%A0%E6%B3%95%E6%89%BE%E5%88%B0%E5%AF%B9%E5%BA%94%E7%9A%84selector%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">运行时便无法找到对应的selector？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-x2F-%E9%93%BE%E6%8E%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">2.1.1.</span> <span class="nav-text">编译&#x2F;链接过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">2.1.2.</span> <span class="nav-text">解决方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

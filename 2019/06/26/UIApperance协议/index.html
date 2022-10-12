@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言在iOS开发中有时候需要全局设置某个控件的属性 1[UINavigationBar appearance].barTintColor &#x3D; xxx; 那么它是如何实现的呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UIApperance协议">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前言在iOS开发中有时候需要全局设置某个控件的属性 1[UINavigationBar appearance].barTintColor &#x3D; xxx; 那么它是如何实现的呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_call_Track.png">
+<meta property="og:image" content="https://github.com/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_Setter.png">
+<meta property="og:image" content="https://github.com/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_handler.png">
+<meta property="article:published_time" content="2019-06-26T00:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-02T12:28:21.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_call_Track.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>UIApperance协议 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          UIApperance协议
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-06-26 08:00:00" itemprop="dateCreated datePublished" datetime="2019-06-26T08:00:00+08:00">2019-06-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-07-02 20:28:21" itemprop="dateModified" datetime="2019-07-02T20:28:21+08:00">2019-07-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在iOS开发中有时候需要全局设置某个控件的属性</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="built_in">UINavigationBar</span> appearance].barTintColor = xxx;</span><br></pre></td></tr></table></figure>
+<p>那么它是如何实现的呢？</p>
+<span id="more"></span>
+
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p><code>UIApperance</code>实际上是一个协议（Protocol），我们可以用它来获取一个类的外观代理（Apperance Proxy）.</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">instancetype</span>)appearance;</span><br><span class="line">+ (<span class="keyword">instancetype</span>)appearanceWhenContainedInInstancesOfClasses:(<span class="built_in">NSArray</span>&lt;Class &lt;<span class="built_in">UIAppearanceContainer</span>&gt;&gt; *)containerTypes <span class="built_in">NS_AVAILABLE_IOS</span>(<span class="number">9</span>_0);</span><br><span class="line"><span class="comment">// 详细方法见 UIKit/UIAppearance.h</span></span><br></pre></td></tr></table></figure>
+
+<p>另外一个与之对应的协议是<code>UIApperanceContainer</code>，该协议并没有任何约定方法。因为它只是一个容器。</p>
+<p>UIView实现了这两种协议，既可以获取外观代理，也可以作为外观容器。<br>UIViewController则是仅实现了<code>UIApperanceContainer</code>协议。<br>对于我们继承与UIView的自定义控件，如果需要支持使用apperance来设置的属性，需要在属性后增加<code>UI_APPERANCE_SELECTOR</code>(并没有干什么事，如文档所说，只是 tag 一下)宏声明即可。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">To participate <span class="keyword">in</span> the appearance proxy API, tag your appearance property selectors <span class="keyword">in</span> your header with <span class="built_in">UI_APPEARANCE_SELECTOR</span>.</span><br><span class="line"></span><br><span class="line">Appearance property selectors must be of the form:</span><br><span class="line">- (<span class="type">void</span>)setProperty:(PropertyType)property forAxis1:(IntegerType)axis1 axis2:(IntegerType)axis2 axisN:(IntegerType)axisN;</span><br><span class="line">- (PropertyType)propertyForAxis1:(IntegerType)axis1 axis2:(IntegerType)axis2 axisN:(IntegerType)axisN;</span><br><span class="line">You may have no axes or as many as you like <span class="keyword">for</span> any property. PropertyType may be any standard iOS type: <span class="type">id</span>, <span class="built_in">NSInteger</span>, <span class="built_in">NSUInteger</span>, <span class="built_in">CGFloat</span>, <span class="built_in">CGPoint</span>, <span class="built_in">CGSize</span>, <span class="built_in">CGRect</span>, <span class="built_in">UIEdgeInsets</span> or <span class="built_in">UIOffset</span>. IntegerType must be either <span class="built_in">NSInteger</span> or <span class="built_in">NSUInteger</span>; we will throw an exception <span class="keyword">if</span> other types are used <span class="keyword">in</span> the axes.</span><br></pre></td></tr></table></figure>
+
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>写一个简单的小 <a href="https://github.com/JackWchen2015/iOS_Demo/tree/master/TestUIApperance">Demo</a>，自定义 CardView，有两个 subview: headerView 和 footerView，声明 2 个属性：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">UIColor</span> *headerColor <span class="built_in">UI_APPEARANCE_SELECTOR</span>;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">UIColor</span> *bodyColor <span class="built_in">UI_APPEARANCE_SELECTOR</span>;</span><br></pre></td></tr></table></figure>
+
+<p>Setter 方法都加断点调试：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)setHeaderColor:(<span class="built_in">UIColor</span> *)headerColor</span><br><span class="line">&#123;</span><br><span class="line">    _headerColor = headerColor;</span><br><span class="line">    <span class="keyword">self</span>.headerView.backgroundColor = _headerColor;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)setBodyColor:(<span class="built_in">UIColor</span> *)bodyColor</span><br><span class="line">&#123;</span><br><span class="line">    _bodyColor = bodyColor;</span><br><span class="line">    <span class="keyword">self</span>.bodyView.backgroundColor = _bodyColor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 ViewController 的 view 中加一个按钮，点击则创建并添加 CardView，每行代码均加断点：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">IBAction</span>)createButtonTouched:(<span class="type">id</span>)sender</span><br><span class="line">	CardView *cardView = [[CardView alloc] initWithFrame:<span class="built_in">CGRectMake</span>(<span class="number">20</span>, <span class="number">100</span>, <span class="number">80</span>, <span class="number">120</span>)];</span><br><span class="line">	[<span class="keyword">self</span>.view addSubview:cardView];</span><br><span class="line">	cardView.headerColor = [<span class="built_in">UIColor</span> greenColor];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>另外，在较早的时候，添加 appearance 设置：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[CardView appearance].headerColor = [<span class="built_in">UIColor</span> redColor];</span><br><span class="line">[CardView appearance].bodyColor = [<span class="built_in">UIColor</span> orangeColor];</span><br></pre></td></tr></table></figure>
+<p>运行发现，在通过 appearance 设置属性的时候，并没有调用 setter 方法，由此可知 appearance 并不会生成实例，立即赋值。当 cardView 被添加到主视图（即视图树）中去的时候，才依次调用两个 setter 方法，调用栈如下</p>
+<img src="/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_call_Track.png" class="">
+
+<p>从 15 至 11 可以看出确实是加入到视图树中才触发的，从 7 至 2 可以基本猜测出，appearance 设置的属性，都以 <code>Invocation</code> 的形式存储到 <code>UIApperance</code> 类中（事实上  UIApperance 类中就有一个 <code>_appearanceInvocations</code> 数组），等到视图树 performUpdates 的时候，会去检查有没有相关的属性设置，有则 invoke。(这里可以看看 <code>NSInvocation</code>)</p>
+<p>紧接着，它进入了 bodyColor 的 setter</p>
+<img src="/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_Setter.png" class="">
+
+<p>然后，当手动设置属性的时候，它是直接进入 setter 的。</p>
+<img src="/2019/06/26/UIApperance%E5%8D%8F%E8%AE%AE/UIApperance_handler.png" class="">
+
+<p>总结：</p>
+<ol>
+<li>每一个实现 UIAppearance 协议的类，都会有一个 _UIApperance 实例，保存着这个类通过 appearance 设置属性的 invocations，在该类被添加或应用到视图树上的时候，它会检查并调用这些属性设置。这样就实现了让所有该类的实例都自动统一属性。</li>
+</ol>
+<p>当然，如果后面又手动设置了属性，肯定会覆盖了。</p>
+<p>2.去掉 UI_APPEARANCE_SELECTOR 宏声明，然后通过 appearance 设置属性，会发现结果是一样的。也就是说 UI_APPEARANCE_SELECTOR 并没有干什么事，正如文档所说，只是 tag 一下。看 UI_APPEARANCE_SELECTOR 宏定义如下</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> UI_APPEARANCE_SELECTOR __attribute__((annotate(<span class="string">&quot;ui_appearance_selector&quot;</span>)))</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>1.<a target="_blank" rel="noopener" href="https://hyancat.com/posts/2016/04/13/UIAppearance/">iOS UIAppearance 探秘</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/" rel="prev" title="iOS中的锁">
+      <i class="fa fa-chevron-left"></i> iOS中的锁
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/01/%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%92%8CUIWindow/" rel="next" title="程序的生命周期">
+      程序的生命周期 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">2.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.</span> <span class="nav-text">实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

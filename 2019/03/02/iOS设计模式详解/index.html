@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="设计模式的本质是面向对象设计原则的实际运用，是对类的封装性、继承性和多态性以及类的关联关系和组合关系的充分理解。  正确使用设计模式具有以下优点。  可以提高程序员的思维能力、编程能力和设计能力。 使程序设计更加标准化、代码编制更加工程化，使软件开发效率大大提高，从而缩短软件的开发周期。 使设计的代码可重用性高、可读性强、可靠性高、灵活性好、可维护性强。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式详解">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="设计模式的本质是面向对象设计原则的实际运用，是对类的封装性、继承性和多态性以及类的关联关系和组合关系的充分理解。  正确使用设计模式具有以下优点。  可以提高程序员的思维能力、编程能力和设计能力。 使程序设计更加标准化、代码编制更加工程化，使软件开发效率大大提高，从而缩短软件的开发周期。 使设计的代码可重用性高、可读性强、可靠性高、灵活性好、可维护性强。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/design_Category.png">
+<meta property="article:published_time" content="2019-03-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-23T00:13:54.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/design_Category.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>设计模式详解 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-03-02 08:00:00" itemprop="dateCreated datePublished" datetime="2019-03-02T08:00:00+08:00">2019-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-23 08:13:54" itemprop="dateModified" datetime="2021-06-23T08:13:54+08:00">2021-06-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>设计模式的本质是面向对象设计原则的实际运用，是对类的封装性、继承性和多态性以及类的关联关系和组合关系的充分理解。</p>
+</blockquote>
+<p>正确使用设计模式具有以下优点。</p>
+<ul>
+<li>可以提高程序员的思维能力、编程能力和设计能力。</li>
+<li>使程序设计更加标准化、代码编制更加工程化，使软件开发效率大大提高，从而缩短软件的开发周期。</li>
+<li>使设计的代码可重用性高、可读性强、可靠性高、灵活性好、可维护性强。</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="设计模式定义"><a href="#设计模式定义" class="headerlink" title="设计模式定义"></a>设计模式定义</h3><p>每一个设计模式描述了一个在我们周围不断重复发生的问题，以及该问题的解决方案的核心。这样，你就能重复使用该方案。</p>
+<ul>
+<li>一个模式的四个基本要素</li>
+</ul>
+<ol>
+<li>模式名称（助记词）</li>
+<li>问题（描述了应该在何时使用模式）</li>
+<li>解决方案（描述的设计组成成分）</li>
+<li>效果（描述了模式应用的效果及使用模式应权衡的问题）</li>
+</ol>
+<p><code>设计模式对于面向对象而言，其作用好比数据结构对于面向过程</code></p>
+<p>面向对象系统追求的目标就是尽可能的提高系统模块内部的内聚，尽可能降低模块间的耦合。</p>
+<h3 id="设计模式框架"><a href="#设计模式框架" class="headerlink" title="设计模式框架"></a>设计模式框架</h3><p>设计模式大致可分三种类型以及MVX架构系列</p>
+<img src="/2019/03/02/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3/design_Category.png" class="">
+
+<!--more-->
+
+<h3 id="设计模式详解"><a href="#设计模式详解" class="headerlink" title="设计模式详解"></a>设计模式详解</h3><h4 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h4><p>用于描述“怎么创建对象”。它的主要特点是“将对象的创建与使用分离”</p>
+<h5 id="原型模式（Prototype）："><a href="#原型模式（Prototype）：" class="headerlink" title="原型模式（Prototype）："></a>原型模式（Prototype）：</h5><ol>
+<li>定义：原型模式是通过克隆已有的对象来创建新的对象，已有的对象称为原型。通俗来讲，原型模式就是允许你创建现有对象的副本并根据需要进行修改，而不是从头开始创建对象并进行设置。</li>
+<li>使用场景：通过初始化产生一个对象需要非常繁琐的准备步骤，也就是新生成一个对象的代价比较大，则可以考虑使用原型模式。</li>
+<li>具体实现：原型模式实现起来比较简单，iOS实现这个模式用的就是copy方法，如果是类使用copy，那这个类就要实现。NSCopying协议中的copyWithZone方法，告诉程序如何复制该对象。</li>
+<li>注意事项: 涉及到copy，注意下深复制和浅复制就好。</li>
+</ol>
+<h5 id="单例模式（Singleton）："><a href="#单例模式（Singleton）：" class="headerlink" title="单例模式（Singleton）："></a>单例模式（Singleton）：</h5><ol>
+<li>定义: 单例模式能够确保某个类在应用中只存在一个实例，创建之后会向整个系统共用这个实例。</li>
+<li>使用场景： 需要用来保存全局的状态，并且不和任何作用域绑定的时候可以考虑单例。</li>
+<li>注意事项: 单例模式比较常用，也可能是很多初级工程师唯一会使用的设计模式。这里还是要尽量避免滥用单例，大家可以查看这篇文章 另外还要防止一下对单例对象的copy操作。</li>
+</ol>
+<h5 id="工厂方法模式（FactoryMethod）："><a href="#工厂方法模式（FactoryMethod）：" class="headerlink" title="工厂方法模式（FactoryMethod）："></a>工厂方法模式（FactoryMethod）：</h5><ol>
+<li>定义: 定义一个用于创建对象的接口，让子类决定实例化哪一个类。</li>
+<li>使用场景： 当存在多个类共同实现一个协议或者共同继承一个基类的时候，需要创建不同的对象，这个时候就可以考虑是否有必要使用工厂类进行管理。</li>
+<li>具体实现：工厂方法模式还可以缩小成简单工厂模式，形如：</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//CarFactory.m</span></span><br><span class="line">+ (Car *)createCarWithType:(<span class="built_in">NSIntger</span>)passengersCount &#123;</span><br><span class="line">    <span class="keyword">if</span> (passengersCount &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[SportCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (passengersCount &lt; <span class="number">4</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[NormalCar alloc] init];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> [[SUV alloc] init];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>但简单工厂模式的耦合和扩展方面存在一些问题，基本所有使用简单工厂模式的地方都可以用依赖注入来解决掉这个问题</p>
+<ol start="4">
+<li>优点： 1.在工厂方法中，用户只需要知道所要产品的具体工厂，不需要知道具体的创建过程，甚至不需要具体产品类。2.在系统增加新的产品时，我们只需要添加一个具体产品类和对应的实现工厂，无需对原工厂进行任何修改，很好地符合了“开闭原则”。</li>
+<li>缺点： 每次增加一个产品时，都需要增加一个具体类和对象实现工厂，代码量会增加，也增加了系统的复杂度。</li>
+</ol>
+<h5 id="抽象工厂模式（AbstractFactory）："><a href="#抽象工厂模式（AbstractFactory）：" class="headerlink" title="抽象工厂模式（AbstractFactory）："></a>抽象工厂模式（AbstractFactory）：</h5><ol>
+<li>定义: 抽象工厂模式是工厂方式模式的升级版本，抽象工厂模式允许调用组件在不了解创建对象所需类的情况下，创建一组相关或者互相依赖的对象。</li>
+<li>使用场景： 一个对象族有相同的约束时可以使用抽象工厂模式。</li>
+<li>具体实现： 这里引用了一个生产门的工厂，木门需要搭配木门安装工，铁门需要搭配铁门安装工</li>
+<li>优点：良好的封装性：抽象工厂模式允许调用组件不必了解创建对象使用的类，也不必知道为什么选择这些类，因为我可以在不修改调用组件的情况下，对使用的类进行修改。</li>
+<li>缺点：扩展产品族困难，需要更改接口及其下所有子类(什么是产品族：在抽象工厂模式中，产品族是指由同一个工厂生产的。例如苹果手机，苹果平板，苹果电脑)。</li>
+</ol>
+<h5 id="建造者模式（Builder）："><a href="#建造者模式（Builder）：" class="headerlink" title="建造者模式（Builder）："></a>建造者模式（Builder）：</h5><ol>
+<li>定义: 将一个复杂的对象的构建与他的表示分离，使得同样的构建过程可以创建不同的表示。</li>
+<li>使用场景： 当创建多种风格的对象时或者创建对象时涉及很多步骤，可以使用建造者模式。</li>
+<li>具体实现： 这里举了一个手抓饼的例子，5元的不辣手抓饼需要添加（生菜 + 火腿肠 + 鸡蛋，味精 + 番茄酱），10元的变态辣手抓饼需要添加(生菜 + 热狗 + 肉松 + 里脊 + 芝士，辣椒 + 辣酱 + 麻酱 + 干辣椒 + 剁辣椒 + 老干妈 + 辣椒油)，具体实现请看demo</li>
+<li>优点： 1.将产品的创建过程与产品本身分离开来，可以使用相同的创建过程来得到不同的产品。2.每一个具体建造者都相对独立，因此可以很方便地替换具体建造者或增加新的具体建造者。</li>
+<li>缺点： 1.建造者模式所创建的产品一般具有较多的共同点，其组成部分相似，如果产品之间的差异性很大，则不适合使用建造者模式，因此其使用范围受到一定的限制。2.如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，导致系统变得很庞大。</li>
+</ol>
+<h4 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h4><p>用于描述“如何将类或对象按某种布局组成更大的结构”</p>
+<ul>
+<li>类的层次结构</li>
+</ul>
+<ol>
+<li>类的功能层次结构：父类具有基本功能，在子类中增加新的功能（继承）</li>
+<li>类的实现层次结构：父类通过声明抽象方法来定义接口，不同子类通过实现具体的方法来实现接口。（多态）</li>
+</ol>
+<h5 id="适配器模式（Adapter）："><a href="#适配器模式（Adapter）：" class="headerlink" title="适配器模式（Adapter）："></a>适配器模式（Adapter）：</h5><ol>
+<li>定义: 适配器模式将一个类的接口变成调用者所期待的另一种接口，从而使原本因接口不匹配而无法在一起工作的两个类能够在一起工作。(举一个现实中的实例：比如转接头)。</li>
+<li>使用场景： 扩展应用或者组件时，而被集成进来的又不符合现在的接口，这个时候可以考虑使用适配器模式。</li>
+<li>注意事项: 适配器模式一般不是为了解决还处在于开发阶段的问题，一般都是解决正在服役项目的扩展问题。</li>
+</ol>
+<h5 id="桥接模式（Bridge）："><a href="#桥接模式（Bridge）：" class="headerlink" title="桥接模式（Bridge）："></a>桥接模式（Bridge）：</h5><ol>
+<li>定义: 编程时为了使得类变得简洁，类功能明确，往往需要将 <code>类的功能层次结构</code>与<code>类的实现层次结构</code>独立出来，将两种层次结构分离开，必然需要一种“媒介”将他们构成联系，就是bridge。</li>
+<li>使用场景： 重用性要求较高的不希望或不适用使用继承的场景。也就是说当继承N层，达到层级有点爆炸的时候可以考虑使用此模式。</li>
+<li>注意事项: 并不是一涉及继承就要考虑使用桥接模式，不然还要继承做什么？桥接模式的目的就是要对变化进行封装，尽可能的把变化的因素封装到最细最小的单元中，避免风险扩散。所以当发现类的继承有N层的时候，才需要去考虑使用该模式。</li>
+</ol>
+<h5 id="装饰器模式（Decorator）："><a href="#装饰器模式（Decorator）：" class="headerlink" title="装饰器模式（Decorator）："></a>装饰器模式（Decorator）：</h5><ol>
+<li>定义: 通过组合的方式动态的给一个对象添加一些额外的职责。就增加功能来说，装饰模式会比通过继承生成子类更为灵活。</li>
+<li>使用场景： 需要动态地给一个对象增加功能，这些功能也可以动态地被撤销。</li>
+<li>具体实现： Objective-C中的Category 就是装饰器模式的一种应用。</li>
+<li>优点： 装饰器模式中定义的行为，能够在不创建大量子类的情况下，组合起来实现复杂的效果，比继承更加灵活。<br>5.缺点： 装饰器模式会导致设计中出现许多的小对象，会让系统变得更加复杂，比如说出错调试时寻找错误可能需要逐级排查。</li>
+</ol>
+<h5 id="组合模式（Composite）："><a href="#组合模式（Composite）：" class="headerlink" title="组合模式（Composite）："></a>组合模式（Composite）：</h5><ol>
+<li>定义: 组合模式将对象组合成树形结构以表示“部分-整体”的层次结构，使得用户对单个对象和组合对象的使用具有一致性。</li>
+<li>使用场景： 维护和展示部分-整体关系的场景，在具有整体和部分的层次结构中，希望通过一种方式忽略整体与部分的差异，可以一致地对待它们的时候。</li>
+<li>缺点： 使设计变得更加抽象，对象的业务规则如果很复杂，则实现组合模式具有很大挑战性，而且不是所有的方法都与叶子对象子类都有关联。</li>
+<li>注意事项: 当使用这个属性结构的调用组件能够通过同一个类或者协议来使用书中包含的所有的对象时，才能证明正确的实现了此模式。</li>
+</ol>
+<h5 id="享元模式（Flyweight）："><a href="#享元模式（Flyweight）：" class="headerlink" title="享元模式（Flyweight）："></a>享元模式（Flyweight）：</h5><ol>
+<li>定义: 享元模式就是运行共享技术有效地支持大量细粒度对象的复用</li>
+<li>使用场景： 系统中存在大量的相似对象，由于这类对象的大量使用可能会造成系统内存资源浪费，而且这些对象的状态大部分可以外部化，这个时候可以考虑享元模式。在iOS中，我们用到的UITableView 重用机制就是享元模式的典型应用。</li>
+<li>优点： 通过共享极大的减少了对象实例的个数，节省了内存开销。</li>
+<li>缺点： 1.提高了系统的复杂度，需要分离出外部状态和内部状态。 2.这些类必须有一个工厂对象加以控制。</li>
+</ol>
+<h5 id="代理模式（Proxy）："><a href="#代理模式（Proxy）：" class="headerlink" title="代理模式（Proxy）："></a>代理模式（Proxy）：</h5><ol>
+<li>定义: 代理模式为其他对象提供一种代理以控制对这个对象的访问。</li>
+<li>使用场景： 想在访问一个类时做一些控制。</li>
+<li>具体实现： 这里举一个实际的例子，就是火车票代售点，具体实现Demo请点击这里查看</li>
+<li>优点： 1、职责清晰。 2、高扩展性。</li>
+<li>缺点： 增加了系统的复杂度</li>
+<li>注意事项: 1、和适配器模式的区别：适配器模式主要改变所考虑对象的接口，而代理模式不能改变所代理类的接口。 2、和装饰器模式的区别：装饰器模式为了增强功能，而代理模式是为了加以控制。</li>
+</ol>
+<h4 id="行为型模式"><a href="#行为型模式" class="headerlink" title="行为型模式"></a>行为型模式</h4><p>用于描述“类或对象之间怎样相互协作共同完成单个对象无法单独完成的任务，以及怎样分配职责”。</p>
+<h5 id="责任链模式（Chain-of-Responsibility）："><a href="#责任链模式（Chain-of-Responsibility）：" class="headerlink" title="责任链模式（Chain of Responsibility）："></a>责任链模式（Chain of Responsibility）：</h5><ol>
+<li>定义: 责任链模式（Chain of Responsibility Pattern）为请求创建了一个接收者对象的链。使多个对象都有机会处理请求，从而避免了请求的发送者和接受者之前的耦合关系。将这些对象连成一条链，并沿着这条链传递该请求，知道有对象处理它为止。</li>
+<li>使用场景： 有多个对象可以处理同一个请求，具体哪个对象处理该请求由运行时确定。</li>
+<li>优点： 1.低耦合：将请求和处理分开，请求者可以不用知道是谁处理的。2.新增和修改新的处理类比较容易</li>
+<li>缺点： 每个请求都是从链头遍历到链尾，如果链比较长会产生一定的性能问题，调试起来也比较麻烦。</li>
+<li>注意事项: 避免超长链的情况出现</li>
+</ol>
+<h5 id="命令模式（Command）："><a href="#命令模式（Command）：" class="headerlink" title="命令模式（Command）："></a>命令模式（Command）：</h5><ol>
+<li>定义: 命令模式将请求封装成对象，从而可用不同的请求对客户进行参数化，对请求排队或记录请求日志，以及支持可撤销和恢复的操作。</li>
+<li>使用场景： 在某些场合，比如要对行为进行”记录、撤销&#x2F;重做、事务”等处理的时候。</li>
+<li>具体实现： YTKNetwork就是用的命令模式，推荐大家学习。这里我举了一个吃饭点菜的例子，具体请点击这里查看</li>
+<li>优点： 1.类间解耦：调用者与接收者之间没有任何依赖关系。2.扩展性良好：新的命令可以很容易添加到系统中去。</li>
+<li>缺点： 使用命令模式可能会导致系统有过多的具体命令类。</li>
+</ol>
+<h5 id="中介者模式（Mediator）："><a href="#中介者模式（Mediator）：" class="headerlink" title="中介者模式（Mediator）："></a>中介者模式（Mediator）：</h5><ol>
+<li>定义: 中介者模式就是用一个中介对象来封装一系列的对象交互，中介者使各对象不需要显式地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。</li>
+<li>使用场景： 多个类相互依赖，形成了网状结构的时候可以考虑使用中介者模式。</li>
+<li>具体实现： 这里举了一个聊天室的例子，具体请点击这里查看</li>
+<li>优点： 1.解耦：通过中介者模式，我们可以将复杂关系的网状结构变成结构简单的以中介者为核心的星形结构，每个对象不再和它与之关联的对象直接发生相互作用，而是通过中介者对象来另一个对象发生相互作用。2.降低了类的复杂度，将一对多转化成了一对一。</li>
+<li>缺点：中介者模式在某些情况会膨胀得很大，而且逻辑复杂，中介类越多越复杂，越难以维护。</li>
+<li>注意事项: 类之间的依赖关系是必然存在的，所以不一定有多个依赖关系的时候就考虑使用中介者模式。中介者模式适用于多个对象之间的紧密耦合的情况，紧密耦合的定义标准是：在类图中出现了蜘蛛网状结构，这种情况就要考虑使用中介者模式，中介者模式可以把蜘蛛网梳理成星型结构，使原本复杂混乱的关系变得清晰简单。</li>
+</ol>
+<h5 id="观察者模式（Observer）："><a href="#观察者模式（Observer）：" class="headerlink" title="观察者模式（Observer）："></a>观察者模式（Observer）：</h5><ol>
+<li>定义: 定义对象间的一种一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。</li>
+<li>使用场景： 一个对象的状态发生改变，所有的依赖对象都将得到通知的时候。</li>
+<li>具体实现： Objective-C中的通知以及KVO都是观察者模式的具体实现。这里举了一个找工作订阅的例子，具体请点击这里查看</li>
+<li>优点： 1.观察者和被观察者是抽象耦合的，扩展比较方便。2.建立一套触发机制。</li>
+<li>缺点： 1.如果一个被观察者对象有很多的直接和间接的观察者的话，将所有的观察者都通知到会花费很多时间。 2.如果在观察者和观察目标之间有循环依赖的话，观察目标会触发它们之间进行循环调用，可能导致系统崩溃。 3.观察者模式没有相应的机制让观察者知道所观察的目标对象是怎么发生变化的，而仅仅只是知道观察目标发生了变化。</li>
+</ol>
+<h5 id="备忘录模式（Memento）："><a href="#备忘录模式（Memento）：" class="headerlink" title="备忘录模式（Memento）："></a>备忘录模式（Memento）：</h5><ol>
+<li>定义: 在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样以后就开奖对象恢复到原先保存的状态了。</li>
+<li>使用场景： 需要存档的时候，比如说游戏中的存档。</li>
+<li>具体实现： 打游戏时的存档，数据库的事务管理，SVN以及Git代码的版本控制系统等等都可以说成是备忘录模式的实例。这里我简单的举了一下例子，具体请点击这里查看</li>
+<li>优点： 1.给用户提供了一种可以恢复状态的机制，可以使用户能够比较方便地回到某个历史的状态。 2.实现了信息的封装，使得用户不需要关心状态的保存细节。</li>
+<li>缺点： 在一些场景下比较消耗资源。</li>
+<li>注意事项: 不要在频繁建立备份的场景中使用备忘录模式，比如说在for循环中。</li>
+</ol>
+<h5 id="策略模式（Strategy）："><a href="#策略模式（Strategy）：" class="headerlink" title="策略模式（Strategy）："></a>策略模式（Strategy）：</h5><ol>
+<li>定义: 定义一系列的算法，把它们一个个封装起来，并且使它们可相互替换。</li>
+<li>使用场景： 1.多个类只有在算法或行为上稍有不同的场景。2.算法需要自由切换的场景。3.需要屏蔽算法规则的场景。</li>
+<li>具体实现： 具体请点击这里查看</li>
+<li>优点： 1.算法可以自由切换。 2.避免使用多重条件判断。 3.扩展性良好。</li>
+<li>缺点：1.策略类会增多。 2.所有策略类都需要对外暴露。</li>
+<li>注意事项: 如果一个系统的策略多于四个，就需要考虑使用混合模式，解决策略类膨胀的问题。</li>
+</ol>
+<h5 id="访问者模式（Visitor）："><a href="#访问者模式（Visitor）：" class="headerlink" title="访问者模式（Visitor）："></a>访问者模式（Visitor）：</h5><ol>
+<li>定义: 访问者模式封装了一些作用于某种数据结构中的各元素操作，它可以在不改变数据结构的前提下定义作用于这些元素的新的操作。</li>
+<li>使用场景： 需要对一个对象结构中的对象进行很多不同的并且不相关的操作，而需要避免让这些操作”污染”这些对象的类，使用访问者模式将这些封装到类中。</li>
+<li>具体实现： 这里举了一个悲观的人和乐观的人对待不同事物的反应的实例，具体请点击这里查看，如果想增加Action就比较方便，但是如果想增加一个既悲观又乐观的人就有一点麻烦了。</li>
+<li>优点： 1.符合单一职责原则。 2.优秀的扩展性。 3.灵活性高</li>
+<li>缺点：1.具体元素对访问者公布细节，违反了迪米特原则。 2.具体元素变更比较困难。 3.违反了依赖倒置原则，依赖了具体类，没有依赖抽象。</li>
+</ol>
+<h5 id="模板方法模式（TemplateMethod）："><a href="#模板方法模式（TemplateMethod）：" class="headerlink" title="模板方法模式（TemplateMethod）："></a>模板方法模式（TemplateMethod）：</h5><ol>
+<li>定义: 定义一个操作中的算法的框架，而降一些步骤延迟到子类中。使得子类可以不改变一个算法的结构即可重定义该算法的某些特定步骤。</li>
+<li>使用场景： 1.多个子类有公有的方法，并且逻辑基本相同时。2.有重要、复杂的算法的时候，可以把核心算法设计为模板方法，周边的相关细节功能则由各个子类实现。</li>
+<li>具体实现： 这里简单举了一个Android 和iOS项目的从code到发布的简易过程Demo，具体请点击这里查看</li>
+<li>优点： 1.封装不变部分，扩展可变部分。 2.提取公共代码，便于维护。 3.行为由父类控制，子类实现。</li>
+<li>缺点： 每一个不同的实现都需要一个子类来实现，导致类的个数增加，使得系统更加庞大。</li>
+</ol>
+<h5 id="状态模式（State）："><a href="#状态模式（State）：" class="headerlink" title="状态模式（State）："></a>状态模式（State）：</h5><ol>
+<li>定义: 当一个对象内在状态改变时允许其改变行为，这个对象看起来像改变了其类。</li>
+<li>使用场景： 1.行为随状态改变而改变的场景。2.条件、分支判断语句的替代者。</li>
+<li>具体实现： 这里举了一个不太恰当的例子，假如一支笔有3种状态可以切换，可以写钢笔字，圆珠笔字，毛笔字，具体请点击这里查看。再举一个实际中典型的例子就是酒店管理房间的时候，房间应该会有三种状态：空闲，已预订，已入住，同理。</li>
+<li>优点： 1.结构清晰，避免了过多的选择判断语句。2.封装性比较好。</li>
+<li>缺点： 子类会比较多，增加了复杂度。</li>
+</ol>
+<h5 id="迭代器模式（Iterator）："><a href="#迭代器模式（Iterator）：" class="headerlink" title="迭代器模式（Iterator）："></a>迭代器模式（Iterator）：</h5><ol>
+<li>定义: 迭代器模式提供一种方法访问一个容器对象中各个元素，而又不需暴露该对象的内部细节。</li>
+<li>使用场景： 一个聚合对象有遍历的需求</li>
+<li>具体实现： 在 Cocoa Touch 中的 NSEnumerator类 就实现了迭代器模式。还有基于块的枚举也是迭代器模式的实现等等</li>
+<li>优点： 1.它支持以不同的方式遍历一个聚合对象。2.增加新的collection类和迭代器类都很方便。</li>
+<li>缺点： 迭代器和collection类是对应的，增加新的collection类就会增加新的迭代器，类的个数成对增加，可能会增加系统复杂度。</li>
+</ol>
+<h5 id="解释器模式（Interpreter）："><a href="#解释器模式（Interpreter）：" class="headerlink" title="解释器模式（Interpreter）："></a>解释器模式（Interpreter）：</h5><ol>
+<li>定义: 给定一门语言，定义它的文法的一种表示，并定义一个解释器，该解释器使用该表示来解释语言中的句子。</li>
+<li>使用场景： 解释器模式在实际项目中用到的比较少，正则表达式就是用的解释器模式。</li>
+<li>具体实现： 正则表达式。</li>
+<li>优点： 容易改变和扩展问法。</li>
+<li>缺点： 效率是严重的问题。</li>
+</ol>
+<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/55f0e3b30e9c">iOS设计模式四部曲</a></li>
+<li><a href="https://github.com/maligh/DesignPatterns">Sample Code</a> </li>
+<li><a target="_blank" rel="noopener" href="http://design-patterns.readthedocs.io/zh_CN/latest/index.html">图说设计模式</a></li>
+<li><a href="https://github.com/huang303513/Design-Pattern-For-iOS">Sample Code 2</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/02/28/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%85%AD%E5%A4%A7%E5%8E%9F%E5%88%99/" rel="prev" title="设计模式六大原则">
+      <i class="fa fa-chevron-left"></i> 设计模式六大原则
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/04/02/CocoaPods%20Setup%EF%BC%8C%E6%9B%B4%E6%96%B0repo%E7%BC%93%E6%85%A2/" rel="next" title="CocoaPods Setup，更新repo缓慢">
+      CocoaPods Setup，更新repo缓慢 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">设计模式定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">设计模式框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.</span> <span class="nav-text">设计模式详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">创建型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F%EF%BC%88Prototype%EF%BC%89%EF%BC%9A"><span class="nav-number">3.1.1.</span> <span class="nav-text">原型模式（Prototype）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F%EF%BC%88Singleton%EF%BC%89%EF%BC%9A"><span class="nav-number">3.1.2.</span> <span class="nav-text">单例模式（Singleton）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%EF%BC%88FactoryMethod%EF%BC%89%EF%BC%9A"><span class="nav-number">3.1.3.</span> <span class="nav-text">工厂方法模式（FactoryMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F%EF%BC%88AbstractFactory%EF%BC%89%EF%BC%9A"><span class="nav-number">3.1.4.</span> <span class="nav-text">抽象工厂模式（AbstractFactory）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F%EF%BC%88Builder%EF%BC%89%EF%BC%9A"><span class="nav-number">3.1.5.</span> <span class="nav-text">建造者模式（Builder）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.2.</span> <span class="nav-text">结构型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%88Adapter%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.1.</span> <span class="nav-text">适配器模式（Adapter）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F%EF%BC%88Bridge%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.2.</span> <span class="nav-text">桥接模式（Bridge）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%88Decorator%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.3.</span> <span class="nav-text">装饰器模式（Decorator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%EF%BC%88Composite%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.4.</span> <span class="nav-text">组合模式（Composite）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%EF%BC%88Flyweight%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.5.</span> <span class="nav-text">享元模式（Flyweight）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%EF%BC%88Proxy%EF%BC%89%EF%BC%9A"><span class="nav-number">3.2.6.</span> <span class="nav-text">代理模式（Proxy）：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%8C%E4%B8%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">3.3.</span> <span class="nav-text">行为型模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F%EF%BC%88Chain-of-Responsibility%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.1.</span> <span class="nav-text">责任链模式（Chain of Responsibility）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F%EF%BC%88Command%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.2.</span> <span class="nav-text">命令模式（Command）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F%EF%BC%88Mediator%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.3.</span> <span class="nav-text">中介者模式（Mediator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%EF%BC%88Observer%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.4.</span> <span class="nav-text">观察者模式（Observer）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F%EF%BC%88Memento%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.5.</span> <span class="nav-text">备忘录模式（Memento）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%EF%BC%88Strategy%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.6.</span> <span class="nav-text">策略模式（Strategy）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%80%85%E6%A8%A1%E5%BC%8F%EF%BC%88Visitor%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.7.</span> <span class="nav-text">访问者模式（Visitor）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%EF%BC%88TemplateMethod%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.8.</span> <span class="nav-text">模板方法模式（TemplateMethod）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%EF%BC%88State%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.9.</span> <span class="nav-text">状态模式（State）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%88Iterator%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.10.</span> <span class="nav-text">迭代器模式（Iterator）：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%88Interpreter%EF%BC%89%EF%BC%9A"><span class="nav-number">3.3.11.</span> <span class="nav-text">解释器模式（Interpreter）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

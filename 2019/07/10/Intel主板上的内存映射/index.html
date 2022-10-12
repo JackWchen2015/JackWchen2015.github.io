@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言之前通过MMKV提到过文件内存映射，现在了解下硬件角度的内存映射。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Intel主板上的内存映射">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前言之前通过MMKV提到过文件内存映射，现在了解下硬件角度的内存映射。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/intel.jpeg">
+<meta property="og:image" content="https://github.com/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/intel_4Mem.jpeg">
+<meta property="article:published_time" content="2019-07-10T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-23T00:12:37.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/intel.jpeg">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Intel主板上的内存映射 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Intel主板上的内存映射
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-07-10 08:00:00" itemprop="dateCreated datePublished" datetime="2019-07-10T08:00:00+08:00">2019-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-23 08:12:37" itemprop="dateModified" datetime="2021-06-23T08:12:37+08:00">2021-06-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">计算机系统结构</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%BB%93%E6%9E%84/IO/" itemprop="url" rel="index"><span itemprop="name">IO</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前通过MMKV提到过文件内存映射，现在了解下硬件角度的内存映射。</p>
+<span id="more"></span>
+<h3 id="如今Intel计算机组成"><a href="#如今Intel计算机组成" class="headerlink" title="如今Intel计算机组成"></a>如今Intel计算机组成</h3><img src="/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/intel.jpeg" class="">
+
+<p>CPU一点也不知道它连接了什么东西（这很符合设计六大原则的开闭原则），CPU仅仅通过一组针脚与外界交互，它并不关心外界到底有什么。可能是电脑主板，导弹，网络路由器，植入脑内的设备，或CPU测试工作台。</p>
+<h4 id="CPU主要通过3种方式与外界交互"><a href="#CPU主要通过3种方式与外界交互" class="headerlink" title="CPU主要通过3种方式与外界交互"></a>CPU主要通过3种方式与外界交互</h4><ol>
+<li>内存地址空间</li>
+<li>I&#x2F;O地址空间</li>
+<li>中断</li>
+</ol>
+<h4 id="CPU与外界的通信"><a href="#CPU与外界的通信" class="headerlink" title="CPU与外界的通信"></a>CPU与外界的通信</h4><p>安装在主板上的CPU与外界沟通的门户是<strong>前端总线</strong>（front-side bus），前端总线把CPU与北桥连接起来。每当CPU需要读写内存时，都会使用这条总线。CPU通过一部分管脚来传输想要读写的物理内存地址，同时另一些管脚用于发送将被写入或接收被读出的数据。一个Intel Core 2 QX6600有33个针脚用于传输物理内存地址（可以表示233个地址位置），64个针脚用于接收&#x2F;发送数据（所以数据在64位通道中传输，也就是8字节的数据块）。这使得CPU可以控制64GB的物理内存（233个地址乘以8字节）。</p>
+<h3 id="内存映射I-x2F-O"><a href="#内存映射I-x2F-O" class="headerlink" title="内存映射I&#x2F;O"></a>内存映射I&#x2F;O</h3><ul>
+<li><p>我们可能曾经认为内存指的就是RAM，被各式各样的程序读写着。的确，大部分CPU发出的内存请求都被北桥转送给了RAM管理器，但并非全部如此。物理内存地址还可能被用于主板上各种设备间的通信，这种通信方式叫做<strong>内存映射I&#x2F;O</strong>。这类设备包括显卡，大多数的PCI卡（比如扫描仪或SCSI卡），以及BIOS中的flash存储器等。</p>
+</li>
+<li><p>当北桥接收到一个物理内存访问请求时，它需要决定把这个请求转发到哪里：是发给RAM？抑或是显卡？具体发给谁是由内存地址映射表来决定的。映射表知道每一个物理内存地址区域所对应的设备。绝大部分的地址被映射到了RAM，其余地址由映射表来通知芯片组该由哪个设备来响应此地址的访问请求。这些被映射为设备的内存地址形成了一个经典的空洞，位于PC内存的640KB到1MB之间。当内存地址被保留用于显卡和PCI设备时，就会形成更大的空洞。这就是为什么32位的操作系统无法使用全部的4GB RAM。Linux中，&#x2F;proc&#x2F;iomem这个文件简明的列举了这些空洞的地址范围。下图展示了Intel PC低端4GB物理内存地址形成的一个典型的内存映射：</p>
+</li>
+</ul>
+<img src="/2019/07/10/Intel%E4%B8%BB%E6%9D%BF%E4%B8%8A%E7%9A%84%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84/intel_4Mem.jpeg" class="">
+
+<ul>
+<li><p>实际的地址和范围依赖于特定的主板和电脑中接入的设备，但是对于大多数Core 2系统，情形都跟上图非常接近。所有棕色的区域都被设备地址映射走了。记住，这些在主板总线上使用的都是物理地址。在CPU内部（比如我们正在编写和运行的程序），使用的是逻辑地址，必须先由CPU翻译成物理地址以后，才能发布到总线上去访问内存.</p>
+</li>
+<li><p>这个把逻辑地址翻译成物理地址的规则比较复杂，而且还依赖于当时CPU的运行模式（实模式，32位保护模式，64位保护模式）。不管采用哪种翻译机制，CPU的运行模式决定了有多少物理内存可以被访问。比如，当CPU工作于32位保护模式时，它只可以寻址4GB物理地址空间（当然，也有个例外叫做物理地址扩展，但暂且忽略这个技术吧）。由于顶部的大约1GB物理地址被映射到了主板上的设备，CPU实际能够使用的也就只有大约3GB的RAM（有时甚至更少，我曾用过一台安装了Vista的电脑，它只有2.4GB可用）。如果CPU工作于实模式，那么它将只能寻址1MB的物理地址空间（这是早期的Intel处理器所支持的唯一模式）。如果CPU工作于64位保护模式，则可以寻址64GB的地址空间（虽然很少有芯片组支持这么大的RAM）。处于64位保护模式时，CPU就有可能访问到RAM空间中被主板上的设备映射走了的区域了（即访问空洞下的RAM）。要达到这种效果，就需要使用比系统中所装载的RAM地址区域更高的地址。这种技术叫做回收(reclaiming)，而且还需要芯片组的配合。</p>
+</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="">微信公众号：技术原理君</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/04/iOS%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/" rel="prev" title="iOS面试题汇总">
+      <i class="fa fa-chevron-left"></i> iOS面试题汇总
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/25/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E5%BC%95%E5%AF%BC%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B/" rel="next" title="计算机的引导启动过程">
+      计算机的引导启动过程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BB%8AIntel%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">如今Intel计算机组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%BB%E8%A6%81%E9%80%9A%E8%BF%873%E7%A7%8D%E6%96%B9%E5%BC%8F%E4%B8%8E%E5%A4%96%E7%95%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">2.1.</span> <span class="nav-text">CPU主要通过3种方式与外界交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%8E%E5%A4%96%E7%95%8C%E7%9A%84%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.</span> <span class="nav-text">CPU与外界的通信</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84I-x2F-O"><span class="nav-number">3.</span> <span class="nav-text">内存映射I&#x2F;O</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

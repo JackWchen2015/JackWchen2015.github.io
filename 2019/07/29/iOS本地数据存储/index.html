@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言据存储本质就是运行时的对象保存在文件、数据库中。数据存储可以分为两步：首先是将对象转换成二进制数据，这一步也叫序列化；相反，将二进制数据转换成对象则称为反序列化；然后是考虑二进制数据如何保存和读取。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS本地数据存储">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前言据存储本质就是运行时的对象保存在文件、数据库中。数据存储可以分为两步：首先是将对象转换成二进制数据，这一步也叫序列化；相反，将二进制数据转换成对象则称为反序列化；然后是考虑二进制数据如何保存和读取。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/image01.png">
+<meta property="article:published_time" content="2019-07-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-29T07:18:55.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/image01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS本地数据存储 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS本地数据存储
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2019-07-29 08:00:00 / 修改时间：15:18:55" itemprop="dateCreated datePublished" datetime="2019-07-29T08:00:00+08:00">2019-07-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7%E4%B8%8E%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能监控与优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>据存储本质就是运行时的对象保存在文件、数据库中。数据存储可以分为两步：首先是将对象转换成二进制数据，这一步也叫序列化；相反，将二进制数据转换成对象则称为反序列化；然后是考虑二进制数据如何保存和读取。</p>
+<span id="more"></span>
+
+<h2 id="沙盒目录"><a href="#沙盒目录" class="headerlink" title="沙盒目录"></a>沙盒目录</h2><p>iOS系统为每个App分配了独立的数据目录，App只能对自己的目录进行操作，这个目录所在被称为沙盒目录。<br>一个应用的沙盒包括下面三个部分：应用目录、沙盒目录、iCloud目录。</p>
+<img src="/2019/07/29/iOS%E6%9C%AC%E5%9C%B0%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/image01.png" class="">
+
+<p>Documents目录用于保存App的数据，包括App运行时需要的各类文件以及用户的数据等。Documents文件夹可以在连接iTunes时选择备份，通常Documents目录用来存放可以对外的文件。</p>
+<p>Library目录用来保存不对外的数据，但同样可以被iTunes备份（Library&#x2F;Caches目录除外，原因就和目录名一样，里面应该只放Caches）。Library&#x2F;Caches目录用来放置运行时产生的临时文件以及缓存文件，空间不足时可能会被iOS系统删除。Library&#x2F;Preferences目录通常用于保存用户的设置等信息，比如我们常用的<strong>NSUserDefaults类就会以plist的方式保存在该目录中</strong>。</p>
+<p>tmp目录用来保存不重要的临时文件，在系统重启后会被清空，容易知道这个也不会被iTunes备份。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取沙盒根目录路径</span></span><br><span class="line"><span class="built_in">NSString</span> *homeDir = <span class="built_in">NSHomeDirectory</span>();</span><br><span class="line"><span class="comment">// 获取Documents目录路径</span></span><br><span class="line"><span class="built_in">NSString</span> *docDir = [<span class="built_in">NSSearchPathForDirectoriesInDomains</span>(<span class="built_in">NSDocumentDirectory</span>,<span class="built_in">NSUserDomainMask</span>,<span class="literal">YES</span>) firstObject];</span><br><span class="line"><span class="comment">//获取Library的目录路径</span></span><br><span class="line"><span class="built_in">NSString</span> *libDir = [<span class="built_in">NSSearchPathForDirectoriesInDomains</span>(<span class="built_in">NSLibraryDirectory</span>,<span class="built_in">NSUserDomainMask</span>,<span class="literal">YES</span>) lastObject];</span><br><span class="line"><span class="comment">// 获取cache目录路径</span></span><br><span class="line"><span class="built_in">NSString</span> *cachesDir = [<span class="built_in">NSSearchPathForDirectoriesInDomains</span>(<span class="built_in">NSCachesDirectory</span>,<span class="built_in">NSUserDomainMask</span>,<span class="literal">YES</span>) firstObject];</span><br><span class="line"><span class="comment">// 获取tmp目录路径</span></span><br><span class="line"><span class="built_in">NSString</span> *tmpDir =<span class="built_in">NSTemporaryDirectory</span>();</span><br></pre></td></tr></table></figure>
+
+<p><strong>我们工程中的图片资源是不是放在沙盒目录中呢？</strong><br>工程中的资源文件在NSBundle，而NSBundle会被打包到.ipa文件上传到App Store，而用户安装App时候，会把App放置在应用目录（非沙盒目录）。</p>
+<h2 id="NSBundle"><a href="#NSBundle" class="headerlink" title="NSBundle"></a>NSBundle</h2><p>在用NSFileManager去读取文件的时候需要提供文件路径，但是有时候我们并不知道资源被放置在哪个<strong>目录</strong>，此时可以用到NSBundle。</p>
+<p><strong>在Xcode编译运行的时候，会把Xcode内的图片、xib、音频等都拷贝到.app文件中。<br>NSBundle就是系统提供，用来读取这些资源的类</strong></p>
+<p><code>NSBundle * mainBundle = [NSBundle mainBundle];</code><br>这样我们就拿到我们的mainBundle，通过mainBundle我们可以查找对应的资源：<br>NSString *path &#x3D;[mainBundle pathForImageResource:@”some_pic_name”]; &#x2F;&#x2F; 查找图片地<br>也可以通过mainBundle直接加载xib：<br><code>[[NSBundle mainBundle] loadNibNamed:@&quot;SSProgressView&quot; owner:self options:nil];</code></p>
+<p><strong>通过CocoaPods安装的Pod库，要如何读取其资源？</strong></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span> *path = [[<span class="built_in">NSBundle</span> mainBundle] pathForResource:<span class="string">@&quot;SSTestPod&quot;</span> ofType:<span class="string">@&quot;bundle&quot;</span>];</span><br><span class="line"><span class="built_in">NSBundle</span> *podBundle = [<span class="built_in">NSBundle</span> bundleWithPath:path];</span><br></pre></td></tr></table></figure>
+
+<h2 id="Keychain"><a href="#Keychain" class="headerlink" title="Keychain"></a>Keychain</h2><p>保存在沙盒目录的数据是不安全的，用户可能会导出沙盒数据进行分析。<br>有没有什么保存方式是更安全的呢？<br>iOS给出的答案是keychain。</p>
+<p><strong>keychain是iOS提供给App存储敏感和安全相关数据用的工具。</strong>keychain同样会被iTunes备份，即使App重装仍能读取到上次保存的结果。为了保证数据安全，keychain内的数据都是经过加密。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">import &lt;Security/Security.h&gt;</span><br><span class="line"><span class="comment">// SELECT</span></span><br><span class="line">OSStatus SecItemCopyMatching(<span class="built_in">CFDictionaryRef</span> query, <span class="built_in">CFTypeRef</span> *result);</span><br><span class="line"><span class="comment">// ADD</span></span><br><span class="line">OSStatus SecItemAdd(<span class="built_in">CFDictionaryRef</span> attributes, <span class="built_in">CFTypeRef</span> *result);</span><br><span class="line"><span class="comment">// UPDATE</span></span><br><span class="line">OSStatus SecItemUpdate(<span class="built_in">CFDictionaryRef</span> query, <span class="built_in">CFDictionaryRef</span> attributesToUpdate);</span><br><span class="line"><span class="comment">// DELETE</span></span><br><span class="line">OSStatus SecItemDelete(<span class="built_in">CFDictionaryRef</span> query);</span><br></pre></td></tr></table></figure>
+<p>以<a href="https://github.com/jizhidexia/KeychainWrapper">KeychainWrapper</a>为例，来看看封装后更简单的接口。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)savePassword:(<span class="built_in">NSString</span> *)password;</span><br><span class="line">- (<span class="type">BOOL</span>)deleteItem;</span><br><span class="line"></span><br><span class="line">- (<span class="built_in">NSString</span> *)readPassword;</span><br><span class="line"><span class="comment">//返回当前accessGroup下的service的所有Keychain Item</span></span><br><span class="line">+ (<span class="built_in">NSArray</span> *)passwordItemsForService:(<span class="built_in">NSString</span> *)service accessGroup:(<span class="built_in">NSString</span> *)accessGroup;</span><br></pre></td></tr></table></figure>
+<p>具体的使用样例：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">KeychainWrapper *wrapper = [[KeychainWrapper alloc] initWithSevice:kKeychainService account:<span class="keyword">self</span>.account accessGroup:kKeychainAccessGroup];</span><br><span class="line"><span class="built_in">NSString</span> *saveStr = [wrapper readPassword];</span><br><span class="line"><span class="keyword">if</span> (!saveStr) &#123;</span><br><span class="line">    [wrapper savePassword:<span class="string">@&quot;test_password&quot;</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;saveStr:%@&quot;</span>, saveStr);</span><br></pre></td></tr></table></figure>
+<p>要保存在keychain，即使应用卸载重装，仍旧能读取到该值。</p>
+<h2 id="对象序列化"><a href="#对象序列化" class="headerlink" title="对象序列化"></a>对象序列化</h2><p><strong>NSCoding</strong>是系统提供的序列化协议，在对象转换为二进制的时候，会通过NSCoding的方法回调开发者。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">NSCoding</span></span></span><br><span class="line">- (<span class="type">void</span>)encodeWithCoder:(<span class="built_in">NSCoder</span> *)aCoder;</span><br><span class="line">- (<span class="keyword">nullable</span> <span class="keyword">instancetype</span>)initWithCoder:(<span class="built_in">NSCoder</span> *)aDecoder; <span class="comment">// NS_DESIGNATED_INITIALIZER</span></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SSUser</span> : <span class="title">NSObject</span> &lt;<span class="title">NSCoding</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">NSInteger</span> gender;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> *userName;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithCoder:(<span class="built_in">NSCoder</span> *)aDecoder &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="variable language_">super</span> init];</span><br><span class="line">    <span class="keyword">self</span>.gender = [[aDecoder decodeObjectForKey:<span class="string">@&quot;gender&quot;</span>] integerValue];</span><br><span class="line">    <span class="keyword">self</span>.userName = [aDecoder decodeObjectForKey:<span class="string">@&quot;userName&quot;</span>];</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)encodeWithCoder:(<span class="built_in">NSCoder</span> *)aCoder &#123;</span><br><span class="line">    [aCoder encodeObject:@(<span class="keyword">self</span>.gender) forKey:<span class="string">@&quot;gender&quot;</span>];</span><br><span class="line">    [aCoder encodeObject:<span class="keyword">self</span>.userName forKey:<span class="string">@&quot;userName&quot;</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>YYModel</strong>具有几大特点：<br>1、利用iOS的Runtime特点，无需继承；<br>2、安全转换数据类型，常见Crash都进行了保护；<br>3、扩展性强，提供多种容器扩展；</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/07/29/iOS%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B/" rel="prev" title="iOS渲染流程">
+      <i class="fa fa-chevron-left"></i> iOS渲染流程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/31/iOS%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93/" rel="next" title="iOS离屏渲染">
+      iOS离屏渲染 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B2%99%E7%9B%92%E7%9B%AE%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">沙盒目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSBundle"><span class="nav-number">3.</span> <span class="nav-text">NSBundle</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keychain"><span class="nav-number">4.</span> <span class="nav-text">Keychain</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">对象序列化</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

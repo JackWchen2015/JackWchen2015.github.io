@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="如果你要做一个类似网易云音乐，豆瓣电台的在线音乐类APP，你会这么做？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS音频边加载边播放">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="如果你要做一个类似网易云音乐，豆瓣电台的在线音乐类APP，你会这么做？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/avplayer01.png">
+<meta property="article:published_time" content="2019-09-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-13T15:04:16.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/avplayer01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS音频边加载边播放 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS音频边加载边播放
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-16 00:00:00" itemprop="dateCreated datePublished" datetime="2019-09-16T00:00:00+08:00">2019-09-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-13 23:04:16" itemprop="dateModified" datetime="2020-06-13T23:04:16+08:00">2020-06-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如果你要做一个类似网易云音乐，豆瓣电台的在线音乐类APP，你会这么做？</p>
+<span id="more"></span>
+
+
+<h2 id="音频播放的需求"><a href="#音频播放的需求" class="headerlink" title="音频播放的需求"></a>音频播放的需求</h2><ol>
+<li>离线播放：播放本地音频文件，包括先下载完成音频文件再进行播放，这种使用AVFoundation里的AVAudioPlayer就可以满足</li>
+<li>在线播放：使用AVFoundation的AVPlayer可以满足</li>
+<li>在线播放同时存储文件：使用AudioFileStreamer+AudioQueue可以满足</li>
+<li>在线播放且带有音效处理：使用AudioFileStreamer+AudioQueue+音效处理（系统自带或者自行开发）来满足</li>
+</ol>
+<h3 id="AVPlayer"><a href="#AVPlayer" class="headerlink" title="AVPlayer"></a>AVPlayer</h3><p>AVPlayer存在于AVFoundation中，其实它是一个视频播放器，但是用它来播放音乐是没问题的。</p>
+<p>AVAsset是抽象类，不能直接使用，其子类AVURLAsset可以根据URL生成包含媒体信息的Asset对象。</p>
+<p>AVPlayerItem：和媒体资源存在对应关系，管理媒体资源的信息和状态。</p>
+<h3 id="功能实现"><a href="#功能实现" class="headerlink" title="功能实现"></a>功能实现</h3><ol>
+<li>网络链接播放音乐</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSURl</span>* url  = [<span class="built_in">NSURL</span> URLWithString:<span class="keyword">self</span>.currentSong.url];</span><br><span class="line"><span class="built_in">AVPleryItem</span>* songItem=[[<span class="built_in">AVPlayerItem</span> alloc]initWithURL:url];</span><br><span class="line"><span class="built_in">AVPlayer</span>* player=[[<span class="built_in">AVPlayer</span> alloc]initWithPlayerItem:songItem];</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>上一首，下一首<br>两种实现，一种是自行控制下一首歌曲的item，将其替换到当前播放的item<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[player replaceCurrentItemWithPlayerItem:songItem];</span><br></pre></td></tr></table></figure>
+一种是使用AVPlayer的子类AVQueuePlayer来播放多个item，调用advanceToNextItem来播放下一首</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSArray</span> * items = @[item1, item2, item3 ....];</span><br><span class="line"><span class="built_in">AVQueuePlayer</span> * queuePlayer = [[<span class="built_in">AVQueuePlayer</span> alloc]initWithItems:items];</span><br></pre></td></tr></table></figure>
+
+<h3 id="AVPlayer缓存实现"><a href="#AVPlayer缓存实现" class="headerlink" title="AVPlayer缓存实现"></a>AVPlayer缓存实现</h3><p>AVPlayer使用过程中，有很多局限性，比如播放音乐时，不能控制其内部播放逻辑，比如播放时seek会失败，数据加载完毕后不能获取到数据文件进行其他操作，因此需要其他方法弥补其不足，<code>AVAssetResourceLoader</code>.</p>
+<p><code>AVAssetResourceLoader</code>：可以自行掌握AVPlayer数据的加载，包括获取AVPlaer需要的数据信息，以及传递多少数据给AVPlayer</p>
+<img src="/2019/09/16/iOS%E9%9F%B3%E9%A2%91%E8%BE%B9%E5%8A%A0%E8%BD%BD%E8%BE%B9%E6%92%AD%E6%94%BE/avplayer01.png" class="">
+<h4 id="AVAssetResourceLoaderDelegate"><a href="#AVAssetResourceLoaderDelegate" class="headerlink" title="AVAssetResourceLoaderDelegate"></a>AVAssetResourceLoaderDelegate</h4><p>使用AVAssetResourceLoader需要实现AVAssetResourceLoaderDelegate方法</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">AVURLAsset</span> *urlAsset = ...</span><br><span class="line">[urlAsset.resourceLoader setDelegate:&lt;<span class="built_in">AVAssetResourceLoaderDelegate</span>&gt; queue:dispatch_get_main_queue()];</span><br></pre></td></tr></table></figure>
+<p>找一个对象实现AVAssetResourceLoaderDelegate这个协议的方法，丢给asset，再把asset丢给AVPlayer，AVPlayer在执行播放的时候就会去访问delegate，能否播放这个url，然后会触发下面方法</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)resourceLoader:(<span class="built_in">AVAssetResourceLoader</span> *)resourceLoader </span><br><span class="line">shouldWaitForLoadingOfRequestedResource:(<span class="built_in">AVAssetResourceLoadingRequest</span> *)loadingRequest; <span class="comment">//要求加载资源的代理方法</span></span><br></pre></td></tr></table></figure>
+<p>此时可以保存loadingRequest并对其所指定的数据进行读取或下载操作，当数据读取或下载完成，我们可以对loadingRequest进行完成操作。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)resourceLoader:(<span class="built_in">AVAssetResourceLoader</span> *)resourceLoader </span><br><span class="line">didCancelLoadingRequest:(<span class="built_in">AVAssetResourceLoadingRequest</span> *)loadingRequest; <span class="comment">//取消加载资源的代理方法</span></span><br></pre></td></tr></table></figure>
+<p>这是我们需要取消loadingRequest所指定的数据的读取或下载操作</p>
+<ul>
+<li>如何请求数据<br><code>shouldWaitForLoadingOfRequestedResource</code>代理方法会得到一个<code>AVAssetResourceLoadingRequest</code>对象</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">AVAssetResourceLoadingRequest</span> : <span class="title">NSObject</span> </span></span><br><span class="line"> </span><br><span class="line"> <span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>) <span class="built_in">NSURLRequest</span> *request;</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>, <span class="keyword">nullable</span>) <span class="built_in">AVAssetResourceLoadingContentInformationRequest</span> *contentInformationRequest <span class="built_in">NS_AVAILABLE</span>(<span class="number">10</span>_9, <span class="number">7</span>_0);</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">readonly</span>, <span class="keyword">nullable</span>) <span class="built_in">AVAssetResourceLoadingDataRequest</span> *dataRequest <span class="built_in">NS_AVAILABLE</span>(<span class="number">10</span>_9, <span class="number">7</span>_0);</span><br><span class="line"> </span><br><span class="line"> - (<span class="type">void</span>)finishLoading <span class="built_in">NS_AVAILABLE</span>(<span class="number">10</span>_9, <span class="number">7</span>_0);</span><br><span class="line"> </span><br><span class="line"> - (<span class="type">void</span>)finishLoadingWithError:(<span class="keyword">nullable</span> <span class="built_in">NSError</span> *)error;</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">@end</span> </span><br></pre></td></tr></table></figure>
+<p>request代表原始的请求，AVPlayer是会触发分片下载的策略，dataRequest中可以得到请求范围的信息，有了请求地址和请求范围，可以重新创建一个设置了请求Range头的NSURLRequest对象，让下载器去下载这个文件的Range范围内的数据。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>1.<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/v1sw_Sb8oKeZ8sWyjBUXGA#%23"> AVPlayer 音视频缓存方案</a><br>2.<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/93ce1748ea57">VPlayer的缓存实现</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/15/Java%E5%B8%B8%E7%94%A8%E6%8A%80%E5%B7%A7/" rel="prev" title="Java常用技巧">
+      <i class="fa fa-chevron-left"></i> Java常用技巧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/10/15/ReactiveCocoa%E5%AD%A6%E4%B9%A0/" rel="next" title="ReactiveCocoa学习">
+      ReactiveCocoa学习 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E6%92%AD%E6%94%BE%E7%9A%84%E9%9C%80%E6%B1%82"><span class="nav-number">1.</span> <span class="nav-text">音频播放的需求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AVPlayer"><span class="nav-number">1.1.</span> <span class="nav-text">AVPlayer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.</span> <span class="nav-text">功能实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AVPlayer%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">AVPlayer缓存实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AVAssetResourceLoaderDelegate"><span class="nav-number">1.3.1.</span> <span class="nav-text">AVAssetResourceLoaderDelegate</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

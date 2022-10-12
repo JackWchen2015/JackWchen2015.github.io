@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="知道为什么iOS系统可以使用3年，还能保证系统的流畅度么？除了苹果定制的CPU领先业界两年的水平，软件层面，苹果通过签名机制控制了安装在iOS上的APP都是经过苹果官方允许的，这样可以规范控制App在iOS的行为。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS App签名原理">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="知道为什么iOS系统可以使用3年，还能保证系统的流畅度么？除了苹果定制的CPU领先业界两年的水平，软件层面，苹果通过签名机制控制了安装在iOS上的APP都是经过苹果官方允许的，这样可以规范控制App在iOS的行为。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign0.png">
+<meta property="og:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign1.png">
+<meta property="og:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign2.png">
+<meta property="og:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign3.png">
+<meta property="og:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign4.png">
+<meta property="article:published_time" content="2020-03-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-13T13:22:06.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign0.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS App签名原理 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS App签名原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-01 08:00:00" itemprop="dateCreated datePublished" datetime="2020-03-01T08:00:00+08:00">2020-03-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-13 21:22:06" itemprop="dateModified" datetime="2020-06-13T21:22:06+08:00">2020-06-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E9%80%86%E5%90%91%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">逆向安全</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>知道为什么iOS系统可以使用3年，还能保证系统的流畅度么？除了苹果定制的CPU领先业界两年的水平，软件层面，苹果通过签名机制控制了安装在iOS上的APP都是经过苹果官方允许的，这样可以规范控制App在iOS的行为。</p>
+<span id="more"></span>
+
+<h2 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h2><p>数字签名的作用是我对某一份数据打个标记，表示我认可了这份数据（签了个名），然后我发送给其他人，其他人可以知道这份数据经过我认证的，数据没有被篡改过。</p>
+<img src="/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign0.png" class="">
+
+<ol>
+<li>首先使用摘要算法，算出原始数据的摘要</li>
+<li>生成一份非对称加密的公钥和私钥，私钥我自己拿着，公钥发布出去</li>
+<li>私钥加密摘要，得到一份加密后的数据，称为原始数据的签名，把它跟原始数据一起发送给用户</li>
+<li>用户收到数据和签名后，用公钥解密签名得到摘要，同时用户使用同样的算法计算原始数据的摘要，对比这里计算出来的摘要是否相等，从而确保这份数据的一致性。</li>
+</ol>
+<h2 id="苹果的APP签名"><a href="#苹果的APP签名" class="headerlink" title="苹果的APP签名"></a>苹果的APP签名</h2><p>苹果官方生成一对公私钥，在iOS里内置一个公钥，私钥由苹果后台保存，上传App上AppStore时，苹果后台用私钥对APP数据进行签名，iOS系统下载这个APP后，用公钥验证这个签名，弱正确，这个APP肯定是由苹果后台认证的，并没有被修改过，从而保证安装的每一个APP都是经过苹果官方允许的。</p>
+<img src="/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign1.png" class="">
+
+<p>但是除了从AppStore下载，我们还可以有三种方式安装一个App：</p>
+<ol>
+<li>开发App时可以直接把开发中的应用安装进手机进行调试</li>
+<li>In-House 企业内部分发，可以直接安装企业证书签名后的APP。</li>
+<li>AD-Hoc相当于企业分发的限制版，限制安装设备数量，较少用。</li>
+</ol>
+<h3 id="双重签名"><a href="#双重签名" class="headerlink" title="双重签名"></a>双重签名</h3><p>开发时安装APP，有两个需求：</p>
+<ol>
+<li>安装包不需要传到苹果服务器，可以直接安装到手机上</li>
+<li>苹果必须对这里的安装有控制权，包括经过苹果允许才可以安装，不能被滥用导致非开发的app也能被安装。</li>
+</ol>
+<img src="/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign2.png" class="">
+
+<ol>
+<li>在Mac开发机器生成一对公私钥，公钥L（用来获取证书），私钥L</li>
+<li>苹果自己的一对固定公私钥，公钥A（在每个iOS设备上），私钥A（在苹果后台）</li>
+<li>把公钥L传到苹果后台，用苹果后台里的私钥A去签名公钥L，得到一份数据包含了公钥L以及其签名，这份数据称为证书</li>
+<li>开发时，编译完一个APP后，用本地的私钥对这个APP进行签名，同时把第三步得到的证书一起打包进APP里，安装到手机上。</li>
+<li>在安装时，iOS系统取得证书，通过内置的公钥A，去验证证书的数字签名是否正确。</li>
+<li>验证证书后确保公钥L是经过苹果认证的，再用公钥L去验证APP的签名，这里就间接验证了这个APP的安装行为是否经过苹果官方允许。（这里只验证安装行为，不验证APP是否被改动，因为开发阶段APP内容总是不断变化）</li>
+</ol>
+<h3 id="避免被滥用"><a href="#避免被滥用" class="headerlink" title="避免被滥用"></a>避免被滥用</h3><p>1.限制在苹果后台注册过的设备才可以安装<br>2.限制签名只能针对某一个具体的APP<br>3.APP里iCloud，push，后台运行权限如何控制，苹果把这些开关统一称为Entitlements，也需要通过签名去授权。</p>
+<p>分析：<br>双重签名中，可以看到步骤3中，证书中只有公钥L，这里可以通过添加允许安装的设备 ID 列表 和 App对应的 AppID 等数据，一起组成证书，再用苹果私钥A对这个证书进行签名，在第5步，验证时可以拿到设备ID列表，判断当前设备是否符合要求，根据数字签名的原理，只要数字签名通过验证，第 5 步这里的设备 IDs &#x2F; AppID &#x2F; 公钥 L 就都是经过苹果认证的，无法被修改，苹果就可以限制可安装的设备和 APP，避免滥用。</p>
+<img src="/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign3.png" class="">
+
+<p>实际上一个“证书”本来就有规定的格式规范，于是苹果发明了Provisioning Profile，里面包含证书，以及上述提到的所有额外信息，以及所有信息的签名。</p>
+<img src="/2020/03/01/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/sign4.png" class="">
+
+<p>完整流程如下：</p>
+<ol>
+<li>在Mac开发机器生成一对公私钥，公钥L（用来获取证书），私钥L</li>
+<li>苹果自己的一对固定公私钥，公钥A（在每个iOS设备上），私钥A（在苹果后台）</li>
+<li>把公钥L传到苹果后台，用苹果后台里的私钥A去签名公钥L，得到一份数据包含了公钥L以及其签名，这份数据称为证书</li>
+<li>在苹果后台申请AppID，配置好设备ID列表，和APP可使用的权限，再加上第3步的证书，组成的数据用私钥A签名，把数据和签名一起组成一个Provisioning Profile文件，下载到本地Mac开发机。</li>
+<li>开发时，编译完一个APP后，用本地的私钥L对这个APP签名，同时把第4步得到的Provisoning Profile文件打包进APP里，文件名为embeded.mobileprovison<br>6.在安装时，iOS取得证书，通过系统内置的公钥A，去验证embedded.mobileprovison的数字签名是否正确，里面的证书签名也会再验一遍。<br>7.确保了 embedded.mobileprovision 里的数据都是苹果授权以后，就可以取出里面的数据，做各种验证，包括用公钥 L 验证APP签名，验证设备 ID 是否在 ID 列表上，AppID 是否对应得上，权限开关是否跟 APP 里的 Entitlements 对应等。</li>
+</ol>
+<h3 id="概念和常见操作"><a href="#概念和常见操作" class="headerlink" title="概念和常见操作"></a>概念和常见操作</h3><ol>
+<li>第 1 步对应的是 keychain 里的 “从证书颁发机构请求证书”，这里就本地生成了一对公私钥，保存的 CertificateSigningRequest 就是公钥，私钥保存在本地电脑里。</li>
+<li>第 3 步对应把 CertificateSigningRequest 传到苹果后台生成证书，并下载到本地。这时本地有两个证书，一个是第 1 步生成的，一个是这里下载回来的，keychain 会把这两个证书关联起来，因为他们公私钥是对应的，在XCode选择下载回来的证书时，实际上会找到 keychain 里对应的私钥去签名。这里私钥只有生成它的这台 Mac 有，如果别的 Mac 也要编译签名这个 App 怎么办？答案是把私钥导出给其他 Mac 用，在 keychain 里导出私钥，就会存成 .p12 文件，其他 Mac 打开后就导入了这个私钥</li>
+<li>第 5 步 XCode 会通过第 3 步下载回来的证书（存着公钥），在本地找到对应的私钥（第一步生成的），用本地私钥去签名 App，并把 Provisioning Profile 文件命名为 embedded.mobileprovision 一起打包进去。这里对 App 的签名数据保存分两部分，Mach-O 可执行文件会把签名直接写入这个文件里，其他资源文件则会保存在 _CodeSignature 目录下。</li>
+</ol>
+<p>一些概念：<br>证书：内容是公钥或私钥，由其他机构对其签名组成的数据包。<br>Entitlements：包含了 App 权限开关列表。<br>CertificateSigningRequest：本地公钥。<br>p12：本地私钥，可以导入到其他电脑。<br>Provisioning Profile：包含了 证书 &#x2F; Entitlements 等数据，并由苹果后台私钥签名的数据包。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="http://blog.cnbang.net/tech/3386/">iOS App 签名的原理</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/10/iOS%E9%9F%B3%E9%A2%91/" rel="prev" title="iOS语音合成">
+      <i class="fa fa-chevron-left"></i> iOS语音合成
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/16/iOS%E5%BD%95%E9%9F%B3%E7%94%9F%E6%88%90Wav%E6%A0%BC%E5%BC%8F%E9%97%AE%E9%A2%98/" rel="next" title="iOS录音生成Wav格式问题">
+      iOS录音生成Wav格式问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D"><span class="nav-number">1.</span> <span class="nav-text">数字签名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8B%B9%E6%9E%9C%E7%9A%84APP%E7%AD%BE%E5%90%8D"><span class="nav-number">2.</span> <span class="nav-text">苹果的APP签名</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E9%87%8D%E7%AD%BE%E5%90%8D"><span class="nav-number">2.1.</span> <span class="nav-text">双重签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E8%A2%AB%E6%BB%A5%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">避免被滥用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E5%92%8C%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C"><span class="nav-number">2.3.</span> <span class="nav-text">概念和常见操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

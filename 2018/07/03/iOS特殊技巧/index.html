@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="艾德的父亲给所有逍遥法外的罪犯起了一个统一的代称-罗罗·汤马西.——–&lt;洛城机密&gt;  这篇博客总结一些，iOS开发中遇到的，比较特殊的问题，或者暂时想不到解决办法的问题。有些问题是个人能力不足，暂时没找到解决方案，有些可能就是苹果系统本身的问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS特殊技巧">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/03/iOS%E7%89%B9%E6%AE%8A%E6%8A%80%E5%B7%A7/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="艾德的父亲给所有逍遥法外的罪犯起了一个统一的代称-罗罗·汤马西.——–&lt;洛城机密&gt;  这篇博客总结一些，iOS开发中遇到的，比较特殊的问题，或者暂时想不到解决办法的问题。有些问题是个人能力不足，暂时没找到解决方案，有些可能就是苹果系统本身的问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-07-02T16:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-15T03:08:30.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/03/iOS%E7%89%B9%E6%AE%8A%E6%8A%80%E5%B7%A7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS特殊技巧 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/03/iOS%E7%89%B9%E6%AE%8A%E6%8A%80%E5%B7%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS特殊技巧
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-03 00:00:00" itemprop="dateCreated datePublished" datetime="2018-07-03T00:00:00+08:00">2018-07-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-15 11:08:30" itemprop="dateModified" datetime="2020-04-15T11:08:30+08:00">2020-04-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>艾德的父亲给所有逍遥法外的罪犯起了一个统一的代称-<em>罗罗·汤马西</em>.——–&lt;洛城机密&gt;</p>
+</blockquote>
+<p>这篇博客总结一些，iOS开发中遇到的，比较特殊的问题，或者暂时想不到解决办法的问题。有些问题是个人能力不足，暂时没找到解决方案，有些可能就是苹果系统本身的问题。</p>
+<span id="more"></span>
+
+<h2 id="特殊情况"><a href="#特殊情况" class="headerlink" title="特殊情况"></a>特殊情况</h2><h3 id="需要手动添加-synthesize的情况"><a href="#需要手动添加-synthesize的情况" class="headerlink" title="需要手动添加@synthesize的情况"></a>需要手动添加@synthesize的情况</h3><ul>
+<li>你手动同时重写 setXXX 和 XXX（get） 方法, 就不会为你自动生成 _xxx 实例变量</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Cat</span> : <span class="title">NSObject</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">copy</span>, <span class="keyword">nonatomic</span>) <span class="built_in">NSString</span> *name;</span><br><span class="line">- (<span class="type">void</span>)echo;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>解决</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&quot;Cat.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Cat</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@synthesize</span> name = _name;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)echo</span><br><span class="line">&#123;</span><br><span class="line">    _name = <span class="string">@&quot;XiaoHua&quot;</span>;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;name = %@&quot;</span>, _name);</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">void</span>)setName:(<span class="built_in">NSString</span> *)name</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//TODO</span></span><br><span class="line">&#125;</span><br><span class="line">- (<span class="built_in">NSString</span> *)name</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> _name;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="单例的创建与释放"><a href="#单例的创建与释放" class="headerlink" title="单例的创建与释放"></a>单例的创建与释放</h3><ul>
+<li>线程安全的单例创建</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">instancetype</span>)shareSingleton &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        singleton = [[<span class="keyword">self</span> alloc]init];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> singleton;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>单例的销毁</li>
+</ul>
+<ol>
+<li>必须把static dispatch_once_t onceToken; 这个拿到函数体外,成为全局的.</li>
+<li>onceToken&#x3D;0;</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">+(<span class="type">void</span>)attempDealloc&#123;</span><br><span class="line">    onceToken = <span class="number">0</span>; <span class="comment">// 只有置成0,GCD才会认为它从未执行过.它默认为0.这样</span></span><br><span class="line">    才能保证下次再次调用shareInstance的时候,再次创建对象.</span><br><span class="line">    [_instance release];</span><br><span class="line">    _instance = <span class="literal">nil</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>onceToken说明</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GCD创建：dispatch_once中dispatch_once_t类型为typedef long</span><br><span class="line"> •onceToken= 0，线程执行dispatch_once的block中代码</span><br><span class="line"> •onceToken= -1，线程跳过dispatch_once的block中代码不执行</span><br><span class="line"> •onceToken= 其他值，线程被线程被阻塞，等待onceToken值改变</span><br></pre></td></tr></table></figure>
+
+<h3 id="iOS定时器时间准么？"><a href="#iOS定时器时间准么？" class="headerlink" title="iOS定时器时间准么？"></a>iOS定时器时间准么？</h3><p>对于NSTimer是否时间准确呢？大家可能都知道是时间不准确的，因为受RunLoop的影响，那么GCD中也有延时，如果用GCD来做延时，那时间准确吗？</p>
+<p>答案是GCD的time是准确的，GCD 的线程管理是通过系统来直接管理的。GCD Timer 是通过 dispatch port 给 RunLoop 发送消息，来使 RunLoop 执行相应的 block，如果所在线程没有 RunLoop，那么 GCD 会临时创建一个线程去执行 block，执行完之后再销毁掉，因此 GCD 的 Timer 是不依赖 RunLoop 的。</p>
+<h3 id="iOS中纯代码创建的UI控件使用weak还是strong？"><a href="#iOS中纯代码创建的UI控件使用weak还是strong？" class="headerlink" title="iOS中纯代码创建的UI控件使用weak还是strong？"></a>iOS中纯代码创建的UI控件使用weak还是strong？</h3><p>当addSubview:时，该UI控件已经被VC的view持有了。如果VC把该控件声明成了strong，就会同时有两个对象持有这个UI控件，一个是VC，一个是VC的view，所以只有这两个持有者都释放了才会释放该UI控件。声明成weak的好处是不会干扰该UI控件的正常的生命周期</p>
+<p>使用weak连接控件，只要我们在创建控件的时候，在当前的作用域 { xxx }中，添加到contentView上，就能为其添加强引用保证它不被销毁。然后当我们removeFromSuperView的时候，可以实现控件的销毁</p>
+<h2 id="罗罗·汤马西"><a href="#罗罗·汤马西" class="headerlink" title="罗罗·汤马西"></a>罗罗·汤马西</h2><h3 id="iOS原生二维码，条形码识别问题"><a href="#iOS原生二维码，条形码识别问题" class="headerlink" title="iOS原生二维码，条形码识别问题"></a>iOS原生二维码，条形码识别问题</h3><ul>
+<li>AVFoundation使用多译码器扫描的时候。不管有没有设置扫描区域（setRectOfInterest:）,二维码可以在扫描区域的任意位置响应扫描成功，但是条形码却不行，只能在扫码区域的中间位置响应。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">官网文档解释如下</span><br><span class="line"></span><br><span class="line">按照ISO标准解碼，实际上是，按照1:1:3:1:1去寻找那三个寻像图形，就是标志性的</span><br><span class="line">大方块。然后圈出二维码大小再去解碼的。也就是说，再没设定边界的情况下全屏都可</span><br><span class="line">以。</span><br><span class="line"></span><br><span class="line">而条形码完全不同，他是在Detect Center那个点，画一个无限延伸的米字型，然后</span><br><span class="line">去判断每一条在线能否解析出条形码所需要的0101010序列。而iOS默认的Center是</span><br><span class="line">Layer 的 Center。所以条形码扫描仪上往往会有一条红线，这并不是为了拟物化，</span><br><span class="line">而是告诉用户一定要用这条线对准条形码，否则会有扫不上的可能性</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>有时候会遇到，当AVFoundation使用多译码器扫描的时候。二维码是秒杀，但是条形码却经常扫不上。如果去掉二维码的话，条形码扫描又秒杀的问题。如果是二维码和条形码一起，条形码扫描中心线就只有center。但是如果只有条形码，扫描中心线是center+additional。additional的存在的意义是用更加优秀且稍微耗时的算法去优化扫描精准度，也就是牺牲效率换精确度。</li>
+</ul>
+<h3 id="进入后台播放音频文件时提示错误"><a href="#进入后台播放音频文件时提示错误" class="headerlink" title="进入后台播放音频文件时提示错误"></a>进入后台播放音频文件时提示错误</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)applicationWillResignActive:(<span class="built_in">UIApplication</span> *)application &#123;</span><br><span class="line">     [[<span class="built_in">UIApplication</span> sharedApplication] beginReceivingRemoteControlEvents];</span><br><span class="line">    <span class="built_in">AVAudioSession</span>* session=[<span class="built_in">AVAudioSession</span> sharedInstance];</span><br><span class="line">    [session setActive:<span class="literal">YES</span> error:<span class="literal">nil</span>];</span><br><span class="line">    [session setCategory:<span class="built_in">AVAudioSessionCategoryPlayback</span> error:<span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)beginTask</span><br><span class="line">&#123;</span><br><span class="line">    bgTaskIdentifier= [[<span class="built_in">UIApplication</span> sharedApplication] beginBackgroundTaskWithExpirationHandler:^&#123;</span><br><span class="line">        <span class="comment">//如果在系统规定时间3分钟内任务还没有完成，在时间到之前会调用到这个方法</span></span><br><span class="line">        [<span class="keyword">self</span> endBack];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//结束后台运行，让app挂起</span></span><br><span class="line">- (<span class="type">void</span>)endBack</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//切记endBackgroundTask要和beginBackgroundTaskWithExpirationHandler成对出现</span></span><br><span class="line">    [[<span class="built_in">UIApplication</span> sharedApplication] endBackgroundTask:bgTaskIdentifier];</span><br><span class="line">    bgTaskIdentifier = <span class="built_in">UIBackgroundTaskInvalid</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)applicationDidEnterBackground:(<span class="built_in">UIApplication</span> *)application &#123;</span><br><span class="line">      [<span class="keyword">self</span> beginTask];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Can<span class="string">&#x27;t end BackgroundTask: no background task exists with identifier 2 (0x2), or it may have already been </span></span><br><span class="line"><span class="string">ended. Break in UIApplicationEndBackgroundTaskError() to debug.</span></span><br></pre></td></tr></table></figure>
+<p>遇到这种问题，当时是一脸懵逼的，除了谷歌之外，一点思路都没有，在我契而不舍的搜索之下，结果发现stackoverflow上有人提出这是iOS13特有的系统Bug。然后我拿模拟器iOS12的系统测试，还真是没有报错….</p>
+<h3 id="新机第一次安装、第一次启动的时候，app没数据。kill掉重新打开就好了"><a href="#新机第一次安装、第一次启动的时候，app没数据。kill掉重新打开就好了" class="headerlink" title="新机第一次安装、第一次启动的时候，app没数据。kill掉重新打开就好了"></a>新机第一次安装、第一次启动的时候，app没数据。kill掉重新打开就好了</h3><p>开发App的时候，有个别用户反应，第一次安装，第一次启动App的时候，用户隐私页面是空白的，而且会一直卡在那里，退出App，再重新进入就可以了。刚开始还以为是用户的网络故障，让她切换wifi试试，然后她说又好了，所以当时也没在意，后来自己一不小心复现了。。。。</p>
+<p>症状: iOS 10之后   国行手机</p>
+<p>原因:</p>
+<blockquote>
+<p>2015年底工信部起草的一份《移动智能终端应用软件（APP）预置和分发管理暂行规定》有关，规定中要求设备生产企业「未经明示且经用户同意，不得实施擅自收集使用用户个人信息、强制开启应用软件……等侵害用户合法权益和危害网络安全的行为」</p>
+</blockquote>
+<p>在 iOS 10 中，苹果为国行 iPhone 制定了一个「联网权限」功能，「允许 XXX 使用数据？」<br>只有当你选择「允许」后，应用才能够开始联网。如果你没有允许，那么这个 App 将无法做任何与联网相关的动作，不管是在前台还是后台。</p>
+<p>解决：加一个重新加载的按钮呗！</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6cbde1b8b922">iOS 10 的坑：新机首次安装 app，请求网络权限“是否允许使用数据”</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/02/UIView%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9A%84%E6%96%B9%E6%B3%95/" rel="prev" title="UIView 几个重要的方法">
+      <i class="fa fa-chevron-left"></i> UIView 几个重要的方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/01/UIView%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E5%BC%82%E6%AD%A5%E7%BB%98%E5%88%B6/" rel="next" title="UIView绘制原理以及异步绘制">
+      UIView绘制原理以及异步绘制 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">特殊情况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E6%89%8B%E5%8A%A8%E6%B7%BB%E5%8A%A0-synthesize%E7%9A%84%E6%83%85%E5%86%B5"><span class="nav-number">1.1.</span> <span class="nav-text">需要手动添加@synthesize的情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%BE%8B%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E9%87%8A%E6%94%BE"><span class="nav-number">1.2.</span> <span class="nav-text">单例的创建与释放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS%E5%AE%9A%E6%97%B6%E5%99%A8%E6%97%B6%E9%97%B4%E5%87%86%E4%B9%88%EF%BC%9F"><span class="nav-number">1.3.</span> <span class="nav-text">iOS定时器时间准么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS%E4%B8%AD%E7%BA%AF%E4%BB%A3%E7%A0%81%E5%88%9B%E5%BB%BA%E7%9A%84UI%E6%8E%A7%E4%BB%B6%E4%BD%BF%E7%94%A8weak%E8%BF%98%E6%98%AFstrong%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">iOS中纯代码创建的UI控件使用weak还是strong？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%97%E7%BD%97%C2%B7%E6%B1%A4%E9%A9%AC%E8%A5%BF"><span class="nav-number">2.</span> <span class="nav-text">罗罗·汤马西</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS%E5%8E%9F%E7%94%9F%E4%BA%8C%E7%BB%B4%E7%A0%81%EF%BC%8C%E6%9D%A1%E5%BD%A2%E7%A0%81%E8%AF%86%E5%88%AB%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">iOS原生二维码，条形码识别问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E5%90%8E%E5%8F%B0%E6%92%AD%E6%94%BE%E9%9F%B3%E9%A2%91%E6%96%87%E4%BB%B6%E6%97%B6%E6%8F%90%E7%A4%BA%E9%94%99%E8%AF%AF"><span class="nav-number">2.2.</span> <span class="nav-text">进入后台播放音频文件时提示错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E6%9C%BA%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%AE%89%E8%A3%85%E3%80%81%E7%AC%AC%E4%B8%80%E6%AC%A1%E5%90%AF%E5%8A%A8%E7%9A%84%E6%97%B6%E5%80%99%EF%BC%8Capp%E6%B2%A1%E6%95%B0%E6%8D%AE%E3%80%82kill%E6%8E%89%E9%87%8D%E6%96%B0%E6%89%93%E5%BC%80%E5%B0%B1%E5%A5%BD%E4%BA%86"><span class="nav-number">2.3.</span> <span class="nav-text">新机第一次安装、第一次启动的时候，app没数据。kill掉重新打开就好了</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

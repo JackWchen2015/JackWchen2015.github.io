@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UIView 几个重要的方法">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9A%84%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="layoutlayoutSubviews在以下情况下回被调用1234567891011121、init初始化不会触发layoutSubviews但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发2、addSubview会触发layoutSubviews3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-07-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2019-05-31T08:09:59.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9A%84%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>UIView 几个重要的方法 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/07/02/UIView%E5%87%A0%E4%B8%AA%E9%87%8D%E8%A6%81%E7%9A%84%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          UIView 几个重要的方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-02 08:00:00" itemprop="dateCreated datePublished" datetime="2018-07-02T08:00:00+08:00">2018-07-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-05-31 16:09:59" itemprop="dateModified" datetime="2019-05-31T16:09:59+08:00">2019-05-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="layout"><a href="#layout" class="headerlink" title="layout"></a>layout</h2><h3 id="layoutSubviews在以下情况下回被调用"><a href="#layoutSubviews在以下情况下回被调用" class="headerlink" title="layoutSubviews在以下情况下回被调用"></a>layoutSubviews在以下情况下回被调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">1、init初始化不会触发layoutSubviews</span><br><span class="line">但是是用initWithFrame 进行初始化时，当rect的值不为CGRectZero时,也会触发</span><br><span class="line"></span><br><span class="line">2、addSubview会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">3、设置view的Frame会触发layoutSubviews，当然前提是frame的值设置前后发生了变化</span><br><span class="line"></span><br><span class="line">4、滚动一个UIScrollView会触发layoutSubviews</span><br><span class="line"></span><br><span class="line">5、旋转Screen会触发父UIView上的layoutSubviews事件</span><br><span class="line"></span><br><span class="line">6、改变一个UIView大小的时候也会触发父UIView上的layoutSubviews事件</span><br></pre></td></tr></table></figure>
+<p>注意</p>
+<span id="more"></span>
+<p>苹果官方文档强调</p>
+<p>You should override this method only if the autoresizing behaviors of the subviews do not offer the behavior you want.</p>
+<p>也就是说layoutSubviews, 当我们在某个类的内部调整子视图位置时，需要调用。</p>
+<p>反过来的意思就是说：如果你想要在外部设置subviews的位置，就不要重写。</p>
+<h3 id="setNeedsLayout"><a href="#setNeedsLayout" class="headerlink" title="setNeedsLayout"></a>setNeedsLayout</h3><ol>
+<li><p>标记为需要重新布局，异步调用layoutIfNeeded刷新布局，不立即刷新，但layoutSubviews一定会被调用 </p>
+</li>
+<li><p>setNeedsLayout在receiver标上一个需要被重新布局的标记，在系统runloop的下一个周期自动调用layoutSubviews</p>
+</li>
+</ol>
+<h3 id="layoutIfNeeded"><a href="#layoutIfNeeded" class="headerlink" title="layoutIfNeeded"></a>layoutIfNeeded</h3><ol>
+<li>如果有需要刷新的标记，立即调用layoutSubviews进行布局（如果没有标记，不会调用layoutSubviews）</li>
+<li>layoutIfNeeded方法如其名，UIKit会判断该receiver是否需要layout.根据Apple官方文档,layoutIfNeeded方法应该是这样的，layoutIfNeeded遍历的不是superview链，应该是subviews链</li>
+</ol>
+<h3 id="立刻刷新"><a href="#立刻刷新" class="headerlink" title="立刻刷新"></a>立刻刷新</h3><p>先调用[view setNeedsLayout]，把标记设为需要布局，然后马上调用[view layoutIfNeeded]，实现布局</p>
+<h2 id="重绘"><a href="#重绘" class="headerlink" title="重绘"></a>重绘</h2><h3 id="drawRect在以下情况下会被调用"><a href="#drawRect在以下情况下会被调用" class="headerlink" title="drawRect在以下情况下会被调用"></a>drawRect在以下情况下会被调用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1、如果在UIView初始化时没有设置rect大小，将直接导致drawRect不被自动调用。drawRect调用是在Controller-&gt;loadView,Controller-&gt;viewDidLoad 两方法之后掉用的.所以不用担心在控制器中,这些View的drawRect就开始画了.</span><br><span class="line">这样可以在控制器中设置一些值给View(如果这些View draw的时候需要用到某些变量值).</span><br><span class="line">2、该方法在调用sizeToFit后被调用，所以可以先调用sizeToFit计算出size。然后系统自动调用drawRect:方法。</span><br><span class="line">3、通过设置contentMode属性值为UIViewContentModeRedraw。那么将在每次设置或更改frame的时候自动调用drawRect:。</span><br><span class="line">4、直接调用setNeedsDisplay，或者setNeedsDisplayInRect:触发drawRect:，但是有个前提条件是rect不能为0。</span><br><span class="line">以上1,2推荐；而3,4不提倡</span><br></pre></td></tr></table></figure>
+<h3 id="drawRect方法使用注意点"><a href="#drawRect方法使用注意点" class="headerlink" title="drawRect方法使用注意点"></a>drawRect方法使用注意点</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1、若使用UIView绘图，只能在drawRect：方法中获取相应的contextRef并绘图。如果在其他方法中获取将获取到一个invalidate的ref并且不能用于画图。drawRect：方法不能手动显示调用，必须通过调用setNeedsDisplay 或者 setNeedsDisplayInRect，让系统自动调该方法。</span><br><span class="line">2、若使用calayer绘图，只能在drawInContext: 中（类似于drawRect）绘制，或者在delegate中的相应方法绘制。同样也是调用setNeedDisplay等间接调用以上方法</span><br><span class="line">3、若要实时画图，不能使用gestureRecognizer，只能使用touchbegan等方法来掉用setNeedsDisplay实时刷新屏幕</span><br></pre></td></tr></table></figure>
+<h3 id="drawRect-CGRect-rect"><a href="#drawRect-CGRect-rect" class="headerlink" title="drawRect:(CGRect)rect"></a>drawRect:(CGRect)rect</h3><p>重写此方法，执行重绘任务 </p>
+<h3 id="setNeedsDisplay"><a href="#setNeedsDisplay" class="headerlink" title="setNeedsDisplay"></a>setNeedsDisplay</h3><ol>
+<li>标记为需要重绘，异步调用drawRect </li>
+<li>setNeedDisplay在receiver标上一个需要被重新绘图的标记，在下一个draw周期自动重绘，iphone device的刷新频率是60hz，也就是1&#x2F;60秒后重绘</li>
+</ol>
+<h3 id="setNeedsDisplayInRect-CGRect-invalidRect"><a href="#setNeedsDisplayInRect-CGRect-invalidRect" class="headerlink" title="setNeedsDisplayInRect:(CGRect)invalidRect"></a>setNeedsDisplayInRect:(CGRect)invalidRect</h3><p>标记为需要局部重绘</p>
+<h2 id="自适应"><a href="#自适应" class="headerlink" title="自适应"></a>自适应</h2><h3 id="sizeToFit"><a href="#sizeToFit" class="headerlink" title="sizeToFit"></a>sizeToFit</h3><p>sizeToFit会自动调用sizeThatFits方法；</p>
+<p>sizeToFit不应该在子类中被重写，应该重写sizeThatFits</p>
+<p>sizeToFit和sizeThatFits方法都没有递归，对subviews也不负责，只负责自己</p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>layoutSubviews方法调用先于drawRect</p>
+<h2 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/timtian008/article/details/57084670">UIView 刷新</a></li>
+<li><a target="_blank" rel="noopener" href="http://blog.sina.com.cn/s/blog_a573f7990101cdpe.html">UIView常用的一些方法小记</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/" rel="prev" title="事件传递和响应机制">
+      <i class="fa fa-chevron-left"></i> 事件传递和响应机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/03/iOS%E7%89%B9%E6%AE%8A%E6%8A%80%E5%B7%A7/" rel="next" title="iOS特殊技巧">
+      iOS特殊技巧 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#layout"><span class="nav-number">1.</span> <span class="nav-text">layout</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#layoutSubviews%E5%9C%A8%E4%BB%A5%E4%B8%8B%E6%83%85%E5%86%B5%E4%B8%8B%E5%9B%9E%E8%A2%AB%E8%B0%83%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">layoutSubviews在以下情况下回被调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsLayout"><span class="nav-number">1.2.</span> <span class="nav-text">setNeedsLayout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#layoutIfNeeded"><span class="nav-number">1.3.</span> <span class="nav-text">layoutIfNeeded</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%8B%E5%88%BB%E5%88%B7%E6%96%B0"><span class="nav-number">1.4.</span> <span class="nav-text">立刻刷新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E7%BB%98"><span class="nav-number">2.</span> <span class="nav-text">重绘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect%E5%9C%A8%E4%BB%A5%E4%B8%8B%E6%83%85%E5%86%B5%E4%B8%8B%E4%BC%9A%E8%A2%AB%E8%B0%83%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">drawRect在以下情况下会被调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect%E6%96%B9%E6%B3%95%E4%BD%BF%E7%94%A8%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">drawRect方法使用注意点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#drawRect-CGRect-rect"><span class="nav-number">2.3.</span> <span class="nav-text">drawRect:(CGRect)rect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsDisplay"><span class="nav-number">2.4.</span> <span class="nav-text">setNeedsDisplay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setNeedsDisplayInRect-CGRect-invalidRect"><span class="nav-number">2.5.</span> <span class="nav-text">setNeedsDisplayInRect:(CGRect)invalidRect</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E9%80%82%E5%BA%94"><span class="nav-number">3.</span> <span class="nav-text">自适应</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sizeToFit"><span class="nav-number">3.1.</span> <span class="nav-text">sizeToFit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">4.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

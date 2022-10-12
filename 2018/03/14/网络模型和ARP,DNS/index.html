@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TCP&#x2F;IP五层模型 VS OSI参考模型1234567应用层 文件传输，电子邮件，文件服务，虚拟终端 TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet表示层 数据格式化，代码转换，数据加密 没有协议会话层 解除或建立与别的接点的联系 没有协议传输层 提供端对端的接口 TCP，UDP网络层 为数据包选择路由 IP，ICMP，RIP，OSPF，BGP，IGMP数据链路层">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络模型和常见协议">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="TCP&#x2F;IP五层模型 VS OSI参考模型1234567应用层 文件传输，电子邮件，文件服务，虚拟终端 TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet表示层 数据格式化，代码转换，数据加密 没有协议会话层 解除或建立与别的接点的联系 没有协议传输层 提供端对端的接口 TCP，UDP网络层 为数据包选择路由 IP，ICMP，RIP，OSPF，BGP，IGMP数据链路层">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/%E7%BD%91%E7%BB%9C%E5%B1%82.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/macAddr.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/adr.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/arpSend.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/11.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/12.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/10.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/13.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/dns.png">
+<meta property="og:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/die.png">
+<meta property="article:published_time" content="2018-03-14T00:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-13T14:51:13.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/%E7%BD%91%E7%BB%9C%E5%B1%82.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>网络模型和常见协议 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络模型和常见协议
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-03-14 08:00:00" itemprop="dateCreated datePublished" datetime="2018-03-14T08:00:00+08:00">2018-03-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-07-13 22:51:13" itemprop="dateModified" datetime="2020-07-13T22:51:13+08:00">2020-07-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="TCP-x2F-IP五层模型-VS-OSI参考模型"><a href="#TCP-x2F-IP五层模型-VS-OSI参考模型" class="headerlink" title="TCP&#x2F;IP五层模型 VS OSI参考模型"></a>TCP&#x2F;IP五层模型 VS OSI参考模型</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">应用层 文件传输，电子邮件，文件服务，虚拟终端 TFTP，HTTP，SNMP，FTP，SMTP，DNS，Telnet</span><br><span class="line">表示层 数据格式化，代码转换，数据加密 没有协议</span><br><span class="line">会话层 解除或建立与别的接点的联系 没有协议</span><br><span class="line">传输层 提供端对端的接口 TCP，UDP</span><br><span class="line">网络层 为数据包选择路由 IP，ICMP，RIP，OSPF，BGP，IGMP</span><br><span class="line">数据链路层 传输有地址的帧以及错误检测功能 SLIP，CSLIP，PPP，ARP，RARP，MTU</span><br><span class="line">物理层 以二进制数据形式在物理媒体上传输数据 ISO2110，IEEE802，IEEE802.2</span><br></pre></td></tr></table></figure>
+
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/%E7%BD%91%E7%BB%9C%E5%B1%82.png" class="">
+<span id="more"></span>
+
+
+<h2 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h2><h3 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h3><h4 id="IP地址和MAC地址"><a href="#IP地址和MAC地址" class="headerlink" title="IP地址和MAC地址"></a>IP地址和MAC地址</h4><p>MAC地址是数据链路层和物理层使用的地址，而IP地址是网络层和以上各层使用的地址，是一种逻辑地址</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/macAddr.png" class="">
+
+<p>使用IP地址的IP数据报一旦交给了数据链路层，就被封装成了MAC帧，MAC帧在传送时使用的原地址和目的地址都是硬件地址，连接在通信链路上的设备（主机或者路由器）在接收MAC帧时，根据是MAC帧首部的硬件地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IP地址本质上是终点地址，它在跳过路由器的时候不会变（NAT（Network address translation）例外）</span><br><span class="line">MAC地址则是下一跳的地址，每跳过一次路由都会改变。</span><br></pre></td></tr></table></figure>
+<h4 id="ARP地址解析协议"><a href="#ARP地址解析协议" class="headerlink" title="ARP地址解析协议"></a>ARP地址解析协议</h4><p>地址解析协议，基本功能是透过目标设备的IP地址，查询目标设备的MAC地址</p>
+<p>每台安装有TCP&#x2F;IP协议的主机里都有一个ARP缓存表，表里的IP地址与MAC地址是一一对应的</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/adr.png" class="">
+
+<p>当主机A要向主机B发送IP数据报时，就先在其ARP高速缓存中查找有无主机B的IP地址，如果有，就把硬件地址写入MAC帧，然后通过局域网把该MAC帧发往此硬件地址。</p>
+<p>没有就会按照如下步骤找出主机B的硬件地址</p>
+<ol>
+<li><p>主机A，B在同一个局域网的时候，ARP广播发送一个ARP请求分组</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/arpSend.png" class="">
+<p>主机B在ARP分组中见到自己的IP地址，就会响应分组，并写入自己的硬件地址</p>
+</li>
+<li><p>主机A，B不在同一个局域网的时候，此时发送主机通过ARP协议获得的将不是目的主机的真实MAC地址，而是当前路由器的MAC地址 这种情况称为委托ARP或ARP代理。</p>
+</li>
+</ol>
+<h4 id="同网段和不同网段设备通信原理"><a href="#同网段和不同网段设备通信原理" class="headerlink" title="同网段和不同网段设备通信原理"></a>同网段和不同网段设备通信原理</h4><p>通信实现的前提是拥有双方的IP地址和MAC地址</p>
+<p><code>主机A与主机B通信，已知A的IP地址，MAC地址，B的IP地址，通过ARP获取主机B的MAC地址</code></p>
+<h2 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h2><h3 id="ICMP协议"><a href="#ICMP协议" class="headerlink" title="ICMP协议"></a>ICMP协议</h3><p>IP协议并不提供可靠传输，如果丢包了，IP协议并不能通知传输层是否丢包，以及丢包原因。ICMP可以完成这样的功能</p>
+<ol>
+<li>确认IP包是否成功到达目标地址。</li>
+<li>通知在发送过程中IP包被废弃的具体原因。</li>
+</ol>
+<p><code>IP通信中如果某个IP包因为某种原因未能到达目标地址，那么这个具体原因将由ICMP负责通知</code></p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/11.png" class="">
+
+<ul>
+<li>ICMP消息类型<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/12.png" class=""></li>
+</ul>
+<h4 id="ICMP超时消息"><a href="#ICMP超时消息" class="headerlink" title="ICMP超时消息"></a>ICMP超时消息</h4><p>IP包中有一个字段TTL（Time To Live，生存周期），它的值随着每经过一次路由器就会减1，直到0时该IP包就会被丢弃，此时IP路由器将会发送一个ICMP超时的消息给发送端主机，并通知该包已被丢弃。</p>
+<ul>
+<li>traceroute<br>可以显示出由执行程序的主机到达特定主机之前历经多少路由器。原理就是利用IP包的TTL从1开始按照顺序递增的同时发送UDP包，强制接收ICMP超时消息的一种方法，这样可以将所有路由器的IP地址逐一呈现。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Jack-Mac-mini:~ Jack$ traceroute www.baidu.com</span><br><span class="line">traceroute to www.baidu.com (14.215.177.39), 64 hops max, 52 byte packets</span><br><span class="line"> 1  xiaoqiang (192.168.31.1)  2.367 ms  1.271 ms  1.048 ms</span><br><span class="line"> 2  192.168.1.1 (192.168.1.1)  1.821 ms  1.886 ms  1.760 ms</span><br><span class="line"> 3  100.64.0.1 (100.64.0.1)  4.640 ms  4.539 ms  5.622 ms</span><br><span class="line"> 4  202.105.158.97 (202.105.158.97)  30.972 ms</span><br><span class="line">    53.187.37.59.broad.dg.gd.dynamic.163data.com.cn (59.37.187.53)  4.616 ms</span><br><span class="line">    202.105.154.165 (202.105.154.165)  3.564 ms</span><br><span class="line"> 5  119.145.47.85 (119.145.47.85)  4.626 ms</span><br><span class="line">    202.105.106.37 (202.105.106.37)  7.971 ms *</span><br><span class="line"> 6  113.96.5.38 (113.96.5.38)  16.189 ms</span><br><span class="line">    113.96.4.246 (113.96.4.246)  8.064 ms</span><br><span class="line">    113.96.0.18 (113.96.0.18)  11.310 ms</span><br><span class="line"> 7  113.96.11.74 (113.96.11.74)  8.232 ms  6.788 ms  9.168 ms</span><br><span class="line"> 8  121.14.67.130 (121.14.67.130)  9.790 ms</span><br><span class="line">    14.215.32.90 (14.215.32.90)  10.042 ms  8.760 ms</span><br><span class="line"> 9  * * *</span><br></pre></td></tr></table></figure>
+<h4 id="ICMP回送消息"><a href="#ICMP回送消息" class="headerlink" title="ICMP回送消息"></a>ICMP回送消息</h4><p>用于通信的主机或路由器之间，判断所发送的数据包是否已经成功到达对端的一种消息，网络上常用的ping命令就是利用这个消息实现的。</p>
+<h3 id="IP协议"><a href="#IP协议" class="headerlink" title="IP协议"></a>IP协议</h3><h4 id="IP分割与重组"><a href="#IP分割与重组" class="headerlink" title="IP分割与重组"></a>IP分割与重组</h4><p>在数据链路层，每一条数据链路都有它的最大传输单元MTU，所以如果你传输的数据包大于数据链路层的最大传输单元，就需要对它进行分割。</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/10.png" class="">
+
+
+<p>如图，由于以太网的默认MTU是1500字节，因此4342字节的IP数据报无法在一个帧当中发送完成，这时路由器将此IP数据报划分成了3个分片进行发送。</p>
+<p><code>经过分片之后的IP数据报在被重组的时候，只能由目标主机进行。路由器虽然做分片但不会进行重组。因为无法保证IP数据报是否经由同一个路径传送</code></p>
+<h4 id="路径MTU发现"><a href="#路径MTU发现" class="headerlink" title="路径MTU发现"></a>路径MTU发现</h4><p>分片机制的不足：</p>
+<ol>
+<li>加重路由器的负荷</li>
+<li>一旦某个分片丢失，则会导致整个IP数据报作废</li>
+</ol>
+<p>路径MTU：是指从发送端主机到接收端主机之间不需要分片时最大MTU的大小，即路径中存在的所有数据链中最小的MTU，就可以避免在中途的路由器上进行分片处理。</p>
+<ul>
+<li>路径MTU发现的原理<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/13.png" class="">
+1.首先发送端发送IP数据报时将其首部的分片禁止标志位设置1，根据这个标志位，路由器遇到需要分片才能处理的大包，也不会去分片，而是将包丢弃。</li>
+</ul>
+<ol start="2">
+<li>丢弃的时候，ICMP会回送一个不可达消息将数据链路上的MTU的值发送主机</li>
+<li>发送给同一个目标主机的IP数据报会设置步骤2获取到的MTU为当前MTU，发送主机会根据这个MTU对数据报进行分片处理。如此反复，直到数据报被发送到目标主机为止，没有再收到任何ICMP，就认为最后一次ICMP所通知的MTU即是一个合适MTU。一般会缓存10分钟</li>
+</ol>
+<h2 id="应用层协议"><a href="#应用层协议" class="headerlink" title="应用层协议"></a>应用层协议</h2><h3 id="DNS协议"><a href="#DNS协议" class="headerlink" title="DNS协议"></a>DNS协议</h3><p>DNS 是域名到 IP 地址的映射，DNS 解析使用 UDP 数据报，端口号53，并且采用明文传输的方式<br>客户端在向服务端发送请求时，会先将 域名 到 DNS 服务器映射出 IP 地址，然后再访问。</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/dns.png" class="">
+
+<p>Mac系统下更改host文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<h4 id="DNS-解析的两种方式"><a href="#DNS-解析的两种方式" class="headerlink" title="DNS 解析的两种方式"></a>DNS 解析的两种方式</h4><ul>
+<li>递归查询    （用户向本地 DNS 服务器发起请求）</li>
+</ul>
+<p>不断地自下而上遍历解析，“我去给你问一下”的方式</p>
+<p><code>主机向本地域名服务器的查询采用递归查询</code>,如果主机所询问的本地域名服务器不知道被查询域名的IP地址，那么本地域名服务器就以DNS客户的身份，向根域名服务器继续发出查询请求报文，而不是让主机自己进行下一步查询。因此，递归查询返回的结果或者是要查询的IP地址，或者是报错，表示无法查询到所需的IP地址。</p>
+<ul>
+<li>迭代查询  （本地 DNS 服务器向各级域名服务器发起请求）</li>
+</ul>
+<p>迭代查询 是 “我告诉你谁可能知道”的方式</p>
+<p><code>本地域名服务器向根域名服务器的查询通常采用迭代查询</code>,当根域名服务器收到本地域名服务器发出的迭代查询请求报文是，要么给出所要查询的IP地址，要么告诉域名服务器下一步要向哪个域名服务器进行查询。然后本地域名服务器继续进行下一步查询。</p>
+<img src="/2018/03/14/%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E5%92%8CARP,DNS/die.png" class="">
+
+<h4 id="DNS优化与应用"><a href="#DNS优化与应用" class="headerlink" title="DNS优化与应用"></a>DNS优化与应用</h4><ol>
+<li><p>DNS缓存<br>  DNS存在着多级缓存，从离浏览器的距离排序的话，有以下几种: 浏览器缓存，系统缓存，路由器缓存，IPS服务器缓存，根域名服务器缓存，顶级域名服务器缓存，主域名服务器缓存。</p>
+</li>
+<li><p>DNS负载均衡(DNS重定向) DNS负载均衡技术的实现原理是在DNS服务器中为同一个主机名配置多个IP地址，在应答DNS查询时， DNS服务器对每个查询将以DNS文件中主机记录的IP地址按顺序返回不同的解析结果，将客户端的访问 引导到不同的机器上去，使得不同的客户端访问不同的服务器，从而达到负载均衡的目的</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CDN(Content Delivery Network)就是利用DNS的重定向技术，DNS</span><br><span class="line">服务器会返回一个跟 用户最接近的点的IP地址给用户，CDN节点的服务器负责响应用户的</span><br><span class="line">请求，提供所需的内容。</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>dns-prefetch DNS Prefetch 是一种 DNS 预解析技术。当你浏览网页时，浏览器会在加载网页时对网页中的域名进行解析缓存，这样在你单击当前网页中的连接时就无需进行 DNS 的解析，减少用户等待时间，提高用户体验。</li>
+</ol>
+<h4 id="DNS-解析存在的问题"><a href="#DNS-解析存在的问题" class="headerlink" title="DNS 解析存在的问题"></a>DNS 解析存在的问题</h4><p>DNS 劫持</p>
+<p>被钓鱼网站劫持，有可能返回错误的 IP，浏览的不是目标浏览器</p>
+<p>DNS 解析转发</p>
+<p>小的运营商可能将 DNS 解析请求转发，解析的比较慢，效率低</p>
+<h4 id="DNS-劫持解决办法"><a href="#DNS-劫持解决办法" class="headerlink" title="DNS 劫持解决办法"></a>DNS 劫持解决办法</h4><ul>
+<li><a target="_blank" rel="noopener" href="http://www.ttlsa.com/web/httpdns-detailed-service/">httpDNS</a></li>
+</ul>
+<p>使用 http 协议向 DNS 服务器 80 端口进行请求</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HttpDNS是使用HTTP协议向DNS服务器的80端口进行请求，代替传统的DNS协议向DNS服务器的53端口进行请求,绕开了运营商的Local DNS，从而避免了使用运营商Local DNS造成的劫持和跨网问题。</span><br><span class="line"></span><br><span class="line">HTTPDNS使用HTTP协议进行域名解析，代替现有基于UDP的DNS协议，域名解析请求直接发送到HTTPDNS服务器，从而绕过运营商的Local DNS，能够避免Local DNS造成的域名劫持问题和调度不精准问题</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>长连接</li>
+</ul>
+<p>找一个中间的长连 server ,在内网专线进行 Http 请求。客户端和这个长连 server通信即可。</p>
+<h4 id="DNS为什么使用UDP协议作为传输层协议？"><a href="#DNS为什么使用UDP协议作为传输层协议？" class="headerlink" title="DNS为什么使用UDP协议作为传输层协议？"></a>DNS为什么使用UDP协议作为传输层协议？</h4><p>主要是为了避免使用TCP协议时照成的连接时延，因为为了得到一个域名的IP地址，往往会向多个域名服务器查询，如果使用TCP协议，那么每次请求都会存在连接时延，这样使DNS服务变得很慢，因为大多数的地址查询请求，都是浏览器请求页面时发出的，这样会照成网页的等待时间过长。</p>
+<h4 id="使用UDP作为DNS协议的问题？"><a href="#使用UDP作为DNS协议的问题？" class="headerlink" title="使用UDP作为DNS协议的问题？"></a>使用UDP作为DNS协议的问题？</h4><ol>
+<li>由于物理链路的最小MTU（最大传输单元，大于这个值会导致IP分片，IP包每次最大为1500）&#x3D;576，所以为了限制报文长度不超过576，UDP的报文长度被限制在512个字节以内，这样一旦DNS的查询或者应答报文，超过了512字节，那么基于UDP的DNS协议，就会被截断为512字节，那么有可能用户得到的DNS应答就是不完整的，为了解决这个问题，可以使用TCP协议去请求报文。</li>
+<li>安全问题，无法确定得到的应答一定是一个安全的应答。所以现在有了DNS over HTTPS来解决这个问题。</li>
+</ol>
+<h3 id="如何在测试过程中-MOCK-各种网络环境？"><a href="#如何在测试过程中-MOCK-各种网络环境？" class="headerlink" title="如何在测试过程中 MOCK 各种网络环境？"></a>如何在测试过程中 MOCK 各种网络环境？</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u010828718/article/details/46986795">模拟iOS网络环境</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013309870/article/details/77427112">计算机网络–ARP地址解析协议详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/duan2/p/9128765.html">同网段和不同网段设备通信原理详解</a></li>
+<li><a href="">图解TCP&#x2F;IP</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2018/06/01/Hexo%E5%AE%89%E8%A3%85%E9%81%87%E5%9D%91/" rel="next" title="Hexo安装遇坑笔记">
+      Hexo安装遇坑笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-x2F-IP%E4%BA%94%E5%B1%82%E6%A8%A1%E5%9E%8B-VS-OSI%E5%8F%82%E8%80%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">TCP&#x2F;IP五层模型 VS OSI参考模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">数据链路层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ARP"><span class="nav-number">2.1.</span> <span class="nav-text">ARP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IP%E5%9C%B0%E5%9D%80%E5%92%8CMAC%E5%9C%B0%E5%9D%80"><span class="nav-number">2.1.1.</span> <span class="nav-text">IP地址和MAC地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ARP%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.1.2.</span> <span class="nav-text">ARP地址解析协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%8C%E7%BD%91%E6%AE%B5%E5%92%8C%E4%B8%8D%E5%90%8C%E7%BD%91%E6%AE%B5%E8%AE%BE%E5%A4%87%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.3.</span> <span class="nav-text">同网段和不同网段设备通信原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-number">3.</span> <span class="nav-text">网络层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ICMP%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.1.</span> <span class="nav-text">ICMP协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ICMP%E8%B6%85%E6%97%B6%E6%B6%88%E6%81%AF"><span class="nav-number">3.1.1.</span> <span class="nav-text">ICMP超时消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ICMP%E5%9B%9E%E9%80%81%E6%B6%88%E6%81%AF"><span class="nav-number">3.1.2.</span> <span class="nav-text">ICMP回送消息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP%E5%8D%8F%E8%AE%AE"><span class="nav-number">3.2.</span> <span class="nav-text">IP协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IP%E5%88%86%E5%89%B2%E4%B8%8E%E9%87%8D%E7%BB%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">IP分割与重组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B7%AF%E5%BE%84MTU%E5%8F%91%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">路径MTU发现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">应用层协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS%E5%8D%8F%E8%AE%AE"><span class="nav-number">4.1.</span> <span class="nav-text">DNS协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-%E8%A7%A3%E6%9E%90%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="nav-number">4.1.1.</span> <span class="nav-text">DNS 解析的两种方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS%E4%BC%98%E5%8C%96%E4%B8%8E%E5%BA%94%E7%94%A8"><span class="nav-number">4.1.2.</span> <span class="nav-text">DNS优化与应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-%E8%A7%A3%E6%9E%90%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.3.</span> <span class="nav-text">DNS 解析存在的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS-%E5%8A%AB%E6%8C%81%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95"><span class="nav-number">4.1.4.</span> <span class="nav-text">DNS 劫持解决办法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DNS%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8UDP%E5%8D%8F%E8%AE%AE%E4%BD%9C%E4%B8%BA%E4%BC%A0%E8%BE%93%E5%B1%82%E5%8D%8F%E8%AE%AE%EF%BC%9F"><span class="nav-number">4.1.5.</span> <span class="nav-text">DNS为什么使用UDP协议作为传输层协议？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8UDP%E4%BD%9C%E4%B8%BADNS%E5%8D%8F%E8%AE%AE%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="nav-number">4.1.6.</span> <span class="nav-text">使用UDP作为DNS协议的问题？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%9C%A8%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B%E4%B8%AD-MOCK-%E5%90%84%E7%A7%8D%E7%BD%91%E7%BB%9C%E7%8E%AF%E5%A2%83%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">如何在测试过程中 MOCK 各种网络环境？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

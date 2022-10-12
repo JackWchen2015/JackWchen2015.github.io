@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言查了下资料，没找到关于组建化合理的定义，可以理解为模块化，对较大粒度的业务模块进行封装，组件间只有很少的依赖，只关注输入与输出。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS组件化">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="前言查了下资料，没找到关于组建化合理的定义，可以理解为模块化，对较大粒度的业务模块进行封装，组件间只有很少的依赖，只关注输入与输出。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component1.png">
+<meta property="og:image" content="https://github.com/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component2.png">
+<meta property="og:image" content="https://github.com/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component3.png">
+<meta property="article:published_time" content="2019-04-03T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-06T23:02:12.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component1.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS组件化 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS组件化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-04-03 08:00:00" itemprop="dateCreated datePublished" datetime="2019-04-03T08:00:00+08:00">2019-04-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-07 07:02:12" itemprop="dateModified" datetime="2022-03-07T07:02:12+08:00">2022-03-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>查了下资料，没找到关于组建化合理的定义，可以理解为模块化，对较大粒度的业务模块进行封装，组件间只有很少的依赖，只关注输入与输出。</p>
+<span id="more"></span>
+
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>通常一个APP会有多个模块，模块之间会有通信，互相调用，例如微信读书有 书籍详情 想法列表 阅读器 发现卡片 等等模块，这些模块会互相调用，例如 书籍详情要调起阅读器和想法列表，阅读器要调起想法列表和书籍详情，等等，一般我们是怎样调用呢，以阅读器为例，会这样写：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="string">&quot;WRBookDetailViewController.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;WRReviewViewController.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line">- (<span class="type">void</span>)gotoDetail &#123;</span><br><span class="line">    WRBookDetailViewController *detailVC = [[WRBookDetailViewController alloc] initWithBookId:<span class="keyword">self</span>.bookId];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController.pushViewController:detailVC animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">void</span>)gotoReview &#123;</span><br><span class="line">    WRReviewViewController *reviewVC = [[WRReviewViewController alloc] initWithBookId:<span class="keyword">self</span>.bookId reviewType:<span class="number">1</span>];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController.pushViewController:reviewVC animated:<span class="literal">YES</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>看起来挺好，这样做简单明了，没有多余的东西，项目初期推荐这样快速开发，但到了项目越来越庞大，这种方式会有什么问题呢？显而易见，每个模块都离不开其他模块，互相依赖粘在一起成为一坨：</p>
+<img src="/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component1.png" class="">
+
+<p>这样揉成一坨对测试&#x2F;编译&#x2F;开发效率&#x2F;后续扩展都有一些坏处，那怎么解开这一坨呢。很简单，按软件工程的思路，下意识就会加一个中间层：</p>
+<img src="/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component2.png" class="">
+
+<p>负责转发信息的中间层，暂且叫他 Mediator(Mediator Manager Router)。</p>
+<p>看起来顺眼多了，但这里有几个问题：</p>
+<p>Mediator 怎么去转发组件间调用？<br>一个模块只跟 Mediator 通信，怎么知道另一个模块提供了什么接口？<br>按上图的画法，模块和 Mediator 间互相依赖，怎样破除这个依赖？</p>
+<h3 id="解耦"><a href="#解耦" class="headerlink" title="解耦"></a>解耦</h3><p>对于前两个问题，最直接的反应就是在 Mediator 直接提供接口，调用对应模块的方法：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Mediator.m</span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;BookDetailComponent.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;ReviewComponent.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)BookDetailComponent_viewController:(<span class="built_in">NSString</span> *)bookId &#123;</span><br><span class="line">    <span class="keyword">return</span> [BookDetailComponent detailViewController:bookId];</span><br><span class="line">&#125;</span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)ReviewComponent_viewController:(<span class="built_in">NSString</span> *)bookId reviewType:(<span class="built_in">NSInteger</span>)type &#123;</span><br><span class="line">    <span class="keyword">return</span> [ReviewComponent reviewViewController:bookId type:type];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//BookDetailComponent  组件</span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;WRBookDetailViewController.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">BookDetailComponent</span></span></span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)detailViewController:(<span class="built_in">NSString</span> *)bookId &#123;</span><br><span class="line">    WRBookDetailViewController *detailVC = [[WRBookDetailViewController alloc] initWithBookId:bookId];</span><br><span class="line">    <span class="keyword">return</span> detailVC;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ReviewComponent  组件</span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;WRReviewViewController.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ReviewComponent</span></span></span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)reviewViewController:(<span class="built_in">NSString</span> *)bookId type:(<span class="built_in">NSInteger</span>)type &#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *reviewVC = [[WRReviewViewController alloc] initWithBookId:bookId type:type];</span><br><span class="line">    <span class="keyword">return</span> reviewVC;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在阅读模块里：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//WRReadingViewController.m</span></span><br><span class="line"><span class="meta">#import <span class="string">&quot;Mediator.h&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">WRReadingViewController</span></span></span><br><span class="line">- (<span class="type">void</span>)gotoDetail:(<span class="built_in">NSString</span> *)bookId &#123;</span><br><span class="line">    <span class="built_in">UIViewController</span> *detailVC = [Mediator BookDetailComponent_viewControllerForDetail:bookId];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController:detailVC];</span><br><span class="line">    <span class="built_in">UIViewController</span> *reviewVC = [Mediator ReviewComponent_viewController:bookId type:<span class="number">1</span>];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController:reviewVC];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>问题来了，<br>依赖关系并没有解除，Mediator 依赖了所有模块，而调用者又依赖 Mediator，最后还是一坨互相依赖，跟原来没有 Mediator 的方案相比除了更麻烦点其他没区别。</p>
+<p>怎样让Mediator解除对各个组件的依赖，同时又能调到各个组件暴露出来的方法？对于OC有一个法宝可以做到，就是runtime反射调用：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Mediator.m</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Mediator</span></span></span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)BookDetailComponent_viewController:(<span class="built_in">NSString</span> *)bookId &#123;</span><br><span class="line">    Class cls = <span class="built_in">NSClassFromString</span>(<span class="string">@&quot;BookDetailComponent&quot;</span>);</span><br><span class="line">    <span class="type">id</span> obj = [[cls alloc] init];</span><br><span class="line">    <span class="keyword">return</span> [obj performSelector:<span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;detailViewController:&quot;</span>) withObject:@&#123;<span class="string">@&quot;bookId&quot;</span>:bookId&#125;];</span><br><span class="line">&#125;</span><br><span class="line">+ (<span class="built_in">UIViewController</span> *)ReviewComponent_viewController:(<span class="built_in">NSString</span> *)bookId type:(<span class="built_in">NSInteger</span>)type &#123;</span><br><span class="line">    Class cls = <span class="built_in">NSClassFromString</span>(<span class="string">@&quot;ReviewComponent&quot;</span>);</span><br><span class="line">    <span class="type">id</span> obj = [[cls alloc] init];</span><br><span class="line">    <span class="keyword">return</span> [obj performSelector:<span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;reviewViewController:&quot;</span>) withObject:@&#123;<span class="string">@&quot;bookId&quot;</span>:bookId, <span class="string">@&quot;type&quot;</span>: @(type)&#125;];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+<p>这下 Mediator 没有再对各个组件有依赖了，你看已经不需要 #import 什么东西了，对应的架构图就变成：</p>
+<img src="/2019/04/03/iOS%E7%BB%84%E4%BB%B6%E5%8C%96/component3.png" class="">
+
+<p>只有调用其他组件接口时才需要依赖 Mediator，组件开发者不需要知道 Mediator 的存在。</p>
+<p>既然用runtime就可以解耦取消依赖，那还要Mediator做什么？组件间调用时直接用runtime接口调不就行了，这样就可以没有任何依赖就完成调用</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//WRReadingViewController.m</span></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">WRReadingViewController</span></span></span><br><span class="line">- (<span class="type">void</span>)gotoReview:(<span class="built_in">NSString</span> *)bookId &#123;</span><br><span class="line">    Class cls = <span class="built_in">NSClassFromString</span>(<span class="string">@&quot;BookDetailComponent&quot;</span>);</span><br><span class="line">    <span class="type">id</span> obj = [[cls alloc] init];</span><br><span class="line">    <span class="built_in">UIViewController</span> *reviewVC = [obj performSelector:<span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;reviewViewController:&quot;</span>) withObject:@&#123;<span class="string">@&quot;bookId&quot;</span>:bookId, <span class="string">@&quot;type&quot;</span>: @(<span class="number">1</span>)&#125;];</span><br><span class="line">    [<span class="keyword">self</span>.navigationController pushViewController:reviewVC];</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>这样就完全解耦了，但这样做的问题是：</p>
+<ol>
+<li>调用者写起来很恶心，代码提示都没有，每次调用写一坨。</li>
+<li>runtime方法的参数个数和类型限制，导致只能每个接口都统一传一个 NSDictionary。这个 NSDictionary里的key value是什么不明确，需要找个地方写文档说明和查看。</li>
+<li>编译器层面不依赖其他组件，实际上还是依赖了，直接在这里调用，没有引入调用的组件时就挂了</li>
+</ol>
+<p>把它移到Mediator后：</p>
+<ol>
+<li>调用者写起来不恶心，代码提示也有了。</li>
+<li>参数类型和个数无限制，由 Mediator 去转就行了，组件提供的还是一个 NSDictionary 参数的接口，但在Mediator 里可以提供任意类型和个数的参数，像上面的例子显式要求参数 NSString *bookId 和 NSInteger type。</li>
+<li>Mediator可以做统一处理，调用某个组件方法时如果某个组件不存在，可以做相应操作，让调用者与组件间没有耦合。</li>
+</ol>
+<p>到这里，基本上能解决我们的问题：各组件互不依赖，组件间调用只依赖中间件Mediator，Mediator不依赖其他组件。接下来就是优化这套写法，有两个优化点：</p>
+<ol>
+<li>Mediator 每一个方法里都要写 runtime 方法，格式是确定的，这是可以抽取出来的。</li>
+<li>每个组件对外方法都要在 Mediator 写一遍，组件一多 Mediator 类的长度是恐怖的。<br>优化后就成了 casa 的方案，target-action 对应第一点，target就是class，action就是selector，通过一些规则简化动态调用。Category 对应第二点，每个组件写一个 Mediator 的 Category，让 Mediator 不至于太长。</li>
+</ol>
+<p>总结起来就是，组件通过中间件通信，中间件通过 runtime 接口解耦，通过 target-action 简化写法，通过 category 感官上分离组件接口代码。这里可以看到这个实现的 <a href="https://github.com/casatwy/CTMediator">Demo</a>。</p>
+<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="http://wereadteam.github.io/2016/03/19/iOS-Component/">iOS 组件化方案探索</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/04/02/CocoaPods%20Setup%EF%BC%8C%E6%9B%B4%E6%96%B0repo%E7%BC%93%E6%85%A2/" rel="prev" title="CocoaPods Setup，更新repo缓慢">
+      <i class="fa fa-chevron-left"></i> CocoaPods Setup，更新repo缓慢
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/04/04/Pod%20openssl%E6%8A%A5%E9%94%99/" rel="next" title="Pod openssl报错">
+      Pod openssl报错 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E8%80%A6"><span class="nav-number">3.</span> <span class="nav-text">解耦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">文章参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

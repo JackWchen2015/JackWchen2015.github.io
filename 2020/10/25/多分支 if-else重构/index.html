@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="多分支 if-else 重构if-else不外乎两种场景：异常逻辑处理和不同状态处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多分支 if-else 重构">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="多分支 if-else 重构if-else不外乎两种场景：异常逻辑处理和不同状态处理">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-25T00:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-23T00:13:35.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>多分支 if-else 重构 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多分支 if-else 重构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-25 08:00:00" itemprop="dateCreated datePublished" datetime="2020-10-25T08:00:00+08:00">2020-10-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-23 08:13:35" itemprop="dateModified" datetime="2021-06-23T08:13:35+08:00">2021-06-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="多分支-if-else-重构"><a href="#多分支-if-else-重构" class="headerlink" title="多分支 if-else 重构"></a>多分支 if-else 重构</h2><p><code>if-else不外乎两种场景：异常逻辑处理和不同状态处理</code></p>
+<span id="more"></span>
+
+<p>重构if-else时，心中无时无刻把握一个原则：</p>
+<p> <strong>尽可能地维持正常流程代码在最外层。</strong></p>
+<blockquote>
+<p>意思是说，可以写if-else语句时一定要尽量保持主干代码是正常流程，避免嵌套过深。</p>
+</blockquote>
+<blockquote>
+<p>实现的手段有：减少嵌套、移除临时变量、条件取反判断、合并条件表达式等</p>
+</blockquote>
+<h3 id="异常逻辑处理型重构"><a href="#异常逻辑处理型重构" class="headerlink" title="异常逻辑处理型重构"></a>异常逻辑处理型重构</h3><h4 id="合并表达式"><a href="#合并表达式" class="headerlink" title="合并表达式"></a>合并表达式</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="type">double</span> <span class="title function_">disablityAmount</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(_seniority &lt; <span class="number">2</span>) </span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>(_monthsDisabled &gt; <span class="number">12</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>(_isPartTime)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//do somethig</span></span><br></pre></td></tr></table></figure>
+
+<p>如果有一系列条件测试都得到相同结果，将这些结果测试合并为一个条件表达式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="title function_">disablityAmount</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(_seniority &lt; <span class="number">2</span> || _monthsDisabled &gt; <span class="number">12</span> || _isPartTime) </span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//do somethig</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">public</span> <span class="type">double</span> <span class="title function_">getAdjustedCapital</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">double</span> <span class="variable">result</span> <span class="operator">=</span> <span class="number">0.0</span>;</span><br><span class="line">    <span class="keyword">if</span>(_capital &gt; <span class="number">0.0</span> )&#123;</span><br><span class="line">        <span class="keyword">if</span>(_intRate &gt; <span class="number">0</span> &amp;&amp; _duration &gt;<span class="number">0</span>)&#123;</span><br><span class="line">            resutl = (_income / _duration) *ADJ_FACTOR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">double</span> <span class="title function_">getAdjustedCapital</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(_capital &lt;= <span class="number">0.0</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(_intRate &gt; <span class="number">0</span> &amp;&amp; _duration &gt;<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> (_income / _duration) *ADJ_FACTOR;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.0</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>这样重构后，还不够，因为主要的语句<code>(_income / _duration) *ADJ_FACTOR;</code>在if内部，并非在最外层，根据优化原则（尽可能地维持正常流程代码在最外层），可以再继续重构：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">double</span> <span class="title function_">getAdjustedCapital</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(_capital &lt;= <span class="number">0.0</span> )&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(_intRate &lt;= <span class="number">0</span> || _duration &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> (_income / _duration) *ADJ_FACTOR;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<p>这才是好的代码风格，逻辑清晰，一目了然，没有if-else嵌套难以理解的流程。</p>
+<p> 这里用到的重构方法是：<code>将条件反转使异常情况先退出，让正常流程维持在主干流程</code>。</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 查找年龄大于18岁且为男性的学生列表 */</span></span><br><span class="line">  <span class="keyword">public</span> ArrayList&lt;Student&gt; <span class="title function_">getStudents</span><span class="params">(<span class="type">int</span> uid)</span>&#123;</span><br><span class="line">      ArrayList&lt;Student&gt; result = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Student&gt;();</span><br><span class="line">      <span class="type">Student</span> <span class="variable">stu</span> <span class="operator">=</span> getStudentByUid(uid);</span><br><span class="line">      <span class="keyword">if</span> (stu != <span class="literal">null</span>) &#123;</span><br><span class="line">          <span class="type">Teacher</span> <span class="variable">teacher</span> <span class="operator">=</span> stu.getTeacher();</span><br><span class="line">          <span class="keyword">if</span>(teacher != <span class="literal">null</span>)&#123;</span><br><span class="line">              ArrayList&lt;Student&gt; students = teacher.getStudents();</span><br><span class="line">              <span class="keyword">if</span>(students != <span class="literal">null</span>)&#123;</span><br><span class="line">                  <span class="keyword">for</span>(Student student : students)&#123;</span><br><span class="line">                      <span class="keyword">if</span>(student.getAge() &gt; = <span class="number">18</span> &amp;&amp; student.getGender() == MALE)&#123;</span><br><span class="line">                          result.add(student);</span><br><span class="line">                      &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                  logger.error(<span class="string">&quot;获取学生列表失败&quot;</span>);</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">              logger.error(<span class="string">&quot;获取老师信息失败&quot;</span>);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          logger.error(<span class="string">&quot;获取学生信息失败&quot;</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>典型的”箭头型”代码，最大的问题是嵌套过深，解决方法是异常条件先退出，保持主干流程是核心流程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 查找年龄大于18岁且为男性的学生列表 */</span></span><br><span class="line">  <span class="keyword">public</span> ArrayList&lt;Student&gt; <span class="title function_">getStudents</span><span class="params">(<span class="type">int</span> uid)</span>&#123;</span><br><span class="line">      ArrayList&lt;Student&gt; result = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Student&gt;();</span><br><span class="line">      <span class="type">Student</span> <span class="variable">stu</span> <span class="operator">=</span> getStudentByUid(uid);</span><br><span class="line">      <span class="keyword">if</span> (stu == <span class="literal">null</span>) &#123;</span><br><span class="line">          logger.error(<span class="string">&quot;获取学生信息失败&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span> result;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      <span class="type">Teacher</span> <span class="variable">teacher</span> <span class="operator">=</span> stu.getTeacher();</span><br><span class="line">      <span class="keyword">if</span>(teacher == <span class="literal">null</span>)&#123;</span><br><span class="line">          logger.error(<span class="string">&quot;获取老师信息失败&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span> result;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      ArrayList&lt;Student&gt; students = teacher.getStudents();</span><br><span class="line">      <span class="keyword">if</span>(students == <span class="literal">null</span>)&#123;</span><br><span class="line">          logger.error(<span class="string">&quot;获取学生列表失败&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span> result;</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      <span class="keyword">for</span>(Student student : students)&#123;</span><br><span class="line">          <span class="keyword">if</span>(student.getAge() &gt; <span class="number">18</span> &amp;&amp; student.getGender() == MALE)&#123;</span><br><span class="line">              result.add(student);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="状态处理型重构"><a href="#状态处理型重构" class="headerlink" title="状态处理型重构"></a>状态处理型重构</h3><h4 id="公共函数封装"><a href="#公共函数封装" class="headerlink" title="公共函数封装"></a>公共函数封装</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="title function_">getPayAmount</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> getObj();</span><br><span class="line">    <span class="type">double</span> <span class="variable">money</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (obj.getType == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="type">ObjectA</span> <span class="variable">objA</span> <span class="operator">=</span> obj.getObjectA();</span><br><span class="line">        money = objA.getMoney()*obj.getNormalMoneryA();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (obj.getType == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="type">ObjectB</span> <span class="variable">objB</span> <span class="operator">=</span> obj.getObjectB();</span><br><span class="line">        money = objB.getMoney()*obj.getNormalMoneryB()+<span class="number">1000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>重构后：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="title function_">getPayAmount</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> getObj();</span><br><span class="line">    <span class="keyword">if</span> (obj.getType == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> getType1Money(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (obj.getType == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> getType2Money(obj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">double</span> <span class="title function_">getType1Money</span><span class="params">(Object obj)</span>&#123;</span><br><span class="line">    <span class="type">ObjectA</span> <span class="variable">objA</span> <span class="operator">=</span> obj.getObjectA();</span><br><span class="line">    <span class="keyword">return</span> objA.getMoney()*obj.getNormalMoneryA();</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">double</span> <span class="title function_">getType2Money</span><span class="params">(Object obj)</span>&#123;</span><br><span class="line">    <span class="type">ObjectB</span> <span class="variable">objB</span> <span class="operator">=</span> obj.getObjectB();</span><br><span class="line">    <span class="keyword">return</span> objB.getMoney()*obj.getNormalMoneryB()+<span class="number">1000</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>重构方法是：<code>把if-else内的代码都封装成一个公共函数。函数的好处是屏蔽内部实现，缩短if-else分支的代码。代码结构和逻辑上清晰，能一下看出来每一个条件内做的功能</code>。</p>
+<h4 id="用多态取代条件表达式"><a href="#用多态取代条件表达式" class="headerlink" title="用多态取代条件表达式"></a>用多态取代条件表达式</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> <span class="title function_">getSpeed</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">switch</span>(_type)&#123;</span><br><span class="line">        <span class="keyword">case</span> EUROPEAN:</span><br><span class="line">            <span class="keyword">return</span> getBaseSpeed();</span><br><span class="line">        <span class="keyword">case</span> AFRICAN:</span><br><span class="line">            <span class="keyword">return</span> getBaseSpeed()-getLoadFactor()*_numberOfCoconuts;</span><br><span class="line">        <span class="keyword">case</span> NORWEGIAN_BLUE:</span><br><span class="line">            <span class="keyword">return</span> (_isNailed)?<span class="number">0</span>:getBaseSpeed(_voltage);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 重构后：</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">class</span> <span class="title class_">Bird</span>&#123;</span><br><span class="line">    <span class="keyword">abstract</span> <span class="type">double</span> <span class="title function_">getSpeed</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">European</span> <span class="keyword">extends</span> <span class="title class_">Bird</span>&#123;</span><br><span class="line">    <span class="type">double</span> <span class="title function_">getSpeed</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getBaseSpeed();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">African</span> <span class="keyword">extends</span> <span class="title class_">Bird</span>&#123;</span><br><span class="line">    <span class="type">double</span> <span class="title function_">getSpeed</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> getBaseSpeed()-getLoadFactor()*_numberOfCoconuts;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NorwegianBlue</span> <span class="keyword">extends</span> <span class="title class_">Bird</span>&#123;</span><br><span class="line">    <span class="type">double</span> <span class="title function_">getSpeed</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (_isNailed)?<span class="number">0</span>:getBaseSpeed(_voltage);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<h4 id="策略模式-工厂方法消除-if-else"><a href="#策略模式-工厂方法消除-if-else" class="headerlink" title="策略模式+工厂方法消除 if else"></a>策略模式+工厂方法消除 if else</h4><p>假设需求为，根据不同勋章类型，处理相对应的勋章服务，优化前有以下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">medalType</span> <span class="operator">=</span> <span class="string">&quot;guest&quot;</span>;</span><br><span class="line">   <span class="keyword">if</span> (<span class="string">&quot;guest&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">       System.out.println(<span class="string">&quot;嘉宾勋章&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;vip&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">       System.out.println(<span class="string">&quot;会员勋章&quot;</span>);</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;guard&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">       System.out.println(<span class="string">&quot;展示守护勋章&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line"> ...</span><br></pre></td></tr></table></figure>
+
+<p>首先，我们把每个条件逻辑代码块，抽象成一个公共的接口，可以得出以下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//勋章接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">IMedalService</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">showMedal</span><span class="params">()</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们根据每个逻辑条件，定义相对应的策略实现类，可得以下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//守护勋章策略实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GuardMedalServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">IMedalService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">showMedal</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;展示守护勋章&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//嘉宾勋章策略实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GuestMedalServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">IMedalService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">showMedal</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;嘉宾勋章&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//VIP勋章策略实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">VipMedalServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">IMedalService</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">showMedal</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;会员勋章&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们再定义策略工厂类，用来管理这些勋章实现策略类，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//勋章服务工产类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MedalServicesFactory</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Map&lt;String, IMedalService&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        map.put(<span class="string">&quot;guard&quot;</span>, <span class="keyword">new</span> <span class="title class_">GuardMedalServiceImpl</span>());</span><br><span class="line">        map.put(<span class="string">&quot;vip&quot;</span>, <span class="keyword">new</span> <span class="title class_">VipMedalServiceImpl</span>());</span><br><span class="line">        map.put(<span class="string">&quot;guest&quot;</span>, <span class="keyword">new</span> <span class="title class_">GuestMedalServiceImpl</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> IMedalService <span class="title function_">getMedalService</span><span class="params">(String medalType)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> map.get(medalType);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用了策略+工厂模式之后，代码变得简洁多了，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">medalType</span> <span class="operator">=</span> <span class="string">&quot;guest&quot;</span>;</span><br><span class="line">        <span class="type">IMedalService</span> <span class="variable">medalService</span> <span class="operator">=</span> MedalServicesFactory.getMedalService(medalType);</span><br><span class="line">        medalService.showMedal();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="iOS-使用策略模式来去除繁琐的if-else"><a href="#iOS-使用策略模式来去除繁琐的if-else" class="headerlink" title="[iOS]使用策略模式来去除繁琐的if-else"></a>[iOS]使用策略模式来去除繁琐的if-else</h4><p>通过传入的三种类型来获取对应的id,例如id 001-&gt;类型1,id 002-&gt;类型2,id 003-&gt;类型3</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (type == 类型<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">001</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (type == 类型<span class="number">2</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">002</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (type == 类型<span class="number">3</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">003</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>用策略模式如何实现呢?</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSDictionary</span> *dict =@&#123;</span><br><span class="line">                          <span class="string">@&quot;类型1&quot;</span> : @<span class="number">001</span>,</span><br><span class="line">                          <span class="string">@&quot;类型2&quot;</span> : @<span class="number">002</span>,</span><br><span class="line">                          <span class="string">@&quot;类型3&quot;</span> : @<span class="number">003</span></span><br><span class="line">                          &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSInteger</span> <span class="type">id</span> = dict[type];<span class="comment">//type 为类型1,类型2,类型3</span></span><br></pre></td></tr></table></figure>
+<p>这个dict就是一个策略的集合,我们通过type来取出对应的结果.</p>
+<p>题目:小明在每个星期每天都会做不同的事</p>
+<ol>
+<li> 周一打篮球</li>
+<li>周二逛街</li>
+<li>周三洗衣服</li>
+<li>周四打游戏</li>
+<li>周五唱歌</li>
+<li>周六看电影</li>
+<li>周末爬山</li>
+</ol>
+<p>用分支来写,应该是这样的:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(day == 周一)&#123;</span><br><span class="line">      result = [xiaoming playBasketball];</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (day == 周二)&#123;</span><br><span class="line">      result =  [xiaoming shopping];</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (day == 周三)&#123;</span><br><span class="line">      result =  [xiaoming washClothes];</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(...) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;<span class="comment">//很烦,写不下去了</span></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;xiaoming 今天%@&quot;</span>,result);</span><br></pre></td></tr></table></figure>
+<p>策略优化后</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1.将复杂的业务逻辑包装成invocation,这里传入的每天做的事,例如playBasketball</span></span><br><span class="line">- (<span class="built_in">NSInvocation</span> *)invocationWithMethod:(SEL)selector&#123;</span><br><span class="line">    <span class="built_in">NSMethodSignature</span>*signature = [CurrentClass instanceMethodSignatureForSelector:<span class="keyword">@selector</span>(selector)];</span><br><span class="line">    <span class="built_in">NSInvocation</span>*invocation = [<span class="built_in">NSInvocation</span> invocationWithMethodSignature:signature];</span><br><span class="line">    invocation.target = <span class="keyword">self</span>;</span><br><span class="line">    invocation.selector = <span class="keyword">@selector</span>(selector);</span><br><span class="line">    <span class="keyword">return</span> invocation;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 2.将每天做的事进行整合</span></span><br><span class="line">- (<span class="built_in">NSDictionary</span> *)Strategies&#123;</span><br><span class="line">   <span class="built_in">NSDictionary</span> *Strategies = @&#123;</span><br><span class="line">                           <span class="string">@&quot;day1&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(playBasketball)],</span><br><span class="line">                           <span class="string">@&quot;day2&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(shopping)],</span><br><span class="line">                           <span class="string">@&quot;day3&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(washClothes)],</span><br><span class="line">                           <span class="string">@&quot;day4&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(playGames)],</span><br><span class="line">                           <span class="string">@&quot;day5&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(sing)],</span><br><span class="line">                           <span class="string">@&quot;day6&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(watchMovie)],</span><br><span class="line">                           <span class="string">@&quot;day7&quot;</span> : [<span class="keyword">self</span> invocationWithMethod:<span class="keyword">@selector</span>(climbing)],</span><br><span class="line">                           &#125;;</span><br><span class="line">   <span class="keyword">return</span> Strategies;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 3.找出小明哪天做的事</span></span><br><span class="line">    <span class="built_in">NSInvocation</span> *doWhat = <span class="keyword">self</span>.Strategies[whichDay];</span><br><span class="line">    [doWhat invoke];</span><br></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35440678/article/details/77939999">6个实例详解如何把if-else代码重构成高质量代码</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://juejin.im/post/6844904083665453063">if-else代码优化的八种方案</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/0690516e5f17">[iOS]使用策略模式来去除繁琐的if-else</a></p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/03/iOS%E5%8F%AF%E5%A4%8D%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/" rel="prev" title="iOS可复用项目框架搭建">
+      <i class="fa fa-chevron-left"></i> iOS可复用项目框架搭建
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/" rel="next" title="MLeadksFinder使用">
+      MLeadksFinder使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%88%86%E6%94%AF-if-else-%E9%87%8D%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">多分支 if-else 重构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E9%80%BB%E8%BE%91%E5%A4%84%E7%90%86%E5%9E%8B%E9%87%8D%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">异常逻辑处理型重构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%88%E5%B9%B6%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.1.1.</span> <span class="nav-text">合并表达式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%A4%84%E7%90%86%E5%9E%8B%E9%87%8D%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">状态处理型重构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AC%E5%85%B1%E5%87%BD%E6%95%B0%E5%B0%81%E8%A3%85"><span class="nav-number">1.2.1.</span> <span class="nav-text">公共函数封装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E5%A4%9A%E6%80%81%E5%8F%96%E4%BB%A3%E6%9D%A1%E4%BB%B6%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">用多态取代条件表达式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F-%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%B6%88%E9%99%A4-if-else"><span class="nav-number">1.2.3.</span> <span class="nav-text">策略模式+工厂方法消除 if else</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#iOS-%E4%BD%BF%E7%94%A8%E7%AD%96%E7%95%A5%E6%A8%A1%E5%BC%8F%E6%9D%A5%E5%8E%BB%E9%99%A4%E7%B9%81%E7%90%90%E7%9A%84if-else"><span class="nav-number">1.2.4.</span> <span class="nav-text">[iOS]使用策略模式来去除繁琐的if-else</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">1.3.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

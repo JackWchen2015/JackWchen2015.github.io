@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS防逆向代码混淆">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/safe00.png">
+<meta property="og:image" content="https://github.com/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build00.png">
+<meta property="og:image" content="https://github.com/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build01.png">
+<meta property="og:image" content="https://github.com/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build02.png">
+<meta property="article:published_time" content="2020-05-14T00:00:00.000Z">
+<meta property="article:modified_time" content="2020-06-13T13:22:15.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/safe00.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS防逆向代码混淆 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS防逆向代码混淆
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-14 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-14T08:00:00+08:00">2020-05-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-06-13 21:22:15" itemprop="dateModified" datetime="2020-06-13T21:22:15+08:00">2020-06-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E9%80%86%E5%90%91%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">逆向安全</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。</p>
+<span id="more"></span>
+
+<h2 id="砸壳"><a href="#砸壳" class="headerlink" title="砸壳"></a>砸壳</h2><p>砸壳就是对安装包进行逆向操作，对已加密的软件进行解密，从而获得真实的软件代码。App Store下载的包全部都是经过苹果加密过的包（苹果不允许开发者自己加密ipa包），加密后的ipa包，无法对其进行反编译，也无法class-dump，需要对其进行解密才能反编译。</p>
+<h3 id="砸壳方式"><a href="#砸壳方式" class="headerlink" title="砸壳方式"></a>砸壳方式</h3><ol>
+<li>静态砸壳<br>使用已知的解密方法对软件进行解密叫静态砸壳，难度大，需要知道其软件的加密算法。</li>
+<li>动态砸壳<br>从进程的内存空间中获取软件镜像（image）进行转存处理叫动态砸壳。<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/safe00.png" class=""></li>
+</ol>
+<h4 id="动态砸壳工具"><a href="#动态砸壳工具" class="headerlink" title="动态砸壳工具"></a>动态砸壳工具</h4><ol>
+<li><a href="https://github.com/KJCracks/Clutch">clutch</a></li>
+</ol>
+<p>2.<a href="https://github.com/stefanesser/dumpdecrypted">dumpdecrypted</a><br>通过建立一个名为dumpdecrypted.dylib的动态库，插入目标应用实现脱壳</p>
+<h3 id="otool（object-file-displaying-tool）工具"><a href="#otool（object-file-displaying-tool）工具" class="headerlink" title="otool（object file displaying tool）工具"></a>otool（object file displaying tool）工具</h3><p>Mac OS X下二进制可执行文件的动态连结库是dylib文件（也就是bsd风格的动态库），等价于windows的dll和linux的so。Mac基于bsd，所以也使用的dylib</p>
+<p>它是Xcode自带的常用工具</p>
+<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><ol>
+<li>依赖库查询 otool -L</li>
+</ol>
+<ul>
+<li>eg:查看微信的是否加密等信息 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">otool -l WeChart | grep -B 2 crypt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"> cryptoff 16384</span><br><span class="line">    cryptsize 6651904</span><br><span class="line">      cryptid 0</span><br><span class="line">     cryptoff 16384</span><br><span class="line">    cryptsize 6553600</span><br><span class="line">      cryptid 0123456</span><br><span class="line">//其中cryptid代表是否加壳，1代表加壳，0代表已脱壳。我们发现打印了两遍，其实代表着该可执行文件支持两种架构armv7和arm64.</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol start="2">
+<li><p>查看 Mach-O头结构</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ otool -h /Applications/Sublime\ Text.app/Contents/MacOS/Sublime\ Text </span><br><span class="line"></span><br><span class="line">Mach header</span><br><span class="line">      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags</span><br><span class="line"> 0xfeedfacf 16777223          3  0x80           2    27       4336 0x00218085</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看汇编码 otool -tV</p>
+</li>
+</ol>
+<h2 id="class-dump"><a href="#class-dump" class="headerlink" title="class-dump"></a><a target="_blank" rel="noopener" href="http://stevenygard.com/projects/class-dump/">class-dump</a></h2><p>用来分析ipa文件的class信息的工具，它利用Objective-C语言的runtime的特性，将存储在mach-O文件中的@interface和@protocol信息提取出来，并生成对应的.h文件</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
+<li>class-dump -H [.app文件的路径] -o [输出文件夹路径]<br>就可以得到所有的.h文件</li>
+</ol>
+<h3 id="导出文件特点"><a href="#导出文件特点" class="headerlink" title="导出文件特点"></a>导出文件特点</h3><p>使用 class-dump 命令导出头文件有以下特点：</p>
+<ol>
+<li>不管 .h 还是 .m 文件中的属性和方法都会被导出；</li>
+<li>某个类的类别中的方法也会被导出，导出到源文件中，比如 ViewController (Navigation) 中的方法被导出到 ViewController 中；</li>
+<li>实现的协议也会被导出，比如 ViewControllerDelegate 的方法被导出到 ViewController 中，如果 ViewController 不实现 ViewControllerDelegate 协议讲不会被导出；</li>
+<li>协议中定义的方法不会被导出，只会导出到实现协议的类中；</li>
+</ol>
+<h2 id="代码混淆"><a href="#代码混淆" class="headerlink" title="代码混淆"></a>代码混淆</h2><p>我们希望在开发时一直保留清晰可读的程序代码，方便自己。<br>同时，希望编译出来的二进制包含乱七八糟的混淆后的程序代码，恶心他人</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>方法名混淆其实就是字符串替换，有2个方法可以，一个是#define，一个是利用tops。<br>利用#define的方法有一个好处，就是可以把混淆结果合并在一个.h中，在工程Prefix.pch的最前面#import这个.h。不导入也可以编译、导入则实现混淆。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">单段的selector，如func: ，可以通过#define func 来实现字符串替换。</span><br><span class="line">多段的selector，如a:b:c: ，可以通过分别#define a 、b、c 来实现字符串替换。</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="混淆脚本"><a href="#混淆脚本" class="headerlink" title="混淆脚本"></a>混淆脚本</h3><p>主要思路是把敏感方法名集中写在一个名叫func.list的文件中，逐一#define成随机字符，追加写入.h</p>
+<ul>
+<li>confuse.sh</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#! /usr/bin/env bash</span></span><br><span class="line">TABLENAME=symbols</span><br><span class="line">SYMBOL_DB_FILE=<span class="string">&quot;symbols&quot;</span></span><br><span class="line">STRING_SYMBOL_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/func.list&quot;</span></span><br><span class="line">HEAD_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/codeObfuscation.h&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> LC_CTYPE=C</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">createTable</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;create table <span class="variable">$TABLENAME</span>(src text, des text);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">insertValue</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;insert into <span class="variable">$TABLENAME</span> values(&#x27;<span class="variable">$1</span>&#x27; ,&#x27;<span class="variable">$2</span>&#x27;);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">query</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;select * from <span class="variable">$TABLENAME</span> where src=&#x27;<span class="variable">$1</span>&#x27;;&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">ramdomString</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    openssl rand -<span class="built_in">base64</span> 64 | <span class="built_in">tr</span> -<span class="built_in">cd</span> <span class="string">&#x27;a-zA-Z&#x27;</span> |<span class="built_in">head</span> -c 16</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$HEAD_FILE</span></span><br><span class="line">createTable</span><br><span class="line"></span><br><span class="line"><span class="built_in">touch</span> <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#ifndef Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#define Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;//confuse string at `date`&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">cat</span> <span class="string">&quot;<span class="variable">$STRING_SYMBOL_FILE</span>&quot;</span> | <span class="keyword">while</span> <span class="built_in">read</span> -ra line; <span class="keyword">do</span></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">&quot;<span class="variable">$line</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">ramdom=`ramdomString`</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line">insertValue <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#define <span class="variable">$line</span> <span class="variable">$ramdom</span>&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#endif&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line">sqlite3 <span class="variable">$SYMBOL_DB_FILE</span> .dump</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>func.list</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">loginPass</span><br><span class="line">newPwd</span><br><span class="line">smsCode</span><br><span class="line">secret</span><br><span class="line">tradePwd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>codeObfuscation.h</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#ifndef Demo_codeObfuscation_h</span><br><span class="line">#define Demo_codeObfuscation_h</span><br><span class="line">//confuse string at Wed Jan 16 17:30:22 CST 2019</span><br><span class="line">#define loginPass ITqIAxhareFWDEst</span><br><span class="line">#define newPwd SRgVmxvZsIWUEAWQ</span><br><span class="line">#define smsCode MyiekqqKlJxLiNAx</span><br><span class="line">#define secret hMcpMgCDFGgXwLPL</span><br><span class="line">#define tradePwd ARIKWIPQnJOBNgfS</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><ol>
+<li>将混淆脚本confuse.sh放到工程目录下 </li>
+<li>修改Prefix.pch<br>打开Xcode，修改XXX-Prefix.ch ，添加混淆头文件:<br><code># import “codeObfuscation.h”</code></li>
+<li>配置build pharse 加载confuse.sh脚本</li>
+<li>创建函数名列表func.list，写入待混淆的函数名，如:</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="type">void</span>)sample;</span><br><span class="line">-(<span class="type">void</span>)seg1:(<span class="built_in">NSString</span> *)string seg2:(<span class="built_in">NSUInteger</span>)num;</span><br><span class="line"><span class="comment">//就这样写：</span></span><br><span class="line">sample</span><br><span class="line">seg1</span><br><span class="line">seg2</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>编译查看结果<br>直接build，混淆脚本会在编译前运行，进行字符随机替换，并且每次build的随机字符不同，<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build00.png" class=""></li>
+</ol>
+<h4 id="class-dump测试"><a href="#class-dump测试" class="headerlink" title="class-dump测试"></a>class-dump测试</h4><img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build01.png" class="">
+
+<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build02.png" class="">
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1e3fe0a8c048">class-dump的安装和使用</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/yiyaaixuexi/article/details/29201699">Objective-C代码混淆</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1991854c65af">iOS逆向之《越狱砸壳&#x2F;ipa脱壳》</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/13/iOS%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B3%A8%E5%85%A5/" rel="prev" title="iOS逆向代码注入">
+      <i class="fa fa-chevron-left"></i> iOS逆向代码注入
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="next" title="iOS内存管理">
+      iOS内存管理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B8%E5%A3%B3"><span class="nav-number">1.</span> <span class="nav-text">砸壳</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A0%B8%E5%A3%B3%E6%96%B9%E5%BC%8F"><span class="nav-number">1.1.</span> <span class="nav-text">砸壳方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E7%A0%B8%E5%A3%B3%E5%B7%A5%E5%85%B7"><span class="nav-number">1.1.1.</span> <span class="nav-text">动态砸壳工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#otool%EF%BC%88object-file-displaying-tool%EF%BC%89%E5%B7%A5%E5%85%B7"><span class="nav-number">1.2.</span> <span class="nav-text">otool（object file displaying tool）工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#class-dump"><span class="nav-number">2.</span> <span class="nav-text">class-dump</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E6%96%87%E4%BB%B6%E7%89%B9%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">导出文件特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86"><span class="nav-number">3.</span> <span class="nav-text">代码混淆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B7%E6%B7%86%E8%84%9A%E6%9C%AC"><span class="nav-number">3.2.</span> <span class="nav-text">混淆脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-1"><span class="nav-number">3.3.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#class-dump%E6%B5%8B%E8%AF%95"><span class="nav-number">3.3.1.</span> <span class="nav-text">class-dump测试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">94</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
