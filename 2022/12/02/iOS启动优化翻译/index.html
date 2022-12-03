@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="通过最小化启动时间，为应用创造更快速的体验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS启动优化翻译">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="通过最小化启动时间，为应用创造更快速的体验。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-1@2x.png">
+<meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-2.png">
+<meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-3.png">
+<meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-4.png">
+<meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-5@2x.png">
+<meta property="article:published_time" content="2022-12-02T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-03T01:48:41.939Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-1@2x.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS启动优化翻译 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS启动优化翻译
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-02 08:00:00" itemprop="dateCreated datePublished" datetime="2022-12-02T08:00:00+08:00">2022-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-12-03 09:48:41" itemprop="dateModified" datetime="2022-12-03T09:48:41+08:00">2022-12-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>通过最小化启动时间，为应用创造更快速的体验。</p>
+<span id="more"></span>
+
+
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p> 用户使用应用程序的第一次体验是它启动时的等待。操作系统表明，应用程序在iOS上启动时出现闪屏，在<code>macOS</code>上的<code>Dock</code>中弹出图标。应用程序需要准备好帮助用户尽快完成任务。如果一款应用启动时间过长，可能会让用户感到沮丧。在iOS平台上，<strong>如果启动时间过长，看门狗就会终止该应用</strong>。通常情况下，如果应用是用户日常工作流程的一部分，那么用户一天会启动应用多次，而较长的启动时间会导致执行任务的延迟。 </p>
+<p>当用户点击主屏幕上应用程序的图标时，iOS会在将控制权移交给应用程序进程之前为应用程序的启动做好准备。然后，应用程序运行代码，准备将其UI绘制到屏幕上。即使在应用程序的UI可见之后，应用程序可能仍然在准备内容或用最终控件替换插页界面(例如，加载旋转器)。这些步骤都会影响应用的总启动时间，你可以采取措施减少它们的持续时间。</p>
+<h2 id="了解应用激活"><a href="#了解应用激活" class="headerlink" title="了解应用激活"></a>了解应用激活</h2><p>当用户点击你的图标或回到你的应用程序时，就会发生激活。 </p>
+<p>在iOS上，激活既可以是启动，也可以是恢复。启动是当进程需要启动时，而恢复是当你的应用程序已经有一个活跃的进程，即使暂停。恢复通常要快得多，优化启动和恢复的工作是不同的。 </p>
+<p>在macOS上，系统不会终止您的进程作为正常使用的一部分。激活可能需要系统从压缩器（compressor）引入内存、交换和重新渲染。</p>
+<h2 id="理解冷启动和热启动"><a href="#理解冷启动和热启动" class="headerlink" title="理解冷启动和热启动"></a>理解冷启动和热启动</h2><p>应用程序的激活取决于设备上之前的操作。 </p>
+<p>例如，在iOS平台上，如果你滑回主屏幕并立即重新进入应用程序，这就是最快的激活速度。它也可能是一份恢复。当系统确定需要启动时，通常称为“热启动”。 </p>
+<p>相反地，如果用户刚刚玩了一款内存密集型的游戏，然后他们再次进入你的应用，那么它可能会比你的平均激活速度慢得多。在iOS上，你的应用程序通常会被从内存中移除，以允许前台应用程序拥有更多的内存。<strong>应用程序启动所依赖的框架和守护进程也可能需要重新启动并从磁盘进行分页加载</strong>。这种场景，或者在系统启动后立即启动app，通常称为“冷启动”。 </p>
+<p>把冷启动和热启动看作一个光谱。在实际使用中，用户将根据设备的状态体验到不同的性能。这就是为什么在各种条件下进行测试对于预测真实世界的性能至关重要。</p>
+<h2 id="收集关于应用发布时间的参数"><a href="#收集关于应用发布时间的参数" class="headerlink" title="收集关于应用发布时间的参数"></a>收集关于应用发布时间的参数</h2><p>启动过程中的各种变化意味着理解应用在该领域的运行方式可能具有挑战性。 </p>
+<p>对于iOS应用，使用<code>Xcode Organizer</code>中的<code>Launch Time</code>面板来查看从用户点击图标到静态启动屏幕后绘制第一个屏幕之间的毫秒数。使用过滤器检查不同设备上的启动时间以及典型(第50个百分位数)和最长(第90个百分位数)时间。通过单击所需版本的图表中的栏，比较当前版本的发布时间与之前版本的发布时间。</p>
+<img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-1@2x.png" class="&#x3D;">
+
+<p><code>MetricKit</code>除了报告启动时间外，还报告恢复应用程序的时间。<code>MXAppLaunchMetric</code>包含前一天启动和恢复时间的直方图。</p>
+<h2 id="分析应用的启动时间"><a href="#分析应用的启动时间" class="headerlink" title="分析应用的启动时间"></a>分析应用的启动时间</h2><p>一旦你知道应用启动需要多长时间，你就需要知道为什么需要这么长时间。分析你的应用程序的代码是一种收集你需要的关于你的应用程序花费时间的数据的方法。在分析过程中，<code>Instruments</code>收集有关应用程序调用的方法以及执行这些方法花费的时间的信息。使用这些数据来识别代码中潜在的瓶颈或问题。 </p>
+<p>在<code>Instruments</code>中使用<code>app Launch</code>模板来配置你的应用。在启动期间，<code>Instruments</code>收集时间配置文件和线程状态跟踪。使用时间配置文件来识别应用程序在启动期间运行的代码。使用线程状态跟踪来查找线程活动或阻塞的时间，并发现线程阻塞的原因。 </p>
+<p>分析应用在不同情况下的启动时间，看看这些因素是如何影响体验的。下面是一些需要测试的不同情况的例子:</p>
+<ul>
+<li><p>打开设备，第一次解锁，然后启动你的应用。 </p>
+</li>
+<li><p>强制退出你的应用，然后启动它。系统将终止应用程序进程，系统将执行热启动。 </p>
+</li>
+<li><p>如果你打开其他应用程序，然后启动你的应用程序，系统将部分回收你的应用程序及其依赖项。这反映了一个常见的用户工作流程。 </p>
+</li>
+<li><p>使用一个非常大的应用程序——例如，一个使用许多图形资源或实时摄像头输入的应用程序——然后启动你的应用程序。系统可能会终止你的应用程序的进程，这意味着系统需要在你下次启动时分页加载应用程序的许多依赖项。</p>
+</li>
+</ul>
+<img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-2.png" class="&#x3D;">
+
+<p>UIKit在主线程上绘制视图和处理用户事件，所以当应用程序完成启动时，该线程必须可用来绘制第一帧。在<code>Instruments</code>线程跟踪中，主线程运行或被抢占的时间是它无法绘制视图或响应用户输入事件的时间。 </p>
+<p>对于应用程序启动的不同视图，使用时间配置文件模板(Time Profile template)分析应用程序。App生命周期时间轴将App启动期间的活动划分为进程初始化、UIKit初始化、UIKit初始场景渲染和初始帧渲染。</p>
+<img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-3.png" class="&#x3D;">
+
+<h2 id="减少对外部框架和动态库的依赖"><a href="#减少对外部框架和动态库的依赖" class="headerlink" title="减少对外部框架和动态库的依赖"></a>减少对外部框架和动态库的依赖</h2><p>在你的任何代码运行之前，系统必须找到并加载你的应用程序的可执行文件和它所依赖的任何库。 </p>
+<p>动态加载器(dyld)加载应用程序的可执行文件，并检查可执行文件中的<code>Mach</code>加载命令，以查找应用程序需要的框架(frameworks)和动态库。然后它将每个框架加载到内存中，并解析可执行文件中的动态符号以指向动态库中的适当地址。 </p>
+<p>你的应用加载的每一个额外的第三方框架都会增加启动时间。尽管dyld在用户安装应用程序时在启动闭包(launch closure)中缓存了大量的工作，但启动闭包的大小和加载后完成的工作量仍然取决于加载的库的数量和大小。你可以通过限制嵌入的第三方框架的数量来缩短应用程序的启动时间。在Xcode的Target编辑器中，你导入或添加到应用的链接框架和库设置中的框架都计入这个数字。像<code>CoreFoundation</code>这样的内置框架对启动的影响要小得多，因为它们与使用相同框架的其他进程使用<strong>共享内存</strong>。</p>
+<h2 id="删除或减少静态初始化代码"><a href="#删除或减少静态初始化代码" class="headerlink" title="删除或减少静态初始化代码"></a>删除或减少静态初始化代码</h2><p>应用程序中的某些代码必须在iOS运行你的应用程序的main()函数之前运行，这增加了启动时间。此代码包括: </p>
+<ul>
+<li>c++ static constructors。 </li>
+<li>Objective-C + load在类或类别中定义的方法。 </li>
+<li>带有clang属性<code>__attribute__((constructor))</code>标记的函数。 </li>
+<li>任何链接到应用程序或框架二进制文件的<code>__DATA</code>，<code>__mod_init_func</code>部分的函数。</li>
+</ul>
+<p>在可能的情况下，将代码移到应用程序生命周期的后期阶段，即在应用程序完成启动后，但在需要工作结果之前。在Instruments中，静态初始化器调用工具测量应用程序运行静态初始化器所花费的时间。</p>
+<img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-4.png" class="&#x3D;">
+
+<h2 id="将耗时（expensive）的任务移出应用程序委托"><a href="#将耗时（expensive）的任务移出应用程序委托" class="headerlink" title="将耗时（expensive）的任务移出应用程序委托"></a>将耗时（expensive）的任务移出应用程序委托</h2><p>审查初始化代码以延迟耗时的工作。系统在启动周期中调用你的应用程序委托的方法，给你时间来执行所需的任务。这些方法在主线程上同步执行，直到两个方法都成功返回，启动周期才会结束。因此，从这些方法执行的任何开销很大的任务都会延迟该启动周期的完成。 </p>
+<p>UIKit初始化你的应用程序委托类的一个实例(符合<code>UIApplicationDelegate</code>协议的类)，并向它发送 <code>application(_:willFinishLaunchingWithOptions:)</code>和 <code>application(_:didFinishLaunchingWithOptions:)</code>消息。UIKit在主线程上发送这些消息，在这些方法中执行代码所花费的时间增加了应用程序的启动时间。在这些方法中只做准备应用程序初始显示所需的工作;将其他任务推迟到应用程序生命周期中更合适的时间。 </p>
+<p>在刷新内容时向用户显示过时的内容是有意义的，将网络服务的数据模型的同步推迟到应用程序运行时。将同步移动到异步后台队列。注册一个后台任务来从网络服务中获取更新，以减少启动时数据的陈旧性和更新数据所需的工作量。 </p>
+<p>初始化非视图功能，如持久存储和位置服务，在第一次使用时，而不是在应用启动时。只检索显示应用程序初始视图所需的数据。请注意您的应用程序是否正在恢复状态，并准备显示正在恢复的视图所需的数据。如果没有恢复状态，只准备默认的初始视图。例如，一个图片库应用程序可能会在默认情况下显示一组图像缩略图，并让用户选择一张照片以获得详细视图。如果应用程序启动时没有恢复状态，它只需要显示一个占位符的一个屏幕的缩略图，并在应用程序完成启动后用真实的图像缩略图填充它们。它不需要加载完整的、详细的图片，直到用户点击其中一个缩略图。 </p>
+<p>初始化应用行为的受限子集，这在初始启动时是可行的。例如，一个任务管理器应用程序可以让用户在启动时创建一个新任务，即使应用程序还没有从它的持久存储或网络服务中检索到用户现有的所有任务。</p>
+<h2 id="降低初始视图的复杂性"><a href="#降低初始视图的复杂性" class="headerlink" title="降低初始视图的复杂性"></a>降低初始视图的复杂性</h2><p><code>Xcode Organizer</code>和<code>MetricKit</code>都使用到第一帧的时间作为启动时间的度量，包括绘制在第一帧上显示的视图所需的时间。你只能在主线程上修改视图层次结构;因此，具有更多视图的更复杂的视图层次结构比简单的层次结构需要更长的渲染时间。 </p>
+<p>减少应用程序初始视图的复杂性可以提高加载时间，用标准视图替换重写(override)<code>draw(_:)</code>的自定义视图也是如此。在需要自定义视图的地方，注意传递给<code>draw(_:)</code>的矩形，只渲染该矩形内的部分视图。这样做可以避免在视图中未呈现到屏幕的部分解码图像和计算颜色、坐标和绘图命令。</p>
+<h2 id="跟踪额外的启动活动"><a href="#跟踪额外的启动活动" class="headerlink" title="跟踪额外的启动活动"></a>跟踪额外的启动活动</h2><p>启动时间度量从用户点击主屏幕上的应用程序图标到应用程序在屏幕上绘制第一帧的时间。在此期间绘制<code>default.png</code>或<code>launch-screen storyboard</code>，它的出现不会结束启动时间计数器。 </p>
+<p>如果你的应用在绘制了第一帧之后，但在用户可以开始使用应用之前，仍然需要运行代码，那么这段时间不会影响到启动时间指标。额外的启动活动仍然有助于用户感知应用程序的响应能力。例如，如果你的应用程序在打开后渲染一个文档，用户可能会等待文档渲染，并将其视为你的启动时间的一部分，即使系统将在你显示加载图标时结束启动测量。 </p>
+<p>要跟踪额外的启动活动，在应用程序中创建一个<code>OSLog</code>对象，类别为<code>pointsOfInterest</code>。使用<code>os_signpost</code>函数来记录应用程序准备任务的开始和结束，如下例所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ViewController</span>: <span class="title class_">UIViewController</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> startupActivities:<span class="type">StaticString</span> <span class="operator">=</span> <span class="string">&quot;Startup Activities&quot;</span></span><br><span class="line">    <span class="keyword">let</span> poiLog <span class="operator">=</span> <span class="type">OSLog</span>(subsystem: <span class="string">&quot;com.example.CocoaPictures&quot;</span>, category: .pointsOfInterest)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">viewDidAppear</span>() &#123;</span><br><span class="line">        <span class="keyword">super</span>.viewDidAppear()</span><br><span class="line">        os_signpost(.begin, log: <span class="keyword">self</span>.poiLog, name: <span class="type">ViewController</span>.startupActivities)</span><br><span class="line">        <span class="comment">// do work to prepare the view</span></span><br><span class="line">        os_signpost(.end, log: <span class="keyword">self</span>.poiLog, name: <span class="type">ViewController</span>.startupActivities)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在Instruments中，<code>Points of Interest</code>在其时间轴中显示<code>os_signposts</code>。你可以使用这些信息将应用程序中的活动与应用程序的附加启动任务关联起来。</p>
+<img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-5@2x.png" class="&#x3D;">
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/xcode/reducing-your-app-s-launch-time">启动优化</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/01/POP%20in%20Swift/" rel="prev" title="Protocol Oriented Programming in Swift">
+      <i class="fa fa-chevron-left"></i> Protocol Oriented Programming in Swift
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/02/Codable%E5%8D%8F%E8%AE%AE/" rel="next" title="Codable协议">
+      Codable协议 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%86%E8%A7%A3%E5%BA%94%E7%94%A8%E6%BF%80%E6%B4%BB"><span class="nav-number">2.</span> <span class="nav-text">了解应用激活</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E5%86%B7%E5%90%AF%E5%8A%A8%E5%92%8C%E7%83%AD%E5%90%AF%E5%8A%A8"><span class="nav-number">3.</span> <span class="nav-text">理解冷启动和热启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B6%E9%9B%86%E5%85%B3%E4%BA%8E%E5%BA%94%E7%94%A8%E5%8F%91%E5%B8%83%E6%97%B6%E9%97%B4%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">4.</span> <span class="nav-text">收集关于应用发布时间的参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%BA%94%E7%94%A8%E7%9A%84%E5%90%AF%E5%8A%A8%E6%97%B6%E9%97%B4"><span class="nav-number">5.</span> <span class="nav-text">分析应用的启动时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E5%AF%B9%E5%A4%96%E9%83%A8%E6%A1%86%E6%9E%B6%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93%E7%9A%84%E4%BE%9D%E8%B5%96"><span class="nav-number">6.</span> <span class="nav-text">减少对外部框架和动态库的依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%88%96%E5%87%8F%E5%B0%91%E9%9D%99%E6%80%81%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BB%A3%E7%A0%81"><span class="nav-number">7.</span> <span class="nav-text">删除或减少静态初始化代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E8%80%97%E6%97%B6%EF%BC%88expensive%EF%BC%89%E7%9A%84%E4%BB%BB%E5%8A%A1%E7%A7%BB%E5%87%BA%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%A7%94%E6%89%98"><span class="nav-number">8.</span> <span class="nav-text">将耗时（expensive）的任务移出应用程序委托</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E4%BD%8E%E5%88%9D%E5%A7%8B%E8%A7%86%E5%9B%BE%E7%9A%84%E5%A4%8D%E6%9D%82%E6%80%A7"><span class="nav-number">9.</span> <span class="nav-text">降低初始视图的复杂性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%9F%E8%B8%AA%E9%A2%9D%E5%A4%96%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B4%BB%E5%8A%A8"><span class="nav-number">10.</span> <span class="nav-text">跟踪额外的启动活动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="翻译几篇iOS性能优化的文章 ⅠⅠⅠ，这是本系列的第三篇文章，重点介绍如何提高代码的可读性和性能。 请根据您的需要谨慎选择。通常，更改或改进体系结构和代码重构需要更多的时间和精力。 尽管现代iOS设备能够处理大量密集而复杂的任务，但如果你不密切关注应用程序的运行方式，设备可能会显得很慢。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Improve Performance in Your iOS Applications ⅠⅠⅠ">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/10/28/Improve%20Performance%20iOS%20%E2%85%A0%E2%85%A0%E2%85%A0/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="翻译几篇iOS性能优化的文章 ⅠⅠⅠ，这是本系列的第三篇文章，重点介绍如何提高代码的可读性和性能。 请根据您的需要谨慎选择。通常，更改或改进体系结构和代码重构需要更多的时间和精力。 尽管现代iOS设备能够处理大量密集而复杂的任务，但如果你不密切关注应用程序的运行方式，设备可能会显得很慢。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-10-28T00:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-31T06:21:15.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/10/28/Improve%20Performance%20iOS%20%E2%85%A0%E2%85%A0%E2%85%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Improve Performance in Your iOS Applications ⅠⅠⅠ | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/10/28/Improve%20Performance%20iOS%20%E2%85%A0%E2%85%A0%E2%85%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Improve Performance in Your iOS Applications ⅠⅠⅠ
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-10-28 08:00:00" itemprop="dateCreated datePublished" datetime="2022-10-28T08:00:00+08:00">2022-10-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-10-31 14:21:15" itemprop="dateModified" datetime="2022-10-31T14:21:15+08:00">2022-10-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>翻译几篇iOS性能优化的文章 ⅠⅠⅠ，这是本系列的第三篇文章，重点介绍如何提高代码的可读性和性能。 请根据您的需要谨慎选择。通常，更改或改进体系结构和代码重构需要更多的时间和精力。</p>
+<p>尽管现代iOS设备能够处理大量密集而复杂的任务，但如果你不密切关注应用程序的运行方式，设备可能会显得很慢。  </p>
+<span id="more"></span>
+
+<h2 id="开启Swift快速优化"><a href="#开启Swift快速优化" class="headerlink" title="开启Swift快速优化"></a>开启Swift快速优化</h2><p>第一步总是启用优化。Swift有三个优化级别:</p>
+<ul>
+<li>One:常规开发。它只进行最低限度的优化，并保留所有调试信息。</li>
+</ul>
+<p>-o:用于大多数生产代码。它的极端优化可能会极大地改变输出代码的性质和数量。调试数据将丢失发出。 </p>
+<p>-Osize:在这种模式下，编译器更倾向于代码大小而不是速度。<br>1<br> 当前的优化级别可以通过<code>Xcode</code> UI来改变:<br>在项目导航器（Project Navigator）中选择项目编辑器图标（ Project Editor）。要访问项目设置编辑器，请单击项目标题下面的图标。更改“生成设置”（Build Settings）标题下的“优化级别”（Optimization Level）框，以便对项目中的所有目标应用优化设置。 </p>
+<p>在“项目编辑器”（Project Editor）中的“目标”（Targets）下选择目标（target），并覆盖“生成设置”（Build Settings）标题下的“优化级别”（Optimization Level）框。</p>
+<h2 id="理解自动引用计数"><a href="#理解自动引用计数" class="headerlink" title="理解自动引用计数"></a>理解自动引用计数</h2><p>如果你想构建一个高性能的iOS应用程序，你必须分析你的组件如何使用内存以及如何优化它。循环引用问题是典型的内存管理问题。但首先，让我们看看iOS是如何处理自己的内存的。 </p>
+<p>苹果的自动内存管理系统被称为自动引用计数(ARC)。引用计数用于确定内存块是否应该被释放。新对象的引用计数从1开始。这个引用计数可能会随着时间的推移而改变。最后，当引用计数接近0时，对象被释放。</p>
+<h3 id="强引用和弱引用"><a href="#强引用和弱引用" class="headerlink" title="强引用和弱引用"></a>强引用和弱引用</h3><p>根据上面的想法，在声明变量时还应该理解强引用和弱引用。默认情况下，变量之间保持强引用。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> strongCar <span class="operator">=</span> <span class="type">UIView</span>()</span><br><span class="line">    <span class="keyword">weak</span> <span class="keyword">var</span> weakCar <span class="operator">=</span> <span class="type">UIView</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>随着变量变得更强大，引用的数量也会增加。当一个引用计数为2的对象被一个新的变量强引用时，对象的引用计数增加到3。 </p>
+<p>另一方面，弱引用对引用计数的增加没有影响。如果一个引用计数为2的对象被赋值给一个引用计数已经为3的对象，那么该对象的引用计数将保持为2。 </p>
+<p>此外，当强变量处于活动状态时，强变量的引用组件保证同时保留在内存中。另一方面，这种确定性不适用于弱变量。</p>
+<h3 id="避免内存泄漏"><a href="#避免内存泄漏" class="headerlink" title="避免内存泄漏"></a>避免内存泄漏</h3><p>一个实体<code>Vehicle</code>包含另一个实体<code>Car</code>的许多实例，并且一个实体Car的每个实例都与一个实体Vehicle相连接的模型很可能是您以前见过的。在一个非常简化的实现中，它看起来像这样:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> cars <span class="operator">=</span> [<span class="type">Car</span>]()</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">add</span>(<span class="keyword">_</span> <span class="params">car</span> : <span class="type">Car</span>) &#123;</span><br><span class="line">        cars.append(car)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> vehicle : <span class="type">Vehicle</span></span><br><span class="line">    <span class="keyword">required</span> <span class="keyword">init</span>(<span class="params">vehicle</span> : <span class="type">Vehicle</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.vehicle <span class="operator">=</span> vehicle</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> vehicle <span class="operator">=</span> <span class="type">Vehicle</span>()</span><br><span class="line"><span class="keyword">let</span> car <span class="operator">=</span> <span class="type">Car</span>(vehicle: <span class="type">Vehicle</span>)</span><br><span class="line">vehicle.add(car)</span><br></pre></td></tr></table></figure>
+<p>在上面的例子中，一切看起来都很好，但事实并非如此。观察<code>Vehicle</code>和<code>Cars</code>之间的相似之处:它们彼此之间有着密切的联系。接下来，你要猜。内存泄漏是罪魁祸首。 </p>
+<p>当一段数据在其生命期结束后仍然存在于内存中时，就出现了内存泄漏。当两个强变量相互强引用时，它们会产生内存泄漏。循环引用是这个问题的技术术语。然后，让我们看看几个选项。</p>
+<h2 id="使用面向协议编程"><a href="#使用面向协议编程" class="headerlink" title="使用面向协议编程"></a>使用面向协议编程</h2><p>当涉及到在应用程序中存储数据和建模行为时，结构（structures）和类（classes）都是很好的选择。然而，由于它们的相似之处，可能很难决定哪个更好。 </p>
+<p>仔细检查标准Swift库中的代码，就会发现协议使用得相当频繁。Apple喜欢面向协议编程(Protocol Oriented Programming)，如果你正开始创建继承连接的新项目，建议你使用它。 </p>
+<p>多态是OOP范式中最有帮助的部分之一。它决定要调用的运行时参数或函数。动态调度是一个决策过程。下面是OOP的一个基本示例。Car类有一个带有override关键字的echo方法，因为它是在超类Vehicle中定义的。调用类Car中的echo方法，而不是类Vehicle中的echo方法。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">echo</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Improving iOS App performance.&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">Car</span>: <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">        <span class="keyword">override</span> fun echo() &#123;</span><br><span class="line">        <span class="comment">// your code</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那不是很好吗?不，正如前面的例子所示，每个运行时作业都会减慢我们的执行时间。那么解决办法是什么呢?</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">echo</span>() &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span>: <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">echo</span> &#123;</span><br><span class="line">        <span class="comment">// your code</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>POP是面向协议编程的缩写，现在可以使用了。它只需要一个小小的调整就可以显著减少运行时计算。POP术语如此熟悉是不是很有趣?它是苹果<code>UIKit</code>中最常用的委派模式。</p>
+<h2 id="使用静态调用"><a href="#使用静态调用" class="headerlink" title="使用静态调用"></a>使用静态调用</h2><p>在参考Apple的Swift标准库文档时，你会发现与类相反，struct是值类型，而class是引用类型。因此，它们可以互换使用。一开始似乎有一点变化。这比我想象的要小得多!</p>
+<p><code>Structs</code>是静态分配的，而动态构造的类是动态分配的。但是，如果类具有结构类型参数，会发生什么情况呢?那么，你打算怎么做?即使struct参数是一个结构，也仍然需要堆栈分配和结构构造。根本不是这样的!因此，即使实参是struct类型的，存储它的类也允许它在堆中分配和动态调用，而不依赖于实参的类型。</p>
+<p>对于前面提到的例子，你可以继续使用你之前创建的类，但是使用变量的弱引用:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> cars <span class="operator">=</span> [<span class="type">Car</span>]()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">add</span>(<span class="keyword">_</span> <span class="params">car</span> : <span class="type">Car</span>) &#123;</span><br><span class="line">        cars.append(car)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">weak</span> <span class="keyword">var</span> vehicle : <span class="type">Vehicle</span>?</span><br><span class="line"></span><br><span class="line">    <span class="keyword">required</span> <span class="keyword">init</span>(<span class="params">vehicle</span> : <span class="type">Vehicle</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.vehicle <span class="operator">=</span> vehicle</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> vehicle <span class="operator">=</span> <span class="type">Vehicle</span>()</span><br><span class="line"><span class="keyword">let</span> car <span class="operator">=</span> <span class="type">Car</span>(vehicle: vehicle)</span><br><span class="line">vehicle.add(<span class="type">Car</span>)</span><br></pre></td></tr></table></figure>
+<p>最后，不要在代码中大范围使用类继承，而是尝试使用结构体（structs）和协议（protocols）。</p>
+<h2 id="限制变量的作用域"><a href="#限制变量的作用域" class="headerlink" title="限制变量的作用域"></a>限制变量的作用域</h2><p>包含<code>private</code>或<code>fileprivate</code>关键字的声明将该声明的可见性限制在包含这些关键字的文件中。这使编译器能够确定代码中是否有任何其他可能的覆盖声明。</p>
+<p>因此，由于没有任何这样的声明，编译器就可以自动推导出最终关键字，并在过程中根据需要删除对方法和字段访问的间接调用。使用以下示例，<code>vehicle.doSomething()</code>和<code>car. dosomething()</code>。<code>myPrivateVar</code>将能够直接使用，提供<code>Vehicle</code>和<code>Car</code>不包含任何覆盖声明在同一文件:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">Vehicle</span> &#123;</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">doSomething</span>() &#123; <span class="operator">...</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">  <span class="keyword">fileprivate</span> <span class="keyword">var</span> myPrivateVar: <span class="type">Int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">usingVehicle</span>(<span class="keyword">_</span> <span class="params">vehicle</span>: <span class="type">Vehicle</span>) &#123;</span><br><span class="line">  vehicle.doSomething() <span class="comment">// The compiler will remove calls to this method</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">usingCar</span>(<span class="keyword">_</span> <span class="params">car</span>: <span class="type">Car</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> car.myPrivateVar</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用值类型"><a href="#使用值类型" class="headerlink" title="使用值类型"></a>使用值类型</h2><p>Swift有两种类型:值类型(结构、枚举和元组)和引用类型(类)。重要的是要注意<code>NSArrays </code>不能包含值类型。因此，当使用值类型时，优化器可以避免大部分与处理由<code>NSArray</code>支持的<code>Array</code>的可能性相关的成本。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Avoid using a class here.</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">  <span class="keyword">var</span> manufacturedYear: [<span class="type">Int</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> newCar: [<span class="type">Car</span>]</span><br></pre></td></tr></table></figure>
+<p>此外，与引用类型不同，值类型只需要对包含递归引用类型的引用进行计数。为了避免Array中不必要的retain和release流量，可以使用值类型而不是引用类型。</p>
+<h2 id="使用闭包"><a href="#使用闭包" class="headerlink" title="使用闭包"></a>使用闭包</h2><p>说到特性，Swift的闭包是目前最强大的特性之一。另一方面，它们不受循环引用的影响。闭包有可能导致循环引用，原因很简单:它们在不使用时维持对使用它们的对象的强引用。 </p>
+<p>在本例中，我们有一个包含闭包的循环引用。注意下面连续的代码块是如何修改自我声明的:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> tyres <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> closure : (() -&gt; ()) <span class="operator">=</span> &#123; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        closure <span class="operator">=</span> &#123;</span><br><span class="line">            <span class="keyword">self</span>.tyres <span class="operator">+=</span> <span class="number">1</span>				<span class="comment">// standard way</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="keyword">self</span>.tyres)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">foo</span>() &#123;</span><br><span class="line">        closure()</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的例子与闭包有很强的连接，而闭包又与对象本身有很强的连接，因为self在闭包块中使用。有两种方法可以解决这个问题:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> tyres <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> closure : (() -&gt; ()) <span class="operator">=</span> &#123; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        closure <span class="operator">=</span> &#123; </span><br><span class="line">[__unowned self__] <span class="keyword">in</span> <span class="keyword">self</span>.tyres <span class="operator">+=</span> <span class="number">1</span>	<span class="comment">// unowned declaration</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="keyword">self</span>.tyres)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">foo</span>() &#123;</span><br><span class="line">        closure()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有了以上的改进，闭包不再有强引用。但是，使用<code>[unowned self]</code>要小心，如果在调用闭包之前已经释放了对象，则会导致崩溃。同样，你也可以修改实现如下:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> tyres <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> closure : (() -&gt; ()) <span class="operator">=</span> &#123; &#125;</span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        closure <span class="operator">=</span> &#123; </span><br><span class="line">[<span class="keyword">weak</span> <span class="keyword">self</span>] <span class="keyword">in</span> <span class="keyword">self</span><span class="operator">?</span>.tyres <span class="operator">+=</span> <span class="number">1</span>	<span class="comment">// weak declaration</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="keyword">self</span><span class="operator">?</span>.tyres <span class="operator">??</span> <span class="string">&quot;&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">foo</span>() &#123;</span><br><span class="line">        closure()</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里，<code>[weak self]</code>返回与<code>[unowned self]</code>相同的结果，但它是可选处理的。 </p>
+<p>在闭包的上下文中，从周围的作用域捕获变量和常量。这在它和闭包所需的值之间建立了紧密的连接。在我们的项目中，很可能会有数千个闭包，这意味着检查每一个闭包的内存问题将非常耗时。可以在Xcode中监控内存泄漏;所需要的是打开<code>Instruments </code>并选择<code>Leaks</code>。</p>
+<blockquote>
+<p>Navigate to Xcode and then Open Developer Tool → Instruments → Leaks.</p>
+</blockquote>
+<p>打开后，选择模拟器和应用程序目标并跟踪需要修复的泄漏。 </p>
+<p>作为最佳实践，在处理闭包或代理时，最好使用<code>weak</code>或<code>unowned</code>。在你的项目中保持健壮的编码风格，这样<code>weak self</code>的存在就会立刻显现出来。一旦你准备好了，就去安装<code>SwiftLint</code>，这是一个执行编码标准的强大工具。为了整个团队的利益，编译器时的问题可以被发现，代码样式可以被自动化。</p>
+<h2 id="提高Arrays的利用率"><a href="#提高Arrays的利用率" class="headerlink" title="提高Arrays的利用率"></a>提高Arrays的利用率</h2><p>Arrays通常将它们的元素存储在不相邻的内存块中。只需分配一个新块并将其附加到数组中，就可以添加数组中的新元素。这对于添加来说非常好，但是对于迭代来说就不那么好了。所以，如果你在一个巨大的数组上迭代，<code>ContinuousArray</code>可能是一个很好的选择。 </p>
+<p>当使用<code>ContinuousArray </code>时，它确保数组的所有元素按顺序排列。这在查找以下信息时非常有用。这是一种取舍，一如既往，没有什么神奇的事情发生。由于在<code>ContinuousArray</code>中增加了对数组管理的限制，插入和追加等任务现在变得更加困难。由于我们最近的更改，您的用例将不再受到限制。 </p>
+<p>Swift对象通常表现良好，我们可以忽略内存问题和安全问题，因为Swift为我们处理一切。这对整体性能有负面影响。您可以使用<code>withUnsafeBufferPointer</code>函数来获取数组元素的指针数组，这使您能够在安全性和性能之间进行权衡。但是您需要小心，因为如果由于某种原因这些元素被释放，它可能会导致崩溃。 </p>
+<p>Apple SDK for Sentry允许你监视和跟踪应用性能、用户会话、用户可能面临的崩溃等。 </p>
+<p>一般来说， Sentry.io 中捕捉到这个事件的问题应该可以检查。由其他原因引起的错误不应该显示。要在Discover或Issues页面中查找它们，请使用未处理的错误搜索过滤器<code>unhandled:true</code>。因为会话不受数据速率的限制，所以未处理事件的数量预计不会与失败会话的数量匹配。</p>
+<h2 id="利用范型"><a href="#利用范型" class="headerlink" title="利用范型"></a>利用范型</h2><p>Swift的泛型类型提供了一个强大的抽象工具。Swift编译器用<code>T</code>的任意值构造<code>CustomFunc&lt;T&gt;</code>。还需要一个函数指针表和一个包含<code>T</code>的方框。这是因为<code>CustomFunc&lt;Int&gt;</code>的行为与<code>CustomFunc&lt;String&gt;</code>的行为不同。下面是一个泛型函数的例子:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CustomFunc</span>&lt;<span class="title class_">T</span>&gt; &#123; <span class="operator">...</span> &#125;</span><br><span class="line"><span class="type">CustomFunc</span>&lt;<span class="type">Int</span>&gt; <span class="type">X</span> <span class="comment">// Same function CustomFunc&lt;String&gt; Y // Works for different data types</span></span><br></pre></td></tr></table></figure>
+<p>每次调用此类代码时，Swift都会尝试识别正在使用的具体(非泛型)类型。当优化器看到泛型函数声明并理解具体类型时，Swift编译器可能会生成根据该类型定制的泛型函数的变体。专门化消除了泛型的管理开销。下面是一些更多的泛型:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CustomStack</span>&lt;<span class="title class_">T</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">push</span>(<span class="keyword">_</span> <span class="params">element</span>: <span class="type">T</span>) &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">pop</span>() -&gt; <span class="type">T</span> &#123; <span class="operator">...</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">customAlgorithm</span>&lt;<span class="type">T</span>&gt;(<span class="keyword">_</span> <span class="params">a</span>: [<span class="type">T</span>], <span class="params">length</span>: <span class="type">Int</span>) &#123; <span class="operator">...</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> stackOfInt: <span class="type">CustomStack</span>&lt;<span class="type">Int</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="operator">...</span> &#123;</span><br><span class="line">  stack.push(<span class="operator">...</span>)</span><br><span class="line">  stack.pop(<span class="operator">...</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> arrayOfInt: [<span class="type">Int</span>]   <span class="comment">// Compiler emits a specialized version for [Int] type</span></span><br><span class="line"></span><br><span class="line">customAlgorithm(arrayOfInt, arrayOfInt.length)</span><br></pre></td></tr></table></figure>
+<p>为了让优化器执行专业化，泛型声明定义必须能够在当前<code>Module</code>中可见。除非启用了<code>-whole-module-optimization</code>开关，否则只有在泛型的声明和调用都与泛型的调用在同一个文件中时才会发生这种情况。 </p>
+<p>标准库是这一规则的一个例外。标准库中的定义可以在所有模块中使用，并且可以定制以满足特定的需求</p>
+<h2 id="优化SpriteKit"><a href="#优化SpriteKit" class="headerlink" title="优化SpriteKit"></a>优化SpriteKit</h2><p><code>SpriteKit</code>是一个快速的2D框架，它使用苹果的<code>Metal</code>库直接访问<code>GPU</code>。像<code>iPad Pro</code>这样的设备有<code>120Hz</code>的显示，你需要努力保持帧更新在分配的<code>8毫秒</code>内。 </p>
+<p>从你的应用程序包加载纹理（Textures）是非常昂贵的。即使图片很普通，尝试加载一个全屏的背景图片可能会导致你超过你分配的时间限制，导致丢失帧。确保你在背景中预加载纹理，这样当你需要它们的时候，它们就会准备好了。因此，丢失帧的风险大大降低。 </p>
+<p>纹理或动画停顿和缓慢移动的UI元素会激怒用户，并影响整体用户体验。有两种方法可以评估这类体验:慢速和定格帧(slow and frozen frames)。如果你想让你的应用程序正常运行，这两种情况都应该避免。Sentry’s SDK 跟踪在设备上渲染时遇到的慢帧和冻结帧。 </p>
+<p>理解<code>SKTexture</code>类似于<code>UIImage</code>，因为它直到需要时才真正加载数据，这对于理解它是如何工作的至关重要。正因为如此，即使是非常大的照片，这种代码也几乎是瞬间的:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> texture <span class="operator">=</span> <span class="type">SKTexture</span>(imageNamed: <span class="string">&quot;Void&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>然而，一旦该纹理被分配给游戏场景中的精灵节点(sprite node )，它就必须在渲染之前被加载。理想情况下，你希望加载发生在场景显示之前——可能在加载屏幕中——以减少帧的困难;因此，你应该像下面这样预加载:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">texture.preload &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Texture is ready!&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="使用-replace代替Blend"><a href="#使用-replace代替Blend" class="headerlink" title="使用.replace代替Blend"></a>使用.replace代替Blend</h2><p>游戏渲染是开发过程中最耗时的部分之一，甚至包括所有需要的计算。这很复杂，因为大多数精灵都有不规则的形式和<code>alpha</code>透明度，场景通常有许多层，效果经常为场景提供生命。 </p>
+<p>你可以通过告诉<code>SpriteKit</code>渲染没有<code>alpha</code>透明度的精灵，例如实体形式或背景图片来避免这种情况:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yourSprite.blendMode <span class="operator">=</span> .replace</span><br></pre></td></tr></table></figure>
+<p>实际上，这意味着<code>SpriteKit</code>不需要读取旧的颜色值并将其与新的颜色值混合。</p>
+<h2 id="分析访问级别"><a href="#分析访问级别" class="headerlink" title="分析访问级别"></a>分析访问级别</h2><p>在程序执行的过程中，由类形成的对象的方法调用和参数访问仍然是未知的。这意味着当你点击Xcode中的运行按钮时，编译器就会启动并执行分配内存和评估多态性使用等任务。最后，如果一个方法或参数不能从程序的作用域之外访问，编译器就会指出它是<code>final</code>的。 </p>
+<p>当您知道一个类不是任何其他类的基类时，就有必要在类声明中添加<code>final</code>关键字。将类添加到类中时，在类的所有参数和方法中都包含类的最终定义。 </p>
+<p>因此，让我们假设您想要覆盖类的行为。这样做的后果是，这个类不允许使用<code>final</code>关键字。一个新特性允许将子类不能访问的所有参数和方法指定为<code>private</code>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>选择在任何特定情况下采用的任何性能改进可能需要一些思考、测试和试验，特别是当我们希望在向代码中添加更多数据时保持代码的效率时。可能需要混合使用各种性能改进技术，而不是简单地使用一种技术，以获得所需的性能特征。扩展您对Swift以外的理解通常对于确定每种情况的最佳格式非常重要。 </p>
+<p>在本文中，您了解了如何使用最佳实践优化现有代码库、模块化体系结构以及在代码中创建和利用可重用组件，从而提高iOS应用程序的性能。 </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/27/Improve%20Performance%20iOS%20Applications%20%E2%85%A0%E2%85%A0/" rel="prev" title="Improve Performance in Your iOS Applications ⅠⅠ">
+      <i class="fa fa-chevron-left"></i> Improve Performance in Your iOS Applications ⅠⅠ
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/10/31/Improve%20Performance%20iOS%20%E2%85%A0V/" rel="next" title="Improve Performance in Your iOS Applications ⅠV">
+      Improve Performance in Your iOS Applications ⅠV <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AFSwift%E5%BF%AB%E9%80%9F%E4%BC%98%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">开启Swift快速优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E8%87%AA%E5%8A%A8%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">理解自动引用计数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E5%BC%95%E7%94%A8%E5%92%8C%E5%BC%B1%E5%BC%95%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">强引用和弱引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">避免内存泄漏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%9D%A2%E5%90%91%E5%8D%8F%E8%AE%AE%E7%BC%96%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">使用面向协议编程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%9D%99%E6%80%81%E8%B0%83%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">使用静态调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E5%88%B6%E5%8F%98%E9%87%8F%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">5.</span> <span class="nav-text">限制变量的作用域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%80%BC%E7%B1%BB%E5%9E%8B"><span class="nav-number">6.</span> <span class="nav-text">使用值类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%97%AD%E5%8C%85"><span class="nav-number">7.</span> <span class="nav-text">使用闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E9%AB%98Arrays%E7%9A%84%E5%88%A9%E7%94%A8%E7%8E%87"><span class="nav-number">8.</span> <span class="nav-text">提高Arrays的利用率</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E8%8C%83%E5%9E%8B"><span class="nav-number">9.</span> <span class="nav-text">利用范型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96SpriteKit"><span class="nav-number">10.</span> <span class="nav-text">优化SpriteKit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-replace%E4%BB%A3%E6%9B%BFBlend"><span class="nav-number">11.</span> <span class="nav-text">使用.replace代替Blend</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E8%AE%BF%E9%97%AE%E7%BA%A7%E5%88%AB"><span class="nav-number">12.</span> <span class="nav-text">分析访问级别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">13.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
