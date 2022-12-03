@@ -70,6 +70,81 @@
       </categories>
   </entry>
   <entry>
+    <title>AutoreleasePool总结</title>
+    <url>/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/</url>
+    <content><![CDATA[<blockquote>
+<p>为什么已经有了 ARC ,但还是需要 @autoreleasePool 的存在？<br>避免内存峰值，及时释放不需要的内存空间</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h2 id="面试题"><a href="#面试题" class="headerlink" title="面试题"></a>面试题</h2><h3 id="一个很经典的面试题"><a href="#一个很经典的面试题" class="headerlink" title="一个很经典的面试题"></a>一个很经典的面试题</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"> <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *string = <span class="string">@&quot;stdy&quot;</span>;</span><br><span class="line">        string = [string lowercaseString];</span><br><span class="line">        string = [string stringByAppendingString:<span class="string">@&quot;123&quot;</span>];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;--%@&quot;</span>, string);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>上述的这种写法，会使内存慢慢增加，如何解决呢？自动释放池</p>
+<!--more-->
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">            <span class="built_in">NSString</span> *string = <span class="string">@&quot;stdy&quot;</span>;</span><br><span class="line">            string = [string lowercaseString];</span><br><span class="line">            string = [string stringByAppendingString:<span class="string">@&quot;123&quot;</span>];</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;--%@&quot;</span>, string);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AutoreleasePool爆栈的问题"><a href="#AutoreleasePool爆栈的问题" class="headerlink" title="AutoreleasePool爆栈的问题"></a>AutoreleasePool爆栈的问题</h3><p>autoreleasePool 的自动 drain是靠runLoop进入空闲来触发的。那么如果你在执行一个很重的任务（如一个很多次数的循环）导致runLoop一直不能进入空闲。 那么autoreleasePool 里面对象会越来越多。导致内存爆掉。因此建议如果是循环次数很大的循环，要么循环里面不要产生autorelease的对象，要么就要手动 添加 @autorelease {}来避免内存爆掉。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用容器的block版本的枚举容器时，内部会自动添加一个AutoreleasePool</span></span><br><span class="line">[array enumerateObjectsUsingBlock:^(<span class="type">id</span> obj, <span class="built_in">NSUInteger</span> idx, <span class="type">BOOL</span> *stop) &#123;</span><br><span class="line">    <span class="comment">// 这里被一个局部@autoreleasepool包围着</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="什么时间会创建自动释放池？"><a href="#什么时间会创建自动释放池？" class="headerlink" title="什么时间会创建自动释放池？"></a>什么时间会创建自动释放池？</h3><p> 从程序启动到加载完成是一个完整的运行循环，然后会停下来，等待用户交互，用户的每一次交互都会启动一次运行循环，来处理用户所有的点击事件、触摸事件，运行循环检测到事件并启动后，就会创建自动释放池。 子线程的 runloop 默认是不工作，无法主动创建，必须手动创建。 自定义的 NSOperation 和 NSThread 需要手动创建自动释放池。比如：自定义的 NSOperation 类中的 main 方法里就必须添加自动释放池。否则出了作用域后，自动释放对象会因为没有自动释放池去处理它，而造成内存泄露。</p>
+<p>但对于 blockOperation 和 invocationOperation 这种默认的Operation ，系统已经帮我们封装好了，不需要手动创建自动释放池。</p>
+<p>@autoreleasepool 当自动释放池被销毁或者耗尽时，会向自动释放池中的所有对象发送 release 消息，释放自动释放池中的所有对象。</p>
+<p>如果在一个vc的viewDidLoad中创建一个 Autorelease对象，那么该对象会在 viewDidAppear 方法执行前就被销毁了。</p>
+<h3 id="访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><a href="#访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？" class="headerlink" title="访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？"></a>访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</h3><p>肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autoreleasePool 中，以延缓释放。</p>
+<h3 id="函数返回一个对象时，会对对象-autorelease-么？为什么？"><a href="#函数返回一个对象时，会对对象-autorelease-么？为什么？" class="headerlink" title="函数返回一个对象时，会对对象 autorelease 么？为什么？"></a>函数返回一个对象时，会对对象 autorelease 么？为什么？</h3><p>会 ，为了延长返回对象的生命周期，给其他使用者留足调用的时间</p>
+<h3 id="简要说一下-autoreleasePool-的数据结构？"><a href="#简要说一下-autoreleasePool-的数据结构？" class="headerlink" title="简要说一下 @autoreleasePool 的数据结构？"></a>简要说一下 @autoreleasePool 的数据结构？</h3><p>一个双向链表组成的栈</p>
+<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease.jpg" class="">
+
+<ol>
+<li>AutoreleasePoolPage 组成了一个双向链表，每个page里面都有一个一页的大小的数组，如iOS上一页 0x4000。 每个AutoreleasePoolPage都有个next指针指向下一个可以存储的位置。当next是结尾的时候，这个page就full了。再压入对象就要创建新的page了。</li>
+<li>一般情况下链表最尾端的一个page是 hotPage. 一般autorelease时对象指针会压入这个page。</li>
+<li>objc_autoreleasePoolPush 会返回当前page的 next的地址作为 token. 然后objc_autoreleasePoolPop 会一直倾倒到这个token的地址。</li>
+<li>push和pop一般出现的地方就是： ① @autorelease {} 所包围的代码的前后； ② runLoop 进入和退出时；③ runLoop进入kCFRunLoopBeforeWaiting状态时，也就是常常说的idle时，会先pop, 再 push.</li>
+</ol>
+<h3 id="autoreleasrPool-的释放时机？"><a href="#autoreleasrPool-的释放时机？" class="headerlink" title="@autoreleasrPool 的释放时机？"></a>@autoreleasrPool 的释放时机？</h3><p>App启动后，苹果在主线程 RunLoop 里注册了两个 Observer，其回调都是 _wrapRunLoopWithAutoreleasePoolHandler()。</p>
+<p>第一个 Observer 监视的事件是 Entry(即将进入Loop)，其回调内会调用 _objc_autoreleasePoolPush() 创建自动释放池。其 order 是 -2147483647，优先级最高，保证创建释放池发生在其他所有回调之前。</p>
+<p>第二个 Observer 监视了两个事件： BeforeWaiting(准备进入休眠) 时调用_objc_autoreleasePoolPop() 和 _objc_autoreleasePoolPush() 释放旧的池并创建新池；Exit(即将退出Loop) 时调用 _objc_autoreleasePoolPop() 来释放自动释放池。这个 Observer 的 order 是 2147483647，优先级最低，保证其释放池子发生在其他所有回调之后。</p>
+<p>在主线程执行的代码，通常是写在诸如事件回调、Timer回调内的。这些回调会被 RunLoop 创建好的 AutoreleasePool 环绕着，所以不会出现内存泄漏，开发者也不必显示创建 Pool 了。</p>
+<p><code>Autorelease对象是在当前runloop迭代结束时释放</code></p>
+<h2 id="Autorelease原理"><a href="#Autorelease原理" class="headerlink" title="Autorelease原理"></a>Autorelease原理</h2><h3 id="AutoreleasePoolPage"><a href="#AutoreleasePoolPage" class="headerlink" title="AutoreleasePoolPage"></a>AutoreleasePoolPage</h3><p>ARC下使用<code>@autoreleasepool&#123;&#125;</code>来使用一个AutoreleasePool，随后编译器会将其改写成下面的样子</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> *context = objc_autoreleasePoolPush();</span><br><span class="line"><span class="comment">// &#123;&#125;中的代码</span></span><br><span class="line">objc_autoreleasePoolPop(context);</span><br></pre></td></tr></table></figure>
+
+<h3 id="AutoreleasePoolPage结构—-C-实现的类"><a href="#AutoreleasePoolPage结构—-C-实现的类" class="headerlink" title="AutoreleasePoolPage结构—-C++实现的类"></a>AutoreleasePoolPage结构—-C++实现的类</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">magic_t</span> <span class="type">const</span> magic;</span><br><span class="line">id*	next;	<span class="comment">//作为游标指向栈顶最新add进来的autorelease对象的地址</span></span><br><span class="line">pthread <span class="type">const</span> thread;</span><br><span class="line">AutoreleasePoolPage* <span class="type">const</span> parent;</span><br><span class="line">AutoreleasePoolPage* child;</span><br><span class="line"><span class="type">uint32_t</span> <span class="type">const</span> depth;</span><br><span class="line"><span class="type">unit32_t</span> hiwat;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>AutoreleasePoolPage每个对象会开辟4096字节内存（也就是虚拟内存一页的大小）</li>
+<li>一个AutoreleasePoolPage空间被占满时，会新建一个AutoreleasePoolPage对象，连接链表，后来的autorelease对象在新的page加入</li>
+</ul>
+<h3 id="objc-autoreleasePoolPush"><a href="#objc-autoreleasePoolPush" class="headerlink" title="objc_autoreleasePoolPush"></a>objc_autoreleasePoolPush</h3><ul>
+<li>当前线程只有一个AutoreleasePoolPage对象时的内存结构<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease01.jpg" class="">
+上图中，这一页再加入一个autorelease对象就要满了，也就是next指针马上指向栈顶，这时就要建立下一页page对象，与这一页链表连接完成后，新page的next指针被初始化在栈底（begin的位置），然后继续向栈里添加新对象。</li>
+</ul>
+<p><code>向一个对象发送--autorelease消息，就是将这个对象加入到当前AutoreleasePoolPage的栈顶next指针指向的位置</code></p>
+<h3 id="objc-autoreleasePoolPop"><a href="#objc-autoreleasePoolPop" class="headerlink" title="objc_autoreleasePoolPop"></a>objc_autoreleasePoolPop</h3><p>每当进行一次objc_autoreleasePoolPush调用时，runtime会向当前的AutoreleasePoolPage中add进一个哨兵对象，值为0（也就是nil），那么page就变成下面的样子</p>
+<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease02.jpg" class="">
+
+<p>objc_autoreleasePoolPush的返回值就是这个哨兵对象的地址，objc_autoreleasePoolPop（哨兵对象）作为入参</p>
+<ul>
+<li>释放过程</li>
+</ul>
+<ol>
+<li>根据传入的哨兵对象地址找到哨兵对象所处的page</li>
+<li>在当前page中，将晚于哨兵对象（可根据parent跨越page）插入的所有autorelease对象都发送一次release消息，并向回移动next指针到正确位置</li>
+</ol>
+<p>上面Pop之后的内存状态如下</p>
+<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease03.jpg" class="">
+
+<h3 id="嵌套的AutoreleasePool"><a href="#嵌套的AutoreleasePool" class="headerlink" title="嵌套的AutoreleasePool"></a>嵌套的AutoreleasePool</h3><p>pop的时候总会释放到上次push的位置为止，多层的pool就是多个哨兵对象而已</p>
+<h2 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h2><p>1.<a href="https://blog.sunnyxx.com/2014/10/15/behind-autorelease/">黑幕背后的Autorelease</a></p>
+]]></content>
+      <categories>
+        <category>iOS</category>
+        <category>Objective-C</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Association关联对象</title>
     <url>/2022/01/21/Association%E5%85%B3%E8%81%94%E5%AF%B9%E8%B1%A1/</url>
     <content><![CDATA[<h2 id="Association-关联对象"><a href="#Association-关联对象" class="headerlink" title="Association 关联对象"></a>Association 关联对象</h2><p>默认情况下，由于分类底层结构的限制，不能直接给 Category 添加成员变量，但是可以通过关联对象间接实现 Category 有成员变量的效果。 </p>
@@ -147,138 +222,6 @@
       <categories>
         <category>iOS</category>
         <category>性能监控与优化</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>AutoreleasePool总结</title>
-    <url>/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<blockquote>
-<p>为什么已经有了 ARC ,但还是需要 @autoreleasePool 的存在？<br>避免内存峰值，及时释放不需要的内存空间</p>
-</blockquote>
-<span id="more"></span>
-
-
-<h2 id="面试题"><a href="#面试题" class="headerlink" title="面试题"></a>面试题</h2><h3 id="一个很经典的面试题"><a href="#一个很经典的面试题" class="headerlink" title="一个很经典的面试题"></a>一个很经典的面试题</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"> <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="built_in">NSString</span> *string = <span class="string">@&quot;stdy&quot;</span>;</span><br><span class="line">        string = [string lowercaseString];</span><br><span class="line">        string = [string stringByAppendingString:<span class="string">@&quot;123&quot;</span>];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;--%@&quot;</span>, string);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<p>上述的这种写法，会使内存慢慢增加，如何解决呢？自动释放池</p>
-<!--more-->
-
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAXFLOAT; i++) &#123;</span><br><span class="line">        <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">            <span class="built_in">NSString</span> *string = <span class="string">@&quot;stdy&quot;</span>;</span><br><span class="line">            string = [string lowercaseString];</span><br><span class="line">            string = [string stringByAppendingString:<span class="string">@&quot;123&quot;</span>];</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;--%@&quot;</span>, string);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="AutoreleasePool爆栈的问题"><a href="#AutoreleasePool爆栈的问题" class="headerlink" title="AutoreleasePool爆栈的问题"></a>AutoreleasePool爆栈的问题</h3><p>autoreleasePool 的自动 drain是靠runLoop进入空闲来触发的。那么如果你在执行一个很重的任务（如一个很多次数的循环）导致runLoop一直不能进入空闲。 那么autoreleasePool 里面对象会越来越多。导致内存爆掉。因此建议如果是循环次数很大的循环，要么循环里面不要产生autorelease的对象，要么就要手动 添加 @autorelease {}来避免内存爆掉。</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用容器的block版本的枚举容器时，内部会自动添加一个AutoreleasePool</span></span><br><span class="line">[array enumerateObjectsUsingBlock:^(<span class="type">id</span> obj, <span class="built_in">NSUInteger</span> idx, <span class="type">BOOL</span> *stop) &#123;</span><br><span class="line">    <span class="comment">// 这里被一个局部@autoreleasepool包围着</span></span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="什么时间会创建自动释放池？"><a href="#什么时间会创建自动释放池？" class="headerlink" title="什么时间会创建自动释放池？"></a>什么时间会创建自动释放池？</h3><p> 从程序启动到加载完成是一个完整的运行循环，然后会停下来，等待用户交互，用户的每一次交互都会启动一次运行循环，来处理用户所有的点击事件、触摸事件，运行循环检测到事件并启动后，就会创建自动释放池。 子线程的 runloop 默认是不工作，无法主动创建，必须手动创建。 自定义的 NSOperation 和 NSThread 需要手动创建自动释放池。比如：自定义的 NSOperation 类中的 main 方法里就必须添加自动释放池。否则出了作用域后，自动释放对象会因为没有自动释放池去处理它，而造成内存泄露。</p>
-<p>但对于 blockOperation 和 invocationOperation 这种默认的Operation ，系统已经帮我们封装好了，不需要手动创建自动释放池。</p>
-<p>@autoreleasepool 当自动释放池被销毁或者耗尽时，会向自动释放池中的所有对象发送 release 消息，释放自动释放池中的所有对象。</p>
-<p>如果在一个vc的viewDidLoad中创建一个 Autorelease对象，那么该对象会在 viewDidAppear 方法执行前就被销毁了。</p>
-<h3 id="访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？"><a href="#访问-weak-修饰的变量，是否已经被注册在了-autoreleasePool-中？为什么？" class="headerlink" title="访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？"></a>访问 __weak 修饰的变量，是否已经被注册在了 @autoreleasePool 中？为什么？</h3><p>肯定的，__weak修饰的变量属于弱引用，如果没有被注册到 @autoreleasePool 中，创建之后也就会随之销毁，为了延长它的生命周期，必须注册到 @autoreleasePool 中，以延缓释放。</p>
-<h3 id="函数返回一个对象时，会对对象-autorelease-么？为什么？"><a href="#函数返回一个对象时，会对对象-autorelease-么？为什么？" class="headerlink" title="函数返回一个对象时，会对对象 autorelease 么？为什么？"></a>函数返回一个对象时，会对对象 autorelease 么？为什么？</h3><p>会 ，为了延长返回对象的生命周期，给其他使用者留足调用的时间</p>
-<h3 id="简要说一下-autoreleasePool-的数据结构？"><a href="#简要说一下-autoreleasePool-的数据结构？" class="headerlink" title="简要说一下 @autoreleasePool 的数据结构？"></a>简要说一下 @autoreleasePool 的数据结构？</h3><p>一个双向链表组成的栈</p>
-<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease.jpg" class="">
-
-<ol>
-<li>AutoreleasePoolPage 组成了一个双向链表，每个page里面都有一个一页的大小的数组，如iOS上一页 0x4000。 每个AutoreleasePoolPage都有个next指针指向下一个可以存储的位置。当next是结尾的时候，这个page就full了。再压入对象就要创建新的page了。</li>
-<li>一般情况下链表最尾端的一个page是 hotPage. 一般autorelease时对象指针会压入这个page。</li>
-<li>objc_autoreleasePoolPush 会返回当前page的 next的地址作为 token. 然后objc_autoreleasePoolPop 会一直倾倒到这个token的地址。</li>
-<li>push和pop一般出现的地方就是： ① @autorelease {} 所包围的代码的前后； ② runLoop 进入和退出时；③ runLoop进入kCFRunLoopBeforeWaiting状态时，也就是常常说的idle时，会先pop, 再 push.</li>
-</ol>
-<h3 id="autoreleasrPool-的释放时机？"><a href="#autoreleasrPool-的释放时机？" class="headerlink" title="@autoreleasrPool 的释放时机？"></a>@autoreleasrPool 的释放时机？</h3><p>App启动后，苹果在主线程 RunLoop 里注册了两个 Observer，其回调都是 _wrapRunLoopWithAutoreleasePoolHandler()。</p>
-<p>第一个 Observer 监视的事件是 Entry(即将进入Loop)，其回调内会调用 _objc_autoreleasePoolPush() 创建自动释放池。其 order 是 -2147483647，优先级最高，保证创建释放池发生在其他所有回调之前。</p>
-<p>第二个 Observer 监视了两个事件： BeforeWaiting(准备进入休眠) 时调用_objc_autoreleasePoolPop() 和 _objc_autoreleasePoolPush() 释放旧的池并创建新池；Exit(即将退出Loop) 时调用 _objc_autoreleasePoolPop() 来释放自动释放池。这个 Observer 的 order 是 2147483647，优先级最低，保证其释放池子发生在其他所有回调之后。</p>
-<p>在主线程执行的代码，通常是写在诸如事件回调、Timer回调内的。这些回调会被 RunLoop 创建好的 AutoreleasePool 环绕着，所以不会出现内存泄漏，开发者也不必显示创建 Pool 了。</p>
-<p><code>Autorelease对象是在当前runloop迭代结束时释放</code></p>
-<h2 id="Autorelease原理"><a href="#Autorelease原理" class="headerlink" title="Autorelease原理"></a>Autorelease原理</h2><h3 id="AutoreleasePoolPage"><a href="#AutoreleasePoolPage" class="headerlink" title="AutoreleasePoolPage"></a>AutoreleasePoolPage</h3><p>ARC下使用<code>@autoreleasepool&#123;&#125;</code>来使用一个AutoreleasePool，随后编译器会将其改写成下面的样子</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> *context = objc_autoreleasePoolPush();</span><br><span class="line"><span class="comment">// &#123;&#125;中的代码</span></span><br><span class="line">objc_autoreleasePoolPop(context);</span><br></pre></td></tr></table></figure>
-
-<h3 id="AutoreleasePoolPage结构—-C-实现的类"><a href="#AutoreleasePoolPage结构—-C-实现的类" class="headerlink" title="AutoreleasePoolPage结构—-C++实现的类"></a>AutoreleasePoolPage结构—-C++实现的类</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="type">magic_t</span> <span class="type">const</span> magic;</span><br><span class="line">id*	next;	<span class="comment">//作为游标指向栈顶最新add进来的autorelease对象的地址</span></span><br><span class="line">pthread <span class="type">const</span> thread;</span><br><span class="line">AutoreleasePoolPage* <span class="type">const</span> parent;</span><br><span class="line">AutoreleasePoolPage* child;</span><br><span class="line"><span class="type">uint32_t</span> <span class="type">const</span> depth;</span><br><span class="line"><span class="type">unit32_t</span> hiwat;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>AutoreleasePoolPage每个对象会开辟4096字节内存（也就是虚拟内存一页的大小）</li>
-<li>一个AutoreleasePoolPage空间被占满时，会新建一个AutoreleasePoolPage对象，连接链表，后来的autorelease对象在新的page加入</li>
-</ul>
-<h3 id="objc-autoreleasePoolPush"><a href="#objc-autoreleasePoolPush" class="headerlink" title="objc_autoreleasePoolPush"></a>objc_autoreleasePoolPush</h3><ul>
-<li>当前线程只有一个AutoreleasePoolPage对象时的内存结构<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease01.jpg" class="">
-上图中，这一页再加入一个autorelease对象就要满了，也就是next指针马上指向栈顶，这时就要建立下一页page对象，与这一页链表连接完成后，新page的next指针被初始化在栈底（begin的位置），然后继续向栈里添加新对象。</li>
-</ul>
-<p><code>向一个对象发送--autorelease消息，就是将这个对象加入到当前AutoreleasePoolPage的栈顶next指针指向的位置</code></p>
-<h3 id="objc-autoreleasePoolPop"><a href="#objc-autoreleasePoolPop" class="headerlink" title="objc_autoreleasePoolPop"></a>objc_autoreleasePoolPop</h3><p>每当进行一次objc_autoreleasePoolPush调用时，runtime会向当前的AutoreleasePoolPage中add进一个哨兵对象，值为0（也就是nil），那么page就变成下面的样子</p>
-<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease02.jpg" class="">
-
-<p>objc_autoreleasePoolPush的返回值就是这个哨兵对象的地址，objc_autoreleasePoolPop（哨兵对象）作为入参</p>
-<ul>
-<li>释放过程</li>
-</ul>
-<ol>
-<li>根据传入的哨兵对象地址找到哨兵对象所处的page</li>
-<li>在当前page中，将晚于哨兵对象（可根据parent跨越page）插入的所有autorelease对象都发送一次release消息，并向回移动next指针到正确位置</li>
-</ol>
-<p>上面Pop之后的内存状态如下</p>
-<img src="/2018/06/28/AutoreleasePool%E6%80%BB%E7%BB%93/autorelease03.jpg" class="">
-
-<h3 id="嵌套的AutoreleasePool"><a href="#嵌套的AutoreleasePool" class="headerlink" title="嵌套的AutoreleasePool"></a>嵌套的AutoreleasePool</h3><p>pop的时候总会释放到上次push的位置为止，多层的pool就是多个哨兵对象而已</p>
-<h2 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h2><p>1.<a href="https://blog.sunnyxx.com/2014/10/15/behind-autorelease/">黑幕背后的Autorelease</a></p>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>Objective-C</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>BST数据结构</title>
-    <url>/2020/07/20/BST%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
-    <content><![CDATA[<p>二叉查找树（Binary Search Treee），也称二叉搜索树，是指一课空树或者具有下列性质的二叉树：</p>
-<ol>
-<li>若任意节点的左子树不空，则左子树上所有节点的值均小于它的根节点的值；</li>
-<li>若任意节点的右子树不空，则右子树上所有节点的值均大于或等于它的根节点的值；</li>
-<li>任意节点的左、右子树也分别为二叉搜索树；</li>
-</ol>
-<p>二叉搜索树相比其他数据结构的优势在于查找、插入的时间复杂度较低。为O（log n）</p>
-<span id="more"></span>
-
-<h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><p>向一个二叉搜索树b中插入一个节点s的算法过程为：</p>
-<ol>
-<li>若b是空树，则将s所指节点作为根节点插入，否则：</li>
-<li>若s-&gt;data 等于b的根节点的数据域之值，则返沪，否则：</li>
-<li>若s-&gt;data小于b的根节点的数据域之值，则把s所指节点插入到左子树中，否则：</li>
-<li>把s所指节点插入到右子树中。（新插入节点总是叶子节点）</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 当二元搜尋樹T中不存在关键字等于e.key的数据元素时，插入e并返回TRUE，否则返回 FALSE */</span></span><br><span class="line">Status <span class="title function_">InsertBST</span><span class="params">(BiTree *&amp;T, ElemType e)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!T) &#123;</span><br><span class="line">        s = new BiTNode;</span><br><span class="line">        s-&gt;data = e;</span><br><span class="line">        s-&gt;lchild = s-&gt;rchild = <span class="literal">NULL</span>;</span><br><span class="line">        T = s; <span class="comment">// 被插節点*s为新的根结点</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (e.key == T-&gt;data.key)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;<span class="comment">// 关键字等于e.key的数据元素，返回錯誤</span></span><br><span class="line">    <span class="keyword">if</span> (e.key &lt; T-&gt;data.key)</span><br><span class="line">        InsertBST(T-&gt;lchild, e);  <span class="comment">// 將 e 插入左子樹</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        InsertBST(T-&gt;rchild, e);  <span class="comment">// 將 e 插入右子樹</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><p>在二叉搜索树b中查找x的过程为：</p>
-<ol>
-<li>若b是空树，则搜索失败，否则：</li>
-<li>若x等于b的根节点的数据域之值，则查找成功；否则：</li>
-<li>若x小于b的根节点的数据域之值，则搜索左子树；否则：</li>
-<li>查找右子树</li>
-</ol>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Status <span class="title">SearchBST</span><span class="params">(BiTree T, KeyType key, BiTree f, BiTree &amp;p)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 在根指针T所指二元查找樹中递归地查找其關键字等於key的數據元素，若查找成功，</span></span><br><span class="line">    <span class="comment">// 則指针p指向該數據元素節點，并返回TRUE，否則指针指向查找路徑上訪問的最後</span></span><br><span class="line">    <span class="comment">// 一個節點并返回FALSE，指针f指向T的雙親，其初始调用值為NULL</span></span><br><span class="line">    <span class="keyword">if</span> (!T) &#123; <span class="comment">// 查找不成功</span></span><br><span class="line">        p = f;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key == T-&gt;data.key) &#123; <span class="comment">// 查找成功</span></span><br><span class="line">        p = T;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key &lt; T-&gt;data.key) <span class="comment">// 在左子樹中繼續查找</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">SearchBST</span>(T-&gt;lchild, key, T, p);</span><br><span class="line">    <span class="keyword">else</span> <span class="comment">// 在右子樹中繼續查找</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">SearchBST</span>(T-&gt;rchild, key, T, p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h3><p>中序遍历   二叉查找树的Python代码：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> node <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">traverse_binary_tree(node.leftChild, callback)</span><br><span class="line">callback(node.value)</span><br><span class="line">traverse_binary_tree(node.rightChild, callback)</span><br></pre></td></tr></table></figure>
-<h3 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h3><p>&#96;&#96;&#96;cpp<br>#include <iostream></p>
-<p> struct TreeNode {<br>    int val;<br>    TreeNode *left;<br>    TreeNode *right;<br>    TreeNode(int x) : val(x), left(NULL), right(NULL) {}<br>};</p>
-<p>bool addElem(TreeNode*&amp; node, int i)<br>{<br>    if (!node) {<br>        node &#x3D; new TreeNode(i);<br>        return true;<br>    } else {<br>        if (node-&gt;val&#x3D;&#x3D;i) {<br>            return false;<br>        }<br>        else if (node-&gt;val&lt;i) {<br>            addElem(node-&gt;right,i);<br>        }<br>        else{<br>            addElem(node-&gt;left,i);<br>        }<br>        return true;<br>    }<br>}</p>
-<p>bool searchBST(TreeNode* tree,TreeNode node)<br>{<br>    if (!tree) {<br>        return false;<br>    }<br>    else<br>    {<br>        if (tree-&gt;val&#x3D;&#x3D;node.val) {<br>            return true;<br>        }<br>        else if (tree-&gt;val&gt;node.val)<br>        {<br>           return  searchBST(tree-&gt;left, node);<br>        }<br>        else<br>        {<br>           return  searchBST(tree-&gt;right, node);<br>        }<br>    }<br>}<br>void  inOrderTraversal(TreeNode* node)<br>{<br>    if (node) {<br>        inOrderTraversal(node-&gt;left);<br>        printf(“%d “,node-&gt;val);<br>        inOrderTraversal(node-&gt;right);<br>    }</p>
-<p>}<br>int main(int argc, const char * argv[]) {<br>     TreeNode*  head&#x3D;NULL;</p>
-<pre><code> addElem(head,8);
- addElem(head,3);
- addElem(head,5);
- addElem(head,6);
- addElem(head,9);
- addElem(head,7);
-
- inOrderTraversal(head);
-
-TreeNode tmp=TreeNode(10);
-TreeNode tmp2=TreeNode(5);
-printf(&quot;\n search tmp %d tmp2 %d\n&quot;,searchBST(head,tmp),searchBST(head,tmp2));
-
-return 0;
-</code></pre>
-<p>}&#96;&#96;&#96;</p>
-]]></content>
-      <categories>
-        <category>算法与数据结构</category>
       </categories>
   </entry>
   <entry>
@@ -371,6 +314,63 @@ return 0;
       <categories>
         <category>iOS</category>
         <category>性能监控与优化</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>BST数据结构</title>
+    <url>/2020/07/20/BST%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<p>二叉查找树（Binary Search Treee），也称二叉搜索树，是指一课空树或者具有下列性质的二叉树：</p>
+<ol>
+<li>若任意节点的左子树不空，则左子树上所有节点的值均小于它的根节点的值；</li>
+<li>若任意节点的右子树不空，则右子树上所有节点的值均大于或等于它的根节点的值；</li>
+<li>任意节点的左、右子树也分别为二叉搜索树；</li>
+</ol>
+<p>二叉搜索树相比其他数据结构的优势在于查找、插入的时间复杂度较低。为O（log n）</p>
+<span id="more"></span>
+
+<h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><p>向一个二叉搜索树b中插入一个节点s的算法过程为：</p>
+<ol>
+<li>若b是空树，则将s所指节点作为根节点插入，否则：</li>
+<li>若s-&gt;data 等于b的根节点的数据域之值，则返沪，否则：</li>
+<li>若s-&gt;data小于b的根节点的数据域之值，则把s所指节点插入到左子树中，否则：</li>
+<li>把s所指节点插入到右子树中。（新插入节点总是叶子节点）</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 当二元搜尋樹T中不存在关键字等于e.key的数据元素时，插入e并返回TRUE，否则返回 FALSE */</span></span><br><span class="line">Status <span class="title function_">InsertBST</span><span class="params">(BiTree *&amp;T, ElemType e)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!T) &#123;</span><br><span class="line">        s = new BiTNode;</span><br><span class="line">        s-&gt;data = e;</span><br><span class="line">        s-&gt;lchild = s-&gt;rchild = <span class="literal">NULL</span>;</span><br><span class="line">        T = s; <span class="comment">// 被插節点*s为新的根结点</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (e.key == T-&gt;data.key)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;<span class="comment">// 关键字等于e.key的数据元素，返回錯誤</span></span><br><span class="line">    <span class="keyword">if</span> (e.key &lt; T-&gt;data.key)</span><br><span class="line">        InsertBST(T-&gt;lchild, e);  <span class="comment">// 將 e 插入左子樹</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        InsertBST(T-&gt;rchild, e);  <span class="comment">// 將 e 插入右子樹</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><p>在二叉搜索树b中查找x的过程为：</p>
+<ol>
+<li>若b是空树，则搜索失败，否则：</li>
+<li>若x等于b的根节点的数据域之值，则查找成功；否则：</li>
+<li>若x小于b的根节点的数据域之值，则搜索左子树；否则：</li>
+<li>查找右子树</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Status <span class="title">SearchBST</span><span class="params">(BiTree T, KeyType key, BiTree f, BiTree &amp;p)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 在根指针T所指二元查找樹中递归地查找其關键字等於key的數據元素，若查找成功，</span></span><br><span class="line">    <span class="comment">// 則指针p指向該數據元素節點，并返回TRUE，否則指针指向查找路徑上訪問的最後</span></span><br><span class="line">    <span class="comment">// 一個節點并返回FALSE，指针f指向T的雙親，其初始调用值為NULL</span></span><br><span class="line">    <span class="keyword">if</span> (!T) &#123; <span class="comment">// 查找不成功</span></span><br><span class="line">        p = f;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key == T-&gt;data.key) &#123; <span class="comment">// 查找成功</span></span><br><span class="line">        p = T;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key &lt; T-&gt;data.key) <span class="comment">// 在左子樹中繼續查找</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">SearchBST</span>(T-&gt;lchild, key, T, p);</span><br><span class="line">    <span class="keyword">else</span> <span class="comment">// 在右子樹中繼續查找</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">SearchBST</span>(T-&gt;rchild, key, T, p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h3><p>中序遍历   二叉查找树的Python代码：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> node <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">traverse_binary_tree(node.leftChild, callback)</span><br><span class="line">callback(node.value)</span><br><span class="line">traverse_binary_tree(node.rightChild, callback)</span><br></pre></td></tr></table></figure>
+<h3 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h3><p>&#96;&#96;&#96;cpp<br>#include <iostream></p>
+<p> struct TreeNode {<br>    int val;<br>    TreeNode *left;<br>    TreeNode *right;<br>    TreeNode(int x) : val(x), left(NULL), right(NULL) {}<br>};</p>
+<p>bool addElem(TreeNode*&amp; node, int i)<br>{<br>    if (!node) {<br>        node &#x3D; new TreeNode(i);<br>        return true;<br>    } else {<br>        if (node-&gt;val&#x3D;&#x3D;i) {<br>            return false;<br>        }<br>        else if (node-&gt;val&lt;i) {<br>            addElem(node-&gt;right,i);<br>        }<br>        else{<br>            addElem(node-&gt;left,i);<br>        }<br>        return true;<br>    }<br>}</p>
+<p>bool searchBST(TreeNode* tree,TreeNode node)<br>{<br>    if (!tree) {<br>        return false;<br>    }<br>    else<br>    {<br>        if (tree-&gt;val&#x3D;&#x3D;node.val) {<br>            return true;<br>        }<br>        else if (tree-&gt;val&gt;node.val)<br>        {<br>           return  searchBST(tree-&gt;left, node);<br>        }<br>        else<br>        {<br>           return  searchBST(tree-&gt;right, node);<br>        }<br>    }<br>}<br>void  inOrderTraversal(TreeNode* node)<br>{<br>    if (node) {<br>        inOrderTraversal(node-&gt;left);<br>        printf(“%d “,node-&gt;val);<br>        inOrderTraversal(node-&gt;right);<br>    }</p>
+<p>}<br>int main(int argc, const char * argv[]) {<br>     TreeNode*  head&#x3D;NULL;</p>
+<pre><code> addElem(head,8);
+ addElem(head,3);
+ addElem(head,5);
+ addElem(head,6);
+ addElem(head,9);
+ addElem(head,7);
+
+ inOrderTraversal(head);
+
+TreeNode tmp=TreeNode(10);
+TreeNode tmp2=TreeNode(5);
+printf(&quot;\n search tmp %d tmp2 %d\n&quot;,searchBST(head,tmp),searchBST(head,tmp2));
+
+return 0;
+</code></pre>
+<p>}&#96;&#96;&#96;</p>
+]]></content>
+      <categories>
+        <category>算法与数据结构</category>
       </categories>
   </entry>
   <entry>
@@ -979,7 +979,7 @@ return 0;
 <span id="more"></span>
 
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a href="https://hexo.io/zh-cn/docs/">Hexo官方文档</a></p>
-<h2 id="安装完后Hexo-s-运行报错"><a href="#安装完后Hexo-s-运行报错" class="headerlink" title="安装完后Hexo s 运行报错"></a>安装完后Hexo s 运行报错</h2><p>1.提示你 执行  npm install hexo –save<br>执行后会报warning<br>npm WARN engine <a href="mailto:&#x68;&#x65;&#120;&#111;&#x40;&#51;&#x2e;&#x37;&#x2e;&#x31;">&#x68;&#x65;&#120;&#111;&#x40;&#51;&#x2e;&#x37;&#x2e;&#x31;</a>: wanted: {“node”:”&gt;&#x3D;6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})<br>这个时候需要更新下node版本<br>2.升级方法</p>
+<h2 id="安装完后Hexo-s-运行报错"><a href="#安装完后Hexo-s-运行报错" class="headerlink" title="安装完后Hexo s 运行报错"></a>安装完后Hexo s 运行报错</h2><p>1.提示你 执行  npm install hexo –save<br>执行后会报warning<br>npm WARN engine <a href="mailto:&#104;&#101;&#x78;&#111;&#x40;&#51;&#46;&#55;&#x2e;&#49;">&#104;&#101;&#x78;&#111;&#x40;&#51;&#46;&#55;&#x2e;&#49;</a>: wanted: {“node”:”&gt;&#x3D;6.9.0”} (current: {“node”:”4.8.7”,”npm”:”2.15.11”})<br>这个时候需要更新下node版本<br>2.升级方法</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo npm cache clean -f</span><br><span class="line">  sudo npm install -g n</span><br><span class="line">  sudo n stable</span><br></pre></td></tr></table></figure>
 <p>重启终端后 查看版本</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ node -v</span><br></pre></td></tr></table></figure>
@@ -1175,6 +1175,53 @@ return 0;
       </tags>
   </entry>
   <entry>
+    <title>Improve Performance in Your iOS Applications ⅠV</title>
+    <url>/2022/10/31/Improve%20Performance%20iOS%20%E2%85%A0V/</url>
+    <content><![CDATA[<p>翻译几篇iOS性能优化的文章 ⅠV，这是本系列的第四篇文章，重点关注UI改进、代码改进、动画、视觉体验最佳实践等</p>
+<span id="more"></span>
+
+<p>有许多因素，包括速度、性能、UI交互等，对你的iOS应用的成功至关重要。缓慢和无响应的应用程序被用户所鄙视，因此在向公众发布之前进行彻底的测试是至关重要的。 </p>
+<p>本文中提到的技术旨在测试<code>iOS</code>应用程序的性能，可能需要<code>iOS</code>测试的基本知识;不过，本指南还将介绍测试的基本原理，以便您可以开始编写第一个测试用例。 </p>
+<p>在我们开始之前，先快速回顾一下本系列的前三篇文章…… </p>
+<p>本系列的第一篇文章展示了一些性能技巧，以帮助您改进iOS应用程序的编译时间，构建更快的应用程序，并专注于在构建系统中改进iOS性能。本系列的第二篇文章将讨论帮助您改进UI交互、媒体播放、动画和视觉效果等的性能提示—提供流畅和无缝的体验。在本系列的第3部分中，我将讨论通过现有代码库、模块化架构、利用代码中的可重用组件等优化iOS应用程序性能的技术。</p>
+<h2 id="性能测试基础知识"><a href="#性能测试基础知识" class="headerlink" title="性能测试基础知识"></a>性能测试基础知识</h2><p>开发人员和测试人员在虚拟环境中审查和分析应用程序的性能，以预测当产品发布时用户将如何与产品交互。这意味着:</p>
+<ul>
+<li>应用程序在高流量(high traffic periods)期间的性能测试。 </li>
+<li>糟糕的互联网接入可能会对应用的稳定性产生负面影响。 </li>
+<li>与各种移动设备的兼容性。 </li>
+<li>分析应用程序的整体性能。 </li>
+<li>准确地发现和报告错误。 </li>
+<li>对应用程序处理额外需求能力的评估。</li>
+</ul>
+<p>当同时发生的用户或活动的数量增加时，开发人员可能需要查看后端服务器和网络请求的性能，并进行更改以保持整体用户体验的平稳。当流量很大时，了解应用程序的工作速度和系统的工作方式是很有帮助的。负载测试可以让您了解数据从后端服务器加载到iOS应用程序所需的时间。如果应用程序显示内容所需的时间超过几秒钟，则需要研究改进方法。</p>
+<p>您可以通过应用程序的压力测试来评估应用程序的持久性，例如数据处理、响应速度和在无响应服务器等情况下的功能行为。这些数据可用于检测和修复应用程序瓶颈，从而提高应用程序性能。与压力测试一样，峰值测试包括增加需求，以查看应用程序是否会因为管理不当的大量数据而变慢，或者在某些情况下停止响应并崩溃，或者由于网络请求和响应的峰值(用户活动呈指数增长)而导致服务器崩溃。它可以帮助您确定服务器的加载能力，以及应用程序在关键场景中的行为。频繁出现用户峰值的应用需要进行峰值测试。</p>
+<p>批量测试评估应用程序的总容量。此测试评估应用程序管理大量数据而不降低或丢失数据的能力。另一方面，容量测试可以识别用户在应用性能下降时所面临的困难。随着应用程序用户基数的增长，它的可靠性也会增加。</p>
+<p>可伸缩性测试分析响应时间、每秒请求和事务处理速度，以确定后端服务器管理不断增加的工作负载的能力。虽然它不直接专注于测试你的iOS应用程序，但它肯定可以识别支持iOS应用程序的后端服务器的问题，以确保数据流的稳定性和整体用户体验。持久性测试衡量的是应用的长期性能。在耐力测试中，开发人员和测试人员长时间模拟强大的流量，以验证应用程序的稳定性。</p>
+<h2 id="iOS测试基础知识"><a href="#iOS测试基础知识" class="headerlink" title="iOS测试基础知识"></a>iOS测试基础知识</h2><p>第一步是了解在iOS中如何进行测试，以及如何开始测试iOS应用程序。要编写测试用例，你需要关注不同类型的测试:</p>
+<ul>
+<li>单元测试:测试一个不依赖于任何外部依赖的函数，如验证函数逻辑、验证电子邮件地址等。 </li>
+<li>UI测试:复制用户行为和操作，例如在应用程序中导航。 </li>
+<li>集成测试:测试依赖于另一个函数的单个函数，例如，测试对本地文件或数据库调用的操作。 </li>
+<li>性能测试:测试应用程序在实际使用过程中的表现，例如，加载一个非常大的图像结果列表。</li>
+</ul>
+<p>首先，让我们用下面的例子来理解单元测试。下面的函数返回一个整数的阶乘。要测试下面的函数，可以运行这个示例并使用不同的数字测试它，例如4的阶乘等于24</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">getFactorial</span>(<span class="params">of</span> <span class="params">num</span>: <span class="type">Int</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> fact <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">	<span class="keyword">for</span> factor <span class="keyword">in</span> <span class="number">1</span><span class="operator">...</span>num &#123;</span><br><span class="line">		fact <span class="operator">=</span> fact <span class="operator">*</span> factor</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fact</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，为了自动化检查，让我们编写一个简单的函数，它将在逻辑上检查条件并返回相应的结果。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">getFactorialTest</span>: <span class="title class_">XCTestCase</span> &#123;</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">testGetFactorial</span>() &#123;</span><br><span class="line">		<span class="keyword">let</span> factorial <span class="operator">=</span> (<span class="number">1</span><span class="operator">...</span><span class="number">4</span>).map(<span class="type">Double</span>.<span class="keyword">init</span>).reduce(<span class="number">1.0</span>, <span class="operator">*</span>)</span><br><span class="line">		<span class="type">XCTAssertEqual</span>(factorial, <span class="number">24.0</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段简单的代码在逻辑上检查阶乘是否正确，如果结果不正确，则测试失败。为了本文的简洁，接下来的部分将关注如何在iOS中运行测试来检查应用程序的性能。</p>
+<p>…</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>要获得可靠的结果，必须运行有意义的测试。不准确的测试结果可能会阻止应用程序的部署。如果你的程序不能为真正的用户工作，你的时间和金钱将被浪费，如果一个应用程序发布给公众时存在bug或性能问题，负面的在线评论可能会扼杀它的受欢迎程度。苹果生态系统和Android生态系统中的设备和操作系统如此多样化，以至于模拟器可能不足以对应用进行完整的测试覆盖。诸如<code>AWS Device Farm</code>、<code>Kobiton</code>、<code>Hockeyapp</code>等仿真工具可以让您比较软件版本或与竞争对手进行测试。您需要在模拟器和实际设备上测试应用程序的性能，以获得准确的移动用户体验数据。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.sentry.io/2022/06/27/improve-performance-in-your-ios-applications-part-4/">Part 4</a></p>
+]]></content>
+      <categories>
+        <category>iOS</category>
+        <category>性能优化</category>
+      </categories>
+      <tags>
+        <tag>翻译</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Improve Performance in Your iOS Applications Ⅰ</title>
     <url>/2022/10/26/Improve%20Performance%20iOS%20%E2%85%A0/</url>
     <content><![CDATA[<p>翻译几篇iOS性能优化的文章 Ⅰ，在第一篇文章中，我们将专注于iOS性能提示，帮助您提高iOS应用程序的编译时间，更快地构建，并在构建系统中改进iOS性能。让我们开始吧。</p>
@@ -1286,53 +1333,6 @@ return 0;
 <p>Sentry支持大量的集成，通过不同的工作流程和提供程序来实现您的合适目标。</p>
 <h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>在本文中，我们介绍了如何提高iOS应用程序性能、iOS性能测试工具、iOS性能监控等。我们主要关注构建过程和构建系统。虽然我们的努力是将所有内容集中在一个屋檐下，但iOS性能技巧的话题是广泛的，应该给予适当的公正。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.sentry.io/2022/04/07/improve-performance-in-your-ios-applications-part-1/">Improve Performance in Your iOS Applications</a><br><a href="">有道翻译</a><br><a href="https://irace.me/swift-profiling">Profiling your Swift compilation times</a></p>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>性能优化</category>
-      </categories>
-      <tags>
-        <tag>翻译</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Improve Performance in Your iOS Applications ⅠV</title>
-    <url>/2022/10/31/Improve%20Performance%20iOS%20%E2%85%A0V/</url>
-    <content><![CDATA[<p>翻译几篇iOS性能优化的文章 ⅠV，这是本系列的第四篇文章，重点关注UI改进、代码改进、动画、视觉体验最佳实践等</p>
-<span id="more"></span>
-
-<p>有许多因素，包括速度、性能、UI交互等，对你的iOS应用的成功至关重要。缓慢和无响应的应用程序被用户所鄙视，因此在向公众发布之前进行彻底的测试是至关重要的。 </p>
-<p>本文中提到的技术旨在测试<code>iOS</code>应用程序的性能，可能需要<code>iOS</code>测试的基本知识;不过，本指南还将介绍测试的基本原理，以便您可以开始编写第一个测试用例。 </p>
-<p>在我们开始之前，先快速回顾一下本系列的前三篇文章…… </p>
-<p>本系列的第一篇文章展示了一些性能技巧，以帮助您改进iOS应用程序的编译时间，构建更快的应用程序，并专注于在构建系统中改进iOS性能。本系列的第二篇文章将讨论帮助您改进UI交互、媒体播放、动画和视觉效果等的性能提示—提供流畅和无缝的体验。在本系列的第3部分中，我将讨论通过现有代码库、模块化架构、利用代码中的可重用组件等优化iOS应用程序性能的技术。</p>
-<h2 id="性能测试基础知识"><a href="#性能测试基础知识" class="headerlink" title="性能测试基础知识"></a>性能测试基础知识</h2><p>开发人员和测试人员在虚拟环境中审查和分析应用程序的性能，以预测当产品发布时用户将如何与产品交互。这意味着:</p>
-<ul>
-<li>应用程序在高流量(high traffic periods)期间的性能测试。 </li>
-<li>糟糕的互联网接入可能会对应用的稳定性产生负面影响。 </li>
-<li>与各种移动设备的兼容性。 </li>
-<li>分析应用程序的整体性能。 </li>
-<li>准确地发现和报告错误。 </li>
-<li>对应用程序处理额外需求能力的评估。</li>
-</ul>
-<p>当同时发生的用户或活动的数量增加时，开发人员可能需要查看后端服务器和网络请求的性能，并进行更改以保持整体用户体验的平稳。当流量很大时，了解应用程序的工作速度和系统的工作方式是很有帮助的。负载测试可以让您了解数据从后端服务器加载到iOS应用程序所需的时间。如果应用程序显示内容所需的时间超过几秒钟，则需要研究改进方法。</p>
-<p>您可以通过应用程序的压力测试来评估应用程序的持久性，例如数据处理、响应速度和在无响应服务器等情况下的功能行为。这些数据可用于检测和修复应用程序瓶颈，从而提高应用程序性能。与压力测试一样，峰值测试包括增加需求，以查看应用程序是否会因为管理不当的大量数据而变慢，或者在某些情况下停止响应并崩溃，或者由于网络请求和响应的峰值(用户活动呈指数增长)而导致服务器崩溃。它可以帮助您确定服务器的加载能力，以及应用程序在关键场景中的行为。频繁出现用户峰值的应用需要进行峰值测试。</p>
-<p>批量测试评估应用程序的总容量。此测试评估应用程序管理大量数据而不降低或丢失数据的能力。另一方面，容量测试可以识别用户在应用性能下降时所面临的困难。随着应用程序用户基数的增长，它的可靠性也会增加。</p>
-<p>可伸缩性测试分析响应时间、每秒请求和事务处理速度，以确定后端服务器管理不断增加的工作负载的能力。虽然它不直接专注于测试你的iOS应用程序，但它肯定可以识别支持iOS应用程序的后端服务器的问题，以确保数据流的稳定性和整体用户体验。持久性测试衡量的是应用的长期性能。在耐力测试中，开发人员和测试人员长时间模拟强大的流量，以验证应用程序的稳定性。</p>
-<h2 id="iOS测试基础知识"><a href="#iOS测试基础知识" class="headerlink" title="iOS测试基础知识"></a>iOS测试基础知识</h2><p>第一步是了解在iOS中如何进行测试，以及如何开始测试iOS应用程序。要编写测试用例，你需要关注不同类型的测试:</p>
-<ul>
-<li>单元测试:测试一个不依赖于任何外部依赖的函数，如验证函数逻辑、验证电子邮件地址等。 </li>
-<li>UI测试:复制用户行为和操作，例如在应用程序中导航。 </li>
-<li>集成测试:测试依赖于另一个函数的单个函数，例如，测试对本地文件或数据库调用的操作。 </li>
-<li>性能测试:测试应用程序在实际使用过程中的表现，例如，加载一个非常大的图像结果列表。</li>
-</ul>
-<p>首先，让我们用下面的例子来理解单元测试。下面的函数返回一个整数的阶乘。要测试下面的函数，可以运行这个示例并使用不同的数字测试它，例如4的阶乘等于24</p>
-<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">getFactorial</span>(<span class="params">of</span> <span class="params">num</span>: <span class="type">Int</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> fact <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">	<span class="keyword">for</span> factor <span class="keyword">in</span> <span class="number">1</span><span class="operator">...</span>num &#123;</span><br><span class="line">		fact <span class="operator">=</span> fact <span class="operator">*</span> factor</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> fact</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>现在，为了自动化检查，让我们编写一个简单的函数，它将在逻辑上检查条件并返回相应的结果。</p>
-<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">getFactorialTest</span>: <span class="title class_">XCTestCase</span> &#123;</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">testGetFactorial</span>() &#123;</span><br><span class="line">		<span class="keyword">let</span> factorial <span class="operator">=</span> (<span class="number">1</span><span class="operator">...</span><span class="number">4</span>).map(<span class="type">Double</span>.<span class="keyword">init</span>).reduce(<span class="number">1.0</span>, <span class="operator">*</span>)</span><br><span class="line">		<span class="type">XCTAssertEqual</span>(factorial, <span class="number">24.0</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这段简单的代码在逻辑上检查阶乘是否正确，如果结果不正确，则测试失败。为了本文的简洁，接下来的部分将关注如何在iOS中运行测试来检查应用程序的性能。</p>
-<p>…</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>要获得可靠的结果，必须运行有意义的测试。不准确的测试结果可能会阻止应用程序的部署。如果你的程序不能为真正的用户工作，你的时间和金钱将被浪费，如果一个应用程序发布给公众时存在bug或性能问题，负面的在线评论可能会扼杀它的受欢迎程度。苹果生态系统和Android生态系统中的设备和操作系统如此多样化，以至于模拟器可能不足以对应用进行完整的测试覆盖。诸如<code>AWS Device Farm</code>、<code>Kobiton</code>、<code>Hockeyapp</code>等仿真工具可以让您比较软件版本或与竞争对手进行测试。您需要在模拟器和实际设备上测试应用程序的性能，以获得准确的移动用户体验数据。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://blog.sentry.io/2022/06/27/improve-performance-in-your-ios-applications-part-4/">Part 4</a></p>
 ]]></content>
       <categories>
         <category>iOS</category>
@@ -2340,114 +2340,6 @@ return 0;
       </categories>
   </entry>
   <entry>
-    <title>ReactiveObjC 使用</title>
-    <url>/2021/02/21/ReactiveObjC%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<blockquote>
-<p>ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 <a href="http://reactivex.io/languages.html">Rx</a> 在 Objective-C 语言中的实现</p>
-</blockquote>
-<p> Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 <code>RACSignal</code> 和 <code>RACSequence</code></p>
-<span id="more"></span>
-
-<h3 id="RACSignal-和-RACSequence"><a href="#RACSignal-和-RACSequence" class="headerlink" title="RACSignal 和 RACSequence"></a>RACSignal 和 RACSequence</h3><p>最大区别就是：</p>
-<ol>
-<li><p>RACSignal 是推驱动的，也就是在每次信号中的出现新的数据时，所有的订阅者都会自动接受到最新的值；</p>
-</li>
-<li><p>RACSequence 作为拉驱动的数据流，在改变时并不会通知使用当前序列的对象，只有使用者再次从这个 RACSequence 对象中获取数据才能更新，它的更新是需要使用者自己拉取的。</p>
-</li>
-</ol>
-<p>eg：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">-(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span>.networkingRAC.executionSignal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">        <span class="built_in">NSArray</span>&lt;WSFOrderAddressRegionModel*&gt;*  origionModelAry=[<span class="keyword">self</span>.adrRegionAPi fetchDataFromModel:WSFOrderAddressRegionModel.class];</span><br><span class="line">        </span><br><span class="line">        RACSequence *origionModelSeq = [origionModelAry.rac_sequence map:^<span class="type">id</span>(WSFOrderAddressRegionModel *model) &#123;</span><br><span class="line">            <span class="keyword">return</span> [[YWAddressModel alloc] initWithModel:model];</span><br><span class="line">        &#125;];</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">self</span>.orderAddrAry=origionModelSeq.array;</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="RACSignal-和-RACSequence转换"><a href="#RACSignal-和-RACSequence转换" class="headerlink" title="RACSignal 和 RACSequence转换"></a>RACSignal 和 RACSequence转换</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACSequence *sequence = @[@<span class="number">1</span>, @<span class="number">2</span>, @<span class="number">3</span>].rac_sequence;</span><br><span class="line">RACSignal *signal = sequence.signal;</span><br><span class="line">[signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    [subscriber sendNext:@<span class="number">1</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">2</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">3</span>];</span><br><span class="line">    [subscriber sendCompleted];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, signal.toArray.rac_sequence);</span><br></pre></td></tr></table></figure>
-
-<h3 id="热信号-RACSubject"><a href="#热信号-RACSubject" class="headerlink" title="热信号 RACSubject"></a>热信号 RACSubject</h3><p>RACSubject 是 RACSignal 的子类,RACSubject 在 RACSignal 对象之上进行了简单的修改，将原有的冷信号改造成了热信号，将不可变变成了可变。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">RACSubject 存储了一个遵循 RACSubscriber 协议的对象列表以及所有的消息，</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>RACSubject 对外的接口</li>
-</ul>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACSubject</span> : <span class="title">RACSignal</span> &lt;<span class="title">RACSubscriber</span>&gt;</span></span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)subject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-
-
-<p>它与 RACSignal 最大的不同就是：RACSubject 实现了 RACSubscriber 协议</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">RACSubscriber</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"><span class="keyword">@required</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="keyword">nullable</span> <span class="type">id</span>)value;</span><br><span class="line">- (<span class="type">void</span>)sendError:(<span class="keyword">nullable</span> <span class="built_in">NSError</span> *)error;</span><br><span class="line">- (<span class="type">void</span>)sendCompleted;</span><br><span class="line">- (<span class="type">void</span>)didSubscribeWithDisposable:(RACCompoundDisposable *)disposable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-
-
-<h4 id="冷热信号"><a href="#冷热信号" class="headerlink" title="冷热信号"></a>冷热信号</h4><p>冷信号是被动的，只会在被订阅时向订阅者发送通知；热信号是主动的，它会在任意时间发出通知，与订阅者的订阅时间无关。</p>
-<p>也就是说冷信号所有的订阅者会在订阅时收到完全相同的序列；而订阅热信号之后，只会收到在订阅之后发出的序列。</p>
-<p>热信号的订阅者能否收到消息取决于订阅的时间。</p>
-<p>eg:</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//冷信号 RACSingal</span></span><br><span class="line">-(<span class="type">void</span>)setupRAC&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>)</span><br><span class="line">    [[RACObserve(<span class="keyword">self</span>, cellModel) skip:<span class="number">1</span>] subscribeNext:^(WSFOrderLogisticsCompanyLastestModel*  _Nullable model) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="keyword">if</span> (model.isSelected) &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">YES</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        [ <span class="keyword">self</span>-&gt;itemBtn setTitle:model.shipperName forState:<span class="built_in">UIControlStateNormal</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 热信号 RACSubject</span></span><br><span class="line"><span class="comment">// 直接指派</span></span><br><span class="line">    <span class="keyword">if</span> (kAppDelegate.appHadEnterBackground) &#123;</span><br><span class="line">        [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span><span class="comment">//第一次启动</span></span><br><span class="line">    &#123;</span><br><span class="line">        __block RACDisposable* disposable= [WSFUSERManger.userPermissionUpdatedSub subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">            [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">            [disposable dispose];</span><br><span class="line">         &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//用户权限</span></span><br><span class="line">       <span class="keyword">@property</span>(<span class="keyword">nonatomic</span>)RACSubject* userPermissionUpdatedSub;<span class="comment">//用户权限更新</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">        [[<span class="keyword">self</span>.networkingRACs[UserPermissionApiIdentifier] executionSignal] subscribeNext:^(<span class="type">id</span> x) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="built_in">NSMutableDictionary</span> *tempDic = [<span class="built_in">NSMutableDictionary</span> dictionary];</span><br><span class="line">        <span class="built_in">NSArray</span> *permissionModelArys = [<span class="keyword">self</span>.userPermissionApi fetchDataFromModel:WSFMenuPermissionModel.class];</span><br><span class="line">        [permissionModelArys enumerateObjectsUsingBlock:^(WSFMenuPermissionModel *obj, <span class="built_in">NSUInteger</span> idx, <span class="type">BOOL</span> * _Nonnull stop) &#123;</span><br><span class="line">            <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;allow&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;deny&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            tempDic[obj.nameEN] = obj;</span><br><span class="line">        &#125;];</span><br><span class="line">        <span class="keyword">self</span>.menuPermissionModelDics = tempDic;</span><br><span class="line">        [<span class="keyword">self</span>.userPermissionUpdatedSub sendNext:<span class="literal">nil</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-
-<h4 id="RACBehaviorSubject-与-RACReplaySubject"><a href="#RACBehaviorSubject-与-RACReplaySubject" class="headerlink" title="RACBehaviorSubject 与 RACReplaySubject"></a>RACBehaviorSubject 与 RACReplaySubject</h4><p>RACBehaviorSubject 在订阅时会向订阅者发送最新的消息，<br>RACReplaySubject   在订阅之后可以重新发送之前的所有消息序列。</p>
-<h5 id="RACBehaviorSubject"><a href="#RACBehaviorSubject" class="headerlink" title="RACBehaviorSubject"></a>RACBehaviorSubject</h5><p>RACBehaviorSubject，它在内部会保存一个 currentValue 对象，也就是最后一次发送的消息：</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACBehaviorSubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="type">id</span> currentValue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="type">id</span>)value &#123;</span><br><span class="line">	<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">		<span class="keyword">self</span>.currentValue = value;</span><br><span class="line">		[<span class="variable language_">super</span> sendNext:value];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>向最新的订阅者发送之前的消息，这是通过覆写 -subscribe: 方法实现的</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACDisposable *)subscribe:(<span class="type">id</span>&lt;RACSubscriber&gt;)subscriber &#123;</span><br><span class="line">	RACDisposable *subscriptionDisposable = [<span class="variable language_">super</span> subscribe:subscriber];</span><br><span class="line"></span><br><span class="line">	RACDisposable *schedulingDisposable = [RACScheduler.subscriptionScheduler schedule:^&#123;</span><br><span class="line">		<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">			[subscriber sendNext:<span class="keyword">self</span>.currentValue];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> [RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">		[subscriptionDisposable dispose];</span><br><span class="line">		[schedulingDisposable dispose];</span><br><span class="line">	&#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="RACReplaySubject"><a href="#RACReplaySubject" class="headerlink" title="RACReplaySubject"></a>RACReplaySubject</h5><p>RACReplaySubject 相当于一个自带 buffer 的 RACBehaviorSubject，它可以在每次有新的订阅者订阅之后发送之前的全部消息。</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACReplaySubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>, <span class="keyword">readonly</span>) <span class="built_in">NSUInteger</span> capacity;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">NSMutableArray</span> *valuesReceived;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="RACCommand"><a href="#RACCommand" class="headerlink" title="RACCommand"></a>RACCommand</h3><p>RACCommand 并不表示数据流，它只是一个继承自 NSObject 的类,是一个用于管理 RACSignal 的创建与订阅的类</p>
-<h4 id="RACCommand-的初始化与执行"><a href="#RACCommand-的初始化与执行" class="headerlink" title="RACCommand 的初始化与执行"></a>RACCommand 的初始化与执行</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">instancetype</span>)initWithSignalBlock:(RACSignal&lt;ValueType&gt; * (^)(InputType _Nullable input))signalBlock;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (RACSignal&lt;ValueType&gt; *)execute:(<span class="keyword">nullable</span> InputType)input;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>注意</li>
-</ul>
-<p>在默认情况下 RACCommand 都是不支持并发操作的，需要在上一次命令执行之后才可以发送下一次操作，否则就会返回错误信号 RACErrorSignal，这些错误可以通过订阅 command.errors 获得</p>
-<h4 id="RACCommand-接口中的高阶信号"><a href="#RACCommand-接口中的高阶信号" class="headerlink" title="RACCommand 接口中的高阶信号"></a>RACCommand 接口中的高阶信号</h4><p>它在接口中暴露出的四个信号</p>
-<ol>
-<li><p>executionSignals<br>在每次执行 -execute: 方法时，最终都会向 executionSignals 中传入一个最新的信号</p>
-</li>
-<li><p>executing<br>executing 是一个表示当前是否有任务执行的信号</p>
-</li>
-<li><p>enabled</p>
-</li>
-</ol>
-<p>enabled 信号流表示当前的命令是否可以再次被执行，也就是 -execute: 方法能否可以成功执行新的任务；</p>
-<ol start="4">
-<li>errors</li>
-</ol>
-<p>为了保证 RACCommand 对此执行 -execute: 方法也可以继续运行，我们只能将所有的错误以其它的形式发送到 errors 信号中，防止向 executionSignals 发送错误信号后，executionSignals 信号就会中止的问题。</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACMulticastConnection *errorsConnection = [[[<span class="keyword">self</span>.addedExecutionSignalsSubject</span><br><span class="line">    flattenMap:^(RACSignal *signal) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[signal</span><br><span class="line">            ignoreValues]</span><br><span class="line">            catch:^(<span class="built_in">NSError</span> *error) &#123;</span><br><span class="line">                <span class="keyword">return</span> [RACSignal <span class="keyword">return</span>:error];</span><br><span class="line">            &#125;];</span><br><span class="line">    &#125;]</span><br><span class="line">    deliverOn:RACScheduler.mainThreadScheduler]</span><br><span class="line">    publish];</span><br><span class="line"></span><br><span class="line">_errors = [errorsConnection.signal setNameWithFormat:<span class="string">@&quot;%@ -errors&quot;</span>, <span class="keyword">self</span>];</span><br><span class="line">[errorsConnection connect];</span><br></pre></td></tr></table></figure>
-
-<h3 id="RACChannel双向绑定"><a href="#RACChannel双向绑定" class="headerlink" title="RACChannel双向绑定"></a>RACChannel双向绑定</h3><p>一对一的双向数据流 RACChannel，RACChannel 可以被理解为一个双向的连接，这个连接的两端都是 RACSignal 实例，它们可以向彼此发送消息</p>
-<p>RACChannel 内部封装了两个 RACChannelTerminal 对象，它们都是 RACSignal 的子类：</p>
-<p>eg:</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下单 上门信息   ViewModel</span></span><br><span class="line">WSFPlaceOrderParamModel* modelName=[[WSFPlaceOrderParamModel alloc] init];</span><br><span class="line">    modelName.showTipText=<span class="literal">false</span>;</span><br><span class="line">    modelName.tilteParam=<span class="string">@&quot;姓名&quot;</span>;</span><br><span class="line">    modelName.valueTipParam=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceHolder=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceParam=<span class="literal">nil</span>;</span><br><span class="line">    modelName.modelType=WSFPlaceOrderCellTypeInput;</span><br><span class="line">    modelName.modelId=WSFPlaceOrderModelIdAddrName;</span><br><span class="line">    </span><br><span class="line">    RACChannelTo(modelName, valuePlaceParam)=RACChannelTo(WSFOrderManager,orderExtraData.buyerName);</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// View    WSFPlaceOrderSingleLineInputCell</span></span><br><span class="line">  -(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>);</span><br><span class="line">    [[<span class="keyword">self</span>-&gt;_valueTxt.rac_textSignal filter:^<span class="type">BOOL</span>(<span class="built_in">NSString</span> * _Nullable value) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        &#125;]subscribeNext:^(<span class="built_in">NSString</span> * _Nullable x) &#123;</span><br><span class="line">            @strongify(<span class="keyword">self</span>);</span><br><span class="line">            <span class="keyword">self</span>.cellModel.valuePlaceParam=x;</span><br><span class="line">    &#125;];   </span><br></pre></td></tr></table></figure>
-
-<h3 id="多播的RACMulticastConnection（一对多）"><a href="#多播的RACMulticastConnection（一对多）" class="headerlink" title="多播的RACMulticastConnection（一对多）"></a>多播的RACMulticastConnection（一对多）</h3><blockquote>
-<p>将冷信号转变成热信号，并在合适的时间触发，向所有的订阅者发送消息</p>
-</blockquote>
-<p>使用</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACMulticastConnection *connection = [[RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Send Request&quot;</span>);</span><br><span class="line">    ...</span><br><span class="line">&#125;] publish];</span><br><span class="line"></span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;product: %@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSNumber</span> *productId = [x objectForKey:<span class="string">@&quot;id&quot;</span>];</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;productId: %@&quot;</span>, productId);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[connection connect];</span><br></pre></td></tr></table></figure>
-<p>使用 -publish 方法生成实例，订阅者不再订阅源信号，而是订阅 RACMulticastConnection 中的 RACSubject 热信号，最后通过 -connect 方法触发源信号中的任务。</p>
-<h4 id="publish-和-multicast-方法"><a href="#publish-和-multicast-方法" class="headerlink" title="publish 和 multicast 方法"></a>publish 和 multicast 方法</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACMulticastConnection *)publish &#123;</span><br><span class="line">	RACSubject *subject = [RACSubject subject];</span><br><span class="line">	RACMulticastConnection *connection = [<span class="keyword">self</span> multicast:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (RACMulticastConnection *)multicast:(RACSubject *)subject &#123;</span><br><span class="line">	RACMulticastConnection *connection = [[RACMulticastConnection alloc] initWithSourceSignal:<span class="keyword">self</span> subject:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当 -publish 方法调用时相当于向 -multicast: 传入了 RACSubject。</p>
-<p>在使用 -multicast: 方法时，传入的信号其实就是用于广播的信号；这个信号必须是一个 RACSubject 本身或者它的子类</p>
-<h4 id="订阅源信号的时间点"><a href="#订阅源信号的时间点" class="headerlink" title="订阅源信号的时间点"></a>订阅源信号的时间点</h4><p>只有在调用 -connect 方法之后，RACSubject 才会订阅源信号 sourceSignal。</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACDisposable *)connect &#123;</span><br><span class="line">	<span class="keyword">self</span>.serialDisposable.disposable = [<span class="keyword">self</span>.sourceSignal subscribe:_signal];</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>.serialDisposable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这时源信号的 didSubscribe 代码块才会执行，向 RACSubject 推送消息，消息向下继续传递到 RACSubject 所有的订阅者中。</p>
-<p> <code>-connect</code> 方法通过<code> -subscribe:</code> 实际上建立了 RACSignal 和 RACSubject 之间的连接，这种方式保证了 RACSignal 中的 didSubscribe 代码块只执行了一次。</p>
-<p>所有的订阅者不再订阅原信号，而是订阅 RACMulticastConnection 持有的热信号 RACSubject，实现对冷信号的一对多传播。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
-<li><a href="https://draveness.me/racsignal/">『状态』驱动的世界：ReactiveCocoa</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>Objective-C</category>
-      </categories>
-  </entry>
-  <entry>
     <title>ReactiveObjC基础</title>
     <url>/2021/11/01/ReactiveObjC%E5%9F%BA%E7%A1%80/</url>
     <content><![CDATA[<p>RAC 被描述为函数响应式编程</p>
@@ -2558,6 +2450,114 @@ return 0;
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a href="https://juejin.im/post/6844903443367215112">（RAC）知其所以然（源码分析）</a></li>
 <li><a href="https://tech.meituan.com/tags/reactivecocoa.html">美团ReactiveCocoa</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>iOS</category>
+        <category>Objective-C</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ReactiveObjC 使用</title>
+    <url>/2021/02/21/ReactiveObjC%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<blockquote>
+<p>ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 <a href="http://reactivex.io/languages.html">Rx</a> 在 Objective-C 语言中的实现</p>
+</blockquote>
+<p> Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 <code>RACSignal</code> 和 <code>RACSequence</code></p>
+<span id="more"></span>
+
+<h3 id="RACSignal-和-RACSequence"><a href="#RACSignal-和-RACSequence" class="headerlink" title="RACSignal 和 RACSequence"></a>RACSignal 和 RACSequence</h3><p>最大区别就是：</p>
+<ol>
+<li><p>RACSignal 是推驱动的，也就是在每次信号中的出现新的数据时，所有的订阅者都会自动接受到最新的值；</p>
+</li>
+<li><p>RACSequence 作为拉驱动的数据流，在改变时并不会通知使用当前序列的对象，只有使用者再次从这个 RACSequence 对象中获取数据才能更新，它的更新是需要使用者自己拉取的。</p>
+</li>
+</ol>
+<p>eg：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">-(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span>.networkingRAC.executionSignal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">        <span class="built_in">NSArray</span>&lt;WSFOrderAddressRegionModel*&gt;*  origionModelAry=[<span class="keyword">self</span>.adrRegionAPi fetchDataFromModel:WSFOrderAddressRegionModel.class];</span><br><span class="line">        </span><br><span class="line">        RACSequence *origionModelSeq = [origionModelAry.rac_sequence map:^<span class="type">id</span>(WSFOrderAddressRegionModel *model) &#123;</span><br><span class="line">            <span class="keyword">return</span> [[YWAddressModel alloc] initWithModel:model];</span><br><span class="line">        &#125;];</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">self</span>.orderAddrAry=origionModelSeq.array;</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="RACSignal-和-RACSequence转换"><a href="#RACSignal-和-RACSequence转换" class="headerlink" title="RACSignal 和 RACSequence转换"></a>RACSignal 和 RACSequence转换</h3><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACSequence *sequence = @[@<span class="number">1</span>, @<span class="number">2</span>, @<span class="number">3</span>].rac_sequence;</span><br><span class="line">RACSignal *signal = sequence.signal;</span><br><span class="line">[signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    [subscriber sendNext:@<span class="number">1</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">2</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">3</span>];</span><br><span class="line">    [subscriber sendCompleted];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, signal.toArray.rac_sequence);</span><br></pre></td></tr></table></figure>
+
+<h3 id="热信号-RACSubject"><a href="#热信号-RACSubject" class="headerlink" title="热信号 RACSubject"></a>热信号 RACSubject</h3><p>RACSubject 是 RACSignal 的子类,RACSubject 在 RACSignal 对象之上进行了简单的修改，将原有的冷信号改造成了热信号，将不可变变成了可变。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">RACSubject 存储了一个遵循 RACSubscriber 协议的对象列表以及所有的消息，</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>RACSubject 对外的接口</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACSubject</span> : <span class="title">RACSignal</span> &lt;<span class="title">RACSubscriber</span>&gt;</span></span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)subject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+
+<p>它与 RACSignal 最大的不同就是：RACSubject 实现了 RACSubscriber 协议</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">RACSubscriber</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"><span class="keyword">@required</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="keyword">nullable</span> <span class="type">id</span>)value;</span><br><span class="line">- (<span class="type">void</span>)sendError:(<span class="keyword">nullable</span> <span class="built_in">NSError</span> *)error;</span><br><span class="line">- (<span class="type">void</span>)sendCompleted;</span><br><span class="line">- (<span class="type">void</span>)didSubscribeWithDisposable:(RACCompoundDisposable *)disposable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="冷热信号"><a href="#冷热信号" class="headerlink" title="冷热信号"></a>冷热信号</h4><p>冷信号是被动的，只会在被订阅时向订阅者发送通知；热信号是主动的，它会在任意时间发出通知，与订阅者的订阅时间无关。</p>
+<p>也就是说冷信号所有的订阅者会在订阅时收到完全相同的序列；而订阅热信号之后，只会收到在订阅之后发出的序列。</p>
+<p>热信号的订阅者能否收到消息取决于订阅的时间。</p>
+<p>eg:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//冷信号 RACSingal</span></span><br><span class="line">-(<span class="type">void</span>)setupRAC&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>)</span><br><span class="line">    [[RACObserve(<span class="keyword">self</span>, cellModel) skip:<span class="number">1</span>] subscribeNext:^(WSFOrderLogisticsCompanyLastestModel*  _Nullable model) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="keyword">if</span> (model.isSelected) &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">YES</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        [ <span class="keyword">self</span>-&gt;itemBtn setTitle:model.shipperName forState:<span class="built_in">UIControlStateNormal</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 热信号 RACSubject</span></span><br><span class="line"><span class="comment">// 直接指派</span></span><br><span class="line">    <span class="keyword">if</span> (kAppDelegate.appHadEnterBackground) &#123;</span><br><span class="line">        [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span><span class="comment">//第一次启动</span></span><br><span class="line">    &#123;</span><br><span class="line">        __block RACDisposable* disposable= [WSFUSERManger.userPermissionUpdatedSub subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">            [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">            [disposable dispose];</span><br><span class="line">         &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//用户权限</span></span><br><span class="line">       <span class="keyword">@property</span>(<span class="keyword">nonatomic</span>)RACSubject* userPermissionUpdatedSub;<span class="comment">//用户权限更新</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">        [[<span class="keyword">self</span>.networkingRACs[UserPermissionApiIdentifier] executionSignal] subscribeNext:^(<span class="type">id</span> x) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="built_in">NSMutableDictionary</span> *tempDic = [<span class="built_in">NSMutableDictionary</span> dictionary];</span><br><span class="line">        <span class="built_in">NSArray</span> *permissionModelArys = [<span class="keyword">self</span>.userPermissionApi fetchDataFromModel:WSFMenuPermissionModel.class];</span><br><span class="line">        [permissionModelArys enumerateObjectsUsingBlock:^(WSFMenuPermissionModel *obj, <span class="built_in">NSUInteger</span> idx, <span class="type">BOOL</span> * _Nonnull stop) &#123;</span><br><span class="line">            <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;allow&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;deny&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            tempDic[obj.nameEN] = obj;</span><br><span class="line">        &#125;];</span><br><span class="line">        <span class="keyword">self</span>.menuPermissionModelDics = tempDic;</span><br><span class="line">        [<span class="keyword">self</span>.userPermissionUpdatedSub sendNext:<span class="literal">nil</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+
+<h4 id="RACBehaviorSubject-与-RACReplaySubject"><a href="#RACBehaviorSubject-与-RACReplaySubject" class="headerlink" title="RACBehaviorSubject 与 RACReplaySubject"></a>RACBehaviorSubject 与 RACReplaySubject</h4><p>RACBehaviorSubject 在订阅时会向订阅者发送最新的消息，<br>RACReplaySubject   在订阅之后可以重新发送之前的所有消息序列。</p>
+<h5 id="RACBehaviorSubject"><a href="#RACBehaviorSubject" class="headerlink" title="RACBehaviorSubject"></a>RACBehaviorSubject</h5><p>RACBehaviorSubject，它在内部会保存一个 currentValue 对象，也就是最后一次发送的消息：</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACBehaviorSubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="type">id</span> currentValue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="type">id</span>)value &#123;</span><br><span class="line">	<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">		<span class="keyword">self</span>.currentValue = value;</span><br><span class="line">		[<span class="variable language_">super</span> sendNext:value];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>向最新的订阅者发送之前的消息，这是通过覆写 -subscribe: 方法实现的</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACDisposable *)subscribe:(<span class="type">id</span>&lt;RACSubscriber&gt;)subscriber &#123;</span><br><span class="line">	RACDisposable *subscriptionDisposable = [<span class="variable language_">super</span> subscribe:subscriber];</span><br><span class="line"></span><br><span class="line">	RACDisposable *schedulingDisposable = [RACScheduler.subscriptionScheduler schedule:^&#123;</span><br><span class="line">		<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">			[subscriber sendNext:<span class="keyword">self</span>.currentValue];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> [RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">		[subscriptionDisposable dispose];</span><br><span class="line">		[schedulingDisposable dispose];</span><br><span class="line">	&#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="RACReplaySubject"><a href="#RACReplaySubject" class="headerlink" title="RACReplaySubject"></a>RACReplaySubject</h5><p>RACReplaySubject 相当于一个自带 buffer 的 RACBehaviorSubject，它可以在每次有新的订阅者订阅之后发送之前的全部消息。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACReplaySubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>, <span class="keyword">readonly</span>) <span class="built_in">NSUInteger</span> capacity;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">NSMutableArray</span> *valuesReceived;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="RACCommand"><a href="#RACCommand" class="headerlink" title="RACCommand"></a>RACCommand</h3><p>RACCommand 并不表示数据流，它只是一个继承自 NSObject 的类,是一个用于管理 RACSignal 的创建与订阅的类</p>
+<h4 id="RACCommand-的初始化与执行"><a href="#RACCommand-的初始化与执行" class="headerlink" title="RACCommand 的初始化与执行"></a>RACCommand 的初始化与执行</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="keyword">instancetype</span>)initWithSignalBlock:(RACSignal&lt;ValueType&gt; * (^)(InputType _Nullable input))signalBlock;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (RACSignal&lt;ValueType&gt; *)execute:(<span class="keyword">nullable</span> InputType)input;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>注意</li>
+</ul>
+<p>在默认情况下 RACCommand 都是不支持并发操作的，需要在上一次命令执行之后才可以发送下一次操作，否则就会返回错误信号 RACErrorSignal，这些错误可以通过订阅 command.errors 获得</p>
+<h4 id="RACCommand-接口中的高阶信号"><a href="#RACCommand-接口中的高阶信号" class="headerlink" title="RACCommand 接口中的高阶信号"></a>RACCommand 接口中的高阶信号</h4><p>它在接口中暴露出的四个信号</p>
+<ol>
+<li><p>executionSignals<br>在每次执行 -execute: 方法时，最终都会向 executionSignals 中传入一个最新的信号</p>
+</li>
+<li><p>executing<br>executing 是一个表示当前是否有任务执行的信号</p>
+</li>
+<li><p>enabled</p>
+</li>
+</ol>
+<p>enabled 信号流表示当前的命令是否可以再次被执行，也就是 -execute: 方法能否可以成功执行新的任务；</p>
+<ol start="4">
+<li>errors</li>
+</ol>
+<p>为了保证 RACCommand 对此执行 -execute: 方法也可以继续运行，我们只能将所有的错误以其它的形式发送到 errors 信号中，防止向 executionSignals 发送错误信号后，executionSignals 信号就会中止的问题。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACMulticastConnection *errorsConnection = [[[<span class="keyword">self</span>.addedExecutionSignalsSubject</span><br><span class="line">    flattenMap:^(RACSignal *signal) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[signal</span><br><span class="line">            ignoreValues]</span><br><span class="line">            catch:^(<span class="built_in">NSError</span> *error) &#123;</span><br><span class="line">                <span class="keyword">return</span> [RACSignal <span class="keyword">return</span>:error];</span><br><span class="line">            &#125;];</span><br><span class="line">    &#125;]</span><br><span class="line">    deliverOn:RACScheduler.mainThreadScheduler]</span><br><span class="line">    publish];</span><br><span class="line"></span><br><span class="line">_errors = [errorsConnection.signal setNameWithFormat:<span class="string">@&quot;%@ -errors&quot;</span>, <span class="keyword">self</span>];</span><br><span class="line">[errorsConnection connect];</span><br></pre></td></tr></table></figure>
+
+<h3 id="RACChannel双向绑定"><a href="#RACChannel双向绑定" class="headerlink" title="RACChannel双向绑定"></a>RACChannel双向绑定</h3><p>一对一的双向数据流 RACChannel，RACChannel 可以被理解为一个双向的连接，这个连接的两端都是 RACSignal 实例，它们可以向彼此发送消息</p>
+<p>RACChannel 内部封装了两个 RACChannelTerminal 对象，它们都是 RACSignal 的子类：</p>
+<p>eg:</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//下单 上门信息   ViewModel</span></span><br><span class="line">WSFPlaceOrderParamModel* modelName=[[WSFPlaceOrderParamModel alloc] init];</span><br><span class="line">    modelName.showTipText=<span class="literal">false</span>;</span><br><span class="line">    modelName.tilteParam=<span class="string">@&quot;姓名&quot;</span>;</span><br><span class="line">    modelName.valueTipParam=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceHolder=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceParam=<span class="literal">nil</span>;</span><br><span class="line">    modelName.modelType=WSFPlaceOrderCellTypeInput;</span><br><span class="line">    modelName.modelId=WSFPlaceOrderModelIdAddrName;</span><br><span class="line">    </span><br><span class="line">    RACChannelTo(modelName, valuePlaceParam)=RACChannelTo(WSFOrderManager,orderExtraData.buyerName);</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// View    WSFPlaceOrderSingleLineInputCell</span></span><br><span class="line">  -(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>);</span><br><span class="line">    [[<span class="keyword">self</span>-&gt;_valueTxt.rac_textSignal filter:^<span class="type">BOOL</span>(<span class="built_in">NSString</span> * _Nullable value) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        &#125;]subscribeNext:^(<span class="built_in">NSString</span> * _Nullable x) &#123;</span><br><span class="line">            @strongify(<span class="keyword">self</span>);</span><br><span class="line">            <span class="keyword">self</span>.cellModel.valuePlaceParam=x;</span><br><span class="line">    &#125;];   </span><br></pre></td></tr></table></figure>
+
+<h3 id="多播的RACMulticastConnection（一对多）"><a href="#多播的RACMulticastConnection（一对多）" class="headerlink" title="多播的RACMulticastConnection（一对多）"></a>多播的RACMulticastConnection（一对多）</h3><blockquote>
+<p>将冷信号转变成热信号，并在合适的时间触发，向所有的订阅者发送消息</p>
+</blockquote>
+<p>使用</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">RACMulticastConnection *connection = [[RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Send Request&quot;</span>);</span><br><span class="line">    ...</span><br><span class="line">&#125;] publish];</span><br><span class="line"></span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;product: %@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSNumber</span> *productId = [x objectForKey:<span class="string">@&quot;id&quot;</span>];</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;productId: %@&quot;</span>, productId);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[connection connect];</span><br></pre></td></tr></table></figure>
+<p>使用 -publish 方法生成实例，订阅者不再订阅源信号，而是订阅 RACMulticastConnection 中的 RACSubject 热信号，最后通过 -connect 方法触发源信号中的任务。</p>
+<h4 id="publish-和-multicast-方法"><a href="#publish-和-multicast-方法" class="headerlink" title="publish 和 multicast 方法"></a>publish 和 multicast 方法</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACMulticastConnection *)publish &#123;</span><br><span class="line">	RACSubject *subject = [RACSubject subject];</span><br><span class="line">	RACMulticastConnection *connection = [<span class="keyword">self</span> multicast:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (RACMulticastConnection *)multicast:(RACSubject *)subject &#123;</span><br><span class="line">	RACMulticastConnection *connection = [[RACMulticastConnection alloc] initWithSourceSignal:<span class="keyword">self</span> subject:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 -publish 方法调用时相当于向 -multicast: 传入了 RACSubject。</p>
+<p>在使用 -multicast: 方法时，传入的信号其实就是用于广播的信号；这个信号必须是一个 RACSubject 本身或者它的子类</p>
+<h4 id="订阅源信号的时间点"><a href="#订阅源信号的时间点" class="headerlink" title="订阅源信号的时间点"></a>订阅源信号的时间点</h4><p>只有在调用 -connect 方法之后，RACSubject 才会订阅源信号 sourceSignal。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (RACDisposable *)connect &#123;</span><br><span class="line">	<span class="keyword">self</span>.serialDisposable.disposable = [<span class="keyword">self</span>.sourceSignal subscribe:_signal];</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>.serialDisposable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时源信号的 didSubscribe 代码块才会执行，向 RACSubject 推送消息，消息向下继续传递到 RACSubject 所有的订阅者中。</p>
+<p> <code>-connect</code> 方法通过<code> -subscribe:</code> 实际上建立了 RACSignal 和 RACSubject 之间的连接，这种方式保证了 RACSignal 中的 didSubscribe 代码块只执行了一次。</p>
+<p>所有的订阅者不再订阅原信号，而是订阅 RACMulticastConnection 持有的热信号 RACSubject，实现对冷信号的一对多传播。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://draveness.me/racsignal/">『状态』驱动的世界：ReactiveCocoa</a></li>
 </ol>
 ]]></content>
       <categories>
@@ -2938,7 +2938,7 @@ return 0;
 <p><code>输入yes后，该host已被确认，并被追加到文件known_hosts中，然后就需要输入密码</code>。</p>
 <h3 id="基于公钥认证"><a href="#基于公钥认证" class="headerlink" title="基于公钥认证"></a>基于公钥认证</h3><ol>
 <li>客户端与服务端协商产生会话密钥；</li>
-<li>客户端会向服务端发送一个登录请求（如：<a href="mailto:&#x72;&#111;&#x6f;&#x74;&#x40;&#49;&#x39;&#x32;&#46;&#49;&#54;&#x38;&#46;&#49;&#46;&#x32;">&#x72;&#111;&#x6f;&#x74;&#x40;&#49;&#x39;&#x32;&#46;&#49;&#54;&#x38;&#46;&#49;&#46;&#x32;</a>），发送的信息包括用户名root和root的公钥指纹，且所有信息都是通过会话密钥加密过的。</li>
+<li>客户端会向服务端发送一个登录请求（如：<a href="mailto:&#114;&#111;&#111;&#116;&#x40;&#x31;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#46;&#49;&#46;&#x32;">&#114;&#111;&#111;&#116;&#x40;&#x31;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#46;&#49;&#46;&#x32;</a>），发送的信息包括用户名root和root的公钥指纹，且所有信息都是通过会话密钥加密过的。</li>
 <li>服务端通过会话密钥解密客户端发送的数据得到请求登录的用户名root和root的公钥指纹，然后读取root用户家目录下的所有公钥数据（&#x2F;root&#x2F;.ssh&#x2F;autorized_keys文件中），并分别通过单向加密算法获取各公钥的数据指纹与客户端发送过来的数据指纹做对比，从而找到客户端上的root用户的公钥；</li>
 <li>服务端使用找到的客户端的公钥对一个随机数进行加密发送发送给客户端；</li>
 <li>客户端使用私钥对服务端发送的随机数密文进行解密，然后把解密结果发送给服务端;</li>
@@ -4337,6 +4337,56 @@ return 0;
       </categories>
   </entry>
   <entry>
+    <title>iDA Pro安装</title>
+    <url>/2020/06/25/iDA%20Pro%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<blockquote>
+<p>这是一次失败的安装，起因是前几天面试被问到，有没有用过iDA这个工具</p>
+</blockquote>
+<span id="more"></span>
+
+
+<h2 id="iDA-Pro"><a href="#iDA-Pro" class="headerlink" title="iDA Pro"></a><a href="https://www.hex-rays.com/">iDA Pro</a></h2><p>简单来说，就是国外开发的收费的专业的逆向分析工具，至于具体有多专业，因为我也没有安装成功，就不做评价。</p>
+<h3 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h3><p>环境：mac OS Catalina （10.15.5），Mac mini（Late 2014）， <em><a href="https://xclient.info/s/hex-rays-ida-pro.html">IDA Pro 7.0</a></em></p>
+<p>下载完成后，双击app，直接退出…，进入application里的安装包看看，…&#x2F;Applicaiton&#x2F;Contents&#x2F;MacOS&#x2F;目录下，有installbuilder.sh的脚本，推测双击app会执行这个安装脚本，然后在terminal下执行看看有没有问题</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini MacOS % sh installbuilder.sh</span><br><span class="line">installbuilder.sh: line 18: ./osx-intel: Bad CPU <span class="built_in">type</span> <span class="keyword">in</span> executable</span><br></pre></td></tr></table></figure>
+<p>分析 shell 18行代码的问题</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"> 1 <span class="comment">#!/bin/sh</span></span><br><span class="line"> 2</span><br><span class="line"> 3 os_version=`<span class="built_in">uname</span> -r`</span><br><span class="line"> 4 machine_platform=`<span class="built_in">uname</span> -p`</span><br><span class="line"> 5 <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$&#123;os_version:0:1&#125;</span>&quot;</span> == <span class="string">&quot;6&quot;</span> ];<span class="keyword">then</span></span><br><span class="line"> 6     executable=<span class="string">&quot;none&quot;</span></span><br><span class="line"> 7 <span class="keyword">elif</span> [ <span class="string">&quot;<span class="variable">$&#123;machine_platform&#125;</span>&quot;</span> == <span class="string">&quot;i386&quot;</span> ];<span class="keyword">then</span></span><br><span class="line"> 8     executable=<span class="string">&quot;osx-intel&quot;</span></span><br><span class="line"> 9 <span class="keyword">else</span></span><br><span class="line">10     executable=<span class="string">&quot;none&quot;</span></span><br><span class="line">11 <span class="keyword">fi</span></span><br><span class="line">12</span><br><span class="line">13 <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$executable</span>&quot;</span> == <span class="string">&quot;none&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">14     <span class="built_in">echo</span> <span class="string">&quot;The current OS X version is not supported&quot;</span></span><br><span class="line">15     <span class="built_in">exit</span> 1</span><br><span class="line">16 <span class="keyword">fi</span></span><br><span class="line">17</span><br><span class="line">18         <span class="string">&quot;`dirname \&quot;<span class="variable">$&#123;0&#125;</span>\&quot;`/<span class="variable">$executable</span>&quot;</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>也就是说  i386 导致的  <code>./osx-intel: Bad CPU type in executable</code>这个错误，一脸懵逼，然后就去查了下Bad CPU type in executable这个错误，结果找到这个<a href="https://discussions.apple.com/thread/250777998">结果</a>，于是我以为是默认bash的问题，然后有了下面的部分。</p>
+<h3 id="shell、bash、zsh"><a href="#shell、bash、zsh" class="headerlink" title="shell、bash、zsh"></a>shell、bash、zsh</h3><p>查看当前shell使用 <code>echo $SHELL</code></p>
+<h4 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h4><ol>
+<li><p>shell是一个命令行解释器</p>
+</li>
+<li><p>Login 和 Non-login<br>login shell 是指登陆系统后获得的顶层shell，比如最常用的ssh登陆，登录完成后得到一个login shell，如果已经登录了桌面电脑，打开terminal进入的shell就是Non-login shell。</p>
+</li>
+</ol>
+<h4 id="bash"><a href="#bash" class="headerlink" title="bash"></a>bash</h4><p>Bash是最常见的shell，Mac中默认shell就是bash，唤起bash shell时加载的不同文件，login shell 加载 <code>～/.bash_profile</code><br>,而non-login shell加载 <code>~/.bashrc</code></p>
+<h4 id="zsh"><a href="#zsh" class="headerlink" title="zsh"></a>zsh</h4><p>很多mac中会使用zsh而不是bash，一大半是因为oh-my-zsh这个配置集，它兼容bash，还有自动补全等好用的功能。zsh的配置文件<code>~/.zshrc</code></p>
+<h3 id="更改shell路径-error"><a href="#更改shell路径-error" class="headerlink" title="更改shell路径 error"></a>更改shell路径 error</h3><p><code>chsh: /usr/bin/zsh: non-standard shell</code></p>
+<p>说明：zsh路径不对</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. which zsh</span><br><span class="line">2. chsh -s /bin/zsh</span><br><span class="line">3. Restart your machine</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="安装继续"><a href="#安装继续" class="headerlink" title="安装继续"></a>安装继续</h3><p>更改完Shell为zsh后，继续安装，发现还是报错，看来是走了弯路，再去看下那个报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini MacOS % file osx-intel</span><br><span class="line">osx-intel: Mach-O executable i386</span><br></pre></td></tr></table></figure>
+<p>查了下资料才发现 <code>自 macOS 10.15.1/Catalina 后终止了对 32 位可执行程序的兼容</code> ….</p>
+<h3 id="曙光到来"><a href="#曙光到来" class="headerlink" title="曙光到来"></a>曙光到来</h3><p>找到了 Catalina下的版本 <a href="https://github.com/swfangzhang/IDA-pro-7-for-Catalina-OSX-15">IDA-pro-7-for-Catalina-OSX-15</a></p>
+<p>可用</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>我的系统和CPU都是64位的,但是为什么<code>uname -p</code>返回的是 i386？这个-p代表的是什么？没查到….</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini ~ % uname -a</span><br><span class="line">Darwin Mac-mini.local 19.5.0 Darwin Kernel Version 19.5.0: Tue May 26 20:41:44 PDT 2020; root:xnu-6153.121.2~2/RELEASE_X86_64 x86_64</span><br><span class="line">Jack@Mac-mini ~ % uname -p</span><br><span class="line">i386</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://blog.csdn.net/u010953692/article/details/94907317#1IDA_Pro_70_macOS__1">IDA Pro 7.0 macOS 安装</a></li>
+<li><a href="https://github.com/swfangzhang/IDA-pro-7-for-Catalina-OSX-15">IDA-pro-7-for-Catalina-OSX-15</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+  </entry>
+  <entry>
     <title>URL编码</title>
     <url>/2022/10/08/URL%E7%BC%96%E7%A0%81/</url>
     <content><![CDATA[<p>在iOS程序中，访问一些HTTP&#x2F;HTTPS的资源服务时，如果url中存在中文或者特殊字符时，会导致无法正常的访问到资源或服务，想要解决这个问题，需要对url进行编码。</p>
@@ -4432,54 +4482,76 @@ return 0;
       </tags>
   </entry>
   <entry>
-    <title>iDA Pro安装</title>
-    <url>/2020/06/25/iDA%20Pro%E5%AE%89%E8%A3%85/</url>
-    <content><![CDATA[<blockquote>
-<p>这是一次失败的安装，起因是前几天面试被问到，有没有用过iDA这个工具</p>
-</blockquote>
+    <title>iOS Pod私有库发布</title>
+    <url>/2019/04/20/iOS%20Pod%E7%A7%81%E6%9C%89%E5%BA%93%E5%8F%91%E5%B8%83/</url>
+    <content><![CDATA[<p>为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。</p>
 <span id="more"></span>
 
 
-<h2 id="iDA-Pro"><a href="#iDA-Pro" class="headerlink" title="iDA Pro"></a><a href="https://www.hex-rays.com/">iDA Pro</a></h2><p>简单来说，就是国外开发的收费的专业的逆向分析工具，至于具体有多专业，因为我也没有安装成功，就不做评价。</p>
-<h3 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h3><p>环境：mac OS Catalina （10.15.5），Mac mini（Late 2014）， <em><a href="https://xclient.info/s/hex-rays-ida-pro.html">IDA Pro 7.0</a></em></p>
-<p>下载完成后，双击app，直接退出…，进入application里的安装包看看，…&#x2F;Applicaiton&#x2F;Contents&#x2F;MacOS&#x2F;目录下，有installbuilder.sh的脚本，推测双击app会执行这个安装脚本，然后在terminal下执行看看有没有问题</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini MacOS % sh installbuilder.sh</span><br><span class="line">installbuilder.sh: line 18: ./osx-intel: Bad CPU <span class="built_in">type</span> <span class="keyword">in</span> executable</span><br></pre></td></tr></table></figure>
-<p>分析 shell 18行代码的问题</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"> 1 <span class="comment">#!/bin/sh</span></span><br><span class="line"> 2</span><br><span class="line"> 3 os_version=`<span class="built_in">uname</span> -r`</span><br><span class="line"> 4 machine_platform=`<span class="built_in">uname</span> -p`</span><br><span class="line"> 5 <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$&#123;os_version:0:1&#125;</span>&quot;</span> == <span class="string">&quot;6&quot;</span> ];<span class="keyword">then</span></span><br><span class="line"> 6     executable=<span class="string">&quot;none&quot;</span></span><br><span class="line"> 7 <span class="keyword">elif</span> [ <span class="string">&quot;<span class="variable">$&#123;machine_platform&#125;</span>&quot;</span> == <span class="string">&quot;i386&quot;</span> ];<span class="keyword">then</span></span><br><span class="line"> 8     executable=<span class="string">&quot;osx-intel&quot;</span></span><br><span class="line"> 9 <span class="keyword">else</span></span><br><span class="line">10     executable=<span class="string">&quot;none&quot;</span></span><br><span class="line">11 <span class="keyword">fi</span></span><br><span class="line">12</span><br><span class="line">13 <span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$executable</span>&quot;</span> == <span class="string">&quot;none&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">14     <span class="built_in">echo</span> <span class="string">&quot;The current OS X version is not supported&quot;</span></span><br><span class="line">15     <span class="built_in">exit</span> 1</span><br><span class="line">16 <span class="keyword">fi</span></span><br><span class="line">17</span><br><span class="line">18         <span class="string">&quot;`dirname \&quot;<span class="variable">$&#123;0&#125;</span>\&quot;`/<span class="variable">$executable</span>&quot;</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="静态库生成"><a href="#静态库生成" class="headerlink" title="静态库生成"></a>静态库生成</h2><h3 id="模块说明书PodSpec"><a href="#模块说明书PodSpec" class="headerlink" title="模块说明书PodSpec"></a>模块说明书PodSpec</h3><p>我们把podspec文件上传给cocoapod的master上，当别人配置好CocoaPods就会把我们的podspec.json下载到&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F;下，用户要使用AFNetworking查找本地&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F; 找到这个AFNetworking.podspec.json文件根据内容下载配置。</p>
+<p>podspec文件就是充当了一个我们源代码模块的说明书，告诉开发者我们模块名称，我们用途，可以在哪下载源代码 ，需要如何配置。 </p>
+<h4 id="podspec创建"><a href="#podspec创建" class="headerlink" title="podspec创建"></a>podspec创建</h4><p>pod 还提供了一个一条龙服务的命令：pod lib create 会帮我们创建一个跟项目名称相同podspec文件 测试project 工程 测试框架。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod lib create XXXX</span><br></pre></td></tr></table></figure>
 
-<p>也就是说  i386 导致的  <code>./osx-intel: Bad CPU type in executable</code>这个错误，一脸懵逼，然后就去查了下Bad CPU type in executable这个错误，结果找到这个<a href="https://discussions.apple.com/thread/250777998">结果</a>，于是我以为是默认bash的问题，然后有了下面的部分。</p>
-<h3 id="shell、bash、zsh"><a href="#shell、bash、zsh" class="headerlink" title="shell、bash、zsh"></a>shell、bash、zsh</h3><p>查看当前shell使用 <code>echo $SHELL</code></p>
-<h4 id="shell"><a href="#shell" class="headerlink" title="shell"></a>shell</h4><ol>
-<li><p>shell是一个命令行解释器</p>
+<h4 id="podspec常用属性说明"><a href="#podspec常用属性说明" class="headerlink" title="podspec常用属性说明"></a>podspec常用属性说明</h4><figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title class_">Pod::Spec</span>.new <span class="keyword">do</span>|<span class="params">s</span>|</span><br><span class="line">  /<span class="regexp">/项目名</span></span><br><span class="line"><span class="regexp">  s.name =&#x27;Project&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/版本号</span></span><br><span class="line"><span class="regexp">  s.version =&#x27;1.0.1&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/listen文件的类型</span></span><br><span class="line"><span class="regexp">  s.license = &#x27;MIT&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/简单描述</span></span><br><span class="line"><span class="regexp">  s.summary = &#x27;ATest in iOS.&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/项目的getub地址，只支持HTTP和HTTPS地址，不支持ssh的地址</span></span><br><span class="line"><span class="regexp">  s.homepage =&#x27;https:/</span><span class="regexp">/github.com/</span><span class="number">3671932</span>/Project<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //作者和邮箱</span></span><br><span class="line"><span class="string">  s.authors = &#123;&#x27;</span><span class="variable constant_">MMMMM</span><span class="string">&#x27; =&gt; &#x27;</span><span class="variable constant_">XXXXXX</span><span class="variable">@qq</span>.com<span class="string">&#x27; &#125;</span></span><br><span class="line"><span class="string">  //git仓库的https地址</span></span><br><span class="line"><span class="string">  s.source = &#123; :git=&gt; &#x27;</span><span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="number">3671932</span>/Project.git<span class="string">&#x27;, :tag =&gt;s.version&#125;</span></span><br><span class="line"><span class="string">  //是否要求arc（有部分非arc文件情况未考证）</span></span><br><span class="line"><span class="string">  s.requires_arc = true</span></span><br><span class="line"><span class="string"> //在这个属性中声明过的.h文件能够使用&lt;&gt;方法联想调用（这个是可选属性）</span></span><br><span class="line"><span class="string">  s.public_header_files = &#x27;</span>UIKit/*.h<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //表示源文件的路径，这个路径是相对podspec文件而言的。（这属性下面单独讨论）</span></span><br><span class="line"><span class="string">  s.source_files =&#x27;</span>AppInfo/*.*<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //需要用到的frameworks，不需要加.frameworks后缀。（这个没有用到也可以不填）</span></span><br><span class="line"><span class="string">  s.frameworks =&#x27;</span>Foundation<span class="string">&#x27;, &#x27;</span>CoreGraphics<span class="string">&#x27;, &#x27;</span>UIKit<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">  //图片资源可支持xcassets</span></span><br><span class="line"><span class="string">     s.resource_bundles = &#123;</span></span><br><span class="line"><span class="string">     &#x27;</span>WSFBaseService<span class="string">&#x27; =&gt; [&#x27;</span>WSFBaseService/Assets/WSFBaseService.xcassets<span class="string">&#x27;]</span></span><br><span class="line"><span class="string">   &#125;</span></span><br><span class="line"><span class="string">   </span></span><br><span class="line"><span class="string">   //建立名称为Info的子仓库（虚拟路径）</span></span><br><span class="line"><span class="string">  s.subspec &#x27;</span>Info<span class="string">&#x27; do |ss| </span></span><br><span class="line"><span class="string">  ....</span></span><br><span class="line"><span class="string">  end</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">end</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="模块说明书的验证"><a href="#模块说明书的验证" class="headerlink" title="模块说明书的验证"></a>模块说明书的验证</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod spec lint test.podspec </span><br></pre></td></tr></table></figure>
+<p>可以设置 –allow-warnings来忽略警告，通过–verbose查看错误具体信息</p>
+<h4 id="模块说明书注意"><a href="#模块说明书注意" class="headerlink" title="模块说明书注意"></a>模块说明书注意</h4><p>一个tag对应一个版本 都会包含一个podspec 文件</p>
+<h3 id="仓库Repo"><a href="#仓库Repo" class="headerlink" title="仓库Repo"></a>仓库Repo</h3><p>存放说明书的地方就是仓库<br>创建自己cocoapod仓库的命令就是</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">//REPO_NAME 仓库名称</span><br><span class="line">//SOURCE_URL 仓库远程地址</span><br><span class="line">pod repo add REPO_NAME SOURCE_URL</span><br></pre></td></tr></table></figure>
+
+<p> 推送podspec需要添加仓库名称和 podspec文件地址</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod repo push RooboSpecs xxxxxx.podspec</span><br></pre></td></tr></table></figure>
+<h3 id="编译SDK静态库"><a href="#编译SDK静态库" class="headerlink" title="编译SDK静态库"></a>编译SDK静态库</h3><p> 如果需要隐藏源代码，可以把pod库编译成静态库的方式。<br> 可以通过安装cocoapod的编译插件配合我们的cocoapod 文件来编译我们静态库文件 安装cocoapods-packager</p>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo gem install cocoapods-packager</span><br></pre></td></tr></table></figure>
+<ul>
+<li>编译库文件</li>
+</ul>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">//pod package NAME [SOURCE]</span><br><span class="line">pod package Roobo_Plus.podspec  --force --embedded</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Pod Package命令含义</li>
+</ul>
+ <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> //强制覆盖之前已经生成过的二进制库 </span><br><span class="line">--force</span><br><span class="line"></span><br><span class="line">//生成静态.framework </span><br><span class="line">--embedded</span><br><span class="line"></span><br><span class="line">//生成静态.a </span><br><span class="line">--library</span><br><span class="line"></span><br><span class="line">//生成动态.framework </span><br><span class="line">--dynamic</span><br><span class="line"></span><br><span class="line">//动态.framework是需要签名的，所以只有生成动态库的时候需要这个BundleId </span><br><span class="line">--bundle-identifier</span><br><span class="line"></span><br><span class="line">//不包含依赖的符号表，生成动态库的时候不能包含这个命令，动态库一定需要包含依赖的符号表。 </span><br><span class="line">--exclude-deps</span><br><span class="line"></span><br><span class="line">//表示生成的库是debug还是release，默认是release。--configuration=Debug </span><br><span class="line">--configuration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--no-mangle</span><br><span class="line">//表示不使用name mangling技术，pod package默认是使用这个技术的。我们能在用pod package生成二进制库的时候会看到终端有输出Mangling symbols和Building mangled framework。表示使用了这个技术。</span><br><span class="line">//如果你的pod库没有其他依赖的话，那么不使用这个命令也不会报错。但是如果有其他依赖，不使用--no-mangle这个命令的话，那么你在工程里使用生成的二进制库的时候就会报错：Undefined symbols for architecture x86_64。</span><br><span class="line"></span><br><span class="line">--subspecs</span><br><span class="line"></span><br><span class="line">//如果你的pod库有subspec，那么加上这个命名表示只给某个或几个subspec生成二进制库，--subspecs=subspec1,subspec2。生成的库的名字就是你podspec的名字，如果你想生成的库的名字跟subspec的名字一样，那么就需要修改podspec的名字。 </span><br><span class="line">这个脚本就是批量生成subspec的二进制库，每一个subspec的库名就是podspecName+subspecName。</span><br><span class="line"></span><br><span class="line">--spec-sources</span><br><span class="line"></span><br><span class="line">//一些依赖的source，如果你有依赖是来自于私有库的，那就需要加上那个私有库的source，默认是cocoapods的Specs仓库。--spec-sources=private,https://github.com/CocoaPods/Specs.git。</span><br></pre></td></tr></table></figure>
+
+<p>注意：<br>使用–library编译出的.a静态库文件，pod package插件有问题的，根部不会生成头文件。所以只能编译framwork的库文件</p>
+<h2 id="静态库制作遇到的坑"><a href="#静态库制作遇到的坑" class="headerlink" title="静态库制作遇到的坑"></a>静态库制作遇到的坑</h2><h3 id="运行时便无法找到对应的selector？"><a href="#运行时便无法找到对应的selector？" class="headerlink" title="运行时便无法找到对应的selector？"></a>运行时便无法找到对应的selector？</h3><h4 id="编译-x2F-链接过程"><a href="#编译-x2F-链接过程" class="headerlink" title="编译&#x2F;链接过程"></a>编译&#x2F;链接过程</h4><ul>
+<li><p>编译器在编译的过程中首先会将 .c&#x2F;.cc&#x2F;.cpp&#x2F;.m&#x2F;.mm 的源文件编译成后缀为 .o 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 .a(archive) 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</p>
 </li>
-<li><p>Login 和 Non-login<br>login shell 是指登陆系统后获得的顶层shell，比如最常用的ssh登陆，登录完成后得到一个login shell，如果已经登录了桌面电脑，打开terminal进入的shell就是Non-login shell。</p>
+<li><p>当需要生产二进制文件或是动态库时，编译器会对静态库 .a(archive) 文件进行处理；编译器将获取静态库中所有的符号表，并检查哪些符号被引用，只有被引用的对象文件才会被链接器真正的加载并处理。例如在静态库中有 10 个对象文件，但被引用到只有 2 个，则链接器只加载被引用的 2 个对象文件，未被使用到的 8 个对象文件则会被忽略。</p>
 </li>
+<li><p>在 C&#x2F;C++ 语言中，这种机制可以很好的工作，因为 C&#x2F;C++ 语言会尽可能的在编译期去做这些事。在 Objective-C 语言中非常依赖运行时特性，Category 就是基于运行时实现，但它并不会像类或者函数一样被创建链接符号，编译器在检查符号表时便不能检查到 Category 对应的符号表，从而 Category 的对象文件就不能被正常的加载，在运行时便无法找到对应的 selector 。</p>
+</li>
+</ul>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ol>
+<li>Other Linker Flags 添加</li>
 </ol>
-<h4 id="bash"><a href="#bash" class="headerlink" title="bash"></a>bash</h4><p>Bash是最常见的shell，Mac中默认shell就是bash，唤起bash shell时加载的不同文件，login shell 加载 <code>～/.bash_profile</code><br>,而non-login shell加载 <code>~/.bashrc</code></p>
-<h4 id="zsh"><a href="#zsh" class="headerlink" title="zsh"></a>zsh</h4><p>很多mac中会使用zsh而不是bash，一大半是因为oh-my-zsh这个配置集，它兼容bash，还有自动补全等好用的功能。zsh的配置文件<code>~/.zshrc</code></p>
-<h3 id="更改shell路径-error"><a href="#更改shell路径-error" class="headerlink" title="更改shell路径 error"></a>更改shell路径 error</h3><p><code>chsh: /usr/bin/zsh: non-standard shell</code></p>
-<p>说明：zsh路径不对</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1. which zsh</span><br><span class="line">2. chsh -s /bin/zsh</span><br><span class="line">3. Restart your machine</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="安装继续"><a href="#安装继续" class="headerlink" title="安装继续"></a>安装继续</h3><p>更改完Shell为zsh后，继续安装，发现还是报错，看来是走了弯路，再去看下那个报错</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini MacOS % file osx-intel</span><br><span class="line">osx-intel: Mach-O executable i386</span><br></pre></td></tr></table></figure>
-<p>查了下资料才发现 <code>自 macOS 10.15.1/Catalina 后终止了对 32 位可执行程序的兼容</code> ….</p>
-<h3 id="曙光到来"><a href="#曙光到来" class="headerlink" title="曙光到来"></a>曙光到来</h3><p>找到了 Catalina下的版本 <a href="https://github.com/swfangzhang/IDA-pro-7-for-Catalina-OSX-15">IDA-pro-7-for-Catalina-OSX-15</a></p>
-<p>可用</p>
-<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>我的系统和CPU都是64位的,但是为什么<code>uname -p</code>返回的是 i386？这个-p代表的是什么？没查到….</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Jack@Mac-mini ~ % uname -a</span><br><span class="line">Darwin Mac-mini.local 19.5.0 Darwin Kernel Version 19.5.0: Tue May 26 20:41:44 PDT 2020; root:xnu-6153.121.2~2/RELEASE_X86_64 x86_64</span><br><span class="line">Jack@Mac-mini ~ % uname -p</span><br><span class="line">i386</span><br></pre></td></tr></table></figure>
-
-
-
-
+<ul>
+<li><p>-all_load  告诉编译器 对于所有静态库中的所有对象文件，不管里面的符号有没有被用到，全部都载入，这种方法可以解决问题，但是会产生比较大的二进制文件</p>
+</li>
+<li><p>-force_load 并指定路径，-force_load $(BUILT_PRODUCTS_DIR)&#x2F;&lt;library_name.a&gt; 这种方法和 -all_load 类似，不同的是它只载入指定的静态库</p>
+</li>
+<li><p>-ObjC  如果在静态库的对象文件中发现了 Objective-C 代码，就把它载入，Category 中肯定会存在 Objective-C 代码。</p>
+</li>
+</ul>
+<ol start="2">
+<li>在 Category 的源文件里添加 Fake symbol，并确保以某种方法在编译时引用了该 Fake symbol，这会使得 Fake symbol 对象文件被加载时它里面 Category 代码也会被载入。该方法可以控制哪些 Category 可以被正常加载，同时也不需要添加编译参数做特殊处理。</li>
+</ol>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="https://blog.csdn.net/u010953692/article/details/94907317#1IDA_Pro_70_macOS__1">IDA Pro 7.0 macOS 安装</a></li>
-<li><a href="https://github.com/swfangzhang/IDA-pro-7-for-Catalina-OSX-15">IDA-pro-7-for-Catalina-OSX-15</a></li>
+<li><a href="http://www.enkichen.com/2017/09/13/ios-static-library-categories/">iOS 静态库中的 Category 运行时错误</a></li>
+<li><a href="https://www.jianshu.com/p/9eea3e7cb3a1">podspec文件解析</a></li>
+<li><a href="https://juejin.im/post/6844903559931117581">Pod 库的资源引用</a></li>
 </ol>
 ]]></content>
       <categories>
-        <category>工具</category>
+        <category>iOS</category>
+        <category>性能监控与优化</category>
       </categories>
+      <tags>
+        <tag>CocoaPods</tag>
+      </tags>
   </entry>
   <entry>
     <title>iOS Memory 内存详解</title>
@@ -4580,78 +4652,6 @@ return 0;
         <category>iOS</category>
         <category>性能监控与优化</category>
       </categories>
-  </entry>
-  <entry>
-    <title>iOS Pod私有库发布</title>
-    <url>/2019/04/20/iOS%20Pod%E7%A7%81%E6%9C%89%E5%BA%93%E5%8F%91%E5%B8%83/</url>
-    <content><![CDATA[<p>为了提高项目中代码的复用，通常会把耦合度低的模块解耦出来做成Pod库放在私有仓库上，很多To B的业务，需要制作SDK给第三方使用，这时候需要提供静态framework给第三方。</p>
-<span id="more"></span>
-
-
-<h2 id="静态库生成"><a href="#静态库生成" class="headerlink" title="静态库生成"></a>静态库生成</h2><h3 id="模块说明书PodSpec"><a href="#模块说明书PodSpec" class="headerlink" title="模块说明书PodSpec"></a>模块说明书PodSpec</h3><p>我们把podspec文件上传给cocoapod的master上，当别人配置好CocoaPods就会把我们的podspec.json下载到&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F;下，用户要使用AFNetworking查找本地&#x2F;.cocoapods&#x2F;repos&#x2F;master&#x2F; 找到这个AFNetworking.podspec.json文件根据内容下载配置。</p>
-<p>podspec文件就是充当了一个我们源代码模块的说明书，告诉开发者我们模块名称，我们用途，可以在哪下载源代码 ，需要如何配置。 </p>
-<h4 id="podspec创建"><a href="#podspec创建" class="headerlink" title="podspec创建"></a>podspec创建</h4><p>pod 还提供了一个一条龙服务的命令：pod lib create 会帮我们创建一个跟项目名称相同podspec文件 测试project 工程 测试框架。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod lib create XXXX</span><br></pre></td></tr></table></figure>
-
-<h4 id="podspec常用属性说明"><a href="#podspec常用属性说明" class="headerlink" title="podspec常用属性说明"></a>podspec常用属性说明</h4><figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="title class_">Pod::Spec</span>.new <span class="keyword">do</span>|<span class="params">s</span>|</span><br><span class="line">  /<span class="regexp">/项目名</span></span><br><span class="line"><span class="regexp">  s.name =&#x27;Project&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/版本号</span></span><br><span class="line"><span class="regexp">  s.version =&#x27;1.0.1&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/listen文件的类型</span></span><br><span class="line"><span class="regexp">  s.license = &#x27;MIT&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/简单描述</span></span><br><span class="line"><span class="regexp">  s.summary = &#x27;ATest in iOS.&#x27;</span></span><br><span class="line"><span class="regexp">  /</span><span class="regexp">/项目的getub地址，只支持HTTP和HTTPS地址，不支持ssh的地址</span></span><br><span class="line"><span class="regexp">  s.homepage =&#x27;https:/</span><span class="regexp">/github.com/</span><span class="number">3671932</span>/Project<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //作者和邮箱</span></span><br><span class="line"><span class="string">  s.authors = &#123;&#x27;</span><span class="variable constant_">MMMMM</span><span class="string">&#x27; =&gt; &#x27;</span><span class="variable constant_">XXXXXX</span><span class="variable">@qq</span>.com<span class="string">&#x27; &#125;</span></span><br><span class="line"><span class="string">  //git仓库的https地址</span></span><br><span class="line"><span class="string">  s.source = &#123; :git=&gt; &#x27;</span><span class="symbol">https:</span>/<span class="regexp">/github.com/</span><span class="number">3671932</span>/Project.git<span class="string">&#x27;, :tag =&gt;s.version&#125;</span></span><br><span class="line"><span class="string">  //是否要求arc（有部分非arc文件情况未考证）</span></span><br><span class="line"><span class="string">  s.requires_arc = true</span></span><br><span class="line"><span class="string"> //在这个属性中声明过的.h文件能够使用&lt;&gt;方法联想调用（这个是可选属性）</span></span><br><span class="line"><span class="string">  s.public_header_files = &#x27;</span>UIKit/*.h<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //表示源文件的路径，这个路径是相对podspec文件而言的。（这属性下面单独讨论）</span></span><br><span class="line"><span class="string">  s.source_files =&#x27;</span>AppInfo/*.*<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  //需要用到的frameworks，不需要加.frameworks后缀。（这个没有用到也可以不填）</span></span><br><span class="line"><span class="string">  s.frameworks =&#x27;</span>Foundation<span class="string">&#x27;, &#x27;</span>CoreGraphics<span class="string">&#x27;, &#x27;</span>UIKit<span class="string">&#x27;</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">  //图片资源可支持xcassets</span></span><br><span class="line"><span class="string">     s.resource_bundles = &#123;</span></span><br><span class="line"><span class="string">     &#x27;</span>WSFBaseService<span class="string">&#x27; =&gt; [&#x27;</span>WSFBaseService/Assets/WSFBaseService.xcassets<span class="string">&#x27;]</span></span><br><span class="line"><span class="string">   &#125;</span></span><br><span class="line"><span class="string">   </span></span><br><span class="line"><span class="string">   //建立名称为Info的子仓库（虚拟路径）</span></span><br><span class="line"><span class="string">  s.subspec &#x27;</span>Info<span class="string">&#x27; do |ss| </span></span><br><span class="line"><span class="string">  ....</span></span><br><span class="line"><span class="string">  end</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">end</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="模块说明书的验证"><a href="#模块说明书的验证" class="headerlink" title="模块说明书的验证"></a>模块说明书的验证</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod spec lint test.podspec </span><br></pre></td></tr></table></figure>
-<p>可以设置 –allow-warnings来忽略警告，通过–verbose查看错误具体信息</p>
-<h4 id="模块说明书注意"><a href="#模块说明书注意" class="headerlink" title="模块说明书注意"></a>模块说明书注意</h4><p>一个tag对应一个版本 都会包含一个podspec 文件</p>
-<h3 id="仓库Repo"><a href="#仓库Repo" class="headerlink" title="仓库Repo"></a>仓库Repo</h3><p>存放说明书的地方就是仓库<br>创建自己cocoapod仓库的命令就是</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">//REPO_NAME 仓库名称</span><br><span class="line">//SOURCE_URL 仓库远程地址</span><br><span class="line">pod repo add REPO_NAME SOURCE_URL</span><br></pre></td></tr></table></figure>
-
-<p> 推送podspec需要添加仓库名称和 podspec文件地址</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">pod repo push RooboSpecs xxxxxx.podspec</span><br></pre></td></tr></table></figure>
-<h3 id="编译SDK静态库"><a href="#编译SDK静态库" class="headerlink" title="编译SDK静态库"></a>编译SDK静态库</h3><p> 如果需要隐藏源代码，可以把pod库编译成静态库的方式。<br> 可以通过安装cocoapod的编译插件配合我们的cocoapod 文件来编译我们静态库文件 安装cocoapods-packager</p>
- <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo gem install cocoapods-packager</span><br></pre></td></tr></table></figure>
-<ul>
-<li>编译库文件</li>
-</ul>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">//pod package NAME [SOURCE]</span><br><span class="line">pod package Roobo_Plus.podspec  --force --embedded</span><br></pre></td></tr></table></figure>
-<ul>
-<li>Pod Package命令含义</li>
-</ul>
- <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> //强制覆盖之前已经生成过的二进制库 </span><br><span class="line">--force</span><br><span class="line"></span><br><span class="line">//生成静态.framework </span><br><span class="line">--embedded</span><br><span class="line"></span><br><span class="line">//生成静态.a </span><br><span class="line">--library</span><br><span class="line"></span><br><span class="line">//生成动态.framework </span><br><span class="line">--dynamic</span><br><span class="line"></span><br><span class="line">//动态.framework是需要签名的，所以只有生成动态库的时候需要这个BundleId </span><br><span class="line">--bundle-identifier</span><br><span class="line"></span><br><span class="line">//不包含依赖的符号表，生成动态库的时候不能包含这个命令，动态库一定需要包含依赖的符号表。 </span><br><span class="line">--exclude-deps</span><br><span class="line"></span><br><span class="line">//表示生成的库是debug还是release，默认是release。--configuration=Debug </span><br><span class="line">--configuration</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--no-mangle</span><br><span class="line">//表示不使用name mangling技术，pod package默认是使用这个技术的。我们能在用pod package生成二进制库的时候会看到终端有输出Mangling symbols和Building mangled framework。表示使用了这个技术。</span><br><span class="line">//如果你的pod库没有其他依赖的话，那么不使用这个命令也不会报错。但是如果有其他依赖，不使用--no-mangle这个命令的话，那么你在工程里使用生成的二进制库的时候就会报错：Undefined symbols for architecture x86_64。</span><br><span class="line"></span><br><span class="line">--subspecs</span><br><span class="line"></span><br><span class="line">//如果你的pod库有subspec，那么加上这个命名表示只给某个或几个subspec生成二进制库，--subspecs=subspec1,subspec2。生成的库的名字就是你podspec的名字，如果你想生成的库的名字跟subspec的名字一样，那么就需要修改podspec的名字。 </span><br><span class="line">这个脚本就是批量生成subspec的二进制库，每一个subspec的库名就是podspecName+subspecName。</span><br><span class="line"></span><br><span class="line">--spec-sources</span><br><span class="line"></span><br><span class="line">//一些依赖的source，如果你有依赖是来自于私有库的，那就需要加上那个私有库的source，默认是cocoapods的Specs仓库。--spec-sources=private,https://github.com/CocoaPods/Specs.git。</span><br></pre></td></tr></table></figure>
-
-<p>注意：<br>使用–library编译出的.a静态库文件，pod package插件有问题的，根部不会生成头文件。所以只能编译framwork的库文件</p>
-<h2 id="静态库制作遇到的坑"><a href="#静态库制作遇到的坑" class="headerlink" title="静态库制作遇到的坑"></a>静态库制作遇到的坑</h2><h3 id="运行时便无法找到对应的selector？"><a href="#运行时便无法找到对应的selector？" class="headerlink" title="运行时便无法找到对应的selector？"></a>运行时便无法找到对应的selector？</h3><h4 id="编译-x2F-链接过程"><a href="#编译-x2F-链接过程" class="headerlink" title="编译&#x2F;链接过程"></a>编译&#x2F;链接过程</h4><ul>
-<li><p>编译器在编译的过程中首先会将 .c&#x2F;.cc&#x2F;.cpp&#x2F;.m&#x2F;.mm 的源文件编译成后缀为 .o 的对象文件 ，源文件与对象文件是一一对应的，对象文件中包含了符号、代码以及数据，对象文件是不能被系统加载并使用的。当在编译生成静态库时，这些所有的对象文件，都会被封装到 .a(archive) 文件，可以理解为一个归档文件，也就是我们平常使用的静态库。</p>
-</li>
-<li><p>当需要生产二进制文件或是动态库时，编译器会对静态库 .a(archive) 文件进行处理；编译器将获取静态库中所有的符号表，并检查哪些符号被引用，只有被引用的对象文件才会被链接器真正的加载并处理。例如在静态库中有 10 个对象文件，但被引用到只有 2 个，则链接器只加载被引用的 2 个对象文件，未被使用到的 8 个对象文件则会被忽略。</p>
-</li>
-<li><p>在 C&#x2F;C++ 语言中，这种机制可以很好的工作，因为 C&#x2F;C++ 语言会尽可能的在编译期去做这些事。在 Objective-C 语言中非常依赖运行时特性，Category 就是基于运行时实现，但它并不会像类或者函数一样被创建链接符号，编译器在检查符号表时便不能检查到 Category 对应的符号表，从而 Category 的对象文件就不能被正常的加载，在运行时便无法找到对应的 selector 。</p>
-</li>
-</ul>
-<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><ol>
-<li>Other Linker Flags 添加</li>
-</ol>
-<ul>
-<li><p>-all_load  告诉编译器 对于所有静态库中的所有对象文件，不管里面的符号有没有被用到，全部都载入，这种方法可以解决问题，但是会产生比较大的二进制文件</p>
-</li>
-<li><p>-force_load 并指定路径，-force_load $(BUILT_PRODUCTS_DIR)&#x2F;&lt;library_name.a&gt; 这种方法和 -all_load 类似，不同的是它只载入指定的静态库</p>
-</li>
-<li><p>-ObjC  如果在静态库的对象文件中发现了 Objective-C 代码，就把它载入，Category 中肯定会存在 Objective-C 代码。</p>
-</li>
-</ul>
-<ol start="2">
-<li>在 Category 的源文件里添加 Fake symbol，并确保以某种方法在编译时引用了该 Fake symbol，这会使得 Fake symbol 对象文件被加载时它里面 Category 代码也会被载入。该方法可以控制哪些 Category 可以被正常加载，同时也不需要添加编译参数做特殊处理。</li>
-</ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="http://www.enkichen.com/2017/09/13/ios-static-library-categories/">iOS 静态库中的 Category 运行时错误</a></li>
-<li><a href="https://www.jianshu.com/p/9eea3e7cb3a1">podspec文件解析</a></li>
-<li><a href="https://juejin.im/post/6844903559931117581">Pod 库的资源引用</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>性能监控与优化</category>
-      </categories>
-      <tags>
-        <tag>CocoaPods</tag>
-      </tags>
   </entry>
   <entry>
     <title>iOS Rendering 渲染解析</title>
@@ -5557,7 +5557,7 @@ return 0;
 <li>合并图像<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 给图片添加水印</span></span><br><span class="line">convert original.png -compose over watermark.png -composite new-image.png</span><br></pre></td></tr></table></figure></li>
 <li>高斯模糊<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">convert -blur 80x5 original.jpg blur.png</span><br><span class="line">-blur radiusxsigma，两个分别是高斯模糊需要的两个参数</span><br></pre></td></tr></table></figure></li>
 </ol>
-<h3 id="存在的问题-unhandled-critical-chunk"><a href="#存在的问题-unhandled-critical-chunk" class="headerlink" title="存在的问题  unhandled critical chunk"></a>存在的问题  unhandled critical chunk</h3><p>error: CgBI: unhandled critical chunk <a href="mailto:&#65;&#112;&#x70;&#73;&#99;&#x6f;&#110;&#50;&#x30;&#120;&#50;&#x30;&#64;&#50;&#120;&#46;&#x70;&#110;&#103;">&#65;&#112;&#x70;&#73;&#99;&#x6f;&#110;&#50;&#x30;&#120;&#50;&#x30;&#64;&#50;&#120;&#46;&#x70;&#110;&#103;</a></p>
+<h3 id="存在的问题-unhandled-critical-chunk"><a href="#存在的问题-unhandled-critical-chunk" class="headerlink" title="存在的问题  unhandled critical chunk"></a>存在的问题  unhandled critical chunk</h3><p>error: CgBI: unhandled critical chunk <a href="mailto:&#x41;&#112;&#112;&#73;&#x63;&#x6f;&#110;&#x32;&#48;&#120;&#x32;&#48;&#x40;&#x32;&#x78;&#46;&#112;&#110;&#103;">&#x41;&#112;&#112;&#73;&#x63;&#x6f;&#110;&#x32;&#48;&#120;&#x32;&#48;&#x40;&#x32;&#x78;&#46;&#112;&#110;&#103;</a></p>
 <h4 id="分析原因"><a href="#分析原因" class="headerlink" title="分析原因"></a>分析原因</h4><p>在 Xcode 7.3以后,在 Xcode build 项目时,默认会把 png 压缩 和 修改.然后得到新的png图片,ImageMagick 在修改是会遇到上述的问题.<a href="https://stackoverflow.com/questions/36595799/libpng-error-cgbi-unhandled-critical-chunk-xcode-7-3">stackoverflow</a></p>
 <h4 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h4><p>build settting里面设置Compress PNG FIles debug模式下为NO（注意只有项目路径下存在png图片资源时build setting才会有该选项）</p>
 <h3 id="存在的问题-ICON未发生更改"><a href="#存在的问题-ICON未发生更改" class="headerlink" title="存在的问题 ICON未发生更改"></a>存在的问题 ICON未发生更改</h3><p>项目路径下的ICON已经更改，但是没有显示</p>
@@ -6859,6 +6859,89 @@ return 0;
       </categories>
   </entry>
   <entry>
+    <title>iOS防逆向代码混淆</title>
+    <url>/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/</url>
+    <content><![CDATA[<p>上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。</p>
+<span id="more"></span>
+
+<h2 id="砸壳"><a href="#砸壳" class="headerlink" title="砸壳"></a>砸壳</h2><p>砸壳就是对安装包进行逆向操作，对已加密的软件进行解密，从而获得真实的软件代码。App Store下载的包全部都是经过苹果加密过的包（苹果不允许开发者自己加密ipa包），加密后的ipa包，无法对其进行反编译，也无法class-dump，需要对其进行解密才能反编译。</p>
+<h3 id="砸壳方式"><a href="#砸壳方式" class="headerlink" title="砸壳方式"></a>砸壳方式</h3><ol>
+<li>静态砸壳<br>使用已知的解密方法对软件进行解密叫静态砸壳，难度大，需要知道其软件的加密算法。</li>
+<li>动态砸壳<br>从进程的内存空间中获取软件镜像（image）进行转存处理叫动态砸壳。<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/safe00.png" class=""></li>
+</ol>
+<h4 id="动态砸壳工具"><a href="#动态砸壳工具" class="headerlink" title="动态砸壳工具"></a>动态砸壳工具</h4><ol>
+<li><a href="https://github.com/KJCracks/Clutch">clutch</a></li>
+</ol>
+<p>2.<a href="https://github.com/stefanesser/dumpdecrypted">dumpdecrypted</a><br>通过建立一个名为dumpdecrypted.dylib的动态库，插入目标应用实现脱壳</p>
+<h3 id="otool（object-file-displaying-tool）工具"><a href="#otool（object-file-displaying-tool）工具" class="headerlink" title="otool（object file displaying tool）工具"></a>otool（object file displaying tool）工具</h3><p>Mac OS X下二进制可执行文件的动态连结库是dylib文件（也就是bsd风格的动态库），等价于windows的dll和linux的so。Mac基于bsd，所以也使用的dylib</p>
+<p>它是Xcode自带的常用工具</p>
+<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><ol>
+<li>依赖库查询 otool -L</li>
+</ol>
+<ul>
+<li>eg:查看微信的是否加密等信息 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">otool -l WeChart | grep -B 2 crypt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> cryptoff 16384</span><br><span class="line">    cryptsize 6651904</span><br><span class="line">      cryptid 0</span><br><span class="line">     cryptoff 16384</span><br><span class="line">    cryptsize 6553600</span><br><span class="line">      cryptid 0123456</span><br><span class="line">//其中cryptid代表是否加壳，1代表加壳，0代表已脱壳。我们发现打印了两遍，其实代表着该可执行文件支持两种架构armv7和arm64.</span><br></pre></td></tr></table></figure></li>
+</ul>
+<ol start="2">
+<li><p>查看 Mach-O头结构</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ otool -h /Applications/Sublime\ Text.app/Contents/MacOS/Sublime\ Text </span><br><span class="line"></span><br><span class="line">Mach header</span><br><span class="line">      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags</span><br><span class="line"> 0xfeedfacf 16777223          3  0x80           2    27       4336 0x00218085</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看汇编码 otool -tV</p>
+</li>
+</ol>
+<h2 id="class-dump"><a href="#class-dump" class="headerlink" title="class-dump"></a><a href="http://stevenygard.com/projects/class-dump/">class-dump</a></h2><p>用来分析ipa文件的class信息的工具，它利用Objective-C语言的runtime的特性，将存储在mach-O文件中的@interface和@protocol信息提取出来，并生成对应的.h文件</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
+<li>class-dump -H [.app文件的路径] -o [输出文件夹路径]<br>就可以得到所有的.h文件</li>
+</ol>
+<h3 id="导出文件特点"><a href="#导出文件特点" class="headerlink" title="导出文件特点"></a>导出文件特点</h3><p>使用 class-dump 命令导出头文件有以下特点：</p>
+<ol>
+<li>不管 .h 还是 .m 文件中的属性和方法都会被导出；</li>
+<li>某个类的类别中的方法也会被导出，导出到源文件中，比如 ViewController (Navigation) 中的方法被导出到 ViewController 中；</li>
+<li>实现的协议也会被导出，比如 ViewControllerDelegate 的方法被导出到 ViewController 中，如果 ViewController 不实现 ViewControllerDelegate 协议讲不会被导出；</li>
+<li>协议中定义的方法不会被导出，只会导出到实现协议的类中；</li>
+</ol>
+<h2 id="代码混淆"><a href="#代码混淆" class="headerlink" title="代码混淆"></a>代码混淆</h2><p>我们希望在开发时一直保留清晰可读的程序代码，方便自己。<br>同时，希望编译出来的二进制包含乱七八糟的混淆后的程序代码，恶心他人</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>方法名混淆其实就是字符串替换，有2个方法可以，一个是#define，一个是利用tops。<br>利用#define的方法有一个好处，就是可以把混淆结果合并在一个.h中，在工程Prefix.pch的最前面#import这个.h。不导入也可以编译、导入则实现混淆。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">单段的selector，如func: ，可以通过#define func 来实现字符串替换。</span><br><span class="line">多段的selector，如a:b:c: ，可以通过分别#define a 、b、c 来实现字符串替换。</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="混淆脚本"><a href="#混淆脚本" class="headerlink" title="混淆脚本"></a>混淆脚本</h3><p>主要思路是把敏感方法名集中写在一个名叫func.list的文件中，逐一#define成随机字符，追加写入.h</p>
+<ul>
+<li>confuse.sh</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#! /usr/bin/env bash</span></span><br><span class="line">TABLENAME=symbols</span><br><span class="line">SYMBOL_DB_FILE=<span class="string">&quot;symbols&quot;</span></span><br><span class="line">STRING_SYMBOL_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/func.list&quot;</span></span><br><span class="line">HEAD_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/codeObfuscation.h&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> LC_CTYPE=C</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">createTable</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;create table <span class="variable">$TABLENAME</span>(src text, des text);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">insertValue</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;insert into <span class="variable">$TABLENAME</span> values(&#x27;<span class="variable">$1</span>&#x27; ,&#x27;<span class="variable">$2</span>&#x27;);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">query</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;select * from <span class="variable">$TABLENAME</span> where src=&#x27;<span class="variable">$1</span>&#x27;;&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">ramdomString</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    openssl rand -<span class="built_in">base64</span> 64 | <span class="built_in">tr</span> -<span class="built_in">cd</span> <span class="string">&#x27;a-zA-Z&#x27;</span> |<span class="built_in">head</span> -c 16</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$HEAD_FILE</span></span><br><span class="line">createTable</span><br><span class="line"></span><br><span class="line"><span class="built_in">touch</span> <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#ifndef Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#define Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;//confuse string at `date`&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">cat</span> <span class="string">&quot;<span class="variable">$STRING_SYMBOL_FILE</span>&quot;</span> | <span class="keyword">while</span> <span class="built_in">read</span> -ra line; <span class="keyword">do</span></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">&quot;<span class="variable">$line</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">ramdom=`ramdomString`</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line">insertValue <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#define <span class="variable">$line</span> <span class="variable">$ramdom</span>&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#endif&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line">sqlite3 <span class="variable">$SYMBOL_DB_FILE</span> .dump</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>func.list</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">loginPass</span><br><span class="line">newPwd</span><br><span class="line">smsCode</span><br><span class="line">secret</span><br><span class="line">tradePwd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>codeObfuscation.h</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#ifndef Demo_codeObfuscation_h</span><br><span class="line">#define Demo_codeObfuscation_h</span><br><span class="line">//confuse string at Wed Jan 16 17:30:22 CST 2019</span><br><span class="line">#define loginPass ITqIAxhareFWDEst</span><br><span class="line">#define newPwd SRgVmxvZsIWUEAWQ</span><br><span class="line">#define smsCode MyiekqqKlJxLiNAx</span><br><span class="line">#define secret hMcpMgCDFGgXwLPL</span><br><span class="line">#define tradePwd ARIKWIPQnJOBNgfS</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><ol>
+<li>将混淆脚本confuse.sh放到工程目录下 </li>
+<li>修改Prefix.pch<br>打开Xcode，修改XXX-Prefix.ch ，添加混淆头文件:<br><code># import “codeObfuscation.h”</code></li>
+<li>配置build pharse 加载confuse.sh脚本</li>
+<li>创建函数名列表func.list，写入待混淆的函数名，如:</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">-(<span class="type">void</span>)sample;</span><br><span class="line">-(<span class="type">void</span>)seg1:(<span class="built_in">NSString</span> *)string seg2:(<span class="built_in">NSUInteger</span>)num;</span><br><span class="line"><span class="comment">//就这样写：</span></span><br><span class="line">sample</span><br><span class="line">seg1</span><br><span class="line">seg2</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>编译查看结果<br>直接build，混淆脚本会在编译前运行，进行字符随机替换，并且每次build的随机字符不同，<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build00.png" class=""></li>
+</ol>
+<h4 id="class-dump测试"><a href="#class-dump测试" class="headerlink" title="class-dump测试"></a>class-dump测试</h4><img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build01.png" class="">
+
+<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build02.png" class="">
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://www.jianshu.com/p/1e3fe0a8c048">class-dump的安装和使用</a></li>
+<li><a href="https://blog.csdn.net/yiyaaixuexi/article/details/29201699">Objective-C代码混淆</a></li>
+<li><a href="https://www.jianshu.com/p/1991854c65af">iOS逆向之《越狱砸壳&#x2F;ipa脱壳》</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>iOS</category>
+        <category>逆向安全</category>
+      </categories>
+  </entry>
+  <entry>
     <title>iOS面试题汇总</title>
     <url>/2020/06/03/iOS%E9%9D%A2%E8%AF%95%E9%A2%98%E6%B1%87%E6%80%BB/</url>
     <content><![CDATA[<p>把最近面试中遇到的问题总结下</p>
@@ -6952,89 +7035,6 @@ return 0;
       <categories>
         <category>iOS</category>
         <category>音视频</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>iOS防逆向代码混淆</title>
-    <url>/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/</url>
-    <content><![CDATA[<p>上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。</p>
-<span id="more"></span>
-
-<h2 id="砸壳"><a href="#砸壳" class="headerlink" title="砸壳"></a>砸壳</h2><p>砸壳就是对安装包进行逆向操作，对已加密的软件进行解密，从而获得真实的软件代码。App Store下载的包全部都是经过苹果加密过的包（苹果不允许开发者自己加密ipa包），加密后的ipa包，无法对其进行反编译，也无法class-dump，需要对其进行解密才能反编译。</p>
-<h3 id="砸壳方式"><a href="#砸壳方式" class="headerlink" title="砸壳方式"></a>砸壳方式</h3><ol>
-<li>静态砸壳<br>使用已知的解密方法对软件进行解密叫静态砸壳，难度大，需要知道其软件的加密算法。</li>
-<li>动态砸壳<br>从进程的内存空间中获取软件镜像（image）进行转存处理叫动态砸壳。<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/safe00.png" class=""></li>
-</ol>
-<h4 id="动态砸壳工具"><a href="#动态砸壳工具" class="headerlink" title="动态砸壳工具"></a>动态砸壳工具</h4><ol>
-<li><a href="https://github.com/KJCracks/Clutch">clutch</a></li>
-</ol>
-<p>2.<a href="https://github.com/stefanesser/dumpdecrypted">dumpdecrypted</a><br>通过建立一个名为dumpdecrypted.dylib的动态库，插入目标应用实现脱壳</p>
-<h3 id="otool（object-file-displaying-tool）工具"><a href="#otool（object-file-displaying-tool）工具" class="headerlink" title="otool（object file displaying tool）工具"></a>otool（object file displaying tool）工具</h3><p>Mac OS X下二进制可执行文件的动态连结库是dylib文件（也就是bsd风格的动态库），等价于windows的dll和linux的so。Mac基于bsd，所以也使用的dylib</p>
-<p>它是Xcode自带的常用工具</p>
-<h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><ol>
-<li>依赖库查询 otool -L</li>
-</ol>
-<ul>
-<li>eg:查看微信的是否加密等信息 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">otool -l WeChart | grep -B 2 crypt</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> cryptoff 16384</span><br><span class="line">    cryptsize 6651904</span><br><span class="line">      cryptid 0</span><br><span class="line">     cryptoff 16384</span><br><span class="line">    cryptsize 6553600</span><br><span class="line">      cryptid 0123456</span><br><span class="line">//其中cryptid代表是否加壳，1代表加壳，0代表已脱壳。我们发现打印了两遍，其实代表着该可执行文件支持两种架构armv7和arm64.</span><br></pre></td></tr></table></figure></li>
-</ul>
-<ol start="2">
-<li><p>查看 Mach-O头结构</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ otool -h /Applications/Sublime\ Text.app/Contents/MacOS/Sublime\ Text </span><br><span class="line"></span><br><span class="line">Mach header</span><br><span class="line">      magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags</span><br><span class="line"> 0xfeedfacf 16777223          3  0x80           2    27       4336 0x00218085</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>查看汇编码 otool -tV</p>
-</li>
-</ol>
-<h2 id="class-dump"><a href="#class-dump" class="headerlink" title="class-dump"></a><a href="http://stevenygard.com/projects/class-dump/">class-dump</a></h2><p>用来分析ipa文件的class信息的工具，它利用Objective-C语言的runtime的特性，将存储在mach-O文件中的@interface和@protocol信息提取出来，并生成对应的.h文件</p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><ol>
-<li>class-dump -H [.app文件的路径] -o [输出文件夹路径]<br>就可以得到所有的.h文件</li>
-</ol>
-<h3 id="导出文件特点"><a href="#导出文件特点" class="headerlink" title="导出文件特点"></a>导出文件特点</h3><p>使用 class-dump 命令导出头文件有以下特点：</p>
-<ol>
-<li>不管 .h 还是 .m 文件中的属性和方法都会被导出；</li>
-<li>某个类的类别中的方法也会被导出，导出到源文件中，比如 ViewController (Navigation) 中的方法被导出到 ViewController 中；</li>
-<li>实现的协议也会被导出，比如 ViewControllerDelegate 的方法被导出到 ViewController 中，如果 ViewController 不实现 ViewControllerDelegate 协议讲不会被导出；</li>
-<li>协议中定义的方法不会被导出，只会导出到实现协议的类中；</li>
-</ol>
-<h2 id="代码混淆"><a href="#代码混淆" class="headerlink" title="代码混淆"></a>代码混淆</h2><p>我们希望在开发时一直保留清晰可读的程序代码，方便自己。<br>同时，希望编译出来的二进制包含乱七八糟的混淆后的程序代码，恶心他人</p>
-<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>方法名混淆其实就是字符串替换，有2个方法可以，一个是#define，一个是利用tops。<br>利用#define的方法有一个好处，就是可以把混淆结果合并在一个.h中，在工程Prefix.pch的最前面#import这个.h。不导入也可以编译、导入则实现混淆。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">单段的selector，如func: ，可以通过#define func 来实现字符串替换。</span><br><span class="line">多段的selector，如a:b:c: ，可以通过分别#define a 、b、c 来实现字符串替换。</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="混淆脚本"><a href="#混淆脚本" class="headerlink" title="混淆脚本"></a>混淆脚本</h3><p>主要思路是把敏感方法名集中写在一个名叫func.list的文件中，逐一#define成随机字符，追加写入.h</p>
-<ul>
-<li>confuse.sh</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#! /usr/bin/env bash</span></span><br><span class="line">TABLENAME=symbols</span><br><span class="line">SYMBOL_DB_FILE=<span class="string">&quot;symbols&quot;</span></span><br><span class="line">STRING_SYMBOL_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/func.list&quot;</span></span><br><span class="line">HEAD_FILE=<span class="string">&quot;<span class="variable">$PROJECT_DIR</span>/<span class="variable">$PROJECT_NAME</span>/Source/CodeConfuse/codeObfuscation.h&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> LC_CTYPE=C</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">createTable</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;create table <span class="variable">$TABLENAME</span>(src text, des text);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">insertValue</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;insert into <span class="variable">$TABLENAME</span> values(&#x27;<span class="variable">$1</span>&#x27; ,&#x27;<span class="variable">$2</span>&#x27;);&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">query</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;select * from <span class="variable">$TABLENAME</span> where src=&#x27;<span class="variable">$1</span>&#x27;;&quot;</span> | sqlite3 <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">ramdomString</span></span>()</span><br><span class="line">&#123;</span><br><span class="line">    openssl rand -<span class="built_in">base64</span> 64 | <span class="built_in">tr</span> -<span class="built_in">cd</span> <span class="string">&#x27;a-zA-Z&#x27;</span> |<span class="built_in">head</span> -c 16</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$SYMBOL_DB_FILE</span></span><br><span class="line"><span class="built_in">rm</span> -f <span class="variable">$HEAD_FILE</span></span><br><span class="line">createTable</span><br><span class="line"></span><br><span class="line"><span class="built_in">touch</span> <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#ifndef Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;#define Demo_codeObfuscation_h&#x27;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;//confuse string at `date`&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="built_in">cat</span> <span class="string">&quot;<span class="variable">$STRING_SYMBOL_FILE</span>&quot;</span> | <span class="keyword">while</span> <span class="built_in">read</span> -ra line; <span class="keyword">do</span></span><br><span class="line"><span class="keyword">if</span> [[ ! -z <span class="string">&quot;<span class="variable">$line</span>&quot;</span> ]]; <span class="keyword">then</span></span><br><span class="line">ramdom=`ramdomString`</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line">insertValue <span class="variable">$line</span> <span class="variable">$ramdom</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#define <span class="variable">$line</span> <span class="variable">$ramdom</span>&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;#endif&quot;</span> &gt;&gt; <span class="variable">$HEAD_FILE</span></span><br><span class="line"></span><br><span class="line">sqlite3 <span class="variable">$SYMBOL_DB_FILE</span> .dump</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>func.list</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">loginPass</span><br><span class="line">newPwd</span><br><span class="line">smsCode</span><br><span class="line">secret</span><br><span class="line">tradePwd</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>codeObfuscation.h</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#ifndef Demo_codeObfuscation_h</span><br><span class="line">#define Demo_codeObfuscation_h</span><br><span class="line">//confuse string at Wed Jan 16 17:30:22 CST 2019</span><br><span class="line">#define loginPass ITqIAxhareFWDEst</span><br><span class="line">#define newPwd SRgVmxvZsIWUEAWQ</span><br><span class="line">#define smsCode MyiekqqKlJxLiNAx</span><br><span class="line">#define secret hMcpMgCDFGgXwLPL</span><br><span class="line">#define tradePwd ARIKWIPQnJOBNgfS</span><br><span class="line">#endif</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><ol>
-<li>将混淆脚本confuse.sh放到工程目录下 </li>
-<li>修改Prefix.pch<br>打开Xcode，修改XXX-Prefix.ch ，添加混淆头文件:<br><code># import “codeObfuscation.h”</code></li>
-<li>配置build pharse 加载confuse.sh脚本</li>
-<li>创建函数名列表func.list，写入待混淆的函数名，如:</li>
-</ol>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">-(<span class="type">void</span>)sample;</span><br><span class="line">-(<span class="type">void</span>)seg1:(<span class="built_in">NSString</span> *)string seg2:(<span class="built_in">NSUInteger</span>)num;</span><br><span class="line"><span class="comment">//就这样写：</span></span><br><span class="line">sample</span><br><span class="line">seg1</span><br><span class="line">seg2</span><br></pre></td></tr></table></figure>
-<ol start="5">
-<li>编译查看结果<br>直接build，混淆脚本会在编译前运行，进行字符随机替换，并且每次build的随机字符不同，<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build00.png" class=""></li>
-</ol>
-<h4 id="class-dump测试"><a href="#class-dump测试" class="headerlink" title="class-dump测试"></a>class-dump测试</h4><img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build01.png" class="">
-
-<img src="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/Build02.png" class="">
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a href="https://www.jianshu.com/p/1e3fe0a8c048">class-dump的安装和使用</a></li>
-<li><a href="https://blog.csdn.net/yiyaaixuexi/article/details/29201699">Objective-C代码混淆</a></li>
-<li><a href="https://www.jianshu.com/p/1991854c65af">iOS逆向之《越狱砸壳&#x2F;ipa脱壳》</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>逆向安全</category>
       </categories>
   </entry>
   <entry>
@@ -7279,49 +7279,6 @@ return 0;
       <categories>
         <category>iOS</category>
         <category>性能监控与优化</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>事件传递和响应机制</title>
-    <url>/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/</url>
-    <content><![CDATA[<img src="/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/xmind.png" class="">
-<span id="more"></span>
-<h3 id="响应者对象（UIResponder）"><a href="#响应者对象（UIResponder）" class="headerlink" title="响应者对象（UIResponder）"></a>响应者对象（UIResponder）</h3><p>继承了UIResponder的对象才能接受并处理事件，我们称之为“响应者对象”。以下都是继承UIResponder的，所以都能接收并处理事件。</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UIApplication</span></span><br><span class="line"><span class="built_in">UIViewController</span></span><br><span class="line"><span class="built_in">UIView</span></span><br></pre></td></tr></table></figure>
-<p>为什么继承了UIResponder的类就能够接收并处理事件呢？<br>因为UIResponder中提供了以下4个对象方法来处理触摸事件</p>
-<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//UIResponder内部提供了以下方法来处理事件触摸事件</span></span><br><span class="line">- (<span class="type">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesMoved:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesEnded:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesCancelled:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line"><span class="comment">//加速计事件</span></span><br><span class="line">- (<span class="type">void</span>)motionBegan:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)motionEnded:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)motionCancelled:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line"><span class="comment">//远程控制事件</span></span><br><span class="line">- (<span class="type">void</span>)remoteControlReceivedWithEvent:(<span class="built_in">UIEvent</span> *)event;</span><br></pre></td></tr></table></figure>
-
-<h2 id="事件的产生和传递"><a href="#事件的产生和传递" class="headerlink" title="事件的产生和传递"></a>事件的产生和传递</h2><h3 id="事件的产生"><a href="#事件的产生" class="headerlink" title="事件的产生"></a>事件的产生</h3><ol>
-<li>发生触摸事件后，系统会将该事件加入到一个由UIApplication管理的事件队列中</li>
-<li>UIApplication会从事件队列中取出最前面的事件，并将事件分发下去以便处理，通常先发送事件给应用程序的主窗口（keywindow）。</li>
-<li>keywindow会在视图层次结构中找到一个最合适的视图来处理触摸事件。</li>
-</ol>
-<h3 id="寻找处理事件最合适的view"><a href="#寻找处理事件最合适的view" class="headerlink" title="寻找处理事件最合适的view"></a>寻找处理事件最合适的view</h3><ol>
-<li>首先判断主窗口（keyWindow）自己是否能接受触摸事件</li>
-<li>判断触摸点是否在自己身上</li>
-<li>子控件数组中从后往前遍历子控件，重复前面的两个步骤（所谓从后往前遍历子控件，就是首先查找子控件数组中最后一个元素，然后执行1、2步骤）</li>
-<li>view，比如叫做hitView，那么会把这个事件交给这个hitView，再遍历这个hitView的子控件，直至没有更合适的view为止。</li>
-<li>如果没有符合条件的子控件，那么就认为自己最合适处理这个事件，也就是自己是最合适的view。</li>
-</ol>
-<h4 id="UIView不能接收触摸事件的三种情况："><a href="#UIView不能接收触摸事件的三种情况：" class="headerlink" title="UIView不能接收触摸事件的三种情况："></a>UIView不能接收触摸事件的三种情况：</h4><ol>
-<li>不允许交互：userInteractionEnabled &#x3D; NO</li>
-<li>隐藏：如果把父控件隐藏，那么子控件也会隐藏，隐藏的控件不能接受事件</li>
-<li>透明度：如果设置一个控件的透明度&lt;0.01，会直接影响子控件的透明度。alpha：0.0~0.01为透明</li>
-</ol>
-<h4 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">UIView</span> *)hitTest:(<span class="built_in">CGPoint</span>)point withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 1.判断自己能否接收事件</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.userInteractionEnabled == <span class="literal">NO</span> || <span class="keyword">self</span>.hidden == <span class="literal">YES</span> || <span class="keyword">self</span>.alpha &lt;= <span class="number">0.01</span>) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 2.判断点在不在当前控件上面</span></span><br><span class="line">    <span class="keyword">if</span> (![<span class="keyword">self</span> pointInside:point withEvent:event]) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3.去找有没有比自己更合适的view</span></span><br><span class="line">    <span class="comment">// 从后往前遍历自己的子控件</span></span><br><span class="line">    <span class="type">int</span> count = <span class="keyword">self</span>.subviews.count;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = count - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="comment">// 获取子控件</span></span><br><span class="line">        <span class="built_in">UIView</span> *childView = <span class="keyword">self</span>.subviews[i];</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 转换坐标系</span></span><br><span class="line">        <span class="comment">// 把自己坐标系上的点转换成子控件做坐标系上的点</span></span><br><span class="line">        <span class="built_in">CGPoint</span> childPoint = [<span class="keyword">self</span> convertPoint:point toView:childView];</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">UIView</span> *fitView = [childView hitTest:childPoint withEvent:event];</span><br><span class="line">        <span class="comment">// 找到最合适的view</span></span><br><span class="line">        <span class="keyword">if</span> (fitView) &#123;</span><br><span class="line">            <span class="keyword">return</span> fitView;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 没有找到比自己更合适的view</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<img src="/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/responder.png" class="">
-
-<h3 id="拦截事件的处理"><a href="#拦截事件的处理" class="headerlink" title="拦截事件的处理"></a>拦截事件的处理</h3><p>通过重写hitTest：withEvent：就可以拦截事件的传递过程，想让谁处理事件谁就处理事件。</p>
-<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>如果hitTest:withEvent:方法中返回nil，那么调用该方法的控件本身和其子控件都不是最合适的view，也就是在自己身上没有找到更合适的view。那么最合适的view就是该控件的父控件。</p>
-<h4 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h4><p>想让谁成为最合适的view就重写谁自己的父控件的hitTest:withEvent:方法返回指定的子控件，或者重写自己的hitTest:withEvent:方法 return self。但是，建议在父控件的hitTest:withEvent:中返回子控件作为最合适的view！</p>
-<p>原因是子控件在遍历时会根据addsuview的逆序遍历。</p>
-<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
-<li><a href="https://www.jianshu.com/p/2e074db792ba">iOS之事件的传递和响应机制</a></li>
-</ol>
-]]></content>
-      <categories>
-        <category>iOS</category>
-        <category>UI</category>
       </categories>
   </entry>
   <entry>
@@ -7639,6 +7596,49 @@ return 0;
       <tags>
         <tag>读书笔记</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>事件传递和响应机制</title>
+    <url>/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<img src="/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/xmind.png" class="">
+<span id="more"></span>
+<h3 id="响应者对象（UIResponder）"><a href="#响应者对象（UIResponder）" class="headerlink" title="响应者对象（UIResponder）"></a>响应者对象（UIResponder）</h3><p>继承了UIResponder的对象才能接受并处理事件，我们称之为“响应者对象”。以下都是继承UIResponder的，所以都能接收并处理事件。</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="built_in">UIApplication</span></span><br><span class="line"><span class="built_in">UIViewController</span></span><br><span class="line"><span class="built_in">UIView</span></span><br></pre></td></tr></table></figure>
+<p>为什么继承了UIResponder的类就能够接收并处理事件呢？<br>因为UIResponder中提供了以下4个对象方法来处理触摸事件</p>
+<figure class="highlight objc"><table><tr><td class="code"><pre><span class="line"><span class="comment">//UIResponder内部提供了以下方法来处理事件触摸事件</span></span><br><span class="line">- (<span class="type">void</span>)touchesBegan:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesMoved:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesEnded:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)touchesCancelled:(<span class="built_in">NSSet</span> *)touches withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line"><span class="comment">//加速计事件</span></span><br><span class="line">- (<span class="type">void</span>)motionBegan:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)motionEnded:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line">- (<span class="type">void</span>)motionCancelled:(<span class="built_in">UIEventSubtype</span>)motion withEvent:(<span class="built_in">UIEvent</span> *)event;</span><br><span class="line"><span class="comment">//远程控制事件</span></span><br><span class="line">- (<span class="type">void</span>)remoteControlReceivedWithEvent:(<span class="built_in">UIEvent</span> *)event;</span><br></pre></td></tr></table></figure>
+
+<h2 id="事件的产生和传递"><a href="#事件的产生和传递" class="headerlink" title="事件的产生和传递"></a>事件的产生和传递</h2><h3 id="事件的产生"><a href="#事件的产生" class="headerlink" title="事件的产生"></a>事件的产生</h3><ol>
+<li>发生触摸事件后，系统会将该事件加入到一个由UIApplication管理的事件队列中</li>
+<li>UIApplication会从事件队列中取出最前面的事件，并将事件分发下去以便处理，通常先发送事件给应用程序的主窗口（keywindow）。</li>
+<li>keywindow会在视图层次结构中找到一个最合适的视图来处理触摸事件。</li>
+</ol>
+<h3 id="寻找处理事件最合适的view"><a href="#寻找处理事件最合适的view" class="headerlink" title="寻找处理事件最合适的view"></a>寻找处理事件最合适的view</h3><ol>
+<li>首先判断主窗口（keyWindow）自己是否能接受触摸事件</li>
+<li>判断触摸点是否在自己身上</li>
+<li>子控件数组中从后往前遍历子控件，重复前面的两个步骤（所谓从后往前遍历子控件，就是首先查找子控件数组中最后一个元素，然后执行1、2步骤）</li>
+<li>view，比如叫做hitView，那么会把这个事件交给这个hitView，再遍历这个hitView的子控件，直至没有更合适的view为止。</li>
+<li>如果没有符合条件的子控件，那么就认为自己最合适处理这个事件，也就是自己是最合适的view。</li>
+</ol>
+<h4 id="UIView不能接收触摸事件的三种情况："><a href="#UIView不能接收触摸事件的三种情况：" class="headerlink" title="UIView不能接收触摸事件的三种情况："></a>UIView不能接收触摸事件的三种情况：</h4><ol>
+<li>不允许交互：userInteractionEnabled &#x3D; NO</li>
+<li>隐藏：如果把父控件隐藏，那么子控件也会隐藏，隐藏的控件不能接受事件</li>
+<li>透明度：如果设置一个控件的透明度&lt;0.01，会直接影响子控件的透明度。alpha：0.0~0.01为透明</li>
+</ol>
+<h4 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h4><figure class="highlight objc"><table><tr><td class="code"><pre><span class="line">- (<span class="built_in">UIView</span> *)hitTest:(<span class="built_in">CGPoint</span>)point withEvent:(<span class="built_in">UIEvent</span> *)event</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 1.判断自己能否接收事件</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.userInteractionEnabled == <span class="literal">NO</span> || <span class="keyword">self</span>.hidden == <span class="literal">YES</span> || <span class="keyword">self</span>.alpha &lt;= <span class="number">0.01</span>) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 2.判断点在不在当前控件上面</span></span><br><span class="line">    <span class="keyword">if</span> (![<span class="keyword">self</span> pointInside:point withEvent:event]) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 3.去找有没有比自己更合适的view</span></span><br><span class="line">    <span class="comment">// 从后往前遍历自己的子控件</span></span><br><span class="line">    <span class="type">int</span> count = <span class="keyword">self</span>.subviews.count;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = count - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="comment">// 获取子控件</span></span><br><span class="line">        <span class="built_in">UIView</span> *childView = <span class="keyword">self</span>.subviews[i];</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 转换坐标系</span></span><br><span class="line">        <span class="comment">// 把自己坐标系上的点转换成子控件做坐标系上的点</span></span><br><span class="line">        <span class="built_in">CGPoint</span> childPoint = [<span class="keyword">self</span> convertPoint:point toView:childView];</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">UIView</span> *fitView = [childView hitTest:childPoint withEvent:event];</span><br><span class="line">        <span class="comment">// 找到最合适的view</span></span><br><span class="line">        <span class="keyword">if</span> (fitView) &#123;</span><br><span class="line">            <span class="keyword">return</span> fitView;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 没有找到比自己更合适的view</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<img src="/2018/07/02/%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E5%92%8C%E5%93%8D%E5%BA%94%E6%9C%BA%E5%88%B6/responder.png" class="">
+
+<h3 id="拦截事件的处理"><a href="#拦截事件的处理" class="headerlink" title="拦截事件的处理"></a>拦截事件的处理</h3><p>通过重写hitTest：withEvent：就可以拦截事件的传递过程，想让谁处理事件谁就处理事件。</p>
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>如果hitTest:withEvent:方法中返回nil，那么调用该方法的控件本身和其子控件都不是最合适的view，也就是在自己身上没有找到更合适的view。那么最合适的view就是该控件的父控件。</p>
+<h4 id="技巧"><a href="#技巧" class="headerlink" title="技巧"></a>技巧</h4><p>想让谁成为最合适的view就重写谁自己的父控件的hitTest:withEvent:方法返回指定的子控件，或者重写自己的hitTest:withEvent:方法 return self。但是，建议在父控件的hitTest:withEvent:中返回子控件作为最合适的view！</p>
+<p>原因是子控件在遍历时会根据addsuview的逆序遍历。</p>
+<h3 id="文章参考"><a href="#文章参考" class="headerlink" title="文章参考"></a>文章参考</h3><ol>
+<li><a href="https://www.jianshu.com/p/2e074db792ba">iOS之事件的传递和响应机制</a></li>
+</ol>
+]]></content>
+      <categories>
+        <category>iOS</category>
+        <category>UI</category>
+      </categories>
   </entry>
   <entry>
     <title>在浏览器中输入URL到页面展现发生什么？</title>
