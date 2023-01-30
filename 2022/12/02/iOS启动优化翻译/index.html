@@ -22,7 +22,7 @@
 
   <meta name="description" content="通过最小化启动时间，为应用创造更快速的体验。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS启动优化翻译">
+<meta property="og:title" content="【译】iOS启动优化">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/index.html">
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="通过最小化启动时间，为应用创造更快速的体验。">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-4.png">
 <meta property="og:image" content="https://github.com/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-5@2x.png">
 <meta property="article:published_time" content="2022-12-02T00:00:00.000Z">
-<meta property="article:modified_time" content="2022-12-03T01:48:41.939Z">
+<meta property="article:modified_time" content="2023-01-16T07:55:24.000Z">
 <meta property="article:author" content="Jack Chen">
 <meta property="article:tag" content="翻译">
 <meta name="twitter:card" content="summary">
@@ -52,7 +52,7 @@
   };
 </script>
 
-  <title>iOS启动优化翻译 | 学计算机的那个</title>
+  <title>【译】iOS启动优化 | 学计算机的那个</title>
   
 
 
@@ -209,7 +209,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          iOS启动优化翻译
+          【译】iOS启动优化
         </h1>
 
         <div class="post-meta">
@@ -226,7 +226,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-12-03 09:48:41" itemprop="dateModified" datetime="2022-12-03T09:48:41+08:00">2022-12-03</time>
+                <time title="修改时间：2023-01-16 15:55:24" itemprop="dateModified" datetime="2023-01-16T15:55:24+08:00">2023-01-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -264,7 +264,7 @@
 <p>在macOS上，系统不会终止您的进程作为正常使用的一部分。激活可能需要系统从压缩器（compressor）引入内存、交换和重新渲染。</p>
 <h2 id="理解冷启动和热启动"><a href="#理解冷启动和热启动" class="headerlink" title="理解冷启动和热启动"></a>理解冷启动和热启动</h2><p>应用程序的激活取决于设备上之前的操作。 </p>
 <p>例如，在iOS平台上，如果你滑回主屏幕并立即重新进入应用程序，这就是最快的激活速度。它也可能是一份恢复。当系统确定需要启动时，通常称为“热启动”。 </p>
-<p>相反地，如果用户刚刚玩了一款内存密集型的游戏，然后他们再次进入你的应用，那么它可能会比你的平均激活速度慢得多。在iOS上，你的应用程序通常会被从内存中移除，以允许前台应用程序拥有更多的内存。<strong>应用程序启动所依赖的框架和守护进程也可能需要重新启动并从磁盘进行分页加载</strong>。这种场景，或者在系统启动后立即启动app，通常称为“冷启动”。 </p>
+<p>相反地，如果用户刚刚玩了一款内存密集型的游戏，然后他们再次进入你的应用，那么它可能会比你的平均激活速度慢得多。在iOS上，你的应用程序通常会被从内存中移除，以允许前台应用程序拥有更多的内存。<strong>应用程序启动所依赖的框架和守护进程(Frameworks and daemons)也可能需要重新启动并从磁盘进行分页加载</strong><a href="%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%90%8D%E7%A7%B0%E9%80%9A%E5%B8%B8%E4%BB%A5%E5%AD%97%E6%AF%8Dd%E7%BB%93%E5%B0%BE%EF%BC%8C%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%88%AB%E5%90%8D%E5%8C%85%E6%8B%AC%E6%9C%8D%E5%8A%A1">^守护进程</a>。这种场景，或者在系统启动后立即启动app，通常称为“冷启动”。 </p>
 <p>把冷启动和热启动看作一个光谱。在实际使用中，用户将根据设备的状态体验到不同的性能。这就是为什么在各种条件下进行测试对于预测真实世界的性能至关重要。</p>
 <h2 id="收集关于应用发布时间的参数"><a href="#收集关于应用发布时间的参数" class="headerlink" title="收集关于应用发布时间的参数"></a>收集关于应用发布时间的参数</h2><p>启动过程中的各种变化意味着理解应用在该领域的运行方式可能具有挑战性。 </p>
 <p>对于iOS应用，使用<code>Xcode Organizer</code>中的<code>Launch Time</code>面板来查看从用户点击图标到静态启动屏幕后绘制第一个屏幕之间的毫秒数。使用过滤器检查不同设备上的启动时间以及典型(第50个百分位数)和最长(第90个百分位数)时间。通过单击所需版本的图表中的栏，比较当前版本的发布时间与之前版本的发布时间。</p>
@@ -317,7 +317,11 @@
 <p>在Instruments中，<code>Points of Interest</code>在其时间轴中显示<code>os_signposts</code>。你可以使用这些信息将应用程序中的活动与应用程序的附加启动任务关联起来。</p>
 <img src="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/reducing-your-app-s-launch-time-5@2x.png" class="&#x3D;">
 
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/xcode/reducing-your-app-s-launch-time">启动优化</a></p>
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p> <a target="_blank" rel="noopener" href="https://zh.m.wikipedia.org/zh/%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B">守护进程百科</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/xcode/reducing-your-app-s-launch-time">启动优化</a></p>
+<p><a target="_blank" rel="noopener" href="https://linux.vbird.org/linux_basic/centos7/0560daemons.php">認識系統服務 (daemons)</a></p>
 
     </div>
 
@@ -336,8 +340,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/11/01/POP%20in%20Swift/" rel="prev" title="Protocol Oriented Programming in Swift">
-      <i class="fa fa-chevron-left"></i> Protocol Oriented Programming in Swift
+    <a href="/2022/11/28/%E5%88%9B%E5%BB%BA%E6%8B%93%E5%B1%95%E5%B0%8F%E7%BB%84%E4%BB%B6%E7%BF%BB%E8%AF%91/" rel="prev" title="【译】创建扩展小组件">
+      <i class="fa fa-chevron-left"></i> 【译】创建扩展小组件
     </a></div>
       <div class="post-nav-item">
     <a href="/2022/12/02/Codable%E5%8D%8F%E8%AE%AE/" rel="next" title="Codable协议">
@@ -415,7 +419,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-count">108</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -454,7 +458,7 @@
 <div class="copyright">
   
   &copy; 2018 – 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

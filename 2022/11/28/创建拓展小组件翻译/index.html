@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="添加和配置一个扩展，以显示您的应用程序的内容在主屏幕，今日视图，或通知中心。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】创建扩展小组件">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/11/28/%E5%88%9B%E5%BB%BA%E6%8B%93%E5%B1%95%E5%B0%8F%E7%BB%84%E4%BB%B6%E7%BF%BB%E8%AF%91/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="添加和配置一个扩展，以显示您的应用程序的内容在主屏幕，今日视图，或通知中心。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-28T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-16T07:52:30.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/11/28/%E5%88%9B%E5%BB%BA%E6%8B%93%E5%B1%95%E5%B0%8F%E7%BB%84%E4%BB%B6%E7%BF%BB%E8%AF%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】创建扩展小组件 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/11/28/%E5%88%9B%E5%BB%BA%E6%8B%93%E5%B1%95%E5%B0%8F%E7%BB%84%E4%BB%B6%E7%BF%BB%E8%AF%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】创建扩展小组件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-28 08:00:00" itemprop="dateCreated datePublished" datetime="2022-11-28T08:00:00+08:00">2022-11-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-16 15:52:30" itemprop="dateModified" datetime="2023-01-16T15:52:30+08:00">2023-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>添加和配置一个扩展，以显示您的应用程序的内容在主屏幕，今日视图，或通知中心。</p>
+<span id="more"></span>
+
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>小组件显示相关的、可浏览的内容，让用户快速访问你的应用程序获得更多细节。你的应用程序可以提供各种小组件，让用户专注于对他们来说最重要的信息。他们可以添加同一个小组件的多个副本，并根据各自的独特需求和布局进行定制。如果在小组件中包含自定义意图（custom intent），用户还可以对每个小组件单独进行个性化设置。小部件支持多种大小;选择最适合应用内容的大小。由于空间有限，请确保您的小组件显示人们最重视的信息。 </p>
+<p>向应用程序中添加小组件只需要最少的设置，以及关于用户界面的配置和风格的一些决策。小组件使用<code>SwiftUI</code>视图显示其内容。更多信息请参见<code>SwiftUI</code></p>
+<h2 id="添加一个小组件目标到您的应用程序"><a href="#添加一个小组件目标到您的应用程序" class="headerlink" title="添加一个小组件目标到您的应用程序"></a>添加一个小组件目标到您的应用程序</h2><p>小组件扩展模板提供了创建小组件的起点。一个小组件扩展可以包含多个小组件。例如，一个体育应用程序可能有一个显示球队信息的小组件，而另一个显示比赛日程。一个小组件扩展可以包含两个小组件。</p>
+<ol>
+<li>在<code>Xcode</code>中打开你的应用项目，选择<code>File &gt; New &gt; Target</code>。 </li>
+<li>从应用程序扩展组中选择小组件扩展，然后单击下一步。 </li>
+<li>输入您的扩展名。 </li>
+<li>如果小组件提供用户可配置的属性，请选中<code>Include Configuration Intent</code>复选框。 </li>
+<li>单击Finish。</li>
+</ol>
+
+
+<p>通常，你将所有的小组件包含在一个小组件扩展中，尽管你的应用程序可以包含多个扩展。例如，如果您的一些小组件使用位置信息，而其他小组件不使用，那么将使用位置信息的小组件保留在单独的扩展中。这允许系统提示用户授权只对使用位置信息的扩展的小组件使用位置信息。</p>
+<h2 id="添加配置详情"><a href="#添加配置详情" class="headerlink" title="添加配置详情"></a>添加配置详情</h2><p>小组件扩展模板提供了符合<code>widget</code>协议的初始小组件实现。此小组件的主体属性确定该小组件是否具有用户可配置的属性。有两种配置:</p>
+<p><code>StaticConfiguration</code>（静态配置）<br>对于没有用户可配置属性的小组件。例如，显示一般市场信息的股票市场小组件，或显示趋势标题的新闻小组件。</p>
+<p><code>IntentConfiguration</code>（意向配置）<br> 对于具有用户可配置属性的小组件。使用<code>SiriKit</code>自定义意图（custom intent）来定义属性。例如，一个天气小组件需要一个城市的邮政编码或邮政编码（zip or postal code），或者一个包裹跟踪（package-tracking）小组件需要一个跟踪号。</p>
+<p> 包含配置意图复选框决定了<code>Xcode</code>使用哪种配置。当你选中这个复选框时，<code>Xcode</code>会使用一个意向配置;否则，它使用静态配置。要初始化一个<code>IntentConfiguration</code>，向它的初始化器提供以下信息:</p>
+<p> kind （种类）<br>标识小组件的字符串。这是您选择的标识符，并且应该描述小组件所代表的内容。</p>
+<p>provider（供应商）<br>一个符合<code>TimelineProvider</code>并生成时间轴的对象，告诉<code>WidgetKit</code>何时呈现小组件。时间轴包含您定义的自定义<code>TimelineEntry</code>类型。当您希望<code>WidgetKit</code>更新小部件的内容时，时间轴条目（entry）标识日期。包含小组件视图需要以自定义类型呈现的属性。</p>
+<p>intent（意图）<br>自定义用户可配置属性的自定义意图。有关添加自定义的详细信息，请参见制作可配置小组件。</p>
+<p>content（内容）<br>包含<code>SwiftUI</code>视图的闭包。<code>WidgetKit</code>调用它来呈现小组件的内容，并从提供程序传递一个<code>TimelineEntry</code>参数。</p>
+<p>使用修饰符（modifiers）提供额外的配置细节，包括显示名称、描述和小组件支持的系列（families）。以下代码显示了一个小组件，它为游戏提供了一般的、不可配置的状态:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">GameStatusWidget</span>: <span class="title class_">Widget</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">WidgetConfiguration</span> &#123;</span><br><span class="line">        <span class="type">StaticConfiguration</span>(</span><br><span class="line">            kind: <span class="string">&quot;com.mygame.game-status&quot;</span>,</span><br><span class="line">            provider: <span class="type">GameStatusProvider</span>(),</span><br><span class="line">        ) &#123; entry <span class="keyword">in</span></span><br><span class="line">            <span class="type">GameStatusView</span>(entry.gameStatus)</span><br><span class="line">        &#125;</span><br><span class="line">        .configurationDisplayName(<span class="string">&quot;Game Status&quot;</span>)</span><br><span class="line">        .description(<span class="string">&quot;Shows an overview of your game status&quot;</span>)</span><br><span class="line">        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>小组件的提供者为小组件生成时间轴，并在每个条目（entry）中包含游戏状态细节。当每个时间轴条目（entry）的日期到达时，<code>WidgetKit</code>调用内容闭包来显示小组件的内容。最后，修饰符指定（specify）小组件库（gallery）中显示的名称和描述，并允许用户选择小组件的小、中或大版本。</p>
+<blockquote>
+<p>要让应用程序的小组件出现在小组件库中，用户必须在应用程序安装后启动包含该小组件的应用程序至少一次。</p>
+</blockquote>
+<p>注意这个小组件上<code>@main</code>属性的用法。这个属性表明<code>GameStatusWidget</code>是小组件扩展的入口点，这意味着扩展包含单个小组件。要支持多个小组件，请参阅下面的部分在您的应用程序扩展中声明多个小组件。</p>
+<h2 id="提供时间轴条目"><a href="#提供时间轴条目" class="headerlink" title="提供时间轴条目"></a>提供时间轴条目</h2><p>时间轴供应商生成由时间轴条目组成的时间轴，每个条目指定更新小组件内容的日期和时间。游戏状态小组件可以定义它的时间轴条目，包括一个表示游戏状态的字符串，如下所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GameStatusEntry</span>: <span class="title class_">TimelineEntry</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> date: <span class="type">Date</span></span><br><span class="line">    <span class="keyword">var</span> gameStatus: <span class="type">String</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>要在小组件库中显示小组件，<code>WidgetKit</code>要求提供者提供预览快照。通过检查传递给<code>getSnapshot(in:completion:)</code>方法的上下文参数的<code>isPreview</code>属性来识别这个预览请求。当<code>isPreview</code>为<code>true</code>时，<code>WidgetKit</code>在小组件库中显示您的小组件。因此，您需要快速创建预览快照。如果您的小组件需要从服务器生成或获取需要时间的资产（assets）或信息，请使用示例数据。 </p>
+<p>在以下代码中，游戏状态小组件的提供者通过显示一个空状态来实现<code>snapshot</code>方法，如果它还没有完成从其服务器获取状态:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GameStatusProvider</span>: <span class="title class_">TimelineProvider</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> hasFetchedGameStatus: <span class="type">Bool</span></span><br><span class="line">    <span class="keyword">var</span> gameStatusFromServer: <span class="type">String</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">getSnapshot</span>(<span class="params">in</span> <span class="params">context</span>: <span class="type">Context</span>, <span class="params">completion</span>: <span class="keyword">@escaping</span> (<span class="type">Entry</span>) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> date <span class="operator">=</span> <span class="type">Date</span>()</span><br><span class="line">        <span class="keyword">let</span> entry: <span class="type">GameStatusEntry</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> context.isPreview <span class="operator">&amp;&amp;</span> <span class="operator">!</span>hasFetchedGameStatus &#123;</span><br><span class="line">            entry <span class="operator">=</span> <span class="type">GameStatusEntry</span>(date: date, gameStatus: <span class="string">&quot;—&quot;</span>)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            entry <span class="operator">=</span> <span class="type">GameStatusEntry</span>(date: date, gameStatus: gameStatusFromServer)</span><br><span class="line">        &#125;</span><br><span class="line">        completion(entry)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p> 在请求初始快照之后，WidgetKit调用getTimeline(in:completion:)从提供程序请求一个常规的时间轴。时间轴由一个或多个时间轴条目和一个重新加载策略组成，该策略通知WidgetKit何时请求后续的时间轴。 </p>
+<p>下面的例子展示了游戏状态小组件的提供者如何生成一个时间轴，它包含来自服务器的包含当前游戏状态的单个条目，以及一个在15分钟内请求新时间轴的重新加载策略:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GameStatusProvider</span>: <span class="title class_">TimelineProvider</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">getTimeline</span>(<span class="params">in</span> <span class="params">context</span>: <span class="type">Context</span>, <span class="params">completion</span>: <span class="keyword">@escaping</span> (<span class="type">Timeline</span>&lt;<span class="type">GameStatusEntry</span>&gt;) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">        <span class="comment">// Create a timeline entry for &quot;now.&quot;</span></span><br><span class="line">        <span class="keyword">let</span> date <span class="operator">=</span> <span class="type">Date</span>()</span><br><span class="line">        <span class="keyword">let</span> entry <span class="operator">=</span> <span class="type">GameStatusEntry</span>(</span><br><span class="line">            date: date,</span><br><span class="line">            gameStatus: gameStatusFromServer</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Create a date that&#x27;s 15 minutes in the future.</span></span><br><span class="line">        <span class="keyword">let</span> nextUpdateDate <span class="operator">=</span> <span class="type">Calendar</span>.current.date(byAdding: .minute, value: <span class="number">15</span>, to: date)<span class="operator">!</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Create the timeline with the entry and a reload policy with the date</span></span><br><span class="line">        <span class="comment">// for the next update.</span></span><br><span class="line">        <span class="keyword">let</span> timeline <span class="operator">=</span> <span class="type">Timeline</span>(</span><br><span class="line">            entries:[entry],</span><br><span class="line">            policy: .after(nextUpdateDate)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Call the completion to pass the timeline to WidgetKit.</span></span><br><span class="line">        completion(timeline)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在本例中，如果小部件没有来自服务器的当前状态，它可以存储对完成的引用，向服务器执行异步请求以获取游戏状态，并在请求完成时调用完成。 </p>
+<p>有关生成时间线(包括在小部件中处理网络请求)的更多信息，请参见保持小部件最新</p>
+<h2 id="显示占位符小组件并隐藏敏感数据"><a href="#显示占位符小组件并隐藏敏感数据" class="headerlink" title="显示占位符小组件并隐藏敏感数据"></a>显示占位符小组件并隐藏敏感数据</h2><p>占位符视图是没有特定内容的通用可视化表示。当<code>WidgetKit</code>呈现您的小部件时，它可能需要将您的内容呈现为占位符;例如，当您在后台加载数据时。它使用<code> redacted(reason:)</code>视图修饰符生成占位符，并将<code>reason</code>设置为占位符。该设置自动呈现小部件的视图，其方式适合作为占位符使用。若要选择不将呈现为占位符，并控制小部件的哪些视图显示为审查（redacted）以隐藏敏感信息，请在<code>redacted(reason:)</code>回调中使用<code>unredacted()</code>视图修饰符。 </p>
+<p>除了首次出现外，当您为小部件扩展启用<code>Data Protection</code>功能时，<code>WidgetKit</code>还将小部件视图呈现为占位符。<code>WidgetKit</code>使用您应用的编辑（redactions）来呈现小部件的视图，或者如果您将数据保护授权设置为:</p>
+<ul>
+<li><code>NSFileProtectionComplete</code> and the device is locked</li>
+<li><code>NSFileProtectionCompleteUnlessOpen</code> and the device is locked</li>
+<li><code>NSFileProtectionCompleteUntilFirstUserAuthentication</code> and the user has not yet authenticated</li>
+</ul>
+<p>用户控制小部件在某些表示上下文中是否显示编辑（redacted）视图或占位符，例如在<code>iPhone</code>锁定屏幕或<code>watchOS</code>中的表面上。 </p>
+<p>在<code>watchOS</code>中，设备在使用过程中很少被锁定，因为<code>Apple Watch</code>通常是在用户佩戴时解锁的。但是，用户可以通过选择“设置”来配置是否在“始终打开”期间显示敏感数据(<code>Settings &gt; Display &amp; Brightness &gt; Always On &gt; Hide Sensitive Complications</code>)。如果用户启用隐藏敏感并发症，<code>WidgetKit</code>将呈现您配置的编校(redactions)或返回占位符。他们可以选择为所有或个别并发症(individual complications)显示经过修订的内容。类似地，在iOS中，设备也可能支持<code>Always On</code>，用户可以配置在<code>Always On</code>期间是否显示敏感数据。在不支持<code>Always On</code>的iOS设备上，用户可以通过选择<code>设置&gt;面部ID和密码</code>来控制是否在锁屏上显示敏感数据，并在<code>ALLOW access WHEN LOCKED</code>部分取消对锁屏小部件的数据访问</p>
+<p>有关配置数据保护的详细信息，请参阅数据保护授权</p>
+<h2 id="在小部件中显示内容"><a href="#在小部件中显示内容" class="headerlink" title="在小部件中显示内容"></a>在小部件中显示内容</h2><p>小部件使用<code>SwiftUI</code>视图定义其内容，通常是通过组合其他<code>SwiftUI</code>视图。如<code>Add Configuration Details</code>部分所示，小部件的配置包含一个闭包，<code>WidgetKit</code>调用该闭包来呈现小部件的内容。 </p>
+<p>当用户从小部件库中添加您的小部件时，他们从小部件支持的小部件中选择特定的家族—例如，小型或中型。小部件的内容闭包必须能够呈现小部件支持的每个族。<code>WidgetKit</code>在<code>SwiftUI</code>环境中设置相应的族和附加属性，例如配色方案(亮或暗)。 </p>
+<p>在上图所示的游戏状态小部件配置中，内容闭包使用<code>GameStatusView</code>来显示状态。因为小部件支持锁定屏幕上的大小和附件小部件，它使用<code>widgetFamily</code>来决定要显示哪个特定的<code>SwiftUI</code>视图，如下所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">GameStatusView</span> : <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@Environment</span>(\.widgetFamily) <span class="keyword">var</span> family: <span class="type">WidgetFamily</span></span><br><span class="line">    <span class="keyword">var</span> gameStatus: <span class="type">GameStatus</span></span><br><span class="line">    <span class="keyword">var</span> selectedCharacter: <span class="type">CharacterDetail</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@ViewBuilder</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> family &#123;</span><br><span class="line">        <span class="keyword">case</span> .systemSmall: <span class="type">GameTurnSummary</span>(gameStatus)</span><br><span class="line">        <span class="keyword">case</span> .systemMedium: <span class="type">GameStatusWithLastTurnResult</span>(gameStatus)</span><br><span class="line">        <span class="keyword">case</span> .systemLarge: <span class="type">GameStatusWithStatistics</span>(gameStatus)</span><br><span class="line">        <span class="keyword">case</span> .systemExtraLarge: <span class="type">GameStatusWithStatisticsExtraLarge</span>(gameStatus)</span><br><span class="line">        <span class="keyword">case</span> .accessoryCircular: <span class="type">HealthLevelCircular</span>(selectedCharacter)</span><br><span class="line">        <span class="keyword">case</span> .accessoryRectangular: <span class="type">HealthLevelRectangular</span>(selectedCharacter)</span><br><span class="line">        <span class="keyword">case</span> .accessoryInline: <span class="type">HealthLevelInline</span>(selectedCharacter)</span><br><span class="line">        <span class="keyword">default</span>: <span class="type">GameDetailsNotAvailable</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于小家庭(small family)，小部件使用一个视图来显示它在游戏中的回合的简单摘要。对于<code>medium</code>，它显示状态，表示上一轮的结果。对于大号和特大号，因为有更多的空间可用，它会显示每个玩家的运行统计数据。附件小部件比主屏幕上显示的小部件小得多。因此，它们会显示圆形附件小部件当前所选字符的健康水平。因为矩形和内联附件小部件允许更多的文本，所以它们会显示角色的生命值级别和剩余的治疗时间。如果家族是未知类型，则显示默认视图，这表示游戏状态不可用</p>
+<blockquote>
+<p>视图用<code>@ViewBuilder</code>声明它的主体，因为它使用的视图类型是不同的。</p>
+</blockquote>
+<p>对于可配置的小部件，提供程序遵循<code>IntentTimelineProvider</code>。该提供程序执行与<code>TimelineProvider</code>相同的功能，但它合并了用户在小部件上自定义的值。在传递给<code>getSnapshot(for:in:completion:)</code>和<code>getTimeline(for:in:completion:)</code>的配置参数中，意图时间轴提供程序可以使用这些自定义。您通常将用户配置的值作为自定义时间轴条目类型的属性包含进来，因此小部件的视图可以使用详细信息</p>
+<blockquote>
+<p>小部件显示只读信息，不支持滚动元素或开关等交互元素。在呈现小部件的内容时，<code>WidgetKit</code>会忽略交互元素。</p>
+</blockquote>
+<p>有关<code>WidgetKit</code>支持的视图列表，请参阅<code>SwiftUI views</code>。</p>
+<h2 id="向小部件添加动态内容"><a href="#向小部件添加动态内容" class="headerlink" title="向小部件添加动态内容"></a>向小部件添加动态内容</h2><p>尽管小部件的显示基于视图的快照，但您可以使用各种<code>SwiftUI</code>视图，它们在小部件可见时继续更新。有关提供动态内容的更多信息，请参见<code>保持小部件更新</code></p>
+<h2 id="响应用户交互"><a href="#响应用户交互" class="headerlink" title="响应用户交互"></a>响应用户交互</h2><p>当用户与您的小部件交互时，系统启动您的应用程序来处理请求。当系统激活你的应用程序时，导航到与小部件内容对应的细节。小部件可以指定一个<code>URL</code>来通知应用程序要显示什么内容。要在小部件中配置自定义<code>URLs</code>: </p>
+<ul>
+<li><p>对于所有小部件，在小部件的视图层次结构中添加<code>widgetURL(_:)</code>视图修饰符。如果小部件的视图层次结构包含多个<code>widgetURL</code>修饰符，则行为未定义。 </p>
+</li>
+<li><p>对于使用<code>WidgetFamily.systemMedium</code>, <code>WidgetFamily.systemLarge</code>或<code>WidgetFamily.systemextrallarge</code>的小部件。将一个或多个<code>Link</code>控件添加到小部件的视图层次结构中。可以同时使用<code>widgetURL</code>和<code>Link</code>控件。如果交互以<code>Link</code>控件为目标，则系统使用该控件中的<code>URL</code>。对于小部件中其他任何地方的交互，系统使用<code>widgetURL</code>视图修饰符中指定的<code>URL</code>。</p>
+</li>
+</ul>
+<p>例如，显示游戏中单个角色细节的小部件可以使用<code>widgetURL</code>打开应用，显示该角色的细节。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@ViewBuilder</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">ZStack</span> &#123;</span><br><span class="line">        <span class="type">AvatarView</span>(entry.character)</span><br><span class="line">            .widgetURL(entry.character.url)</span><br><span class="line">            .foregroundColor(.white)</span><br><span class="line">    &#125;</span><br><span class="line">    .background(<span class="type">Color</span>.gameBackground)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果小部件显示一个字符列表，则列表中的每个项都可以位于一个<code>Link</code>控件中。每个Link控件为它所显示的特定字符指定<code>URL</code>。 </p>
+<p>当小部件接收到交互时，系统激活包含该应用程序的应用程序，并将URL传递给<code>onOpenURL(perform:)</code>、<code>application(_:open:options:)</code>或<code>application(_:open:)</code>，这取决于应用程序使用的生命周期。 </p>
+<p>如果小部件不使用<code>widgetURL</code>或<code>Link</code>控件，系统将激活包含该应用的应用程序，并将<code>NSUserActivity</code>传递给<code>onContinueUserActivity(_:perform:)</code>、<code>application(_:continue:restorationHandler:)</code>或<code>application(_:continue:restorationHandler:)</code>。用户活动的<code>userInfo</code>字典包含与用户交互的小部件的详细信息。通过<code>WidgetCenter.UserInfoKey</code>中的键获取Swift代码种的值。要从<code>Objective-C</code>访问<code>userInfo</code>值，请使用键<code>WGWidgetUserInfoKeyKind</code>和<code>WGWidgetUserInfoKeyFamily</code>来代替。 </p>
+<p>对于使用<code>IntentConfiguration</code>的小部件，用户活动的<code>交互</code>属性包含小部件的<code>INIntent</code>。</p>
+<h2 id="在你的应用程序扩展中声明多个小部件"><a href="#在你的应用程序扩展中声明多个小部件" class="headerlink" title="在你的应用程序扩展中声明多个小部件"></a>在你的应用程序扩展中声明多个小部件</h2><p>上面的<code>GameStatusWidget</code>示例使用<code>@main</code>属性为小部件扩展指定一个入口点。要支持多个小部件，声明一个符合<code>WidgetBundle</code>的结构，该结构在其<code>body</code>属性中将多个小部件分组在一起。在这个小部件包结构上添加<code>@main</code>属性，以告诉<code>WidgetKit</code>您的扩展支持多个小部件。 </p>
+<p>例如，如果游戏应用有第二个显示角色生命值的小部件和第三个显示排行榜的小部件，它就会将它们组合在一起，如下所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">GameWidgets</span>: <span class="title class_">WidgetBundle</span> &#123;</span><br><span class="line">    <span class="meta">@WidgetBundleBuilder</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Widget</span> &#123;</span><br><span class="line">        <span class="type">GameStatusWidget</span>()</span><br><span class="line">        <span class="type">CharacterDetailWidget</span>()</span><br><span class="line">        <span class="type">LeaderboardWidget</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="在Xcode中预览widget"><a href="#在Xcode中预览widget" class="headerlink" title="在Xcode中预览widget"></a>在Xcode中预览widget</h2><p><code>Xcode</code>允许你查看小部件的预览，而无需在模拟器或测试设备上运行应用程序。下面的示例显示了使用了<a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/widgetkit/building_widgets_using_widgetkit_and_swiftui"> Building Widgets Using WidgetKit and SwiftUI</a>sample code的表情符号管理员小部件的预览代码。注意它是如何使用<code>widgetFamily</code>环境值来避免为每个小部件手动指定名称的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Environment</span>(\.widgetFamily) <span class="keyword">var</span> family</span><br><span class="line">        </span><br><span class="line"><span class="type">Group</span> &#123;</span><br><span class="line">    <span class="type">EmojiRangerWidgetEntryView</span>(entry: <span class="type">SimpleEntry</span>(date: <span class="type">Date</span>(), relevance: <span class="literal">nil</span>, character: .panda))</span><br><span class="line">        .previewContext(<span class="type">WidgetPreviewContext</span>(family: .accessoryCircular))</span><br><span class="line">        .previewDisplayName(<span class="string">&quot;<span class="subst">\(family)</span>&quot;</span>)</span><br><span class="line">  <span class="type">EmojiRangerWidgetEntryView</span>(entry: <span class="type">SimpleEntry</span>(date: <span class="type">Date</span>(), relevance: <span class="literal">nil</span>, character: .panda))</span><br><span class="line">        .previewContext(<span class="type">WidgetPreviewContext</span>(family: .accessoryRectangular))</span><br><span class="line">        .previewDisplayName(<span class="string">&quot;<span class="subst">\(family)</span>&quot;</span>)</span><br><span class="line">    <span class="type">EmojiRangerWidgetEntryView</span>(entry: <span class="type">SimpleEntry</span>(date: <span class="type">Date</span>(), relevance: <span class="literal">nil</span>, character: .panda))</span><br><span class="line">        .previewContext(<span class="type">WidgetPreviewContext</span>(family: .accessoryInline))</span><br><span class="line">        .previewDisplayName(<span class="string">&quot;<span class="subst">\(family)</span>&quot;</span>)</span><br><span class="line">    <span class="type">EmojiRangerWidgetEntryView</span>(entry: <span class="type">SimpleEntry</span>(date: <span class="type">Date</span>(), relevance: <span class="literal">nil</span>, character: .panda))</span><br><span class="line">        .previewContext(<span class="type">WidgetPreviewContext</span>(family: .systemSmall))</span><br><span class="line">	      .previewDisplayName(<span class="string">&quot;<span class="subst">\(family)</span>&quot;</span>)</span><br><span class="line">    <span class="type">EmojiRangerWidgetEntryView</span>(entry: <span class="type">SimpleEntry</span>(date: <span class="type">Date</span>(), relevance: <span class="literal">nil</span>, character: .panda))</span><br><span class="line">        .previewContext(<span class="type">WidgetPreviewContext</span>(family: .systemMedium))</span><br><span class="line">  	      .previewDisplayName(<span class="string">&quot;<span class="subst">\(family)</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/widgetkit/creating-a-widget-extension">Creating a Widget Extension</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/01/POP%20in%20Swift/" rel="prev" title="【译】Protocol Oriented Programming in Swift">
+      <i class="fa fa-chevron-left"></i> 【译】Protocol Oriented Programming in Swift
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/02/iOS%E5%90%AF%E5%8A%A8%E4%BC%98%E5%8C%96%E7%BF%BB%E8%AF%91/" rel="next" title="【译】iOS启动优化">
+      【译】iOS启动优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E5%B0%8F%E7%BB%84%E4%BB%B6%E7%9B%AE%E6%A0%87%E5%88%B0%E6%82%A8%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">添加一个小组件目标到您的应用程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E9%85%8D%E7%BD%AE%E8%AF%A6%E6%83%85"><span class="nav-number">3.</span> <span class="nav-text">添加配置详情</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E4%BE%9B%E6%97%B6%E9%97%B4%E8%BD%B4%E6%9D%A1%E7%9B%AE"><span class="nav-number">4.</span> <span class="nav-text">提供时间轴条目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%8D%A0%E4%BD%8D%E7%AC%A6%E5%B0%8F%E7%BB%84%E4%BB%B6%E5%B9%B6%E9%9A%90%E8%97%8F%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE"><span class="nav-number">5.</span> <span class="nav-text">显示占位符小组件并隐藏敏感数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E5%B0%8F%E9%83%A8%E4%BB%B6%E4%B8%AD%E6%98%BE%E7%A4%BA%E5%86%85%E5%AE%B9"><span class="nav-number">6.</span> <span class="nav-text">在小部件中显示内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%91%E5%B0%8F%E9%83%A8%E4%BB%B6%E6%B7%BB%E5%8A%A0%E5%8A%A8%E6%80%81%E5%86%85%E5%AE%B9"><span class="nav-number">7.</span> <span class="nav-text">向小部件添加动态内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E7%94%A8%E6%88%B7%E4%BA%A4%E4%BA%92"><span class="nav-number">8.</span> <span class="nav-text">响应用户交互</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E4%BD%A0%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E6%89%A9%E5%B1%95%E4%B8%AD%E5%A3%B0%E6%98%8E%E5%A4%9A%E4%B8%AA%E5%B0%8F%E9%83%A8%E4%BB%B6"><span class="nav-number">9.</span> <span class="nav-text">在你的应用程序扩展中声明多个小部件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8Xcode%E4%B8%AD%E9%A2%84%E8%A7%88widget"><span class="nav-number">10.</span> <span class="nav-text">在Xcode中预览widget</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

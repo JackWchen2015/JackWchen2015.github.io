@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="管理代码大小GCC编译器支持多种优化代码的选项。根据您的需要，大多数这些技术都会生成更少的代码或更快的代码。在准备软件发布时，您应该尝试使用这些技术，看看哪些技术对您的代码最有利。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】管理代码大小">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="管理代码大小GCC编译器支持多种优化代码的选项。根据您的需要，大多数这些技术都会生成更少的代码或更快的代码。在准备软件发布时，您应该尝试使用这些技术，看看哪些技术对您的代码最有利。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/optimize-level.png">
+<meta property="article:published_time" content="2022-12-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-16T07:51:53.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/optimize-level.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】管理代码大小 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】管理代码大小
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-16 08:00:00" itemprop="dateCreated datePublished" datetime="2022-12-16T08:00:00+08:00">2022-12-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-16 15:51:53" itemprop="dateModified" datetime="2023-01-16T15:51:53+08:00">2023-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="管理代码大小"><a href="#管理代码大小" class="headerlink" title="管理代码大小"></a>管理代码大小</h2><p>GCC编译器支持多种优化代码的选项。根据您的需要，大多数这些技术都会生成更少的代码或更快的代码。在准备软件发布时，您应该尝试使用这些技术，看看哪些技术对您的代码最有利。</p>
+<span id="more"></span>
+
+<h3 id="编译器层优化"><a href="#编译器层优化" class="headerlink" title="编译器层优化"></a>编译器层优化</h3><p>GCC编译器支持优化选项，可以让您选择是更小的二进制大小、更快的代码还是更快的构建时间。</p>
+<p>对于新项目，Xcode会自动禁用开发构建风格（the development build style）的优化，并为部署构建风格(the deployment build style)选择“最快，最小”选项。任何类型的代码优化都会导致构建时间变慢，因为优化过程中涉及到额外的工作。如果您的代码在开发周期中发生了变化，那么您不希望启用优化。但是，当您接近开发周期的末尾时，部署构建样式可以指示您完成的产品的大小。 </p>
+<p>表1列出了Xcode中可用的优化级别。当你选择其中一个选项时，Xcode会为给定的组或文件将适当的标志传递给GCC编译器。这些选项可以在目标级别使用，也可以作为构建样式的一部分使用。请参阅Xcode帮助以获得有关如何为项目构建设置的信息。</p>
+<img src="/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/optimize-level.png" class="&#x3D;">
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">None:编译器不会尝试优化代码。当您专注于解决逻辑错误并需要快速编译时，请在开发过程中使用此选项。不要在发布可执行文件时使用此选项。</span><br><span class="line">Fast:编译器执行简单的优化来提高代码性能，同时最大限度地减少对编译时间的影响。该选项还会在编译期间使用更多内存。</span><br><span class="line">Faster:执行几乎所有支持的不需要考虑时间空间权衡的优化。编译器不使用此选项执行循环展开或函数内联。这个选项增加了编译时间和提高了生成代码的性能</span><br><span class="line">Fastest：执行所有优化，以提高生成代码的速度。当编译器执行积极的函数内联时，此选项会增加生成的代码的大小。 通常不建议使用此选项。有关更多信息，请参见避免过多的函数内联。</span><br><span class="line">Fastest，smallest： 执行通常不会增加代码大小的所有优化。这是交付代码的首选选项，因为它为您的可执行文件提供了更小的内存占用。</span><br></pre></td></tr></table></figure>
+<p>与任何性能增强一样，不要假设哪个选项会给您带来最好的结果。您应该始终衡量所尝试的每次优化的结果。例如，“Fastest”选项可能为特定模块生成非常快的代码，但它通常以可执行文件的大小为代价。如果运行时需要从磁盘调入代码，那么从代码生成中获得的任何速度优势都很容易丧失。</p>
+<h3 id="额外的优化"><a href="#额外的优化" class="headerlink" title="额外的优化"></a>额外的优化</h3><p>除了代码级优化之外，还有一些额外的技术可以用于在模块级(the module level)组织代码。下面几节将介绍这些技术。</p>
+<h4 id="Dead-Strip-Your-Code"><a href="#Dead-Strip-Your-Code" class="headerlink" title="Dead Strip Your Code"></a>Dead Strip Your Code</h4><p>对于静态链接(statically-linked)的可执行文件，死代码剥离(dead-code stripping)是从可执行文件中删除未引用代码的过程。死剥背后的思想是，如果代码没有被引用，它就不能被使用，因此在可执行文件中也不需要它。删除死代码可以减少可执行文件的大小，并有助于减少分页(paging)。 </p>
+<p>从Xcode Tools 1.5版开始，静态链接器(ld)支持可执行文件的死剥。你可以直接从Xcode中启用这个特性，也可以将适当的命令行选项传递给静态链接器。 </p>
+<p>要在Xcode中启用死代码剥离，请执行以下操作: </p>
+<ol>
+<li>选择你的target。 </li>
+<li>打开“检查器”或“获取信息”窗口并选择“构建”选项卡。 </li>
+<li>在链接设置中，启用死代码剥离(Dead Code Stripping)选项。 </li>
+<li>在“代码生成设置”(Code Generation settings)中，将“调试符号级别”选项设置为“所有符号”。</li>
+</ol>
+<p> 要从命令行启用死代码剥离，将<code>-dead_strip</code>选项传递给ld。您还应该将<code>-gfull</code>选项传递给GCC，为您的代码生成一组完整的调试符号。链接器使用这些额外的调试信息来死剥可执行文件。</p>
+<blockquote>
+<p>注意:建议使用“All Symbols”或-gfull选项，即使您不打算对代码进行死剥。尽管该选项生成较大的中间文件，但它通常会生成较小的可执行文件，因为链接器能够更有效地删除重复的符号信息。</p>
+</blockquote>
+<p> 如果你不想删除任何未使用的函数，你至少应该将它们隔离在__TEXT段的单独section(a separate section)中。将未使用的函数移动到公共部分可以改善代码引用的局部性，并降低它们被加载到内存中的可能性。有关如何在公共部分(a common section)中对函数进行分组的更多信息，请参见<a href="">改进引用的局部性</a>。</p>
+<h4 id="Strip-Symbol-Information"><a href="#Strip-Symbol-Information" class="headerlink" title="Strip Symbol Information"></a>Strip Symbol Information</h4><p>调试符号和动态绑定信息会占用大量空间，并占可执行文件的很大比例。在发布代码之前，应该去掉所有不需要的符号。 </p>
+<p>要从可执行文件中剥离调试符号，请将Xcode构建风格设置更改为“部署”并重新构建可执行文件。如果您愿意，还可以在逐个目标的基础上生成调试符号。有关构建样式和目标设置的更多信息，请参阅Xcode Help。 </p>
+<p>若要手动从可执行文件中删除动态绑定符号，请使用<code>strip</code>工具。此工具删除通常由动态链接器用于在运行时绑定外部符号的符号信息。删除不希望动态绑定的函数的符号可以减少可执行文件的大小，并减少动态连接器必须绑定的符号数量。通常，你会使用这个命令不带任何选项来删除非外部符号，如下例所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">% cd ~/MyApp/MyApp.app/Contents/MacOS</span><br><span class="line">% strip MyApp</span><br></pre></td></tr></table></figure>
+<p>该命令相当于带<code>-u</code>和<code>-r</code>选项运行<code>strip</code>命令。它删除任何标记为<code>non-external</code>的符号，但不删除标记为<code>external</code>的符号。 </p>
+<p>手动去除动态绑定符号的另一种方法是使用导出文件来限制在构建时导出的符号。导出文件标识可执行文件中运行时可用的特定符号。有关创建导出文件的详细信息，请参见<a href="">最小化导出的符号</a>。</p>
+<h4 id="消除c-异常处理开销"><a href="#消除c-异常处理开销" class="headerlink" title="消除c++异常处理开销"></a>消除c++异常处理开销</h4><p>当抛出异常时，c++运行时库必须能够将堆栈展开到第一个匹配catch块的位置。为此，GCC编译器为每个可能引发异常的函数生成堆栈展开信息。此展开信息存储在可执行文件中，并描述堆栈上的对象。这些信息使得在抛出异常时调用这些对象的析构函数来清除它们成为可能。 </p>
+<p>即使您的代码没有抛出异常，GCC编译器仍然会在默认情况下为c++代码生成堆栈展开信息。如果大量使用异常，这些额外的代码会显著增加可执行文件的大小。</p>
+<ul>
+<li><p>禁用异常	<br>你可以通过禁用target的“<code>Enable c++ Exceptions</code>”构建选项来禁用Xcode中的异常处理。在命令行中，将<code>-fno-exceptions</code>选项传递给编译器。此选项删除函数的堆栈展开信息。但是，您仍然必须从代码中删除任何<code>try、catch</code>和<code>throw</code>语句。</p>
+</li>
+<li><p>选择性禁用异常	<br>如果您的代码在某些地方使用了异常，但不是在所有地方都使用了异常，您可以通过在方法声明中添加空异常规范来显式地识别不需要展开信息的方法。例如，在下面的代码中，编译器必须为<code>my_function</code>生成堆栈展开信息，因为<code>my_other_function</code>或它调用的函数可能抛出异常。</p>
+</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">int</span> <span class="title">my_other_function</span> <span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">my_function</span> <span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="built_in">my_other_function</span> (a, b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而，如果你知道<code>my_other_function</code>不能抛出异常，你可以通过在函数声明中包含空的异常规范(<code>throw()</code>)向编译器发出信号。因此，你可以这样声明前面的函数:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">extern</span> <span class="type">int</span> <span class="title">foo</span> <span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> <span class="title">throw</span> <span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">my_function</span> <span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> <span class="title">throw</span> <span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="built_in">foo</span> (a, b);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>尽量减少异常使用<br> 在编写代码时，请谨慎考虑异常的使用。异常应该用来表示特殊情况——也就是说，它们应该用来报告您没有预料到的问题。如果从文件中读取并得到文件结束错误，则不希望抛出异常，因为这是一种已知的错误类型，可以轻松处理。如果您试图从您知道已打开的文件中读取，但被告知文件ID无效，那么您可能会抛出异常。</li>
+</ul>
+<h4 id="避免过多的函数内联"><a href="#避免过多的函数内联" class="headerlink" title="避免过多的函数内联"></a>避免过多的函数内联</h4><p>尽管内联函数在某些情况下可以提高速度，但如果过度使用，它们也会降低OS X上的性能。<strong>内联函数消除了调用函数的开销，但这样做的方法是将每个函数调用替换为代码的副本。如果频繁调用内联函数，这些额外的代码会迅速增加，使可执行文件膨胀，并导致分页问题</strong>。 </p>
+<p>如果使用得当，内联函数可以节省时间，并且对代码占用空间的影响最小。记住，<strong>内联函数的代码通常应该非常短，并且不经常调用。如果在函数中执行代码所花费的时间小于调用函数所花费的时间，则该函数很适合进行内联</strong>。通常，这意味着内联函数的代码应该不超过几行。您还应该确保从代码中尽可能少的地方调用函数。即使是一个很短的函数，如果它内联在几十个或数百个地方，也会导致过度膨胀。 </p>
+<p>此外，您应该意识到GCC的“Fastest”优化级别通常应该避免。在此优化级别，编译器会积极尝试创建内联函数，即使对于未标记为内联的函数也是如此。不幸的是，这样做会显著增加可执行文件的大小，并由于分页而导致更糟糕的性能问题</p>
+<h4 id="将框架构建为单个模块"><a href="#将框架构建为单个模块" class="headerlink" title="将框架构建为单个模块"></a>将框架构建为单个模块</h4><p>大多数共享库不需要Mach-O运行时的模块特性。此外，跨模块调用所引起的开销与跨库调用相同。因此，您应该将项目的所有中间对象文件链接到一个单独的模块中。 </p>
+<p>要组合目标文件，必须在链接阶段将<code>-r</code>选项传递给<code>ld</code>。如果你使用Xcode来构建你的代码，默认情况下这是为你完成的。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/14/Mach-O%E6%A0%BC%E5%BC%8F%E7%BF%BB%E8%AF%91/" rel="prev" title="【译】Mach-O格式">
+      <i class="fa fa-chevron-left"></i> 【译】Mach-O格式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/" rel="next" title="【译】提高代码局部性">
+      【译】提高代码局部性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.</span> <span class="nav-text">管理代码大小</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E5%B1%82%E4%BC%98%E5%8C%96"><span class="nav-number">1.1.</span> <span class="nav-text">编译器层优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%9D%E5%A4%96%E7%9A%84%E4%BC%98%E5%8C%96"><span class="nav-number">1.2.</span> <span class="nav-text">额外的优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Dead-Strip-Your-Code"><span class="nav-number">1.2.1.</span> <span class="nav-text">Dead Strip Your Code</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Strip-Symbol-Information"><span class="nav-number">1.2.2.</span> <span class="nav-text">Strip Symbol Information</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4c-%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%BC%80%E9%94%80"><span class="nav-number">1.2.3.</span> <span class="nav-text">消除c++异常处理开销</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E8%BF%87%E5%A4%9A%E7%9A%84%E5%87%BD%E6%95%B0%E5%86%85%E8%81%94"><span class="nav-number">1.2.4.</span> <span class="nav-text">避免过多的函数内联</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E6%A1%86%E6%9E%B6%E6%9E%84%E5%BB%BA%E4%B8%BA%E5%8D%95%E4%B8%AA%E6%A8%A1%E5%9D%97"><span class="nav-number">1.2.5.</span> <span class="nav-text">将框架构建为单个模块</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="提高代码局部性(Improving Locality of Reference)可以对应用程序性能进行的一个重要改进是减少应用程序在任何给定时间使用的虚拟内存页的数量。这组页面称为工作集，由应用程序代码和运行时数据组成。减少内存中的数据量是算法的一个功能，但是减少内存中的代码量可以通过一个称为分散加载(scatter loading)的过程来实现。这种技术也被称为改进代码引用的局部性（improv">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】提高代码局部性">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="提高代码局部性(Improving Locality of Reference)可以对应用程序性能进行的一个重要改进是减少应用程序在任何给定时间使用的虚拟内存页的数量。这组页面称为工作集，由应用程序代码和运行时数据组成。减少内存中的数据量是算法的一个功能，但是减少内存中的代码量可以通过一个称为分散加载(scatter loading)的过程来实现。这种技术也被称为改进代码引用的局部性（improv">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/ordertypes.png">
+<meta property="article:published_time" content="2022-12-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-16T07:52:54.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/ordertypes.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】提高代码局部性 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】提高代码局部性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-16 08:00:00" itemprop="dateCreated datePublished" datetime="2022-12-16T08:00:00+08:00">2022-12-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-16 15:52:54" itemprop="dateModified" datetime="2023-01-16T15:52:54+08:00">2023-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="提高代码局部性-Improving-Locality-of-Reference"><a href="#提高代码局部性-Improving-Locality-of-Reference" class="headerlink" title="提高代码局部性(Improving Locality of Reference)"></a>提高代码局部性(Improving Locality of Reference)</h2><p>可以对应用程序性能进行的一个重要改进是减少应用程序在任何给定时间使用的虚拟内存页的数量。这组页面称为工作集，由应用程序代码和运行时数据组成。减少内存中的数据量是算法的一个功能，但是减少内存中的代码量可以通过一个称为分散加载(scatter loading)的过程来实现。这种技术也被称为改进代码引用的局部性（improving the locality of reference of your code）。 </p>
+<p>通常，方法和函数的编译代码在生成的二进制文件中按源文件组织。分散加载改变了这种组织，而是将相关的方法和函数分组在一起，而不依赖于这些方法和函数的原始位置。这个过程允许内核将活动应用程序最常被引用的可执行页保存在尽可能小的内存空间中。这不仅减少了应用程序的占用空间，还减少了这些页面被换出（paged out）的可能性。</p>
+<blockquote>
+<p>重要提示:您通常应该等到开发周期的晚期才分散应用程序的负载。在开发过程中，代码往往会四处移动，这可能会使先前的分析结果无效。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="使用gprof的分析代码"><a href="#使用gprof的分析代码" class="headerlink" title="使用gprof的分析代码"></a>使用gprof的分析代码</h3><p>给定运行时收集的概要数据，<code>gprof</code>将生成程序的执行概要。被调用例程的效果被合并到每个调用方的概要文件中。概要数据取自调用图概要文件(默认为gmon.out)，它是由一个编译并与<code>-pg</code>选项链接的程序创建的。可执行文件中的符号表与调用图配置文件相关联。如果指定了多个概要文件，<code>gprof</code>输出将显示给定概要文件中概要信息的总和。 </p>
+<p><code>gprof</code>工具在很多方面都很有用，包括: </p>
+<ol>
+<li>Sampler应用程序不能很好地工作的情况，例如命令行工具或应用程序在短时间后退出 </li>
+<li>在这种情况下，您希望调用图包括给定程序中可能调用的所有代码，而不是对调用进行周期性采样 </li>
+<li>您希望更改代码的链接顺序以优化代码位置的情况</li>
+</ol>
+<h4 id="生成概要数据"><a href="#生成概要数据" class="headerlink" title="生成概要数据"></a>生成概要数据</h4><p>在分析应用程序之前，必须设置项目以生成分析信息。要为你的Xcode项目生成分析信息，你必须修改你的target或构建风格设置，包括“<code>Generate profiling code</code>”选项。(有关启用target和构建样式设置的信息，请参阅Xcode帮助。) </p>
+<p>程序中的分析代码生成一个名为<code>gmon.out</code>的文件。把剖析信息拿出来。(通常，这个文件放在当前工作目录中。)要分析此文件中的数据，请在调用<code>gprof</code>之前将其复制到包含可执行文件的目录中，或者当你运行<code>gprof</code>时指定<code>gmon.out</code>的路径。</p>
+<p>除了分析您自己的代码之外，您还可以通过链接这些框架的配置文件版本来了解在Carbon和Cocoa框架中花费了多少时间。为此，将<code>DYLD_IMAGE_SUFFIX</code>设置添加到target或构建样式中，并将其值设置为<code>_profile</code>。动态链接器将这个后缀与框架名称结合起来，链接到框架的概要文件版本。要确定哪些框架支持分析，请查看框架本身。例如，Carbon库提供了概要文件和调试版本。</p>
+<blockquote>
+<p>注意:库的概要文件和调试版本是作为开发人员工具包的一部分安装的，在用户系统上可能不可用。确保您发布的可执行文件没有链接到这些库之一。</p>
+</blockquote>
+<h4 id="生成Order文件"><a href="#生成Order文件" class="headerlink" title="生成Order文件"></a>生成Order文件</h4><p>order文件包含一个有序的行序列，每行由一个源文件名和一个符号名组成，用冒号分隔，没有其他空格。每一行表示一个块，放置在可执行文件的一个部分。如果手动修改文件，则必须完全遵循此格式，以便链接器可以处理该文件。如果对象文件name:symbol 名对不完全是链接器看到的名称，它会尽力将名称与被链接的对象匹配。 </p>
+<p>order文件中用于过程重新排序的行由对象文件名和过程名(函数、方法或其他符号)组成。order文件中列出过程的顺序表示它们被链接到可执行文件的<code>__text</code>部分的顺序。 </p>
+<p>要从使用程序生成的分析数据创建order文件，可以使用-S选项运行gprof(参见gprof(1)的手册页)。例如</p>
+<blockquote>
+<p>gprof -S MyApp.profile&#x2F;MyApp gmon.out<br>-S选项生成四个互斥的order文件:</p>
+</blockquote>
+<img src="/2022/12/16/%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7/ordertypes.png" class="&#x3D;">
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gmon.order:基于分析调用图的“最接近即最佳”分析进行排序。经常相互调用的调用被放置在一起。</span><br><span class="line">callf.order:例程按对每个例程的调用次数排序，最大的数字排在前面。</span><br><span class="line">callo.order:按调用顺序排序的例程。</span><br><span class="line">time.order:程序按照CPU花费的时间排序，最大的时间排在前面。</span><br></pre></td></tr></table></figure>
+<p>您应该尝试使用这些文件中的每一个，看看哪个提供了最大的性能改进(如果有的话)。有关如何测量排序结果的讨论，请参见<a href="">使用pagstuff检查磁盘上的页面</a>。 </p>
+<p>这些order文件只包含分析期间使用的过程。链接器跟踪丢失的过程，并在order文件中列出的顺序之后按默认顺序链接它们。只有当项目目录包含由链接器的<code>- whatloaded</code>选项生成的文件时，才会在order文件中生成库函数的静态名称;有关详细信息，请参见<a href="">创建默认订单文件</a>。 </p>
+<p><code>gprof -S</code>选项不适用于已经使用顺序文件链接的可执行文件。</p>
+<h4 id="修复你的order文件"><a href="#修复你的order文件" class="headerlink" title="修复你的order文件"></a>修复你的order文件</h4><p>生成订单文件后，您应该检查它们并确保它们是正确的。有许多情况下，您需要手动编辑您的order文件，包括以下情况: </p>
+<ul>
+<li>您的可执行文件包含汇编语言(assembly-language)文件。 </li>
+<li>你分析了一个剥离的(stripped)可执行文件。 </li>
+<li>您的可执行文件包含没有<code>-g</code>选项编译的文件。 </li>
+<li>您的项目定义了内部标签(通常用于<code>goto</code>语句)。 </li>
+<li>您希望保留特定对象文件中例程(routines)的顺序。</li>
+</ul>
+<p>如果符号的定义位于汇编文件、剥离的可执行文件或未使用<code>-g</code>选项编译的文件中，<code>gprof</code>将从order文件中的符号条目中省略源文件名。如果项目使用此类文件，则必须手动编辑order文件并添加适当的源文件名。或者，您可以完全删除符号引用，以强制以默认顺序链接相应的例程。 </p>
+<p>如果代码包含内部标签(internal labels)，则必须从order文件中删除这些标签;否则，定义标签的函数将在链接阶段被分开。通过在汇编文件前面加上字符串<code>L_</code>，可以完全防止在汇编文件中包含内部标签。汇编程序将带有此前缀的符号解释为特定函数的局部符号，并将其剥离以防止<code>gprof</code>等其他工具访问。 </p>
+<p>要保留特定对象文件中的例程顺序，请使用特殊符号<code>.section_all</code>。例如，如果对象文件<code>foo.O</code>来自汇编，你想要链接所有的例程而不重新排序，删除任何现有的引用<code>foo.O</code>，并在order文件中插入以下一行:</p>
+<blockquote>
+<p>foo.o:.section_all<br>此选项对于从汇编源编译的目标文件或没有汇编源的目标文件非常有用。</p>
+</blockquote>
+<h4 id="使用order文件链接"><a href="#使用order文件链接" class="headerlink" title="使用order文件链接"></a>使用order文件链接</h4><p>一旦你生成了一个order文件，你可以使用<code>-sectorder</code>和<code>-e start</code>选项链接程序: </p>
+<blockquote>
+<p>cc -o outputFile inputFile.o … -sectorder __TEXT __text orderFile -e start . </p>
+</blockquote>
+<p>要在Xcode项目中使用order文件，请修改项目部署构建样式中的“Other Linker Flags”选项。将文本<code>-sectorder __TEXT __text</code>添加到此设置中以指定您的订单文件。 </p>
+<p>如果任何<code>inputFile</code>是库而不是对象文件，则可能需要在链接之前编辑order文件，以将对对象文件的所有引用替换为对适当库文件的引用。同样，链接器尽最大努力将order文件中的名称与它正在编辑的源相匹配。 </p>
+<p>使用这些选项，链接器构造可执行文件<code>outputFile</code>，以便<code>__TEXT</code>段的<code>__text</code>部分(section)的内容是由输入文件的__text部分(section)的块构造的。链接器按照<code>orderFile</code>中列出的顺序排列输入文件中的例程。 </p>
+<p>当链接器处理order文件时，它将对象文件(object-file)和符号-名称(symbol-name)对不在order文件中列出的过程放入outputFile的__text部分(sectioin)。它以默认顺序链接这些符号。对象文件和符号-名称对列出多次总是会生成警告，并使用第一次出现的对象文件和符号-名称对。 </p>
+<p>默认情况下，链接器会打印以下内容的摘要:被链接对象中不在order文件中的符号名的数量、order文件中不在被链接对象中的符号名的数量，以及它试图匹配的不明确的符号名的数量。要请求这些符号的详细列表，请使用<code>-sectorder_detail</code>选项。 </p>
+<p>链接器的<code>-e start</code>选项保留可执行文件的入口点。符号start(注意前面没有“_”)定义在C运行时共享库<code>/usr/bin/crt1.o</code>;它表示正常链接时程序中的第一个文本地址。重新排序过程时，必须使用此选项来固定入口点。另一种方法是把<code>/usr/lib/crt1.O:start</code>或<code>/usr/lib/crt1.O:section_all</code>放在order文件的第一行。</p>
+<h4 id="gprof命令文件的限制"><a href="#gprof命令文件的限制" class="headerlink" title="gprof命令文件的限制"></a>gprof命令文件的限制</h4><p>由<code>gprof</code>生成的<code>.order</code>文件只包含那些在可执行文件运行时被调用或采样的函数。为了使库函数正确地出现在订单文件中，由链接器生成的加载<code>whatloaded</code>的文件应该存在于工作目录中。 </p>
+<p><code>-S</code>选项不适用于已链接到订单文件的可执行文件。 </p>
+<p>gmon.order的生成可能需要很长时间—可以使用<code>-x</code>参数来抑制(suppressed)。 </p>
+<p>以下项目的文件名将会丢失: </p>
+<ul>
+<li>不使用-g参数编译的文件 </li>
+<li>从汇编语言源生成的例程 </li>
+<li>已删除调试符号的可执行文件(与strip工具一样)</li>
+</ul>
+<h3 id="使用监视函数进行分析"><a href="#使用监视函数进行分析" class="headerlink" title="使用监视函数进行分析"></a>使用监视函数进行分析</h3><p>文件<code>/usr/include/monitor.h</code>声明了一组函数，您可以使用它们以编程方式分析代码的特定部分(sections)。您可以使用这些函数仅为代码的某些部分(sections)或所有代码收集统计信息。然后，您可以使用<code>gprof</code>工具从结果文件构建调用图和其他性能分析数据。清单1显示了如何使用监视器函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;monitor.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* To start profiling: */</span></span><br><span class="line">    moninit();</span><br><span class="line">    moncontrol(<span class="number">1</span>);</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/* To stop, and dump to a file */</span></span><br><span class="line">    moncontrol(<span class="number">0</span>);</span><br><span class="line">    monoutput(<span class="string">&quot;/tmp/myprofiledata.out&quot;</span>);</span><br><span class="line">    monreset();</span><br></pre></td></tr></table></figure>
+<h3 id="在编译时组织代码"><a href="#在编译时组织代码" class="headerlink" title="在编译时组织代码"></a>在编译时组织代码</h3><p>GCC编译器允许您在声明的任何函数或变量上指定属性。section属性允许您告诉GCC您希望将特定的代码段放在哪个段和哪个节(section)中。</p>
+<blockquote>
+<p>警告:除非您了解Mach-O可执行文件的结构，并且知道将函数和数据放置在相应段中的规则，否则不要使用节section属性。将函数或全局变量放置在不适当的节中可能会破坏程序。</p>
+</blockquote>
+<p>section属性接受几个参数，这些参数控制结果代码放置的位置。至少，您必须为要放置的代码指定一个段和节名称。其他选项也可用，并在GCC文档中进行了描述。 </p>
+<p>下面的清单显示了如何为函数使用section属性。在本例中，section属性被添加到函数的前向声明中。该属性告诉编译器将函数放置在可执行文件的特定__text部分中。<br><code>void MyFunction (int a) __attribute__((section(&quot;__TEXT,__text.10&quot;)));</code><br>下面的清单展示了如何使用section属性组织全局变量的一些示例。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">const</span> <span class="type">int</span> x __attribute__((section(<span class="string">&quot;__TEXT,__my_const&quot;</span>)));</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> x=<span class="number">2</span>;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">extern</span> <span class="type">char</span> foo_string[] __attribute__((section(<span class="string">&quot;__DATA,__my_data&quot;</span>)));</span><br><span class="line"><span class="type">char</span> foo_string[] = <span class="string">&quot;My text string\n&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>有关指定section属性的详细信息，请参阅<code>/Developer/ documentation /DeveloperTools/gcc3</code>中的GCC编译器文档。</p>
+<h3 id="重新排序-text-Section"><a href="#重新排序-text-Section" class="headerlink" title="重新排序 __text Section"></a>重新排序 __text Section</h3><p>正如Mach-O可执行格式概述中所述，<code>__TEXT</code>段保存程序的实际代码和只读部分。按照惯例，编译器工具将来自Mach-O对象文件(扩展名为.o)的过程放置在__TEXT段的__text部分(section)。 </p>
+<p>当你的程序运行时，来自__text section的页面会根据需要加载到内存中，就像使用这些页面上的例程一样。代码按照它在给定源文件中出现的顺序链接到__text section，源文件按照它们在链接器命令行中列出的顺序链接(或按Xcode中指定的顺序)。因此，来自第一个目标文件的代码从头到尾被链接，其次是来自第二个文件和第三个文件的代码，以此类推。 </p>
+<p>按源文件声明顺序加载代码很少是最优的。例如，假设代码中的某些方法或函数被重复调用，而其他方法或函数很少使用。将过程重新排序，将经常使用的代码放在__text section的开头，可以最大限度地减少应用程序使用的平均页面数，从而减少分页活动。 </p>
+<p>作为另一个例子，假设代码定义的所有对象同时初始化。因为每个类的初始化例程定义在一个单独的源文件中，初始化代码通常分布在__text section。通过连续地重新排序所有类的初始化代码，可以减少需要读入的页面数量，从而增强初始化性能。应用程序只需要少量包含初始化代码的页面，而不是大量的页面，每个页面包含一小段初始化代码。</p>
+<h4 id="重新排序程序-Reordering-Procedures"><a href="#重新排序程序-Reordering-Procedures" class="headerlink" title="重新排序程序(Reordering Procedures)"></a>重新排序程序(Reordering Procedures)</h4><p>根据应用程序的大小和复杂性，应该采用一种最能提高可执行文件性能的代码排序策略。与大多数性能调优一样，花在测量和重新调优过程顺序上的时间越多，节省的内存就越多。通过运行应用程序并根据调用频率对例程进行排序，可以很容易地获得良好的第一切割(first-cut)排序。下面列出了该策略的步骤，并在接下来的部分中进行了更详细的解释:</p>
+<ol>
+<li>构建应用程序的概要文件版本(profile version)。此步骤生成一个可执行文件，其中包含分析和重新排序过程中使用的符号。 </li>
+<li>运行并使用该应用程序创建一组概要数据。执行一系列功能测试，或让某人在测试期间使用该程序。</li>
+</ol>
+<blockquote>
+<p>重要提示:为了获得最佳效果，请关注最典型的使用模式。避免使用应用程序的所有特性，否则概要数据可能会被稀释。例如，关注启动时间以及激活和禁用主窗口的时间。不要打开辅助窗口。</p>
+</blockquote>
+<ol>
+<li>创建order文件。order文件以优化的顺序列出程序。链接器使用order文件对可执行文件中的过程重新排序。 </li>
+<li>使用order文件运行链接器。这将创建一个可执行文件，其中的过程链接到订单文件中指定的__text section。</li>
+</ol>
+<p>有关分析代码以及生成和链接订单文件的信息，请参见<a href="">使用gprof分析代码</a>。</p>
+<h4 id="大程序的程序重排"><a href="#大程序的程序重排" class="headerlink" title="大程序的程序重排"></a>大程序的程序重排</h4><p>对于许多程序来说，由刚才描述的步骤生成的顺序比无序过程带来了实质性的改进。对于一个特性很少的简单应用程序，这样的排序代表了过程重新排序(procedure reordering)所能获得的大部分好处。然而，更大的应用程序和其他大型程序可以从额外的分析中获益良多。虽然基于调用频率或调用图的顺序文件是一个很好的开始，但您可以使用您对应用程序结构的了解来进一步减少虚拟内存工作集</p>
+<ul>
+<li>创建一个默认的order文件<br>如果希望使用上述技术以外的技术对应用程序的过程(procedures)进行重新排序，则可能希望跳过分析步骤，只需从列出应用程序所有例程的默认顺序文件开始。一旦有了合适形式的例程列表，就可以手动或使用您选择的排序技术重新排列条目。然后，您可以使用链接器的<code>-sectorder</code>选项使用生成的order文件，如<a href="">与订单文件链接中</a>所述。<br>要创建一个默认的order文件，首先运行带有<code>-whatloaded</code>选项的链接器:</li>
+</ul>
+<p><code>cc -o outputFile inputFile.o -whatsloaded &gt; loadedFile</code></p>
+<p>这将创建一个名为<code>loaddfile</code>的文件，该文件列出了加载在可执行文件中的目标文件，包括框架或其他库中的任何文件。<code>-whatloaded</code>选项还可用于确保<code>gprof -S</code>生成的order文件包含静态库中的过程(procedures)名称。 </p>
+<p>使用<code>loaddfile</code>文件，你可以使用<code>-onjls</code>选项和<code>__TEXT __text</code>参数运行nm:</p>
+<p><code>nm -onjls __TEXT __text </code>cat loadedFile<code> &gt; orderFile</code><br>文件orderFile的内容是text section的符号表。过程以默认的链接顺序列在符号表中。您可以重新排列此文件中的条目，以更改希望链接过程的顺序，然后按照<a href="">与order文件链接</a>中所述的方法运行链接器。</p>
+<ul>
+<li>使用pagstuff检查磁盘上的页面<br>pagstuff工具通过告诉您在给定时间内可执行文件的哪些页可能被加载到内存中来帮助您度量过程排序的有效性。本节简要介绍该工具的使用方法。有关更多信息，请参阅pagestff手册页。</li>
+</ul>
+<p>pagstuff工具打印可执行代码的特定页上的符号。命令格式如下: </p>
+<p><code>pagstuff filename [pageNumber | -a] </code></p>
+<p>pagstuff的输出是包含在页面pageNumber上的filename中的过程列表。要查看文件的所有页面，请使用<code>-a</code>选项代替页码。此输出允许您确定内存中与文件关联的每个页面是否都经过优化。如果不是，您可以重新安排order文件中的条目，并再次链接可执行文件，以最大限度地提高性能。例如，将两个相关的过程移动到一起，使它们链接到同一个页面上。完善排序可能需要几个链接和调优周期。</p>
+<ul>
+<li>根据用法分组例程（routines）<br>为什么要为应用程序的各个操作生成概要数据?该策略基于以下假设:一个大型应用程序通常有三组例程:</li>
+</ul>
+<p>热例程在应用程序最常见的使用过程中运行。这些通常是基本例程，为应用程序的特性(例如，访问文档数据结构的例程)提供基础，或者实现应用程序核心特性的例程，例如在字处理器中实现输入的例程。这些例程应该聚集在同一组页面中。</p>
+<p>Warm例程实现应用程序的特定功能。Warm例程通常与用户偶尔执行的特定功能相关(例如启动、打印或导入图形)。因为这些例程使用得相当频繁，所以将它们集中在相同的一小组页面中，这样它们就可以快速加载。但是，由于用户在很长一段时间内没有访问此功能，因此这些例程不应该位于热门类别中。</p>
+<p>冷例程很少在应用程序中使用。冷例程实现模糊的特性或覆盖边界或错误情况。将这些例程组合在一起，以避免在热页或Warm页上浪费空间。</p>
+<p>在任何给定的时间，您都应该期望大多数热页都是常驻的，而对于用户当前正在使用的特性，您应该期望warm页是常驻的。只有极少数情况下才需要常驻冷页。</p>
+<p>要实现这种理想的排序，需要收集一些概要数据集。首先，收集热门例程。如上所述，编译用于分析的应用程序，启动它，并使用该程序。使用<code>gprof -S</code>，生成一个称为hot的频率排序顺序文件。从配置文件数据排序。</p>
+<p>创建热order文件后，为用户偶尔使用的功能创建order文件，例如仅在应用程序启动时运行的例程。打印、打开文档、导入图像和使用各种非文档窗口和工具是用户偶尔使用但不是经常使用的其他特性的示例，并且是拥有自己的order文件的良好候选。建议用被分析的特性来命名这些顺序文件(例如，feature.order)。</p>
+<p>最后，为了生成所有例程的列表，构建一个“默认”order文件default.order(如重新排序过程中所述)。</p>
+<p>有了这些order文件之后，就可以使用清单2中所示的代码将它们组合起来。您可以使用这个清单构建一个命令行实用程序，它可以删除顺序文件中的重复行，同时保留原始数据的顺序。</p>
+<p>Listing 2  Code for Unique.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  unique</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  A command for combining files while removing</span></span><br><span class="line"><span class="comment">//  duplicate lines of text. The order of other lines of text</span></span><br><span class="line"><span class="comment">//  in the input files is preserved.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Build using this command line:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  cc -ObjC -O -o unique -framework Foundation Unique.c</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  Note that “unique” differs from the BSD command “uniq” in that</span></span><br><span class="line"><span class="comment">//  “uniq” combines duplicate adjacent lines, while “unique” does not</span></span><br><span class="line"><span class="comment">//  require duplicate lines to be adjacent. “unique” is also spelled</span></span><br><span class="line"><span class="comment">//  correctly.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">#import <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&lt;Foundation/NSSet.h&gt;</span></span></span><br><span class="line"><span class="meta">#import <span class="string">&lt;Foundation/NSData.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> kBufferSize 8*1024</span></span><br><span class="line"> </span><br><span class="line"><span class="type">void</span> <span class="title function_">ProcessFile</span><span class="params">(FILE *fp)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> buf[ kBufferSize ];</span><br><span class="line"> </span><br><span class="line">    <span class="type">static</span> id theSet = nil;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>( theSet == nil )</span><br><span class="line">    &#123;</span><br><span class="line">        theSet = [[NSMutableSet alloc] init];</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">while</span>( fgets(buf, kBufferSize, fp) )</span><br><span class="line">    &#123;</span><br><span class="line">        id dataForString;</span><br><span class="line"> </span><br><span class="line">        dataForString = [[NSData alloc] initWithBytes:buf length:<span class="built_in">strlen</span>(buf)];</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span>( ! [theSet containsObject:dataForString] )</span><br><span class="line">        &#123;</span><br><span class="line">            [theSet addObject:dataForString];</span><br><span class="line">            <span class="built_in">fputs</span>(buf, <span class="built_in">stdout</span>);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        [dataForString release];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">( <span class="type">int</span> argc, <span class="type">char</span> *argv[] )</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span>     i;</span><br><span class="line">    FILE *  theFile;</span><br><span class="line">    <span class="type">int</span>     status = <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>( argc &gt; <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span>( i = <span class="number">1</span>; i &lt; argc; i++ )</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>( theFile = fopen( argv[i], <span class="string">&quot;r&quot;</span> ) )</span><br><span class="line">            &#123;</span><br><span class="line">                ProcessFile( theFile );</span><br><span class="line">                fclose( theFile );</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">fprintf</span>( <span class="built_in">stderr</span>, <span class="string">&quot;Could not open ‘%s’\n&quot;</span>, argv[i] );</span><br><span class="line">                status = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        ProcessFile( <span class="built_in">stdin</span> );</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一旦构建，您将使用该程序生成您的最终order文件，其语法类似于以下:<br><code>unique hot.order feature1.order ... featureN.order default.order &gt; final.order</code><br>当然，真正的排序测试是减少了多少分页I&#x2F;O。运行您的应用程序，使用不同的特性，并检查您的排序文件在不同条件下的执行情况。您可以使用<code>top</code>工具(among others)来度量分页性能。</p>
+<ul>
+<li>找到最后一个热门Routine<br>在重新排序之后，你通常会有一个带有冷例程的页面区域，你希望很少使用这些例程，通常是在文本排序的末尾。然而，一两个热例程可能会从裂缝中溜走，落在这个冷的部分(section)。这是一个代价高昂的错误，因为使用这些热例程之一现在需要常驻整个页面，否则该页将充满不太可能使用的冷例程。</li>
+</ul>
+<p>检查可执行文件的冷页是否被意外地换入(paged in)。在应用程序文本段的冷区中寻找具有高页偏移量的页面。如果存在一个不需要的页面，则需要找出正在调用该页上的哪个例程。一种方法是在涉及该页的特定操作期间进行分析，并使用<code>grep</code>工具搜索分析器输出，以查找驻留在该页上的例程。另外，一种快速的方法来识别页面被触摸的位置是在<code>gdb</code>调试器下运行应用程序，并使用Mach调用<code>vm_protect</code>来禁止对该页的所有访问:</p>
+<p><code>(gdb) p vm_protect(task_self(), startpage_addr, vm_page_size, FALSE, 0);</code><br>在清除页保护之后，对该页的任何访问都会导致内存错误，从而破坏调试器中的程序。此时，您可以简单地查看函数调用堆栈(使用bt命令)来了解为什么要调用例程。</p>
+<h3 id="重排其他Sections"><a href="#重排其他Sections" class="headerlink" title="重排其他Sections"></a>重排其他Sections</h3><p>您可以使用链接器的<code>-sectorder</code>选项来组织可执行文件的大多数sections中的blocks。偶尔可以从重排序中受益的部分是literal sections，例如__TEXT段的__cstring section和__DATA段的__data section。</p>
+<h4 id="重排-Literal-Sections"><a href="#重排-Literal-Sections" class="headerlink" title="重排 Literal Sections"></a>重排 Literal Sections</h4><p>使用ld和otool工具可以最容易地生成literal sections的order文件中的行。对于literal sections，otool为每种类型的literal sections创建特定类型的order文件:</p>
+<ul>
+<li>对于C字符串literal sections，order-file格式是每行一个C字符串文字(C字符串中允许ANSI C转义序列)。例如，一行可能是这样的<br><code>Hello world\n</code></li>
+<li>对于4字节literal sections，order-file格式是一个32位十六进制数字，每行以0x开头，其余的行被视为注释。例如，一行可能是这样的<br><code>0x3f8ccccd (1.10000002384185790000e+00)</code></li>
+<li>对于literal pointer sections，order-file中的行格式表示指针，每行一个。A literal pointer由段名、literal pointer的section name和literal本身表示。它们由冒号分隔，没有额外的空格。例如，一行可能是这样的:<br><code>__OBJC:__selector_strs:new</code><br>对于所有literal sections，order文件中的每一行都被简单地输入到literal section中，并按照order文件的顺序出现在输出文件中。不检查literal是否在已加载的对象中。</li>
+</ul>
+<p>要重新排序literal section，首先使用<code>ld - whatloaded</code>选项创建一个“whatloaded”文件，如<a href="">创建默认order文件</a>小节所述。然后，使用适当的选项、段和section名称以及文件名运行otool。otool的输出是指定section的默认order文件。例如，下面的命令行生成一个order文件，列出文件cstring_order中__TEXT段的__cstring section的默认加载顺序:	<br><code>otool -X -v -s __TEXT __cstring </code>cat whatsloaded<code> &gt; cstring_order</code><br>一旦创建了文件<code>cstring_order</code>，就可以编辑该文件并重新排列其条目以优化引用的位置。例如，您可以将程序最常使用的文字字符串(例如出现在用户界面中的标签)放在文件的开头。要在可执行文件中产生所需的加载顺序，使用以下命令:<br><code>cc -o hello hello.o -sectorder __TEXT __cstring  cstring_order</code></p>
+<h4 id="重排数据sections"><a href="#重排数据sections" class="headerlink" title="重排数据sections"></a>重排数据sections</h4><p>目前还没有工具来测量对数据符号的代码引用。但是，您可能知道程序的数据引用模式，并且可以通过将很少使用的特性的数据与其他数据分开来节省一些开销。__data section重新排序的一种方法是按大小对数据进行排序，这样小的数据项就会在尽可能少的页面上结束。例如，如果一个较大的数据项被放置在两个页面上，而两个较小的项共享每个页面，则必须将较大的项换入以访问较小的项。按大小重新排序数据可以最大限度地降低这种低效率。因为这些数据通常需要被写入虚拟内存备份存储（virtual-memory backing store），所以在某些程序中，这可能是一个很大的节省。 </p>
+<p>要重新排序__data section，首先创建一个order文件，按照您希望它们链接的顺序列出源文件和符号(order文件条目在<a href="">生成order文件</a>的开头描述)。然后，使用-sectorder命令行选项链接程序:<br><code>cc -o outputFile inputFile.o … -sectorder __DATA __data orderFile -e start</code><br>要在Xcode项目中使用order文件，请修改项目部署构建样式中的“Other Linker Flags”选项。将 <code>-sectorder __DATA __data</code> orderFile添加到此设置中，以指定您的order文件。</p>
+<h4 id="重排汇编语言代码"><a href="#重排汇编语言代码" class="headerlink" title="重排汇编语言代码"></a>重排汇编语言代码</h4><p>在重新排序用汇编语言编写的例程时，需要记住的一些附加准则:</p>
+<ul>
+<li>汇编代码中的临时标签			<br>在手工编码(hand-coded)的汇编代码中，要注意到临时标签的分支，而该分支跨越了非临时标签。例如，如果您使用以“L”或d标签(其中d是数字)开头的标签，如本例所示</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">foo: b 1f</span><br><span class="line">    ...</span><br><span class="line">bar: ...</span><br><span class="line">1:   ...</span><br></pre></td></tr></table></figure>
+<p>结果程序将不能正确链接或执行，因为只有符号foo和bar才能进入目标文件的符号表。对临时标签<code>1</code>的引用被编译为偏移量;因此，不会为指令<code>b1f</code>生成重定位表项。如果链接器没有将与符号<code>bar</code>相关联的块直接放在与foo相关联的块之后，到1f的分支将不会到达正确的位置。因为没有重定位表项，所以链接器不知道如何修复分支。修复此问题的源代码更改是将标签<code>1</code>更改为非临时标签(例如bar1)。通过将包含手工编写的程序集代码的目标文件完整地链接起来，而无需重新排序，可以避免出现问题。</p>
+<ul>
+<li>伪符号.section_start</li>
+</ul>
+<p>如果任何输入文件中的指定section的大小为非零，并且没有与其section的开头值相同的符号，链接器将使用伪符号<code>.section_start</code>作为与节中的第一个块相关联的符号名。此符号的目的是处理其符号不持久化到目标文件中的文字常量( literal constants)。因为字面值字符串( literal strings)和浮点常量都在字面值区段(literal sections)中，这对Apple编译器来说不是问题。你可能会在汇编语言程序或非apple编译器中看到这个符号。但是，您不应该重新排序这样的代码，而是应该链接整个文件，而不是重新排序(查看<a href="">与订单文件的链接</a>)。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/16/%E7%AE%A1%E7%90%86%E4%BB%A3%E7%A0%81%E5%A4%A7%E5%B0%8F/" rel="prev" title="【译】管理代码大小">
+      <i class="fa fa-chevron-left"></i> 【译】管理代码大小
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/16/Swift%E6%95%99%E7%A8%8B%E7%AC%94%E8%AE%B0/" rel="next" title="【读书笔记】Swift教程">
+      【读书笔记】Swift教程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E9%AB%98%E4%BB%A3%E7%A0%81%E5%B1%80%E9%83%A8%E6%80%A7-Improving-Locality-of-Reference"><span class="nav-number">1.</span> <span class="nav-text">提高代码局部性(Improving Locality of Reference)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8gprof%E7%9A%84%E5%88%86%E6%9E%90%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">使用gprof的分析代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%A6%82%E8%A6%81%E6%95%B0%E6%8D%AE"><span class="nav-number">1.1.1.</span> <span class="nav-text">生成概要数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90Order%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.2.</span> <span class="nav-text">生成Order文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D%E4%BD%A0%E7%9A%84order%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.3.</span> <span class="nav-text">修复你的order文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8order%E6%96%87%E4%BB%B6%E9%93%BE%E6%8E%A5"><span class="nav-number">1.1.4.</span> <span class="nav-text">使用order文件链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gprof%E5%91%BD%E4%BB%A4%E6%96%87%E4%BB%B6%E7%9A%84%E9%99%90%E5%88%B6"><span class="nav-number">1.1.5.</span> <span class="nav-text">gprof命令文件的限制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%9B%91%E8%A7%86%E5%87%BD%E6%95%B0%E8%BF%9B%E8%A1%8C%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">使用监视函数进行分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%BC%96%E8%AF%91%E6%97%B6%E7%BB%84%E7%BB%87%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.</span> <span class="nav-text">在编译时组织代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E6%8E%92%E5%BA%8F-text-Section"><span class="nav-number">1.4.</span> <span class="nav-text">重新排序 __text Section</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E6%8E%92%E5%BA%8F%E7%A8%8B%E5%BA%8F-Reordering-Procedures"><span class="nav-number">1.4.1.</span> <span class="nav-text">重新排序程序(Reordering Procedures)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%A7%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%A8%8B%E5%BA%8F%E9%87%8D%E6%8E%92"><span class="nav-number">1.4.2.</span> <span class="nav-text">大程序的程序重排</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%8E%92%E5%85%B6%E4%BB%96Sections"><span class="nav-number">1.5.</span> <span class="nav-text">重排其他Sections</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%8E%92-Literal-Sections"><span class="nav-number">1.5.1.</span> <span class="nav-text">重排 Literal Sections</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%8E%92%E6%95%B0%E6%8D%AEsections"><span class="nav-number">1.5.2.</span> <span class="nav-text">重排数据sections</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%8E%92%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.3.</span> <span class="nav-text">重排汇编语言代码</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

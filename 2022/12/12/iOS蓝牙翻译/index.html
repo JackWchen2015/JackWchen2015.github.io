@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="关于Core Bluetooth蓝牙低耗能无线技术（Bluetooth low energy wireless technology）基于蓝牙4.0规范，该规范定义了一组用于低耗能设备之间通信的协议。核心蓝牙框架（The Core Bluetooth framework）是蓝牙低能耗协议栈的抽象。也就是说，它对开发人员隐藏了规范的许多底层细节，使您更容易开发与蓝牙低能耗设备交互的应用程序。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】iOS蓝牙">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="关于Core Bluetooth蓝牙低耗能无线技术（Bluetooth low energy wireless technology）基于蓝牙4.0规范，该规范定义了一组用于低耗能设备之间通信的协议。核心蓝牙框架（The Core Bluetooth framework）是蓝牙低能耗协议栈的抽象。也就是说，它对开发人员隐藏了规范的许多底层细节，使您更容易开发与蓝牙低能耗设备交互的应用程序。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBTechnologyFramework_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBDevices1_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/AdvertisingAndDiscovery_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBPeripheralData_Example_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBObjects_CentralSide_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/TreeOfServicesAndCharacteristics_Remote_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBObjects_PeripheralSide_2x.png">
+<meta property="og:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/TreeOfServicesAndCharacteristics_Local_2x.png">
+<meta property="article:published_time" content="2022-12-12T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-16T07:53:46.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="翻译">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBTechnologyFramework_2x.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】iOS蓝牙 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】iOS蓝牙
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-12 08:00:00" itemprop="dateCreated datePublished" datetime="2022-12-12T08:00:00+08:00">2022-12-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-01-16 15:53:46" itemprop="dateModified" datetime="2023-01-16T15:53:46+08:00">2023-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="关于Core-Bluetooth"><a href="#关于Core-Bluetooth" class="headerlink" title="关于Core Bluetooth"></a>关于Core Bluetooth</h2><p>蓝牙低耗能无线技术（Bluetooth low energy wireless technology）基于蓝牙4.0规范，该规范定义了一组用于低耗能设备之间通信的协议。核心蓝牙框架（The Core Bluetooth framework）是蓝牙低能耗协议栈的抽象。也就是说，它对开发人员隐藏了规范的许多底层细节，使您更容易开发与蓝牙低能耗设备交互的应用程序。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBTechnologyFramework_2x.png" class="&#x3D;">
+
+<span id="more"></span>
+
+<h2 id="中心-和-外围设备"><a href="#中心-和-外围设备" class="headerlink" title="中心 和 外围设备"></a>中心 和 外围设备</h2><p>在所有的蓝牙低能耗通信中有两个主要的参与者:中心和外围设备。基于某种传统的客户机-服务器体系结构(client-server architecture)，<strong>外围设备通常拥有其他设备需要的数据。中心通常使用外设提供的信息来完成某些特定的任务</strong>。如图1-1所示，例如，心率监测器可能具有Mac或iOS应用程序可能需要的有用信息，以便以用户友好的方式显示用户的心率。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBDevices1_2x.png" class="&#x3D;">
+
+<blockquote>
+<p>每个玩家在扮演自己的角色时都要执行不同的任务。<strong>外围设备通过广播宣传它们所拥有的数据来表明它们的存在</strong>。中央设备扫描附近可能有他们感兴趣的数据的外围设备。当中心发现这样的外设时，中心请求连接到外设，并开始探索外设的数据并与之交互。外围设备负责以适当的方式响应中央设备。</p>
+</blockquote>
+<p>如图1-2所示。中心设备可以请求连接到任何发现广告的外围设备。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/AdvertisingAndDiscovery_2x.png" class="&#x3D;">
+
+<h2 id="外围数据结构"><a href="#外围数据结构" class="headerlink" title="外围数据结构"></a>外围数据结构</h2><p><strong>外设可能包含一个或多个服务</strong>，或提供有关其连接的信号强度的有用信息。服务是用于完成设备(或该设备的部分)的功能或特性的数据和相关行为的集合。<br>例如，心率监控器的一项服务可能是公开来自监控器的心率传感器的心率数据。</p>
+<p>服务本身由特征或包含的服务(即对其他服务的引用)组成。特性提供了关于外设服务的更多细节。例如，刚才描述的心率服务可以包含描述设备的心率传感器的预期身体位置的一个特征和传输心率测量数据的另一个特征</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBPeripheralData_Example_2x.png" class="&#x3D;">
+
+<h2 id="中心端对象"><a href="#中心端对象" class="headerlink" title="中心端对象"></a>中心端对象</h2><h3 id="中心设备探索外设上的数据并与之交互"><a href="#中心设备探索外设上的数据并与之交互" class="headerlink" title="中心设备探索外设上的数据并与之交互"></a>中心设备探索外设上的数据并与之交互</h3><p>在中心成功地建立到外围设备的连接后，它可以发现外围设备必须提供的全部服务和特征(广告数据可能只包含可用服务的一小部分)。 </p>
+<p>中心还可以通过读取或写入外围服务的特征值来与该服务交互。例如，你的应用程序可以从数字恒温器请求当前的室温，或者它可以为恒温器提供一个值来设置房间的温度</p>
+<h3 id="本地中心和远程外围设备"><a href="#本地中心和远程外围设备" class="headerlink" title="本地中心和远程外围设备"></a>本地中心和远程外围设备</h3><p>在中心端，本地中心设备由<code>CBCentralManager</code>对象表示。这些对象用于管理已发现或已连接的远程外围设备(由<code>CBPeripheral</code>对象表示)，包括扫描、发现和连接到广告外围设备。图1-4显示了本地中心和远程外围设备如何在核心蓝牙框架中表示。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBObjects_CentralSide_2x.png" class="&#x3D;">
+
+<p>远程外设的数据由<code>CBService</code>和<code>CBCharacteristic</code>对象表示</p>
+<p>当您与远程外设(由<code>CBPeripheral</code>对象表示)上的数据交互时，您正在处理它的服务和特征。在核心蓝牙框架中，远程外设的服务由<code>CBService</code>表示,类似地，远程外围设备服务的特征由<code>CBCharacteristic</code>对象表示。远程外设的基本结构和特点如图1-5所示。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/TreeOfServicesAndCharacteristics_Remote_2x.png" class="&#x3D;">
+
+<h2 id="外围端对象"><a href="#外围端对象" class="headerlink" title="外围端对象"></a>外围端对象</h2><p>从macOS 10.9和iOS 6开始，Mac和iOS设备可以作为蓝牙低耗能外设，为其他设备(包括其他Mac、iPhone和iPad设备)提供数据。当设置您的设备以实现外设角色时，您正在蓝牙低耗能通信的外设端执行操作</p>
+<h3 id="本地外设和远程中心"><a href="#本地外设和远程中心" class="headerlink" title="本地外设和远程中心"></a>本地外设和远程中心</h3><p>在外围端，本地外围设备由一个<code>CBPeripheralManager</code>对象表示。这些对象用于在本地外围设备的服务和特征数据库中管理已发布的服务，并将这些服务发布到远程中心设备(由<code>CBCentral</code>对象表示)。外围管理器对象还用于响应来自这些远程中心的读写请求。图1-6显示了本地外围设备和远程中心如何在核心蓝牙框架中表示。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/CBObjects_PeripheralSide_2x.png" class="&#x3D;">
+
+<p>本地外设的数据由<code>CBMutableService</code>和<code>cbmutablecharistic</code>对象表示</p>
+<p>当您在本地外设(由<code>CBPeripheralManager</code>对象表示)上设置数据并与之交互时，您正在处理其服务和特征的可变版本。在核心蓝牙框架中，本地外围设备的服务由<code>CBMutableService</code>对象表示。类似地，本地外围设备的服务的特征由<code>cbmutablechartraits</code>对象表示。本地外设的基本结构和特点如图1-7所示。</p>
+<img src="/2022/12/12/iOS%E8%93%9D%E7%89%99%E7%BF%BB%E8%AF%91/TreeOfServicesAndCharacteristics_Local_2x.png" class="&#x3D;">
+
+<h2 id="读写"><a href="#读写" class="headerlink" title="读写"></a>读写</h2><h3 id="检索特征值"><a href="#检索特征值" class="headerlink" title="检索特征值"></a>检索特征值</h3><p>一个特征包含一个表示外设服务信息的值。例如，健康温度计服务的温度测量特性可能具有一个值，该值指示以摄氏度为单位的温度。您**可以通过直接读取或订阅来检索特征的值 **</p>
+<ul>
+<li>直接读取<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;Reading value for characteristic %@&quot;</span>, interestingCharacteristic);</span><br><span class="line">    [peripheral readValueForCharacteristic:interestingCharacteristic];</span><br></pre></td></tr></table></figure></li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)peripheral:(CBPeripheral *)peripheral</span><br><span class="line">didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic</span><br><span class="line">             error:(<span class="built_in">NSError</span> *)error &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="built_in">NSData</span> *data = characteristic.value;</span><br><span class="line">    <span class="comment">// parse the data as needed</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<ul>
+<li>订阅特征值<br>使用<code>readValueForCharacteristic</code>:方法读取特征值对于静态值是有效的，但它不是检索动态值的最有效方法。检索随时间变化的特征值——例如，您的心率——通过订阅它们。当你订阅一个特征值时，当值发生变化时，你会收到来自外围设备的通知。</li>
+</ul>
+<p><code> [peripheral setNotifyValue:YES forCharacteristic:interestingCharacteristic];</code></p>
+<p>当你订阅(或取消订阅)一个特征值时，外围设备调用它的委托对象的<code>peripheral:didUpdateNotificationStateForCharacteristic:error:</code>方法。如果订阅请求由于任何原因失败，您可以实现这个委托方法来访问错误的原因，如下例所示:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)peripheral:(CBPeripheral *)peripheral</span><br><span class="line">didUpdateNotificationStateForCharacteristic:(CBCharacteristic *)characteristic</span><br><span class="line">             error:(<span class="built_in">NSError</span> *)error &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (error) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;Error changing notification state: %@&quot;</span>,</span><br><span class="line">           [error localizedDescription]);</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注:并非所有特征都提供订阅。您可以通过检查其properties属性是否包含CBCharacteristicPropertyNotify或CBCharacteristicPropertyIndicate常量来确定一个特征是否提供订阅。</p>
+</blockquote>
+<p>当你成功订阅了一个特征值后，当值发生变化时，外围设备会通知你的应用程序。每次这个值改变时，外围设备都会调用它的委托对象的<code>peripheral:didUpdateValueForCharacteristic:error:</code>方法。要检索更新的值，可以按照上面读取特征值中描述的方法实现此方法。</p>
+<h3 id="写特征值"><a href="#写特征值" class="headerlink" title="写特征值"></a>写特征值</h3><p>如果一个特征的值是可写的，你可以通过调用外围的<code>writeValue:forCharacteristic:type:</code>方法来写它的值(NSData的一个实例)，就像这样:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;Writing value for characteristic %@&quot;</span>, interestingCharacteristic);</span><br><span class="line">[peripheral writeValue:dataToWrite forCharacteristic:interestingCharacteristic</span><br><span class="line">    type:CBCharacteristicWriteWithResponse];</span><br></pre></td></tr></table></figure>
+<p>当您写入一个特征的值时，您可以指定要执行哪种类型的写入。在上面的例子中，写类型是<code>CBCharacteristicWriteWithResponse</code>，它指示外围设备通过调用它的委托对象的<code>peripheral:didWriteValueForCharacteristic:error:</code>方法让你的应用程序知道写是否成功。你可以实现这个委托方法来处理错误情况，如下面的例子所示:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)peripheral:(CBPeripheral *)peripheral</span><br><span class="line">didWriteValueForCharacteristic:(CBCharacteristic *)characteristic</span><br><span class="line">             error:(<span class="built_in">NSError</span> *)error &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (error) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;Error writing characteristic value: %@&quot;</span>,</span><br><span class="line">            [error localizedDescription]);</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>如果您指定写类型为<code>CBCharacteristicWriteWithoutResponse</code>，那么写操作将尽最大努力执行，并且既不保证也不报告交付。外围设备不调用任何委托方法。</p>
+<blockquote>
+<p>注意:特征可能只支持某些类型的写操作，也可能根本不支持。您可以通过检查CBCharacteristicPropertyWriteWithoutResponse或CBCharacteristicPropertyWrite常量之一的properties属性来确定一个特性支持哪种类型的写操作</p>
+</blockquote>
+<h2 id="服务和特征由uuid标识"><a href="#服务和特征由uuid标识" class="headerlink" title="服务和特征由uuid标识"></a>服务和特征由uuid标识</h2><p>外设的服务和特征由128位特定于蓝牙的uuid标识，这些uuid在核心蓝牙框架中由<code>CBUUID</code>对象表示。并非所有标识服务或特征的<code>uuid</code>都是由蓝牙特殊兴趣小组(Bluetooth Special Interest Group, SIG)预定义的，但蓝牙SIG已经定义并发布了许多常用的uuid，为了方便起见，这些uuid已被缩短为<code>16</code>位。例如，Bluetooth SIG预定义了用于<strong>标识心率服务的16位UUID为180D</strong>。该UUID是其<code>等效的128位UUID 0000180D-0000-1000-8000-00805F9B34FB</code>的缩写，它基于蓝牙4.0规范，卷3,F部分，章节3.2.1中定义的蓝牙基本UUID。</p>
+<p><code>CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString: @&quot;180D&quot;];</code></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BF%BB%E8%AF%91/" rel="tag"># 翻译</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/02/Codable%E5%8D%8F%E8%AE%AE/" rel="prev" title="Codable协议">
+      <i class="fa fa-chevron-left"></i> Codable协议
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/14/Mach-O%E6%A0%BC%E5%BC%8F%E7%BF%BB%E8%AF%91/" rel="next" title="【译】Mach-O格式">
+      【译】Mach-O格式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8ECore-Bluetooth"><span class="nav-number">1.</span> <span class="nav-text">关于Core Bluetooth</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E5%BF%83-%E5%92%8C-%E5%A4%96%E5%9B%B4%E8%AE%BE%E5%A4%87"><span class="nav-number">2.</span> <span class="nav-text">中心 和 外围设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%96%E5%9B%B4%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">外围数据结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E5%BF%83%E7%AB%AF%E5%AF%B9%E8%B1%A1"><span class="nav-number">4.</span> <span class="nav-text">中心端对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%BF%83%E8%AE%BE%E5%A4%87%E6%8E%A2%E7%B4%A2%E5%A4%96%E8%AE%BE%E4%B8%8A%E7%9A%84%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%B8%8E%E4%B9%8B%E4%BA%A4%E4%BA%92"><span class="nav-number">4.1.</span> <span class="nav-text">中心设备探索外设上的数据并与之交互</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E4%B8%AD%E5%BF%83%E5%92%8C%E8%BF%9C%E7%A8%8B%E5%A4%96%E5%9B%B4%E8%AE%BE%E5%A4%87"><span class="nav-number">4.2.</span> <span class="nav-text">本地中心和远程外围设备</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%96%E5%9B%B4%E7%AB%AF%E5%AF%B9%E8%B1%A1"><span class="nav-number">5.</span> <span class="nav-text">外围端对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%A4%96%E8%AE%BE%E5%92%8C%E8%BF%9C%E7%A8%8B%E4%B8%AD%E5%BF%83"><span class="nav-number">5.1.</span> <span class="nav-text">本地外设和远程中心</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%86%99"><span class="nav-number">6.</span> <span class="nav-text">读写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%80%E7%B4%A2%E7%89%B9%E5%BE%81%E5%80%BC"><span class="nav-number">6.1.</span> <span class="nav-text">检索特征值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E7%89%B9%E5%BE%81%E5%80%BC"><span class="nav-number">6.2.</span> <span class="nav-text">写特征值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%92%8C%E7%89%B9%E5%BE%81%E7%94%B1uuid%E6%A0%87%E8%AF%86"><span class="nav-number">7.</span> <span class="nav-text">服务和特征由uuid标识</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
