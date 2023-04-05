@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="UIKit将你的视图控制器的content从content is presented 并在屏幕上显示的方式中分离出来。Presented视图控制器由底层presentation控制器对象管理，该对象管理用于显示视图控制器的视图的视觉样式。presentation控制器可以做以下事情:   设置presented视图控制器的大小。  添加自定义视图以更改显示内容的( the presented co">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】Creating Custom Presentations">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/04/04/[%E8%AF%91]Creating%20Custom%20Presentations/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="UIKit将你的视图控制器的content从content is presented 并在屏幕上显示的方式中分离出来。Presented视图控制器由底层presentation控制器对象管理，该对象管理用于显示视图控制器的视图的视觉样式。presentation控制器可以做以下事情:   设置presented视图控制器的大小。  添加自定义视图以更改显示内容的( the presented co">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-04-04T08:27:29.000Z">
+<meta property="article:modified_time" content="2023-04-04T08:27:29.000Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/04/04/[%E8%AF%91]Creating%20Custom%20Presentations/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】Creating Custom Presentations | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/04/04/[%E8%AF%91]Creating%20Custom%20Presentations/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】Creating Custom Presentations
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-04-04 16:27:29" itemprop="dateCreated datePublished" datetime="2023-04-04T16:27:29+08:00">2023-04-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">翻译</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>UIKit将你的视图控制器的content从content is presented 并在屏幕上显示的方式中分离出来。Presented视图控制器由底层presentation控制器对象管理，该对象管理用于显示视图控制器的视图的视觉样式。presentation控制器可以做以下事情: </p>
+<ul>
+<li>设置presented视图控制器的大小。 </li>
+<li>添加自定义视图以更改显示内容的( the presented content)视觉外观。 </li>
+<li>为任何自定义视图提供过渡动画。 </li>
+<li>当应用程序的环境发生变化时，调整演示的视觉外观。</li>
+</ul>
+<p>UIKit为标准的表示样式提供了presentation控制器。当你设置一个视图控制器的表示样式为<code>UIModalPresentationCustom</code>并提供一个适当的转换委托时，UIKit会使用你的自定义表示控制器。</p>
+<span id="more"></span>
+
+<h3 id="The-Custom-Presentation-Process"><a href="#The-Custom-Presentation-Process" class="headerlink" title="The Custom Presentation Process"></a>The Custom Presentation Process</h3><p>当你present一个presentation风格为<code>UIModalPresentationCustom</code>的视图控制器时，UIKit会寻找一个自定义的presentation控制器来管理presentation过程。随着presentation的进行，UIKit调用presentation控制器的方法，让它有机会设置任何自定义视图并将它们动画到相应的位置。 </p>
+<p>presentation控制器与任何动画对象(animator objects)一起工作来实现整体转换。animator对象将视图控制器的内容(contents)动画到屏幕上，而presentation控制器处理其他一切。通常，你的presentation控制器动画它自己的视图，但你也可以重写presentation控制器的<code>presenttedview</code>方法，让animator对象动画所有或部分视图。</p>
+<p>在presentation过程中，UIKit:</p>
+<ol>
+<li><p>调用转换委托的<code>presentationcontrollerforpresenttedviewcontroller:presentingViewController:sourceViewController:</code>方法来检索(retrieve)您的自定义presentation控制器 </p>
+</li>
+<li><p>向过渡委托请求动画器和交互动画器对象(如果有的话) </p>
+</li>
+<li><p>调用表示控制器的<code>presentationTransitionWillBegin</code>方法</p>
+<blockquote>
+<p>这个方法的实现应该将任何自定义视图添加到视图层次结构中，并为这些视图配置动画。 </p>
+</blockquote>
+</li>
+<li><p>从presentation控制器获取<code>presenttedview</code> </p>
+<blockquote>
+<p>此方法返回的视图由动画器对象动画到相应位置。通常，这个方法返回presented视图控制器的根视图。您的presentation控制器可以根据需要用自定义背景视图替换该视图。如果你指定了一个不同的视图，你必须将presented视图控制器的根视图嵌入到你的视图层次结构中。 </p>
+</blockquote>
+</li>
+<li><p>执行过渡动画 </p>
+<blockquote>
+<p>过渡动画包括由animator对象创建的主要动画，以及您配置为与主要动画一起运行的任何动画。有关过渡动画的信息，请参见过渡动画序列。<br> 在动画过程中，UIKit调用你的表示控制器的containerViewWillLayoutSubviews和containerViewDidLayoutSubviews方法，这样你就可以根据需要调整你的自定义视图的布局。 </p>
+</blockquote>
+</li>
+<li><p>在转换动画完成时调用presentationTransitionDidEnd:方法</p>
+</li>
+</ol>
+<p>在dismissal期间，UIKit:</p>
+<ol>
+<li><p>从当前可见的视图控制器获取自定义presentation控制器 </p>
+</li>
+<li><p>向过渡委托请求动画器和交互动画器对象(如果有的话) </p>
+</li>
+<li><p>调用表示控制器的<code>dissaltransitionwillbegin</code>方法 </p>
+<blockquote>
+<p>这个方法的实现应该将任何自定义视图添加到视图层次结构中，并为这些视图配置动画。 </p>
+</blockquote>
+</li>
+<li><p>从表示控制器获取已经  <code>presentedView</code> </p>
+</li>
+<li><p>执行过渡动画 </p>
+<blockquote>
+<p>过渡动画包括由animator对象创建的主要动画，以及您配置为与主要动画一起运行的任何动画。有关过渡动画的信息，请参见过渡动画序列。<br>在动画过程中，UIKit调用你的表示控制器的containerViewWillLayoutSubviews和containerViewDidLayoutSubviews方法，这样你就可以删除任何自定义约束。 </p>
+</blockquote>
+</li>
+<li><p>当过渡动画结束时调用dissaltransitiondidend:方法</p>
+</li>
+</ol>
+<p>在presentation过程中，你的表示控制器的<code>frameofpresenttedviewincontainerview</code>和<code>presenttedview</code>方法可能会被调用几次，所以你的实现应该很快返回。同样，你的<code>presenttedview</code>方法的实现不应该尝试设置视图层次结构。在调用方法时，视图层次结构应该已经配置好了。</p>
+<h3 id="Creating-a-Custom-Presentation-Controller"><a href="#Creating-a-Custom-Presentation-Controller" class="headerlink" title="Creating a Custom Presentation Controller"></a>Creating a Custom Presentation Controller</h3><p>要实现自定义的presentation风格，子类<code>UIPresentationController</code>并添加代码来创建presentation的视图和动画。在创建自定义presentation控制器时，考虑以下问题: </p>
+<ul>
+<li><p>您想添加哪些视图? </p>
+</li>
+<li><p>你想如何在屏幕上动画任何其他视图? </p>
+</li>
+<li><p>呈现的视图控制器应该是多大? </p>
+</li>
+<li><p>在水平规则类和水平紧凑类之间，表示应该如何适应? </p>
+</li>
+<li><p>当呈现结束时，呈现视图控制器的视图应该被移除吗?</p>
+</li>
+</ul>
+<p>所有这些决策都需要重写<code>UIPresentationController</code>类的不同方法。</p>
+<h4 id="Setting-the-Frame-of-the-Presented-View-Controller"><a href="#Setting-the-Frame-of-the-Presented-View-Controller" class="headerlink" title="Setting the Frame of the Presented View Controller"></a>Setting the Frame of the Presented View Controller</h4><p>您可以修改当前视图控制器(presented view controlle)的框架矩形(frame rectangle )，使其只填充可用空间的一部分。默认情况下，presented view controller的大小完全填满容器视图的frame。要改变frame rectangle，重写presentation控制器的<code>frameofpresenttedviewincontainerview</code>方法。清单11-1显示了一个例子，其中frame被更改为只覆盖容器视图的右半部分。在这种情况下，presentation控制器使用背景变暗(dimming)视图来覆盖容器的另一半。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  Listing 11-1 Changing the frame of a presented view controller</span></span><br><span class="line">- (<span class="built_in">CGRect</span>)frameOfPresentedViewInContainerView &#123;</span><br><span class="line">    <span class="built_in">CGRect</span> presentedViewFrame = <span class="built_in">CGRectZero</span>;</span><br><span class="line">    <span class="built_in">CGRect</span> containerBounds = [[<span class="keyword">self</span> containerView] bounds];</span><br><span class="line"> </span><br><span class="line">    presentedViewFrame.size = <span class="built_in">CGSizeMake</span>(floorf(containerBounds.size.width / <span class="number">2.0</span>),</span><br><span class="line">                                         containerBounds.size.height);</span><br><span class="line">    presentedViewFrame.origin.x = containerBounds.size.width -</span><br><span class="line">                                    presentedViewFrame.size.width;</span><br><span class="line">    <span class="keyword">return</span> presentedViewFrame;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Managing-and-Animating-Custom-Views"><a href="#Managing-and-Animating-Custom-Views" class="headerlink" title="Managing and Animating Custom Views"></a>Managing and Animating Custom Views</h4><p>自定义presentations通常包括向presented的内容添加自定义视图。使用自定义视图来实现纯视觉装饰(adornments)，或者使用它们来向表示添加实际(practical)行为。例如，背景视图可能包含手势识别器来跟踪presented内容范围之外的特定操作。 </p>
+<p>presentation控制器负责创建和管理与其presentation相关联的所有自定义视图。通常，在初始化表示控制器期间创建自定义视图。清单11-2显示了创建自己的变暗视图的自定义视图控制器的初始化方法。该方法创建视图并执行一些最小配置。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Listing 11-2 Initializing the presentation controller</span></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithPresentedViewController:(<span class="built_in">UIViewController</span> *)presentedViewController</span><br><span class="line">                    presentingViewController:(<span class="built_in">UIViewController</span> *)presentingViewController &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="variable language_">super</span> initWithPresentedViewController:presentedViewController</span><br><span class="line">                         presentingViewController:presentingViewController];</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="comment">// Create the dimming view and set its initial appearance.</span></span><br><span class="line">        <span class="keyword">self</span>.dimmingView = [[<span class="built_in">UIView</span> alloc] init];</span><br><span class="line">        [<span class="keyword">self</span>.dimmingView setBackgroundColor:[<span class="built_in">UIColor</span> colorWithWhite:<span class="number">0.0</span> alpha:<span class="number">0.4</span>]];</span><br><span class="line">        [<span class="keyword">self</span>.dimmingView setAlpha:<span class="number">0.0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用<code>presentationTransitionWillBegin</code>方法将自定义视图动画到屏幕上。在这种方法中，配置您的自定义视图并将它们添加到容器视图，如清单11-3所示。使用presented视图控制器或presenting视图控制器的转换协调器来创建任何动画。不要在此方法中修改presented视图控制器的视图。动画器对象负责将presented视图控制器动画到你从<code>frameofpresenttedviewincontainerview</code>方法返回的frame rectangle中。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Listing 11-3 Animating the dimming view onto the screen</span></span><br><span class="line">- (<span class="type">void</span>)presentationTransitionWillBegin &#123;</span><br><span class="line">    <span class="comment">// Get critical information about the presentation.</span></span><br><span class="line">    <span class="built_in">UIView</span>* containerView = [<span class="keyword">self</span> containerView];</span><br><span class="line">    <span class="built_in">UIViewController</span>* presentedViewController = [<span class="keyword">self</span> presentedViewController];</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Set the dimming view to the size of the container&#x27;s</span></span><br><span class="line">    <span class="comment">// bounds, and make it transparent initially.</span></span><br><span class="line">    [[<span class="keyword">self</span> dimmingView] setFrame:[containerView bounds]];</span><br><span class="line">    [[<span class="keyword">self</span> dimmingView] setAlpha:<span class="number">0.0</span>];</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Insert the dimming view below everything else.</span></span><br><span class="line">    [containerView insertSubview:[<span class="keyword">self</span> dimmingView] atIndex:<span class="number">0</span>];</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Set up the animations for fading in the dimming view.</span></span><br><span class="line">    <span class="keyword">if</span>([presentedViewController transitionCoordinator]) &#123;</span><br><span class="line">        [[presentedViewController transitionCoordinator]</span><br><span class="line">               animateAlongsideTransition:^(<span class="type">id</span>&lt;<span class="built_in">UIViewControllerTransitionCoordinatorContext</span>&gt;</span><br><span class="line">                                            context) &#123;</span><br><span class="line">            <span class="comment">// Fade in the dimming view.</span></span><br><span class="line">            [[<span class="keyword">self</span> dimmingView] setAlpha:<span class="number">1.0</span>];</span><br><span class="line">        &#125; completion:<span class="literal">nil</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        [[<span class="keyword">self</span> dimmingView] setAlpha:<span class="number">1.0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在presentation结束时，使用<code>presentationTransitionDidEnd:</code>方法来处理由于取消presentation而引起的任何清理。交互式动画对象如果没有满足阈值(threshold)条件，可能会取消转换。当这种情况发生时，UIKit调用<code>presentationTransitionDidEnd:</code>方法，值为<code>NO</code>。当取消发生时，删除您在presentation开始时添加的任何自定义视图，并将任何其他视图返回到它们之前的配置，如清单11-4所示。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Listing 11-4 Handling a cancelled presentation</span></span><br><span class="line">- (<span class="type">void</span>)presentationTransitionDidEnd:(<span class="type">BOOL</span>)completed &#123;</span><br><span class="line">    <span class="comment">// If the presentation was canceled, remove the dimming view.</span></span><br><span class="line">    <span class="keyword">if</span> (!completed)</span><br><span class="line">        [<span class="keyword">self</span>.dimmingView removeFromSuperview];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当视图控制器dismissed时，使用<code>dismissalTransitionDidEnd:</code>方法从视图层次结构中移除你的自定义视图。如果你想动画视图的消失，在<code>dismissalTransitionDidEnd:</code>方法中设置这些动画。清单11-5显示了在前面的示例中删除暗光视图( dimming view)的两种方法的实现。总是检查<code>disdissaltransitiondidend:</code>方法的参数，看看dismissal是成功的还是被取消了</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Listing 11-5 Dismissing the presentation’s views</span></span><br><span class="line">- (<span class="type">void</span>)dismissalTransitionWillBegin &#123;</span><br><span class="line">    <span class="comment">// Fade the dimming view back out.</span></span><br><span class="line">    <span class="keyword">if</span>([[<span class="keyword">self</span> presentedViewController] transitionCoordinator]) &#123;</span><br><span class="line">        [[[<span class="keyword">self</span> presentedViewController] transitionCoordinator]</span><br><span class="line">           animateAlongsideTransition:^(<span class="type">id</span>&lt;<span class="built_in">UIViewControllerTransitionCoordinatorContext</span>&gt;</span><br><span class="line">                                        context) &#123;</span><br><span class="line">            [[<span class="keyword">self</span> dimmingView] setAlpha:<span class="number">0.0</span>];</span><br><span class="line">        &#125; completion:<span class="literal">nil</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        [[<span class="keyword">self</span> dimmingView] setAlpha:<span class="number">0.0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">- (<span class="type">void</span>)dismissalTransitionDidEnd:(<span class="type">BOOL</span>)completed &#123;</span><br><span class="line">    <span class="comment">// If the dismissal was successful, remove the dimming view.</span></span><br><span class="line">    <span class="keyword">if</span> (completed)</span><br><span class="line">        [<span class="keyword">self</span>.dimmingView removeFromSuperview];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Vending-Your-Presentation-Controller-to-UIKit"><a href="#Vending-Your-Presentation-Controller-to-UIKit" class="headerlink" title="Vending Your Presentation Controller to UIKit"></a>Vending Your Presentation Controller to UIKit</h3><p>当presenting一个视图控制器时，执行以下操作来使用你的自定义presentation控制器显示它: </p>
+<ul>
+<li><p>设置presented视图控制器的<code>modalPresentationStyle</code>属性为<code>UIModalPresentationCustom</code>。 </p>
+</li>
+<li><p>给presented视图控制器的<code>transitioningDelegate</code>属性分配一个转换委托。 </p>
+</li>
+<li><p>实现转换委托的<code>presentationcontrollerforpresenttedviewcontroller:presentingViewController:sourceViewController:</code>方法。</p>
+</li>
+</ul>
+<p>UIKit调用你的转换委托的<code>presentationcontrollerforpresenttedviewcontroller:presentingViewController:sourceViewController:</code>方法当它需要你的表示控制器时。这个方法的实现应该像清单11-6中那样简单。只需创建您的表示控制器，配置它并返回它。如果你从这个方法中返回nil, UIKit会使用全屏显示样式来显示视图控制器。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Listing 11-6 Creating a custom presentation controller</span></span><br><span class="line">- (<span class="built_in">UIPresentationController</span> *)presentationControllerForPresentedViewController:</span><br><span class="line">                                 (<span class="built_in">UIViewController</span> *)presented</span><br><span class="line">        presentingViewController:(<span class="built_in">UIViewController</span> *)presenting</span><br><span class="line">            sourceViewController:(<span class="built_in">UIViewController</span> *)source &#123;</span><br><span class="line"> </span><br><span class="line">    MyPresentationController* myPresentation = [[MyPresentationController]</span><br><span class="line">       initWithPresentedViewController:presented presentingViewController:presenting];</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> myPresentation;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/DefiningCustomPresentations.html#//apple_ref/doc/uid/TP40007457-CH25-SW1">Creating Custom Presentations</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/04/%E9%AB%98%E9%98%B6%E5%87%BD%E6%95%B0%20Map,Flatmap,Filter,Reduce%E7%9A%84%E7%94%A8%E6%B3%95/" rel="prev" title="Swift高阶函数 Map,Flatmap,Filter,Reduce的用法">
+      <i class="fa fa-chevron-left"></i> Swift高阶函数 Map,Flatmap,Filter,Reduce的用法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/04/Presenting%20a%20View%20Controller/" rel="next" title="【译】Presenting a View Controller">
+      【译】Presenting a View Controller <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Custom-Presentation-Process"><span class="nav-number">1.</span> <span class="nav-text">The Custom Presentation Process</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Creating-a-Custom-Presentation-Controller"><span class="nav-number">2.</span> <span class="nav-text">Creating a Custom Presentation Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Setting-the-Frame-of-the-Presented-View-Controller"><span class="nav-number">2.1.</span> <span class="nav-text">Setting the Frame of the Presented View Controller</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Managing-and-Animating-Custom-Views"><span class="nav-number">2.2.</span> <span class="nav-text">Managing and Animating Custom Views</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vending-Your-Presentation-Controller-to-UIKit"><span class="nav-number">3.</span> <span class="nav-text">Vending Your Presentation Controller to UIKit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
