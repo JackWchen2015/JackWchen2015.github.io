@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="Runtime数据结构">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/runtime.png">
+<meta property="og:image" content="https://github.com/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/methodStruct.png">
+<meta property="og:image" content="https://github.com/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/isaSuperclass.png">
+<meta property="article:published_time" content="2022-01-25T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T11:57:42.827Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/runtime.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Runtime数据结构 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Runtime数据结构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-25 08:00:00" itemprop="dateCreated datePublished" datetime="2022-01-25T08:00:00+08:00">2022-01-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 19:57:42" itemprop="dateModified" datetime="2023-05-13T19:57:42+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Runtime/" itemprop="url" rel="index"><span itemprop="name">Runtime</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img src="/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/runtime.png" class="&#x3D;">
+
+<span id="more"></span>
+
+<h2 id="objc-object"><a href="#objc-object" class="headerlink" title="objc_object"></a>objc_object</h2><p><code>Objective-C </code>的面相对象都是基于C&#x2F;C++的数据结构—<code>结构体</code>实现的。所有对象都是id类型，对应到runtime中，就是<code>objc_object</code>结构体</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A pointer to an instance of a class.</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">objc_object</span> *id;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">objc_object</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">isa_t</span> isa;</span><br><span class="line">    <span class="comment">/*...</span></span><br><span class="line"><span class="comment">      isa操作相关</span></span><br><span class="line"><span class="comment">      弱引用相关</span></span><br><span class="line"><span class="comment">      关联对象相关</span></span><br><span class="line"><span class="comment">      内存管理相关</span></span><br><span class="line"><span class="comment">      ...</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="objc-class"><a href="#objc-class" class="headerlink" title="objc_class"></a>objc_class</h2><p><code>Class</code>指针用来指向一个Objective-C的类，它是<code>objc_class</code>结构体类型，所以<code>class</code>、<code>meta-class</code>底层结构都是<code>objc_class</code>结构体，<code>objc_class</code>继承自<code>objc_object</code>,所以它也有<code>isa</code>指针，它也是对象</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// An opaque type that represents an Objective-C class.</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">objc_class</span> *Class;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">objc_class</span> : objc_object &#123;</span><br><span class="line">    <span class="comment">// Class ISA;</span></span><br><span class="line">    Class superclass;          <span class="comment">// 指向父类</span></span><br><span class="line">    <span class="type">cache_t</span> cache;             <span class="comment">// 方法缓存 formerly cache pointer and vtable</span></span><br><span class="line">    <span class="type">class_data_bits_t</span> bits;    <span class="comment">// 用于获取具体的类信息 class_rw_t * plus custom rr/alloc flags</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">class_rw_t</span> *<span class="title">data</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="keyword">return</span> bits.<span class="built_in">data</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="class-data-bits-t"><a href="#class-data-bits-t" class="headerlink" title="class_data_bits_t"></a>class_data_bits_t</h3><p><code>class_data_bits_t</code>主要是对<code>class_rw_t</code>的封装，可以通过<code>bits &amp; FAST_DATA_MASK</code>获得<code>class_rw_t</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">class_data_bits_t</span> &#123;</span><br><span class="line">    <span class="comment">// Values are the FAST_ flags above.</span></span><br><span class="line">    <span class="type">uintptr_t</span> bits;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="type">class_rw_t</span>* <span class="title">data</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="type">class_rw_t</span> *)(bits &amp; FAST_DATA_MASK);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><code>class_rw_t</code>代表了类相关的读写信息，它是对<code>class_ro_t</code>的封装；</li>
+<li><code>class_rw_t</code>中主要存储着类的方法列表、属性列表、协议列表等；</li>
+<li><code>class_rw_t</code>里面的<code>methods</code>、<code>properties</code>、<code>protocols</code>都继承于list_array_tt二维数组，是可读可写的，包含了类的初始内容、分类的内容。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">class_rw_t</span> &#123;</span><br><span class="line">    <span class="comment">// Be warned that Symbolication knows the layout of this structure.</span></span><br><span class="line">    <span class="type">uint32_t</span> flags;</span><br><span class="line">    <span class="type">uint32_t</span> version;</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">class_ro_t</span> *ro;</span><br><span class="line"></span><br><span class="line">    <span class="type">method_array_t</span> methods;       <span class="comment">// 方法列表</span></span><br><span class="line">    <span class="type">property_array_t</span> properties;  <span class="comment">// 属性列表</span></span><br><span class="line">    <span class="type">protocol_array_t</span> protocols;   <span class="comment">// 协议列表</span></span><br><span class="line"></span><br><span class="line">    Class firstSubclass;</span><br><span class="line">    Class nextSiblingClass;</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> *demangledName;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ol>
+<li><code>class_ro_t</code>代表了类相关的只读信息；</li>
+<li><code>class_ro_t</code>中主要存储着类的成员变量列表、类名等；</li>
+<li><code>class_ro_t</code>里面的baseMethodList、baseProtocols、ivars、baseProperties是一维数组，是只读的，包含了类的初始内容；</li>
+<li>一开始类的信息都存放在<code>class_ro_t</code>里，当程序运行时，经过一系列的函数调用栈，在realizeClass()函数中，将class_ro_t里的东西和分类的东西合并起来放到class_rw_t里，并让bits指向class_rw_t。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">class_ro_t</span> &#123;</span><br><span class="line">    <span class="type">uint32_t</span> flags;</span><br><span class="line">    <span class="type">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="type">uint32_t</span> instanceSize;  <span class="comment">// instance对象占用的内存空间</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="type">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="type">const</span> <span class="type">uint8_t</span> * ivarLayout;    </span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> * name;  <span class="comment">// 类名</span></span><br><span class="line">    <span class="type">method_list_t</span> * baseMethodList;  </span><br><span class="line">    <span class="type">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="type">const</span> <span class="type">ivar_list_t</span> * ivars;  <span class="comment">// 成员变量列表</span></span><br><span class="line">    <span class="type">const</span> <span class="type">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="type">property_list_t</span> *baseProperties;</span><br><span class="line">    <span class="function"><span class="type">method_list_t</span> *<span class="title">baseMethods</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> baseMethodList;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>method_array_t</code>与<code>method_list_t</code></p>
+<img src="/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/methodStruct.png" class="&#x3D;">
+
+<h3 id="cache-t"><a href="#cache-t" class="headerlink" title="cache_t"></a>cache_t</h3><p>用于快速查找方法执行函数；<br>是可增量扩展的哈希表结构，用哈希表来缓存曾经使用过的方法，可以提高方法的查找速度（空间换时间：牺牲内存空间来换取执行效率）；<br>是<code>局部性原理</code>的最佳应用（比如一些方法调用的频率高，存放到cache中，下一次调用这些方法的命中率就会更高些）；<br>hash 函数式为 <code>f(@selector()) = index, @selector() &amp; _mask</code>；<br>当我们调用过一个方法后，runtime会将这个方法缓存到cache中，下次再调用此方法的时候，runtime会优先去cache中查找。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">cache_t</span> &#123;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">bucket_t</span> *_buckets;  <span class="comment">// 哈希表</span></span><br><span class="line">    <span class="type">mask_t</span> _mask;               <span class="comment">// 哈希表的长度 - 1</span></span><br><span class="line">    <span class="type">mask_t</span> _occupied;           <span class="comment">// 已经缓存的方法数量</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">bucket_t</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">cache_key_t</span> _key;  <span class="comment">// SEL</span></span><br><span class="line">    IMP _imp;          <span class="comment">// IMP 函数的内存地址</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="缓存查找流程"><a href="#缓存查找流程" class="headerlink" title="缓存查找流程"></a>缓存查找流程</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//objc-cache.mm（objc4）</span></span><br><span class="line"><span class="function"><span class="type">bucket_t</span> * <span class="title">cache_t::find</span><span class="params">(<span class="type">cache_key_t</span> k, id receiver)</span>  <span class="comment">// 根据 k 即 @selector 进行查找</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">assert</span>(k != <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">bucket_t</span> *b = <span class="built_in">buckets</span>();          <span class="comment">// 获取_buckets</span></span><br><span class="line">    <span class="type">mask_t</span> m = <span class="built_in">mask</span>();                <span class="comment">// 获取_mask</span></span><br><span class="line">    <span class="type">mask_t</span> begin = <span class="built_in">cache_hash</span>(k, m);  <span class="comment">// 计算起始索引</span></span><br><span class="line">    <span class="type">mask_t</span> i = begin;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="comment">// 根据索引 i 从 _buckets 哈希表中取值</span></span><br><span class="line">        <span class="comment">// 如果取出来的 bucket_t 的 _key = 0，说明在索引的位置上还没有缓存过方法，返回该 bucket_t，中止缓存查询，用于 cache_fill_nolock() 函数</span></span><br><span class="line">        <span class="comment">// 如果取出来的 bucket_t 的 _key = k，说明查询成功，返回该 bucket_t</span></span><br><span class="line">        <span class="keyword">if</span> (b[i].<span class="built_in">key</span>() == <span class="number">0</span>  ||  b[i].<span class="built_in">key</span>() == k) &#123;</span><br><span class="line">            <span class="keyword">return</span> &amp;b[i];</span><br><span class="line">        &#125;</span><br><span class="line">      <span class="comment">// 在 __arm64__ 下将索引 i -1，继续查找，反向遍历 _buckets 哈希表</span></span><br><span class="line">      <span class="comment">// 直到 i 指向首个元素即索引 = 0 时，将 mask 赋值给 i，使其指向哈希表最后一个元素，继续反向遍历</span></span><br><span class="line">      <span class="comment">// 如果此时还没有找到 k 对应的 bucket_t ，或者是空的 bucket_t ，则循环结束，查找失败，调用 bad_cache() 函数</span></span><br><span class="line">      <span class="comment">// 接下来去类对象中 class_rw_t 中的 methods 查找</span></span><br><span class="line">    &#125; <span class="keyword">while</span> ((i = <span class="built_in">cache_next</span>(i, m)) != begin);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// hack</span></span><br><span class="line">    Class cls = (Class)((<span class="type">uintptr_t</span>)<span class="keyword">this</span> - <span class="built_in">offsetof</span>(objc_class, cache));</span><br><span class="line">    <span class="type">cache_t</span>::<span class="built_in">bad_cache</span>(receiver, (SEL)k, cls);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">mask_t</span> <span class="title">cache_hash</span><span class="params">(<span class="type">cache_key_t</span> key, <span class="type">mask_t</span> mask)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="type">mask_t</span>)(key &amp; mask);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">mask_t</span> <span class="title">cache_next</span><span class="params">(<span class="type">mask_t</span> i, <span class="type">mask_t</span> mask)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// return (i+1) &amp; mask;  // __arm__  ||  __x86_64__  ||  __i386__</span></span><br><span class="line">    <span class="keyword">return</span> i ? i<span class="number">-1</span> : mask;   <span class="comment">// __arm64__</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="缓存添加流程"><a href="#缓存添加流程" class="headerlink" title="缓存添加流程"></a>缓存添加流程</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//objc-cache.mm（objc4）</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">cache_fill_nolock</span><span class="params">(Class cls, SEL sel, IMP imp, id receiver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cacheUpdateLock.<span class="built_in">assertLocked</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Never cache before +initialize is done</span></span><br><span class="line">    <span class="keyword">if</span> (!cls-&gt;<span class="built_in">isInitialized</span>()) <span class="keyword">return</span>;   <span class="comment">// 如果类还未初始化，直接返回</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Make sure the entry wasn&#x27;t added to the cache by some other thread </span></span><br><span class="line">    <span class="comment">// before we grabbed the cacheUpdateLock.</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">cache_getImp</span>(cls, sel)) <span class="keyword">return</span>;  <span class="comment">// 可能有其它线程抢先将该方法缓存了，所以要检查一次缓存，如果存在，直接返回</span></span><br><span class="line"></span><br><span class="line">    <span class="type">cache_t</span> *cache = <span class="built_in">getCache</span>(cls);  <span class="comment">// ️取出该 class 的 cache_t</span></span><br><span class="line">    <span class="type">cache_key_t</span> key = <span class="built_in">getKey</span>(sel);   <span class="comment">// ️根据 sel 获得 _key</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Use the cache as-is if it is less than 3/4 full</span></span><br><span class="line">    <span class="type">mask_t</span> newOccupied = cache-&gt;<span class="built_in">occupied</span>() + <span class="number">1</span>;  <span class="comment">// 将 cache_t 的 _occupied 即已经缓存的方法数量 + 1，这里只是为了判断 +1 后缓存容量是否满</span></span><br><span class="line">    <span class="type">mask_t</span> capacity = cache-&gt;<span class="built_in">capacity</span>();  <span class="comment">// 获得缓存容量 = _mask + 1</span></span><br><span class="line">    <span class="keyword">if</span> (cache-&gt;<span class="built_in">isConstantEmptyCache</span>()) &#123;  <span class="comment">// 如果缓存是只读的，重新申请缓存空间</span></span><br><span class="line">        <span class="comment">// Cache is read-only. Replace it.</span></span><br><span class="line">        cache-&gt;<span class="built_in">reallocate</span>(capacity, capacity ?: INIT_CACHE_SIZE);  <span class="comment">// 申请新的缓存空间，并释放旧的</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (newOccupied &lt;= capacity / <span class="number">4</span> * <span class="number">3</span>) &#123;  <span class="comment">// ️如果当前已经缓存的方法数量 +1 &lt;= 缓存容量的 3/4，就继续往下操作</span></span><br><span class="line">        <span class="comment">// Cache is less than 3/4 full. Use it as-is.</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;  <span class="comment">// ️如果以上条件不满足，说明缓存已满，进行缓存扩容</span></span><br><span class="line">        <span class="comment">// Cache is too full. Expand it.</span></span><br><span class="line">        cache-&gt;<span class="built_in">expand</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Scan for the first unused slot and insert there.     // 扫描第一个未使用的插槽（bucket_t）并将其插入</span></span><br><span class="line">    <span class="comment">// There is guaranteed to be an empty slot because the  // 必然会有一个空的插槽（bucket_t）</span></span><br><span class="line">    <span class="comment">// minimum size is 4 and we resized at 3/4 full.        // 因为最小大小是4，我们调整为3/4满</span></span><br><span class="line">    <span class="type">bucket_t</span> *bucket = cache-&gt;<span class="built_in">find</span>(key, receiver);       <span class="comment">// ️调用 find() 函数进行一次缓存查找，必然会得到一个空的 bucket_t</span></span><br><span class="line">    <span class="keyword">if</span> (bucket-&gt;<span class="built_in">key</span>() == <span class="number">0</span>) cache-&gt;<span class="built_in">incrementOccupied</span>();  <span class="comment">// ️如果该 bucket_t 为空，将 _occupied 即已经缓存的方法数量 + 1</span></span><br><span class="line">    bucket-&gt;<span class="built_in">set</span>(key, imp);  <span class="comment">// ️添加缓存</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">cache_fill</span><span class="params">(Class cls, SEL sel, IMP imp, id receiver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> !DEBUG_TASK_THREADS</span></span><br><span class="line">    <span class="function"><span class="type">mutex_locker_t</span> <span class="title">lock</span><span class="params">(cacheUpdateLock)</span></span>;</span><br><span class="line">    <span class="built_in">cache_fill_nolock</span>(cls, sel, imp, receiver);</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    _collecting_in_critical();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="缓存扩容流程"><a href="#缓存扩容流程" class="headerlink" title="缓存扩容流程"></a>缓存扩容流程</h4><p>① 设置新的缓存bucket_t，容量 &#x3D; 旧的两倍；<br>② 设置新的_mask&#x3D;bucket_t长度 - 1；<br>③ 释放旧的缓存（在runtime动态交换方法实现时也会释放缓存）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//objc-cache.mm（objc4）</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">cache_t::expand</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cacheUpdateLock.<span class="built_in">assertLocked</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="type">uint32_t</span> oldCapacity = <span class="built_in">capacity</span>();</span><br><span class="line">    <span class="comment">// ️将缓存扩容为原来的两倍，如果是首次调用，设置缓存容量的初始值为 4</span></span><br><span class="line">    <span class="type">uint32_t</span> newCapacity = oldCapacity ? oldCapacity*<span class="number">2</span> : INIT_CACHE_SIZE;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((<span class="type">uint32_t</span>)(<span class="type">mask_t</span>)newCapacity != newCapacity) &#123;</span><br><span class="line">        <span class="comment">// mask overflow - can&#x27;t grow further</span></span><br><span class="line">        <span class="comment">// fixme this wastes one bit of mask</span></span><br><span class="line">        newCapacity = oldCapacity;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">reallocate</span>(oldCapacity, newCapacity);  <span class="comment">// ️申请新的缓存空间，并释放旧的</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    INIT_CACHE_SIZE_LOG2 = <span class="number">2</span>,</span><br><span class="line">    INIT_CACHE_SIZE      = (<span class="number">1</span> &lt;&lt; INIT_CACHE_SIZE_LOG2)</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">cache_t::reallocate</span><span class="params">(<span class="type">mask_t</span> oldCapacity, <span class="type">mask_t</span> newCapacity)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">bool</span> freeOld = <span class="built_in">canBeFreed</span>();  <span class="comment">// ️判断一下缓存是不是空的，如果为空，就没必要释放空间</span></span><br><span class="line"></span><br><span class="line">    <span class="type">bucket_t</span> *oldBuckets = <span class="built_in">buckets</span>();</span><br><span class="line">    <span class="type">bucket_t</span> *newBuckets = <span class="built_in">allocateBuckets</span>(newCapacity);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache&#x27;s old contents are not propagated. </span></span><br><span class="line">    <span class="comment">// This is thought to save cache memory at the cost of extra cache fills.</span></span><br><span class="line">    <span class="comment">// fixme re-measure this</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">assert</span>(newCapacity &gt; <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">assert</span>((<span class="type">uintptr_t</span>)(<span class="type">mask_t</span>)(newCapacity<span class="number">-1</span>) == newCapacity<span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setBucketsAndMask</span>(newBuckets, newCapacity - <span class="number">1</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (freeOld) &#123;</span><br><span class="line">        <span class="built_in">cache_collect_free</span>(oldBuckets, oldCapacity);</span><br><span class="line">        <span class="built_in">cache_collect</span>(<span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">cache_t::canBeFreed</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> !<span class="built_in">isConstantEmptyCache</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">cache_t::isConstantEmptyCache</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> </span><br><span class="line">        <span class="built_in">occupied</span>() == <span class="number">0</span>  &amp;&amp;  </span><br><span class="line">        <span class="built_in">buckets</span>() == <span class="built_in">emptyBucketsForCapacity</span>(<span class="built_in">capacity</span>(), <span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="isa指针"><a href="#isa指针" class="headerlink" title="isa指针"></a>isa指针</h2><ol>
+<li><code>isa</code>指针用来维护对象和类之间的关系，并确保对象和类能够通过isa指针找到对应的方法、实例变量、属性、协议等；</li>
+<li>在 arm64 架构之前，isa就是一个普通的指针，直接指向<code>objc_class</code>，存储着<code>Class</code>、<code>Meta-Class</code>对象的内存地址。instance对象的isa指向class对象，class对象的isa指向meta-class对象；</li>
+<li>从 arm64 架构开始，对isa进行了优化，变成了一个共用体（union）结构，还使用位域来存储更多的信息。将 64 位的内存数据分开来存储着很多的东西，其中的 33 位才是拿来存储<code>class</code>、<code>meta-class</code>对象的内存地址信息。要通过位运算将<code>isa</code>的值<code>&amp; ISA_MASK</code>掩码，才能得到<code>class</code>、<code>meta-class</code>对象的内存地址。</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">objc_object</span> &#123;</span><br><span class="line">    Class isa;  <span class="comment">// 在 arm64 架构之前</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">objc_object</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">isa_t</span> isa;  <span class="comment">// 在 arm64 架构开始</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">union</span> <span class="title class_">isa_t</span> </span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">isa_t</span>() &#123; &#125;</span><br><span class="line">    <span class="built_in">isa_t</span>(<span class="type">uintptr_t</span> value) : <span class="built_in">bits</span>(value) &#123; &#125;</span><br><span class="line"></span><br><span class="line">    Class cls;</span><br><span class="line">    <span class="type">uintptr_t</span> bits;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> SUPPORT_PACKED_ISA</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// extra_rc must be the MSB-most field (so it matches carry/overflow flags)</span></span><br><span class="line">    <span class="comment">// nonpointer must be the LSB (fixme or get rid of it)</span></span><br><span class="line">    <span class="comment">// shiftcls must occupy the same bits that a real class pointer would</span></span><br><span class="line">    <span class="comment">// bits + RC_ONE is equivalent to extra_rc + 1</span></span><br><span class="line">    <span class="comment">// RC_HALF is the high bit of extra_rc (i.e. half of its range)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// future expansion:</span></span><br><span class="line">    <span class="comment">// uintptr_t fast_rr : 1;     // no r/r overrides</span></span><br><span class="line">    <span class="comment">// uintptr_t lock : 2;        // lock for atomic property, @synch</span></span><br><span class="line">    <span class="comment">// uintptr_t extraBytes : 1;  // allocated with extra bytes</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># <span class="keyword">if</span> __arm64__</span></span><br><span class="line"><span class="meta">#   <span class="keyword">define</span> ISA_MASK        0x0000000ffffffff8ULL  <span class="comment">// 用来取出 Class、Meta-Class 对象的内存地址</span></span></span><br><span class="line"><span class="meta">#   <span class="keyword">define</span> ISA_MAGIC_MASK  0x000003f000000001ULL</span></span><br><span class="line"><span class="meta">#   <span class="keyword">define</span> ISA_MAGIC_VALUE 0x000001a000000001ULL</span></span><br><span class="line">    <span class="keyword">struct</span> &#123;</span><br><span class="line">        <span class="type">uintptr_t</span> nonpointer        : <span class="number">1</span>;  <span class="comment">// 0：代表普通的指针，存储着 Class、Meta-Class 对象的内存地址</span></span><br><span class="line">                                          <span class="comment">// 1：代表优化过，使用位域存储更多的信息</span></span><br><span class="line">        <span class="type">uintptr_t</span> has_assoc         : <span class="number">1</span>;  <span class="comment">// 是否有设置过关联对象，如果没有，释放时会更快</span></span><br><span class="line">        <span class="type">uintptr_t</span> has_cxx_dtor      : <span class="number">1</span>;  <span class="comment">// 是否有C++的析构函数（.cxx_destruct），如果没有，释放时会更快</span></span><br><span class="line">        <span class="type">uintptr_t</span> shiftcls          : <span class="number">33</span>; <span class="comment">// 存储着 Class、Meta-Class 对象的内存地址信息</span></span><br><span class="line">        <span class="type">uintptr_t</span> magic             : <span class="number">6</span>;  <span class="comment">// 用于在调试时分辨对象是否未完成初始化</span></span><br><span class="line">        <span class="type">uintptr_t</span> weakly_referenced : <span class="number">1</span>;  <span class="comment">// 是否有被弱引用指向过，如果没有，释放时会更快</span></span><br><span class="line">        <span class="type">uintptr_t</span> deallocating      : <span class="number">1</span>;  <span class="comment">// 对象是否正在释放</span></span><br><span class="line">        <span class="type">uintptr_t</span> has_sidetable_rc  : <span class="number">1</span>;  <span class="comment">// 如果为1，代表引用计数过大无法存储在 isa 中，那么超出的引用计数会存储在一个叫 SideTable 结构体的 RefCountMap（引用计数表）哈希表中</span></span><br><span class="line">        <span class="type">uintptr_t</span> extra_rc          : <span class="number">19</span>; <span class="comment">// 里面存储的值是引用计数 retainCount - 1</span></span><br><span class="line"><span class="meta">#       <span class="keyword">define</span> RC_ONE   (1ULL&lt;&lt;45)</span></span><br><span class="line"><span class="meta">#       <span class="keyword">define</span> RC_HALF  (1ULL&lt;&lt;18)</span></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="isa-与-superclass-指针指向"><a href="#isa-与-superclass-指针指向" class="headerlink" title="isa 与 superclass 指针指向"></a>isa 与 superclass 指针指向</h3><img src="/2022/01/25/Runtime%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/isaSuperclass.png" class="&#x3D;">
+
+<h2 id="method-t"><a href="#method-t" class="headerlink" title="method_t"></a>method_t</h2><ol>
+<li>Method就是method_t类型的指针；</li>
+<li>method_t是对方法&#x2F;函数的封装（函数四要素：函数名、返回值、参数、函数体）。</li>
+</ol>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> method_t *Method;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> method_t &#123;</span><br><span class="line">    SEL name;  <span class="comment">// 方法名</span></span><br><span class="line">    <span class="keyword">const</span> <span class="type">char</span> *types;  <span class="comment">// 编码（返回值类型、参数类型）</span></span><br><span class="line">    IMP imp;   <span class="comment">// 方法的地址/实现</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SEL"><a href="#SEL" class="headerlink" title="SEL"></a>SEL</h3><ul>
+<li>SEL 又称“选择器”，它是一个指向方法的selector的指针，代表方法&#x2F;函数名；</li>
+<li>SEL 维护在一个全局的 Map 中，所以它是全局唯一的，不同类中相同名字的方法的 SEL 是相同的。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> objc_selector *SEL;</span><br></pre></td></tr></table></figure>
+
+<p>SEL 可以通过以下方式获得</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SEL sel1 = <span class="keyword">@selector</span>(selector);</span><br><span class="line">SEL sel2 = sel_registerName(<span class="string">&quot;selector&quot;</span>);</span><br><span class="line">SEL sel3 = <span class="built_in">NSSelectorFromString</span>(<span class="string">@&quot;selector&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>SEL 可以通过以下方式转换成字符串</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *string1 = sel_getName(sel1);</span><br><span class="line"><span class="built_in">NSString</span> *string2 = <span class="built_in">NSStringFromSelector</span>(sel1);</span><br></pre></td></tr></table></figure>
+
+<h3 id="IMP"><a href="#IMP" class="headerlink" title="IMP"></a>IMP</h3><ul>
+<li>IMP 是指向方法实现的函数指针；</li>
+<li>我们调用方法，实际上就是根据方法 SEL 查找 IMP；</li>
+<li><code>method_t</code>实际上相当于在 SEL 和 IMP 之间做了一个映射。</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">if</span> !OBJC_OLD_DISPATCH_PROTOTYPES</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">void</span> (*IMP)(<span class="type">void</span> <span class="comment">/* id, SEL, ... */</span> ); </span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">id</span> _Nullable (*IMP)(<span class="type">id</span> _Nonnull, SEL _Nonnull, ...); </span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Type-Encodings"><a href="#Type-Encodings" class="headerlink" title="Type Encodings"></a>Type Encodings</h3><ul>
+<li>Type Encodings 编码技术就是配合runtime的技术，把一个方法的返回值类型、参数类型通过字符串的形式描述；</li>
+<li><code>@encode()</code>指令可以将类型转换为 Type Encodings 字符串编码， 如<code>@encode(int)=i</code>；</li>
+<li>OC方法都有两个隐式参数，方法调用者(id)self和方法名(SEL) _cmd，所以我们才能在方法中使用self和_cmd；</li>
+<li>如 -(void)test，它的编码为“v16@0:8”，可以简写为“v@:”<br>v：代表返回值类型为 void<br>@：代表参数 1 类型为 id<br>:：代表参数 2 类型为 SEL<br>16：代表所有参数所占的总字节数<br>0：代表参数 1 从第几个字节开始存储<br>8：代表参数 2 从第几个字节开始存储</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904072215003143">深入浅出 Runtime（二）：数据结构</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/25/%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6/" rel="prev" title="消息机制">
+      <i class="fa fa-chevron-left"></i> 消息机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/01/27/super%E7%9A%84%E6%9C%AC%E8%B4%A8/" rel="next" title="super的本质">
+      super的本质 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#objc-object"><span class="nav-number">1.</span> <span class="nav-text">objc_object</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#objc-class"><span class="nav-number">2.</span> <span class="nav-text">objc_class</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#class-data-bits-t"><span class="nav-number">2.1.</span> <span class="nav-text">class_data_bits_t</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cache-t"><span class="nav-number">2.2.</span> <span class="nav-text">cache_t</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%9F%A5%E6%89%BE%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.1.</span> <span class="nav-text">缓存查找流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%B7%BB%E5%8A%A0%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.2.</span> <span class="nav-text">缓存添加流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E6%89%A9%E5%AE%B9%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.3.</span> <span class="nav-text">缓存扩容流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#isa%E6%8C%87%E9%92%88"><span class="nav-number">3.</span> <span class="nav-text">isa指针</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#isa-%E4%B8%8E-superclass-%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91"><span class="nav-number">3.1.</span> <span class="nav-text">isa 与 superclass 指针指向</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#method-t"><span class="nav-number">4.</span> <span class="nav-text">method_t</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SEL"><span class="nav-number">4.1.</span> <span class="nav-text">SEL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IMP"><span class="nav-number">4.2.</span> <span class="nav-text">IMP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Type-Encodings"><span class="nav-number">4.3.</span> <span class="nav-text">Type Encodings</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

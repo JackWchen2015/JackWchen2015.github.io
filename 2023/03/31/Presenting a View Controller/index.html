@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="添加一个视图弹窗到当前窗口，是选择view还是Controller实现？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】Presenting a View Controller">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/03/31/Presenting%20a%20View%20Controller/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="添加一个视图弹窗到当前窗口，是选择view还是Controller实现？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2023/03/31/Presenting%20a%20View%20Controller/VCPG_PresentationStyles%20_fig_8-1_2x.png">
+<meta property="og:image" content="https://github.com/2023/03/31/Presenting%20a%20View%20Controller/VCPG_popover-style_2x.png">
+<meta property="og:image" content="https://github.com/2023/03/31/Presenting%20a%20View%20Controller/VCPG_CurrentContextStyles_2x.png">
+<meta property="article:published_time" content="2023-03-31T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T11:33:50.697Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2023/03/31/Presenting%20a%20View%20Controller/VCPG_PresentationStyles%20_fig_8-1_2x.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/03/31/Presenting%20a%20View%20Controller/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】Presenting a View Controller | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/03/31/Presenting%20a%20View%20Controller/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】Presenting a View Controller
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-31 08:00:00" itemprop="dateCreated datePublished" datetime="2023-03-31T08:00:00+08:00">2023-03-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 19:33:50" itemprop="dateModified" datetime="2023-05-13T19:33:50+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">翻译</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>添加一个视图弹窗到当前窗口，是选择view还是Controller实现？</p>
+<span id="more"></span>
+
+<p>有两种方法在屏幕上显示一个视图控制器:将它嵌入到容器视图控制器中或present它。容器视图控制器提供了应用程序的主要导航，但present视图控制器也是一个重要的导航工具。你使用直接表示来在当前视图控制器的顶部显示一个新的视图控制器。通常，当你想要实现模态交互时，你会present视图控制器，但你也可以将它们用于其他目的。</p>
+<p>对presenting视图控制器的支持被内置到<code>UIViewController</code>类中，并且对所有视图控制器对象可用。你可以从任何其他视图控制器present任何视图控制器，尽管UIKit可能会将请求重新路由(reroute)到不同的视图控制器。Presenting一个视图控制器会在原始视图控制器(称为presenting视图控制器)和要显示的新视图控制器(称为presented视图控制器)之间创建一个关系。这个关系构成了视图控制器层次结构(hierarchy)的一部分，并一直存在，直到presented视图控制器被解散(dismissed)。</p>
+<h2 id="The-Presentation-and-Transition-Process"><a href="#The-Presentation-and-Transition-Process" class="headerlink" title="The Presentation and Transition Process"></a>The Presentation and Transition Process</h2><p>Presenting一个视图控制器是将新内容动画到屏幕上的一种快速而简单的方法。UIKit内建的表示机制(machinery)允许你使用内置或自定义动画来显示一个新的视图控制器。内置的presentations和动画只需要很少的代码，因为UIKit处理了所有的工作。您还可以创建自定义的presentations和动画，只需一点点额外的努力，并将它们与任何视图控制器一起使用。 </p>
+<p>你可以通过编程或使用segue来初始化视图控制器的presentation。如果你在设计时就知道应用的导航，segue是最简单的方式来启动presentations。对于更动态的交互，或者在没有专门的控件来启动segue的情况下，使用UIViewController的方法来present你的视图控制器。</p>
+<h2 id="Presentation-Styles"><a href="#Presentation-Styles" class="headerlink" title="Presentation Styles"></a>Presentation Styles</h2><p>视图控制器的presentation style决定了它在屏幕上的外观。UIKit定义了许多标准的表示样式，每种样式都有特定的外观和意图。您还可以定义自己的自定义表示样式。在设计你的应用程序时，选择对你想要做的事情最有意义的表现风格，并为你想要表现的视图控制器的modalPresentationStyle属性分配适当的常数。</p>
+<h3 id="Full-Screen-Presentation-Styles"><a href="#Full-Screen-Presentation-Styles" class="headerlink" title="Full-Screen Presentation Styles"></a>Full-Screen Presentation Styles</h3><p>全屏显示样式覆盖了整个屏幕，阻止了与底层内容的交互。在水平规则环境中(horizontally regular environment)，只有一种全屏样式完全覆盖底层内容。其余的包含调光视图(dimming views)或透明度(transparency)，以允许底层视图控制器的部分通过显示。在水平紧凑的环境中(horizontally compact environment)，全屏演示自动适应UIModalPresentationFullScreen样式并覆盖所有底层内容。 </p>
+<p>图8-1演示了在水平规则环境中使用UIModalPresentationFullScreen、UIModalPresentationPageSheet和UIModalPresentationFormSheet样式的演示的外观。在图中，左上角的绿色视图控制器呈现右上方的蓝色视图控制器，每种呈现风格的结果如下所示。对于某些表示样式，UIKit会在两个视图控制器的内容之间插入一个调光视图( dimming view)。 </p>
+<p>Figure 8-1 The full screen presentation styles</p>
+<img src="/2023/03/31/Presenting%20a%20View%20Controller/VCPG_PresentationStyles%20_fig_8-1_2x.png" class="&#x3D;">
+
+<blockquote>
+<p>当使用UIModalPresentationFullScreen样式呈现一个视图控制器时，UIKit通常在转换动画完成后删除底层视图控制器的视图。你可以通过指定UIModalPresentationOverFullScreen样式来阻止这些视图的移除。当呈现的视图控制器有透明区域，可以显示底层内容时，可以使用这种样式。</p>
+</blockquote>
+<p>当使用一种全屏显示样式时，发起显示的视图控制器必须自己覆盖整个屏幕。如果presenting视图控制器没有覆盖屏幕，UIKit会沿着视图控制器层次结构向上走，直到找到一个覆盖屏幕的。如果UIKit找不到一个填充屏幕的中间视图控制器，它就会使用窗口的根视图控制器。</p>
+<h3 id="The-Popover-Style"><a href="#The-Popover-Style" class="headerlink" title="The Popover Style"></a>The Popover Style</h3><p>UIModalPresentationPopover样式在弹窗视图(popover view.)中显示视图控制器。Popovers对于显示与焦点或选定对象相关的附加信息或项列表非常有用。在水平规则环境中，弹窗视图只覆盖屏幕的一部分，如图8-2所示。在水平紧凑的环境中，弹窗默认情况下适应UIModalPresentationOverFullScreen表示样式。在弹出窗口视图外点击会自动解除弹出窗口。</p>
+<p>Figure 8-2 The popover presentation style</p>
+<img src="/2023/03/31/Presenting%20a%20View%20Controller/VCPG_popover-style_2x.png" class="&#x3D;">
+
+<p>因为弹窗适应于水平紧凑环境中的全屏显示，所以通常需要修改弹窗代码来处理这种适应。在全屏模式下，你需要一种方法来dismiss弹出窗口。您可以通过添加一个按钮，将弹出窗口嵌入到dismissible的容器视图控制器中，或更改自适应行为本身来实现这一点。 </p>
+<p>有关如何配置弹出窗口表示的技巧，请参见在弹出窗口中呈现视图控制器。</p>
+<h3 id="The-Current-Context-Styles"><a href="#The-Current-Context-Styles" class="headerlink" title="The Current Context Styles"></a>The Current Context Styles</h3><p><code>UIModalPresentationCurrentContext</code>样式覆盖了你的界面中一个特定的视图控制器。当使用上下文样式时，你通过设置它的<code>definesPresentationContext</code>属性为YES来指定你想覆盖哪个视图控制器。图8-3展示了一个当前的上下文表示，它只覆盖了分屏视图控制器的一个子视图控制器。</p>
+<p>Figure 8-3 The current context presentation style</p>
+<img src="/2023/03/31/Presenting%20a%20View%20Controller/VCPG_CurrentContextStyles_2x.png" class="&#x3D;">
+
+<blockquote>
+<p>当使用UIModalPresentationFullScreen样式呈现一个视图控制器时，UIKit通常在转换动画完成后删除底层视图控制器的视图。你可以通过指定UIModalPresentationOverCurrentContext样式来阻止这些视图的删除。当呈现的视图控制器有透明区域，可以显示底层内容时，可以使用这种样式。</p>
+</blockquote>
+<p>定义presentation上下文的视图控制器还可以定义在表示期间使用的转换动画。通常，UIKit使用所呈现的视图控制器的<code>modalTransitionStyle</code>属性中的值在屏幕上动画视图控制器。如果表示上下文视图控制器将它的<code>providesPresentationContextTransitionStyle</code>设置为YES, UIKit使用该视图控制器的modalTransitionStyle属性中的值。 </p>
+<p>当转换到水平紧凑环境时，当前上下文样式适应<code>UIModalPresentationFullScreen</code>样式。要改变这种行为，请使用自适应表示委托来指定不同的表示样式或视图控制器。</p>
+<h3 id="Custom-Presentation-Styles"><a href="#Custom-Presentation-Styles" class="headerlink" title="Custom Presentation Styles"></a>Custom Presentation Styles</h3><p><code>UIModalPresentationCustom</code>样式让你使用你定义的自定义样式来呈现一个视图控制器。创建自定义样式包括子类化<code>UIPresentationController</code>，并使用它的方法将任何自定义视图动画到屏幕上，并设置presented view controller的大小和位置。presentation控制器还处理任何由于presented视图控制器的特征（traits）的变化而发生的适应性。 </p>
+<p>有关如何定义自定义表示控制器的信息，请参见创建自定义表示。</p>
+<h2 id="Presenting-Versus-Showing-a-View-Controller"><a href="#Presenting-Versus-Showing-a-View-Controller" class="headerlink" title="Presenting Versus Showing a View Controller"></a>Presenting Versus Showing a View Controller</h2><p>UIViewController类提供了两种方式来显示一个视图控制器: </p>
+<ol>
+<li><p><code>showViewController:sender:</code>和<code>showDetailViewController:sender:</code>方法提供了最适应性和最灵活的方式来显示视图控制器。这些方法让presenting视图控制器决定如何最好地处理presentation。例如，容器视图控制器可能将视图控制器合并(incorporate)为子视图控制器，而不是modal地呈现它。默认行为以模态方式呈现视图控制器。 </p>
+</li>
+<li><p><code>presentViewController:animated:completion:</code>方法总是以模态方式显示视图控制器。调用此方法的视图控制器可能最终(ultimately)不会处理presentation，但presentation始终是模态的。此方法适用于水平紧凑环境的presentation样式。</p>
+</li>
+</ol>
+<p>方法<code>showViewController:sender:</code>和<code>showDetailViewController:sender:</code>是发起展示(initiate presentations)的首选方式。视图控制器可以调用它们，而不需要知道视图控制器层次结构的其他部分或者当前视图控制器在那个层次结构中的位置。这些方法也使得在应用程序的不同部分重用视图控制器变得更容易，而无需编写条件代码路径。</p>
+<h3 id="Showing-View-Controllers"><a href="#Showing-View-Controllers" class="headerlink" title="Showing View Controllers"></a>Showing View Controllers</h3><p>当使用showViewController:sender:和showDetailViewController:sender:方法时，在屏幕上获取一个新的视图控制器的过程很简单: </p>
+<ol>
+<li><p>创建你想要呈现的视图控制器对象。当创建视图控制器时，你有责任用它执行任务所需的任何数据来初始化它。 </p>
+</li>
+<li><p>将新视图控制器的modalPresentationStyle属性设置为首选的表示样式。这种风格可能不会在最终的演示中使用。 </p>
+</li>
+<li><p>将视图控制器的modalTransitionStyle属性设置为所需的过渡动画样式。这种风格可能不会在最终的动画中使用。 </p>
+</li>
+<li><p>调用当前视图控制器的showViewController:sender:和showDetailViewController:sender:方法。</p>
+</li>
+</ol>
+<p>UIKit将对showViewController:sender:和showDetailViewController:sender:方法的调用转发给相应的呈现视图控制器。然后视图控制器可以决定如何最好地执行表示，并可以根据需要更改表示和转换样式。例如，一个导航控制器可能会把视图控制器推到它的导航堆栈上。 </p>
+<p>有关显示视图控制器和模态显示视图控制器之间的区别的信息，请参见显示与显示视图控制器。</p>
+<h3 id="Presenting-View-Controllers-Modally"><a href="#Presenting-View-Controllers-Modally" class="headerlink" title="Presenting View Controllers Modally"></a>Presenting View Controllers Modally</h3><p>当直接呈现一个视图控制器时，你告诉UIKit你希望新的视图控制器如何显示，以及它应该如何在屏幕上动画。 </p>
+<ol>
+<li><p>创建你想要呈现的视图控制器对象。<br> 当创建视图控制器时，你有责任用它执行任务所需的任何数据来初始化它。 </p>
+</li>
+<li><p>将新视图控制器的modalPresentationStyle属性设置为所需的表示样式。 </p>
+</li>
+<li><p>将视图控制器的modalTransitionStyle属性设置为所需的动画样式。 </p>
+</li>
+<li><p>调用当前视图控制器的presentViewController:animated:completion:方法。</p>
+</li>
+</ol>
+<p>调用<code>presentViewController:animated:completion:</code>方法的视图控制器可能不是真正执行模式显示的那个。呈现风格决定了视图控制器如何被呈现，包括呈现视图控制器所需的特征。例如，<strong>全屏显示必须由全屏视图控制器发起</strong>。如果当前呈现的视图控制器不合适，UIKit会遍历视图控制器层次结构，直到找到一个合适的。模态呈现完成后，UIKit会更新受影响的视图控制器的presentingViewController和presenttedviewcontroller属性。 </p>
+<p>清单8-1演示了如何以编程方式表示视图控制器。当用户添加一个新食谱时，应用程序会通过一个导航控制器提示用户关于食谱的基本信息。选择一个导航控制器，这样就有一个标准的位置来放置“取消和完成”按钮。使用导航控制器还可以使将来更容易扩展新的食谱界面。你所要做的就是把新的视图控制器推到导航堆栈上。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Listing 8-1 Presenting a view controller programmatically  </span></span><br><span class="line">- (<span class="type">void</span>)add:(<span class="type">id</span>)sender &#123;</span><br><span class="line">   <span class="comment">// Create the root view controller for the navigation controller</span></span><br><span class="line">   <span class="comment">// The new view controller configures a Cancel and Done button for the</span></span><br><span class="line">   <span class="comment">// navigation bar.</span></span><br><span class="line">   RecipeAddViewController *addController = [[RecipeAddViewController alloc] init];</span><br><span class="line"> </span><br><span class="line">   addController.modalPresentationStyle = <span class="built_in">UIModalPresentationFullScreen</span>;</span><br><span class="line">   addController.transitionStyle = <span class="built_in">UIModalTransitionStyleCoverVertical</span>;</span><br><span class="line">   [<span class="keyword">self</span> presentViewController:addController animated:<span class="literal">YES</span> completion: <span class="literal">nil</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Presenting-a-View-Controller-in-a-Popover"><a href="#Presenting-a-View-Controller-in-a-Popover" class="headerlink" title="Presenting a View Controller in a Popover"></a>Presenting a View Controller in a Popover</h3><p>弹出窗口需要额外的配置才能显示它们。在将模态表示样式设置为UIModalPresentationPopover之后，配置以下与弹出窗口相关的属性: </p>
+<ul>
+<li><p>设置你的视图控制器的preferredContentSize属性为所需的大小。 </p>
+</li>
+<li><p>使用相关的UIPopoverPresentationController对象设置弹出窗口锚点，该对象可以从视图控制器的popoverPresentationController属性中访问。只需要设置以下其中一个: </p>
+<ul>
+<li><p>将barButtonItem属性设置为一个栏按钮项。 </p>
+</li>
+<li><p>将sourceView和sourceRect属性设置为一个视图中的特定区域。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>你可以使用<code>UIPopoverPresentationController</code>对象根据需要对弹出窗口的外观进行其他调整。弹窗表示控制器还支持一个委托对象，您可以使用该对象在表示过程中响应更改。例如，当弹出窗口在屏幕上出现、消失或重新定位时，可以使用委托进行响应。有关该对象的更多信息，请参见<a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/uikit/uipopoverpresentationcontroller?language=objc">UIPopoverPresentationController</a>类参考。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/featuredarticles/ViewControllerPGforiPhoneOS/PresentingaViewController.html#//apple_ref/doc/uid/TP40007457-CH14-SW13">View Controller Programming Guide for iOS</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/03/27/Swift%20%E9%97%AD%E5%8C%85/" rel="prev" title="Swift 闭包">
+      <i class="fa fa-chevron-left"></i> Swift 闭包
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/04/%5B%E8%AF%91%5DCreating%20Custom%20Presentations/" rel="next" title="【译】Creating Custom Presentations">
+      【译】Creating Custom Presentations <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Presentation-and-Transition-Process"><span class="nav-number">1.</span> <span class="nav-text">The Presentation and Transition Process</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Presentation-Styles"><span class="nav-number">2.</span> <span class="nav-text">Presentation Styles</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Full-Screen-Presentation-Styles"><span class="nav-number">2.1.</span> <span class="nav-text">Full-Screen Presentation Styles</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Popover-Style"><span class="nav-number">2.2.</span> <span class="nav-text">The Popover Style</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Current-Context-Styles"><span class="nav-number">2.3.</span> <span class="nav-text">The Current Context Styles</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Custom-Presentation-Styles"><span class="nav-number">2.4.</span> <span class="nav-text">Custom Presentation Styles</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Presenting-Versus-Showing-a-View-Controller"><span class="nav-number">3.</span> <span class="nav-text">Presenting Versus Showing a View Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Showing-View-Controllers"><span class="nav-number">3.1.</span> <span class="nav-text">Showing View Controllers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Presenting-View-Controllers-Modally"><span class="nav-number">3.2.</span> <span class="nav-text">Presenting View Controllers Modally</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Presenting-a-View-Controller-in-a-Popover"><span class="nav-number">3.3.</span> <span class="nav-text">Presenting a View Controller in a Popover</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

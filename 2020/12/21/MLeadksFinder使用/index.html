@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="MLeaksFinder作用 MLeaksFinder helps you find memory leaks in your iOS apps at develop time  优点  VS InstrumentMLeaksFinder 具备以下优点：  使用简单，不侵入业务逻辑代码，不用打开 Instrument 不需要额外的操作，你只需开发你的业务逻辑，在你运行调试时就能帮你检测 内存泄露发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MLeadksFinder使用">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="MLeaksFinder作用 MLeaksFinder helps you find memory leaks in your iOS apps at develop time  优点  VS InstrumentMLeaksFinder 具备以下优点：  使用简单，不侵入业务逻辑代码，不用打开 Instrument 不需要额外的操作，你只需开发你的业务逻辑，在你运行调试时就能帮你检测 内存泄露发">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-21T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T12:06:09.716Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MLeadksFinder使用 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MLeadksFinder使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-21 08:00:00" itemprop="dateCreated datePublished" datetime="2020-12-21T08:00:00+08:00">2020-12-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:06:09" itemprop="dateModified" datetime="2023-05-13T20:06:09+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="MLeaksFinder"><a href="#MLeaksFinder" class="headerlink" title="MLeaksFinder"></a><a href="https://github.com/Tencent/MLeaksFinder">MLeaksFinder</a></h3><h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><blockquote>
+<p>MLeaksFinder helps you find memory leaks in your iOS apps at develop time</p>
+</blockquote>
+<h4 id="优点-VS-Instrument"><a href="#优点-VS-Instrument" class="headerlink" title="优点  VS Instrument"></a>优点  VS Instrument</h4><p>MLeaksFinder 具备以下优点：</p>
+<ol>
+<li>使用简单，不侵入业务逻辑代码，不用打开 Instrument</li>
+<li>不需要额外的操作，你只需开发你的业务逻辑，在你运行调试时就能帮你检测</li>
+<li>内存泄露发现及时，更改完代码后一运行即能发现（这点很重要，你马上就能意识到哪里写错了）</li>
+<li>精准，能准确地告诉你哪个对象没被释放</li>
+</ol>
+<span id="more"></span>
+
+<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Memory Leak</span><br><span class="line">(</span><br><span class="line">    MyTableViewController,</span><br><span class="line">    UITableView,</span><br><span class="line">    UITableViewWrapperView,</span><br><span class="line">    MyTableViewCell</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>MLeaksFinder can automatically find leaks in UIView and UIViewController objects. 通过断言的方式弹窗展示未被释放的UIView或UIViewController对象</p>
+<h4 id="关闭"><a href="#关闭" class="headerlink" title="关闭"></a>关闭</h4><p>一些不应该被释放的对象比如全局对象，static，单例，又不想被弹窗误报override</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)willDealloc &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h4><h5 id="Podspec文件"><a href="#Podspec文件" class="headerlink" title="Podspec文件"></a>Podspec文件</h5><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Pod::Spec</span>.new <span class="keyword">do</span> |<span class="params">s</span>|</span><br><span class="line">  s.name             = <span class="string">&quot;MLeaksFinder&quot;</span></span><br><span class="line">  s.version          = <span class="string">&quot;1.0.0&quot;</span></span><br><span class="line">  s.summary          = <span class="string">&quot;Find memory leaks in your iOS app at develop time.&quot;</span></span><br><span class="line">  s.homepage         = <span class="string">&quot;https://github.com/Zepo/MLeaksFinder&quot;</span></span><br><span class="line">  <span class="comment"># s.screenshots     = &quot;www.example.com/screenshots_1&quot;, &quot;www.example.com/screenshots_2&quot;</span></span><br><span class="line">  s.license          = <span class="string">&#x27;MIT&#x27;</span></span><br><span class="line">  s.author           = &#123; <span class="string">&quot;Zeposhe&quot;</span> =&gt; <span class="string">&quot;zeposhe@163.com&quot;</span> &#125;</span><br><span class="line">  s.source           = &#123; <span class="symbol">:git</span> =&gt; <span class="string">&quot;https://github.com/Zepo/MLeaksFinder.git&quot;</span>, <span class="symbol">:tag</span> =&gt; s.version &#125;</span><br><span class="line">  <span class="comment"># s.social_media_url = &#x27;https://twitter.com/&lt;TWITTER_USERNAME&gt;&#x27;</span></span><br><span class="line">  s.ios.deployment_target = <span class="string">&#x27;6.0&#x27;</span></span><br><span class="line">  s.source_files = <span class="string">&#x27;MLeaksFinder/**/*&#x27;</span></span><br><span class="line">  <span class="comment"># s.resource_bundles = &#123;</span></span><br><span class="line">  <span class="comment">#   &#x27;MLeaksFinder&#x27; =&gt; [&#x27;MLeaksFinder/Assets/*.png&#x27;]</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line">  s.public_header_files = <span class="string">&#x27;MLeaksFinder/MLeaksFinder.h&#x27;</span>, <span class="string">&#x27;MLeaksFinder/NSObject+MemoryLeak.h&#x27;</span></span><br><span class="line">  <span class="comment"># s.frameworks = &#x27;UIKit&#x27;, &#x27;MapKit&#x27;</span></span><br><span class="line">  <span class="comment"># s.dependency &#x27;FBRetainCycleDetector&#x27;</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">重要: FBRetainCycleDetector is removed from the podspec due to Facebook&#x27;s BSD-plus-Patents license. If you </span><br><span class="line">want to use FBRetainCycleDetector to find retain cycle, add pod &#x27;FBRetainCycleDetector&#x27; to your project&#x27;s </span><br><span class="line">Podfile and turn the macro MEMORY_LEAKS_FINDER_RETAIN_CYCLE_ENABLED on in MLeaksFinder.h.</span><br></pre></td></tr></table></figure>
+
+<h5 id="willDealloc方法"><a href="#willDealloc方法" class="headerlink" title="willDealloc方法"></a>willDealloc方法</h5><p>为基类 NSObject 添加一个方法 -willDealloc 方法，该方法的作用是，先用一个弱指针指向 self，并在一小段时间(3秒)后，通过这个弱指针调用 -assertNotDealloc，而 -assertNotDealloc 主要作用是直接中断言。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)willDealloc &#123;</span><br><span class="line">    __<span class="keyword">weak</span> <span class="type">id</span> weakSelf = <span class="keyword">self</span>;</span><br><span class="line">    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(<span class="number">3</span> * <span class="built_in">NSEC_PER_SEC</span>)), dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        [weakSelf assertNotDealloc];</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line">- (<span class="type">void</span>)assertNotDealloc &#123;</span><br><span class="line">     <span class="built_in">NSAssert</span>(<span class="literal">NO</span>, @“”);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>果3秒后它被释放成功，weakSelf 就指向 nil，不会调用到 -assertNotDealloc 方法，也就不会中断言，如果它没被释放（泄露了），-assertNotDealloc 就会被调用中断言</p>
+<h3 id="FBRetainCycleDetector"><a href="#FBRetainCycleDetector" class="headerlink" title="FBRetainCycleDetector"></a><a href="https://github.com/facebook/FBRetainCycleDetector">FBRetainCycleDetector</a></h3><blockquote>
+<p>An iOS library that finds retain cycles using runtime analysis<br>用于检测引起内存泄漏对象的环形引用链</p>
+</blockquote>
+<h4 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FBRetainCycleDetector *detector = [FBRetainCycleDetector new];</span><br><span class="line">[detector addCandidate:myObject];</span><br><span class="line"><span class="built_in">NSSet</span> *retainCycles = [detector findRetainCycles];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, retainCycles);</span><br></pre></td></tr></table></figure>
+
+<h4 id="如何检测饮用成环"><a href="#如何检测饮用成环" class="headerlink" title="如何检测饮用成环"></a>如何检测饮用成环</h4><p>点击 “Retain Cycle” 按钮，MLeaksFinder 将调用 FBRetainCycleDetector 进行详细问题检测</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">if</span> _INTERNAL_MLF_RC_ENABLED</span></span><br><span class="line">    <span class="built_in">dispatch_async</span>(dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>), ^&#123;</span><br><span class="line">        FBRetainCycleDetector *detector = [FBRetainCycleDetector new];</span><br><span class="line">        [detector addCandidate:<span class="keyword">self</span>.object];</span><br><span class="line">        <span class="built_in">NSSet</span> *retainCycles = [detector findRetainCyclesWithMaxCycleLength:<span class="number">20</span>];</span><br><span class="line">        </span><br><span class="line">        <span class="type">BOOL</span> hasFound = <span class="literal">NO</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">NSArray</span> *retainCycle <span class="keyword">in</span> retainCycles) &#123;</span><br><span class="line">            <span class="built_in">NSInteger</span> index = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (FBObjectiveCGraphElement *element <span class="keyword">in</span> retainCycle) &#123;</span><br><span class="line">                <span class="keyword">if</span> (element.object == object) &#123;</span><br><span class="line">                    <span class="built_in">NSArray</span> *shiftedRetainCycle = [<span class="keyword">self</span> shiftArray:retainCycle toIndex:index];</span><br><span class="line">                    </span><br><span class="line">                    <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^&#123;</span><br><span class="line">                        [MLeaksMessenger alertWithTitle:<span class="string">@&quot;Retain Cycle&quot;</span></span><br><span class="line">                                                message:[<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;%@&quot;</span>, shiftedRetainCycle]];</span><br><span class="line">                    &#125;);</span><br><span class="line">                    hasFound = <span class="literal">YES</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                ++index;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (hasFound) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!hasFound) &#123;</span><br><span class="line">            <span class="built_in">dispatch_async</span>(dispatch_get_main_queue(), ^&#123;</span><br><span class="line">                [MLeaksMessenger alertWithTitle:<span class="string">@&quot;Retain Cycle&quot;</span></span><br><span class="line">                                        message:<span class="string">@&quot;Fail to find a retain cycle&quot;</span>];</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="NSObject对象循环引用"><a href="#NSObject对象循环引用" class="headerlink" title="NSObject对象循环引用"></a>NSObject对象循环引用</h5><blockquote>
+<p>FBRetainCycleDetector 基于外部传入的object 以及查找深度，进行深度优先遍历所有强引用属性，和动态运行时关联的强引用属性，同时将这些 关联对象的地址 放入 objectSet （set）的集合中, 将对象信息计入 objectOnPath 集合中（set）, 并且将对象在对象栈 stack 中存储一份，便于查找对应环。</p>
+</blockquote>
+<p>首先判断 如果传入的 object 是 NSObject 的话，获取对象的 class，使用</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="type">char</span> *class_getIvarLayout(Class cls);</span><br></pre></td></tr></table></figure>
+<p>获取 class 的所有定义的 property 的布局信息，取出 object 对应的 property 的value值，将value 对象的地址（数字）加入 objectSet 中，将对象指针加入到 objectOnPath，在整个树形遍历中，如果遍历到的新节点，在原来的 objectSet 地址表中已经存在了，代表形成了引用环，即原本的树形结构连成了图。此时可以根据 stack中记录的路径，结合 重复的 object构建一个环形图，作为环形引用链返回。</p>
+<p><code>树是没有环的图</code></p>
+<h5 id="NSBlock类型对像"><a href="#NSBlock类型对像" class="headerlink" title="NSBlock类型对像"></a>NSBlock类型对像</h5><p>在C的结构体中是不存在强弱引用区分的，在编译期，编译器会将所谓的强引用通过一个 copy_helper 的function 做copy 操作，并为 block 生成的 struct 构造 dispose_helper 的 function，dispose_helper 负责在 struct 将要释放时，去释放它所引用的对象。下面是编译器生成的 dispose_helper function 的定义 ，入参为 struct 的地址 _Block_object_dispose 是编译器的 funtion</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __block_dispose_4(<span class="keyword">struct</span> __block_literal_4 *src) &#123;</span><br><span class="line">     <span class="comment">// was _Block_destroy</span></span><br><span class="line">     _Block_object_dispose(src-&gt;existingBlock, BLOCK_FIELD_IS_BLOCK);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>作者利用黑盒测试，基于原有的 block对象 ，拿到对应block对象的 descriptor指针 ，descriptor记录了block对象释放的时候要执行的 dispose_helper 方法和block对象所有引用对象的数组，<br>这个数组包括了强引用对象和弱应用对象 *src。 也就是说，block被释放时，执行的 dispose_helper 方法的入参 是 *scr；那么只需要伪装一个被引用的数组，传入dispose_helper 做个测试，数组中哪一个对象呗调用了 release 方法，那么谁就是被强引用的，记住src对应下标的地址就好。</p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><h4 id="特殊情况"><a href="#特殊情况" class="headerlink" title="特殊情况"></a>特殊情况</h4><p>对于某些特殊情况，释放的时机不大一样（比如系统手势返回时，在划到一半时 hold 住，虽然已被 pop，但这时还不会被释放，ViewController 要等到完全 disappear 后才释放），需要做特殊处理，具体的特殊处理视具体情况而定。</p>
+<h4 id="系统View"><a href="#系统View" class="headerlink" title="系统View"></a>系统View</h4><p>某些系统的私有 View，不会被释放（可能是系统 bug 或者是系统出于某些原因故意这样做的，这里就不去深究了），因此需要建立白名单</p>
+<h4 id="手动扩展"><a href="#手动扩展" class="headerlink" title="手动扩展"></a>手动扩展</h4><p>MLeaksFinder目前只检测 ViewController 跟 View 对象。为此，MLeaksFinder 提供了一个手动扩展的机制，你可以从 UIViewController 跟 UIView 出发，去检测其它类型的对象的内存泄露。如下所示，我们可以检测 UIViewController 底下的 View Model：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)willDealloc &#123;</span><br><span class="line">    <span class="keyword">if</span> (![<span class="variable language_">super</span> willDealloc]) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    MLCheck(<span class="keyword">self</span>.viewModel);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://wereadteam.github.io/2016/02/22/MLeaksFinder/">MLeaksFinder：精准 iOS 内存泄露检测工具</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/76250de94b93">FBRetainCycleDetector + MLeaksFinder 阅读</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/" rel="prev" title="多分支 if-else 重构">
+      <i class="fa fa-chevron-left"></i> 多分支 if-else 重构
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/" rel="next" title="ReactiveObjC 使用">
+      ReactiveObjC 使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#MLeaksFinder"><span class="nav-number">1.</span> <span class="nav-text">MLeaksFinder</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-VS-Instrument"><span class="nav-number">1.2.</span> <span class="nav-text">优点  VS Instrument</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">1.3.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%97%AD"><span class="nav-number">1.4.</span> <span class="nav-text">关闭</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.5.</span> <span class="nav-text">实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Podspec%E6%96%87%E4%BB%B6"><span class="nav-number">1.5.1.</span> <span class="nav-text">Podspec文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#willDealloc%E6%96%B9%E6%B3%95"><span class="nav-number">1.5.2.</span> <span class="nav-text">willDealloc方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBRetainCycleDetector"><span class="nav-number">2.</span> <span class="nav-text">FBRetainCycleDetector</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-1"><span class="nav-number">2.1.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%A3%80%E6%B5%8B%E9%A5%AE%E7%94%A8%E6%88%90%E7%8E%AF"><span class="nav-number">2.2.</span> <span class="nav-text">如何检测饮用成环</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#NSObject%E5%AF%B9%E8%B1%A1%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">NSObject对象循环引用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NSBlock%E7%B1%BB%E5%9E%8B%E5%AF%B9%E5%83%8F"><span class="nav-number">2.2.2.</span> <span class="nav-text">NSBlock类型对像</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">3.</span> <span class="nav-text">注意</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">3.1.</span> <span class="nav-text">特殊情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9FView"><span class="nav-number">3.2.</span> <span class="nav-text">系统View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E6%89%A9%E5%B1%95"><span class="nav-number">3.3.</span> <span class="nav-text">手动扩展</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

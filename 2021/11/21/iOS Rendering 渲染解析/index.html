@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="计算机渲染原理CPU与GPU的架构设计目的 CPU 是运算核心与控制核心，需要有很强的运算通用性，兼容各种数据类型，同时也需要能处理大量不同的跳转、中断等指令，因此 CPU 的内部结构更为复杂。   而 GPU 则面对的是类型统一、更加单纯的运算，也不需要处理复杂的指令，但也肩负着更大的运算任务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS Rendering 渲染解析">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="计算机渲染原理CPU与GPU的架构设计目的 CPU 是运算核心与控制核心，需要有很强的运算通用性，兼容各种数据类型，同时也需要能处理大量不同的跳转、中断等指令，因此 CPU 的内部结构更为复杂。   而 GPU 则面对的是类型统一、更加单纯的运算，也不需要处理复杂的指令，但也肩负着更大的运算任务。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/01.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/02.jpeg">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/03.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/04.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/05.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/06.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/07.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/08.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/09.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/10.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/11.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/12.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/13.jpeg">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/14.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/15.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/16.png">
+<meta property="og:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/17.png">
+<meta property="article:published_time" content="2021-11-21T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T12:00:06.534Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS Rendering 渲染解析 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS Rendering 渲染解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-21 08:00:00" itemprop="dateCreated datePublished" datetime="2021-11-21T08:00:00+08:00">2021-11-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:00:06" itemprop="dateModified" datetime="2023-05-13T20:00:06+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="计算机渲染原理"><a href="#计算机渲染原理" class="headerlink" title="计算机渲染原理"></a>计算机渲染原理</h2><h3 id="CPU与GPU的架构"><a href="#CPU与GPU的架构" class="headerlink" title="CPU与GPU的架构"></a>CPU与GPU的架构</h3><h4 id="设计目的"><a href="#设计目的" class="headerlink" title="设计目的"></a>设计目的</h4><blockquote>
+<p>CPU 是运算核心与控制核心，需要有很强的运算通用性，兼容各种数据类型，同时也需要能处理大量不同的跳转、中断等指令，因此 CPU 的内部结构更为复杂。</p>
+</blockquote>
+<blockquote>
+<p>而 GPU 则面对的是类型统一、更加单纯的运算，也不需要处理复杂的指令，但也肩负着更大的运算任务。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>英伟达的CUDA文档里给了这样一幅图：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/01.png" class="">
+
+<blockquote>
+<p>ALU就是“算术逻辑单元</p>
+</blockquote>
+<p>从上图中也可以看出</p>
+<ol>
+<li>CPU和GPU进行计算的部分都是ALU，GPU绝大部分的芯片面积都是ALU，而且是超大阵列排布的ALU。这些ALU都是可以并行运行的，所以浮点计算速度就特别高了。</li>
+<li>CPU 拥有更多的缓存空间 Cache 以及复杂的控制单元，计算能力并不是 CPU 的主要诉求。</li>
+<li>CPU大多数面积都需要给控制单元和Cache，因为CPU要承担整个计算机的控制工作，没有GPU那么单纯。</li>
+</ol>
+<p><code>GPU的程序控制能力相比CPU来说不强</code></p>
+<p>GPU的强项是并行运算能力比CPU强（多个不同任务的并行运算GPU也无法胜任 <code>GPU只适合处理单个可并行任务的并行运算</code>） 而不是浮点运算能力强（这个谣言也不知道谁传出来的 非要强调浮点运算 非要说浮点运算的话 不如说大多数老式GPU甚至没有整数运算能力 因为根本没有整数指令 最早设计目的是加速图形渲染 基本都是浮点运算 所以GPU核心的SIMD指令 只有浮点指令 没有整数指令 新型GPU因为不光光用于图形渲染 还想推广到通用计算 就是所谓的GPGPU 所以开始加入整数运算的支持）</p>
+<p><code>CPU每个核心有独立的缓存</code><br><code>GPU基本是所有核心共享一个缓存</code>(GPU主要做图形渲染 所有核心都执行同一份指令 获取同样的数据 CPU主要是执行多个串行任务 每个核心可以处理不同的任务 从不同地方获取不同的数据)</p>
+<p>CPU 是设计目标是低时延，更多的高速缓存也意味着可以更快地访问数据；同时复杂的控制单元也能更快速地处理逻辑分支，更适合串行计算。</p>
+<p>而 GPU 拥有更多的计算单元 Arithmetic Logic Unit，具有更强的计算能力，同时也具有更多的控制单元。GPU 基于大吞吐量而设计，每一部分缓存都连接着一个流处理器（stream processor），更加适合大规模的并行计算。</p>
+<h3 id="图像渲染流水线"><a href="#图像渲染流水线" class="headerlink" title="图像渲染流水线"></a>图像渲染流水线</h3><p>图像渲染流程粗粒度大概分为下面这些步骤</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/02.jpeg" class="">
+
+<p>上述图像渲染流水线中，除了第一部分 Application 阶段，后续主要都由 GPU 负责<br>Application 应用处理阶段：得到图元<br>Geometry 几何处理阶段：处理图元<br>Rasterization 光栅化阶段：图元转换为像素<br>Pixel 像素处理阶段：处理像素，得到位图</p>
+<h2 id="屏幕成像与卡顿"><a href="#屏幕成像与卡顿" class="headerlink" title="屏幕成像与卡顿"></a>屏幕成像与卡顿</h2><p>GPU最后一步渲染结束之后像素信息，被存在帧缓冲器（Framebuffer）中，之后视频控制器（video controller）会读取帧缓冲器中的信息，经过数模转换传递给显示器（Monitor），进行显示。流程如下图：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/03.png" class="">
+
+<p>经过GPU处理之后的像素集合，也就是位图，会被帧缓冲器缓存起来，供之后的显示使用。显示器的电子束会从屏幕的左上角开始逐行扫描，屏幕上的每个点的图像信息都从帧缓冲器中的位图进行读取，在屏幕上对应地显示。扫描的流程如下图：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/04.png" class="">
+
+<p>电子束扫描的过程中，屏幕就能呈现出对应的结果，每次整个屏幕被扫描完一次后，就相当于呈现了一幅完整的图像。屏幕不断地刷新，不停呈现新的帧，就能呈现出连续的影像。而这个屏幕刷新的频率，就是<code>帧率</code>（Frame per Second，FPS）。</p>
+<h3 id="屏幕撕裂"><a href="#屏幕撕裂" class="headerlink" title="屏幕撕裂"></a>屏幕撕裂</h3><p>在单一缓存模式下，理想的情况就是一个流畅的流水线：<code>每次电子束从头开始新的一帧的扫描时，CPU+GPU 对于该帧的渲染流程已经结束，渲染好的位图已经放入帧缓冲器中</code>。这种完美的情况是非常脆弱的，很容易产生屏幕撕裂。</p>
+<blockquote>
+<p>在电子束开始扫描新的一帧时，位图还没有渲染好，而是在扫描到屏幕中间时才渲染完成，被放入帧缓冲器中 —- 那么已扫描的部分就是上一帧的画面，而未扫描的部分则会显示新的一帧图像，这就造成屏幕撕裂</p>
+</blockquote>
+<h3 id="垂直同步Vsync-双缓冲机制"><a href="#垂直同步Vsync-双缓冲机制" class="headerlink" title="垂直同步Vsync + 双缓冲机制"></a>垂直同步Vsync + 双缓冲机制</h3><p><code>解决屏幕撕裂、提高显示效率的一个策略就是使用垂直同步信号 Vsync 与双缓冲机制</code> Double Buffering</p>
+<p>垂直同步信号（vertical synchronisation，Vsync）相当于<code>给帧缓冲器加锁</code>：当电子束完成一帧的扫描，将要从头开始扫描时，就会发出一个垂直同步信号。只有当视频控制器接收到 Vsync 之后，才会将帧缓冲器中的位图更新为下一帧，这样就能保证每次显示的都是同一帧的画面，因而避免了屏幕撕裂。</p>
+<p>但是在这种情况下，视频控制器在接受到Vsync之后，就要将下一帧的位图传入，这意味着整个CPU+GPU的渲染流程都要在一瞬间完成，这是明显不现实的。所以双缓冲机制会增加一个备用缓冲器（back buffer）。渲染结果将会预先保存在back buffer中，在接收到Vsync信号的时候，视频控制器会将back buffer中的内容置换到frame buffer中，此时就能保证置换操作几乎在一瞬间完成（实际上是交换了内存地址）。</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/05.png" class="">
+
+<h3 id="掉帧"><a href="#掉帧" class="headerlink" title="掉帧"></a>掉帧</h3><p><code>启用Vsync信号以及双缓存机制之后，能够解决屏幕撕裂的问题，但是会引入新的问题：掉帧</code> 如果在接收到Vsync之时CPU和GPU还没有渲染好新的位图，视频控制器就不会去替换frame buffer中的位图。这是屏幕就会重新扫描呈现出上一帧一摸一样的画面。相当于两个周期显示了同样的画面，这就是所谓掉帧的情况。</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/06.png" class="">
+
+<h3 id="三缓冲-Triple-Buffering"><a href="#三缓冲-Triple-Buffering" class="headerlink" title="三缓冲 Triple Buffering"></a>三缓冲 Triple Buffering</h3><p>事实上上述策略还有优化空间，在掉帧的时候，CPU和GPU有一段时间处于闲置状态：当A的内容正在被扫描显示在屏幕上，而B的内容已经被渲染好，此时CPU和GPU就处于闲置状态。那么如果我们增加一个帧缓冲器，就可以利用这段时间进行下一步的渲染，并将渲染结果暂存于新增的帧缓冲器中，从而减少掉帧的次数。</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/07.png" class="">
+
+<h3 id="屏幕卡顿的本质"><a href="#屏幕卡顿的本质" class="headerlink" title="屏幕卡顿的本质"></a>屏幕卡顿的本质</h3><ol>
+<li>屏幕卡顿的根本原因：CPU 和 GPU 渲染流水线耗时过长，导致掉帧。</li>
+<li>Vsync 与双缓冲的意义：强制同步屏幕刷新，以掉帧为代价解决屏幕撕裂问题。</li>
+<li>三缓冲的意义：合理使用 CPU、GPU 渲染性能，减少掉帧次数</li>
+</ol>
+<h2 id="iOS中渲染框架"><a href="#iOS中渲染框架" class="headerlink" title="iOS中渲染框架"></a>iOS中渲染框架</h2><img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/08.png" class="">
+
+<p>iOS的渲染框架依然复合<code>渲染流水线</code>的基本架构</p>
+<p>Core Image：Core Image 是一个高性能的图像处理分析的框架，它拥有一系列现成的图像滤镜，能对已存在的图像进行高效的处理。</p>
+<p>Metal：Metal 类似于 OpenGL ES，也是一套第三方标准，具体实现由苹果实现。Core Animation、Core Image、SceneKit、SpriteKit 等等渲染框架都是构建于 Metal 之上的。</p>
+<h3 id="Core-Animation是什么"><a href="#Core-Animation是什么" class="headerlink" title="Core Animation是什么"></a>Core Animation是什么</h3><blockquote>
+<p>Render, compose, and animate visual elements. —- Apple</p>
+</blockquote>
+<p><code>Core Animation</code>，它本质上可以理解为一个复合引擎，主要职责包含：渲染、构建和实现动画。前身叫做 <code>Layer Kit</code></p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/09.png" class="">
+
+<h3 id="CALayer是显示的基础：-存储bitmap"><a href="#CALayer是显示的基础：-存储bitmap" class="headerlink" title="CALayer是显示的基础： 存储bitmap"></a>CALayer是显示的基础： 存储bitmap</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Layer content properties and methods. **/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* An object providing the contents of the layer, typically a CGImageRef,</span></span><br><span class="line"><span class="comment"> * but may be something else. (For example, NSImage objects are</span></span><br><span class="line"><span class="comment"> * supported on Mac OS X 10.6 and later.) Default value is nil.</span></span><br><span class="line"><span class="comment"> * Animatable. */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">nullable</span>, <span class="keyword">strong</span>) <span class="type">id</span> contents;</span><br></pre></td></tr></table></figure>
+<p>实际上，CALayer 中的 contents 属性保存了由设备渲染流水线渲染好的位图 bitmap（通常也被称为 backing store），而当设备屏幕进行刷新时，会从 CALayer 中读取生成好的 bitmap，进而呈现到屏幕上。</p>
+<h3 id="CALayer-与-UIView的关系"><a href="#CALayer-与-UIView的关系" class="headerlink" title="CALayer 与 UIView的关系"></a>CALayer 与 UIView的关系</h3><img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/10.png" class="">
+
+<h2 id="Offscreen-Rendering-离屏渲染"><a href="#Offscreen-Rendering-离屏渲染" class="headerlink" title="Offscreen Rendering 离屏渲染"></a>Offscreen Rendering 离屏渲染</h2><p>通常的渲染流程是这样的：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/11.png" class="">
+
+<p>离屏渲染的流程是这样的：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/12.png" class="">
+
+<p>与普通情况下 GPU 直接将渲染好的内容放入 Framebuffer 中不同，<code>需要先额外创建离屏渲染缓冲区 Offscreen Buffer，将提前渲染好的内容放入其中，等到合适的时机再将 Offscreen Buffer 中的内容进一步叠加、渲染，完成后将结果切换到 Framebuffer 中</code>。</p>
+<h3 id="离屏渲染的效率问题"><a href="#离屏渲染的效率问题" class="headerlink" title="离屏渲染的效率问题"></a>离屏渲染的效率问题</h3><p>离屏渲染时由于App需要提前对部分内容进行额外的渲染并保存到Offscreen Buffer，以及需要在必要时刻对Offscreen Buffer和Frame buffer进行内容切换，所以会需要更长的处理时间</p>
+<p>Offscreen Buffer本身就需要额外的空间，大量的离屏渲染可能造成内存的过大的压力。与此同时，Offscreen Buffer的总大小也有限，不能超过屏幕总像素的2.5倍。</p>
+<p>可见离屏渲染的开销非常大，一旦需要离屏渲染的内容过多，很容易造成掉帧的问题。</p>
+<h3 id="为什么使用离屏渲染"><a href="#为什么使用离屏渲染" class="headerlink" title="为什么使用离屏渲染"></a>为什么使用离屏渲染</h3><p>主要因为下面两个原因</p>
+<ol>
+<li>一些特殊效果需要使用额外的 Offscreen Buffer 来保存渲染的中间状态，所以不得不使用离屏渲染</li>
+<li>处于效率目的，可以将内容提前渲染保存在 Offscreen Buffer 中，达到复用的目的。</li>
+</ol>
+<p>对于第一种情况，一般都是系统自动触发的，比如阴影，圆角等等。</p>
+<p>最常见的情形之一就是：使用 <code>mask</code> 蒙版</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/13.jpeg" class="">
+
+<p>如图所示，由于最终的内容是由两层渲染结果叠加，所以必须要利用额外的内存空间对中间的渲染结果进行保存，因此系统会默认触发离屏渲染。</p>
+<p>又比如下面这个例子，iOS 8 开始提供的模糊特效 UIBlurEffectView：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/14.png" class="">
+<p>整个模糊过程分为多步：Pass 1 先渲染需要模糊的内容本身，Pass 2 对内容进行缩放，Pass 3 4 分别对上一步内容进行横纵方向的模糊操作，最后一步用模糊后的结果叠加合成，最终实现完整的模糊特效。</p>
+<p>而第二种情况，为了复用提高效率而使用离屏渲染一般是主动的行为，是通过 CALayer 的 shouldRasterize 光栅化操作实现的。</p>
+<h3 id="shouldRasterize-光栅化"><a href="#shouldRasterize-光栅化" class="headerlink" title="shouldRasterize 光栅化"></a>shouldRasterize 光栅化</h3><blockquote>
+<p>When the value of this property is YES, the layer is rendered as a bitmap in its local coordinate space and then composited to the destination with any other content.</p>
+</blockquote>
+<p>开启光栅化后，会触发离屏渲染，Render Server 会强制将 CALayer 的渲染位图结果 bitmap 保存下来，这样下次再需要渲染时就可以直接复用，从而提高效率。</p>
+<p>而保存的 bitmap 包含 layer 的 subLayer、圆角、阴影、组透明度 group opacity 等，所以如果 layer 的构成包含上述几种元素，结构复杂且需要反复利用，那么就可以考虑打开光栅化。</p>
+<p>圆角、阴影、组透明度等会由系统自动触发离屏渲染，那么打开光栅化可以节约第二次及以后的渲染时间。而多层 subLayer 的情况由于不会自动触发离屏渲染，所以相比之下会多花费第一次离屏渲染的时间，但是可以节约后续的重复渲染的开销</p>
+<p>不过使用光栅化的时候需要注意以下几点：</p>
+<ol>
+<li>如果 layer 不能被复用，则没有必要打开光栅化</li>
+<li>如果 layer 不是静态，需要被频繁修改，比如处于动画之中，那么开启离屏渲染反而影响效率</li>
+<li>离屏渲染缓存内容有时间限制，缓存内容 100ms 内如果没有被使用，那么就会被丢弃，无法进行复用</li>
+<li>离屏渲染缓存空间有限，超过 2.5 倍屏幕像素大小的话也会失效，无法复用</li>
+</ol>
+<h3 id="圆角的离屏渲染"><a href="#圆角的离屏渲染" class="headerlink" title="圆角的离屏渲染"></a>圆角的离屏渲染</h3><p>设置圆角通常会首先像下面这行代码一样进行设置：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">view.layer.cornerRadius = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>上述代码只会默认设置 backgroundColor 和 border 的圆角，而不会设置 content 的圆角，除非同时设置了 layer.masksToBounds 为 true（对应 UIView 的 clipsToBounds 属性）：</p>
+<p>如果只是设置了 cornerRadius 而没有设置 masksToBounds，由于不需要叠加裁剪，此时是并不会触发离屏渲染的。而当设置了裁剪属性的时候，由于 masksToBounds 会对 layer 以及所有 subLayer 的 content 都进行裁剪，所以不得不触发离屏渲染。</p>
+<blockquote>
+<p>在没有必要使用圆角裁剪的时候，尽量不去触发离屏渲染而影响效率</p>
+</blockquote>
+<h3 id="离屏渲染的具体逻辑"><a href="#离屏渲染的具体逻辑" class="headerlink" title="离屏渲染的具体逻辑"></a>离屏渲染的具体逻辑</h3><p>图层的叠加绘制大概遵循“<code>画家算法</code>”，在这种算法下会按层绘制，首先绘制距离较远的场景，然后用绘制距离较近的场景覆盖较远的部分。</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/15.png" class="">
+
+<p>在普通的 layer 绘制中，上层的 sublayer 会覆盖下层的 sublayer，下层 sublayer 绘制完之后就可以抛弃了，从而节约空间提高效率。所有 sublayer 依次绘制完毕之后，整个绘制过程完成，就可以进行后续的呈现了。假设我们需要绘制一个三层的 sublayer，不设置裁剪和圆角，那么整个绘制过程就如下图所示：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/16.png" class="">
+
+<p>而当我们设置了 cornerRadius 以及 masksToBounds 进行圆角 + 裁剪时，如前文所述，masksToBounds 裁剪属性会应用到所有的 sublayer 上。这也就意味着所有的 sublayer 必须要重新被应用一次圆角+裁剪，这也就意味着所有的 sublayer 在第一次被绘制完之后，并不能立刻被丢弃，而必须要被保存在 Offscreen buffer 中等待下一轮圆角+裁剪，这也就诱发了离屏渲染，具体过程如下：</p>
+<img src="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/17.png" class="">
+
+<p>实际上不只是圆角+裁剪，如果设置了<code>透明度+组透明</code>（layer.allowsGroupOpacity+layer.opacity），<code>阴影属性</code>（shadowOffset 等）都会产生类似的效果，因为组透明度、阴影都是和裁剪类似的，会作用与 layer 以及其所有 sublayer 上，这就导致必然会引起离屏渲染。</p>
+<h3 id="避免圆角离屏渲染"><a href="#避免圆角离屏渲染" class="headerlink" title="避免圆角离屏渲染"></a>避免圆角离屏渲染</h3><p>可行的实现方法大概有下面几种：</p>
+<ol>
+<li>【换资源】直接使用带圆角的图片，或者替换背景色为带圆角的纯色背景图，从而避免使用圆角裁剪。不过这种方法需要依赖具体情况，并不通用。</li>
+<li>【mask】再增加一个和背景色相同的遮罩 mask 覆盖在最上层，盖住四个角，营造出圆角的形状。但这种方式难以解决背景色为图片或渐变色的情况。</li>
+<li>【UIBezierPath】用贝塞尔曲线绘制闭合带圆角的矩形，在上下文中设置只有内部可见，再将不带圆角的 layer 渲染成图片，添加到贝塞尔矩形中。这种方法效率更高，但是 layer 的布局一旦改变，贝塞尔曲线都需要手动地重新绘制，所以需要对 frame、color 等进行手动地监听并重绘。</li>
+<li>【CoreGraphics】重写 drawRect:，用 CoreGraphics 相关方法，在需要应用圆角时进行手动绘制。不过 CoreGraphics 效率也很有限，如果需要多次调用也会有效率问题。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>1.<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/20978963/answer/86818933">知乎CPU和GPU的运算能力</a><br>2.<a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904162765832206">iOS Rendering 渲染全解析（长文干货）</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/01/ReactiveObjC%E5%9F%BA%E7%A1%80/" rel="prev" title="ReactiveObjC基础">
+      <i class="fa fa-chevron-left"></i> ReactiveObjC基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/22/iOS%20Memory%20%E5%86%85%E5%AD%98%E8%AF%A6%E8%A7%A3/" rel="next" title="iOS Memory 内存详解">
+      iOS Memory 内存详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%B8%B2%E6%9F%93%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">计算机渲染原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU%E4%B8%8EGPU%E7%9A%84%E6%9E%B6%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">CPU与GPU的架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%9B%AE%E7%9A%84"><span class="nav-number">1.1.1.</span> <span class="nav-text">设计目的</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%B8%B2%E6%9F%93%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">1.2.</span> <span class="nav-text">图像渲染流水线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E6%88%90%E5%83%8F%E4%B8%8E%E5%8D%A1%E9%A1%BF"><span class="nav-number">2.</span> <span class="nav-text">屏幕成像与卡顿</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E6%92%95%E8%A3%82"><span class="nav-number">2.1.</span> <span class="nav-text">屏幕撕裂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%82%E7%9B%B4%E5%90%8C%E6%AD%A5Vsync-%E5%8F%8C%E7%BC%93%E5%86%B2%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">垂直同步Vsync + 双缓冲机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%89%E5%B8%A7"><span class="nav-number">2.3.</span> <span class="nav-text">掉帧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%BC%93%E5%86%B2-Triple-Buffering"><span class="nav-number">2.4.</span> <span class="nav-text">三缓冲 Triple Buffering</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%8F%E5%B9%95%E5%8D%A1%E9%A1%BF%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="nav-number">2.5.</span> <span class="nav-text">屏幕卡顿的本质</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS%E4%B8%AD%E6%B8%B2%E6%9F%93%E6%A1%86%E6%9E%B6"><span class="nav-number">3.</span> <span class="nav-text">iOS中渲染框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Core-Animation%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">3.1.</span> <span class="nav-text">Core Animation是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CALayer%E6%98%AF%E6%98%BE%E7%A4%BA%E7%9A%84%E5%9F%BA%E7%A1%80%EF%BC%9A-%E5%AD%98%E5%82%A8bitmap"><span class="nav-number">3.2.</span> <span class="nav-text">CALayer是显示的基础： 存储bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CALayer-%E4%B8%8E-UIView%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">3.3.</span> <span class="nav-text">CALayer 与 UIView的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Offscreen-Rendering-%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="nav-number">4.</span> <span class="nav-text">Offscreen Rendering 离屏渲染</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E6%95%88%E7%8E%87%E9%97%AE%E9%A2%98"><span class="nav-number">4.1.</span> <span class="nav-text">离屏渲染的效率问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="nav-number">4.2.</span> <span class="nav-text">为什么使用离屏渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shouldRasterize-%E5%85%89%E6%A0%85%E5%8C%96"><span class="nav-number">4.3.</span> <span class="nav-text">shouldRasterize 光栅化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%86%E8%A7%92%E7%9A%84%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="nav-number">4.4.</span> <span class="nav-text">圆角的离屏渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93%E7%9A%84%E5%85%B7%E4%BD%93%E9%80%BB%E8%BE%91"><span class="nav-number">4.5.</span> <span class="nav-text">离屏渲染的具体逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%81%BF%E5%85%8D%E5%9C%86%E8%A7%92%E7%A6%BB%E5%B1%8F%E6%B8%B2%E6%9F%93"><span class="nav-number">4.6.</span> <span class="nav-text">避免圆角离屏渲染</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="概述 随着Xcode 11、Swift 5.0的发布，Swift目前已经实现了ABI稳定及模块稳定，并且Swift runtime和标准库已经植入系统中，而且苹果新出文档都用Swift，Sample Code也是Swift，可以看出Swift是苹果扶持与研发的重点方向。 对于新App来说，可以直接用纯Swift进行开发，而对于老App来说，绝大部分以前都是用OC开发的，因此Swift&#x2F;O">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ObjC和Swift混编">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/01/17/ObjC%E5%92%8CSwift%E6%B7%B7%E7%BC%96/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="概述 随着Xcode 11、Swift 5.0的发布，Swift目前已经实现了ABI稳定及模块稳定，并且Swift runtime和标准库已经植入系统中，而且苹果新出文档都用Swift，Sample Code也是Swift，可以看出Swift是苹果扶持与研发的重点方向。 对于新App来说，可以直接用纯Swift进行开发，而对于老App来说，绝大部分以前都是用OC开发的，因此Swift&#x2F;O">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-17T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T11:38:05.138Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/01/17/ObjC%E5%92%8CSwift%E6%B7%B7%E7%BC%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ObjC和Swift混编 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/01/17/ObjC%E5%92%8CSwift%E6%B7%B7%E7%BC%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ObjC和Swift混编
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-01-17 08:00:00" itemprop="dateCreated datePublished" datetime="2023-01-17T08:00:00+08:00">2023-01-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 19:38:05" itemprop="dateModified" datetime="2023-05-13T19:38:05+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>概述</p>
+<p>随着Xcode 11、Swift 5.0的发布，Swift目前已经实现了ABI稳定及模块稳定，并且<code>Swift runtime</code>和标准库已经植入系统中，而且苹果新出文档都用Swift，Sample Code也是Swift，可以看出Swift是苹果扶持与研发的重点方向。</p>
+<p>对于新App来说，可以直接用纯Swift进行开发，而对于老App来说，绝大部分以前都是用OC开发的，因此Swift&#x2F;OC混编是一个必然面临的问题。</p>
+<span id="more"></span>
+
+<h2 id="ObjC和Swift混编"><a href="#ObjC和Swift混编" class="headerlink" title="ObjC和Swift混编"></a>ObjC和Swift混编</h2><p><code>OC/Swift </code>调用 <code>Swift</code>，最终通过 <code>Swift Module</code> 进行，而 <code>Swift</code> 调用 <code>OC</code> 时，则是通过 <code>Clang Module</code>，当然也可以通过 <code>Clang Module</code> 进行 OC 对 OC 的调用。</p>
+<h2 id="同一工程内的混编"><a href="#同一工程内的混编" class="headerlink" title="同一工程内的混编"></a>同一工程内的混编</h2><h3 id="宿主工程利用桥接文件-Bridging-Header-h-进行混编"><a href="#宿主工程利用桥接文件-Bridging-Header-h-进行混编" class="headerlink" title="宿主工程利用桥接文件(Bridging-Header.h)进行混编"></a>宿主工程利用桥接文件(Bridging-Header.h)进行混编</h3><ul>
+<li><p>Swift访问Obje-C<br>只需要在桥接文件中(<code>Bridging-Header.h</code>)导入需要暴露给Swift模块的Objective-C类，即可在Swift中访问相应Objective-C的类和方法</p>
+</li>
+<li><p>Objective-C访问Swift<br>在Objective-C类中导入<code>ProductName-Swift.h</code>，即可访问Swift中暴露给Objective-C的类和方法</p>
+</li>
+</ul>
+<h3 id="利用cocoapods包管理工具，进行二-x2F-三方库混编"><a href="#利用cocoapods包管理工具，进行二-x2F-三方库混编" class="headerlink" title="利用cocoapods包管理工具，进行二&#x2F;三方库混编"></a>利用cocoapods包管理工具，进行二&#x2F;三方库混编</h3><ul>
+<li><p>Swift访问Obj-C<br>用Swift Module系统，需要用到的Objective-C类用<code>import xxx</code>进行引用，即可在Swift中访问相应的Objective-c的类和方法</p>
+</li>
+<li><p>Objective-C访问Swift<br>在Objective-c类中导入<code>ProductName-Swift.h</code>，即可访问Swift中暴露给Objective-C的类和方法</p>
+</li>
+</ul>
+<h2 id="Module系统"><a href="#Module系统" class="headerlink" title="Module系统"></a>Module系统</h2><h3 id="LLVM-Module系统"><a href="#LLVM-Module系统" class="headerlink" title="LLVM Module系统"></a>LLVM Module系统</h3><p>苹果在 2012 年 11 月提出 <code>LLVM</code> 的 <code>Module</code> 系统，简单讲就是用树形的结构化的描述来取代以往 <code>#include</code> ，例如传统的<code>#include</code> 现在变成 <code>import std.io</code></p>
+<p>意义：</p>
+<ul>
+<li>语义上完整描述了一个框架的作用</li>
+<li>提高编译时的可扩展性，同一模块只需编译或导入一次，避免了头文件的多次引用、解析</li>
+<li>减少碎片化，每个模块只处理一次，环境的变化不会导致不一致</li>
+</ul>
+<h3 id="modulemap文件"><a href="#modulemap文件" class="headerlink" title="modulemap文件"></a>modulemap文件</h3><p><code>modulemap</code>文件就是对一个框架，一个库的所有文件的结构化描述。默认文件名是<code>module.modulemap</code></p>
+<h3 id="Swift-Module"><a href="#Swift-Module" class="headerlink" title="Swift Module"></a>Swift Module</h3><p>SwiftModule 可以将 Swift 解析后生成对应的 modulemap 和 umbrella.h 文件，SwiftModule 增加对编译器版本的依赖，编译产物与编译器 和 Swift 版本有关。如果想要实现 Swift 和 Objective-C 的互相访问，需要 Objective-C 库，以及对应的 umbrella.h 和 modulemap 支持。其中动态库 framework 是 Xcode 支持配置并生成 header，静态库 .a 需要自己编写对应的 umbrella.h 和 modulemap。即库之间无论何种语言实现，均需要封装为 <code>LLVM Module</code> 来相互访问。</p>
+<h4 id="Cocoapods配置"><a href="#Cocoapods配置" class="headerlink" title="Cocoapods配置"></a>Cocoapods配置</h4><p> use_ modular_ headers! 配置将三方库构建成静态库，或者 use_frameworks! 配置将三方库构建成动态库时，在编译产物中都会生成一个 modulemap 和 module umbrella.h 文件</p>
+<p><code> use_ modular_ headers！</code>是 Cocoapods 1.5.0 引入的配置，目的是为了满足 Xcode 9 以后支持的 Swift Static Libraries ，将 Swift Pods 构建成为静态库</p>
+<ul>
+<li>如果你的 Swift Pod 依赖于 Objective-C，那么你需要为这个 Objective-C 库启用 modular_headers</li>
+<li>对于 pod 开发者可以在 podtargetxcconfig 内添加 ’DEFINES_MODULE’&#x3D;&gt;‘YES’，对于使用者在 podfile 内添加 <code>use _modular _headers!</code></li>
+<li>在 podspec 中通过 modular_headers &#x3D;&gt; true 配置特定的 pod</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://tech.youzan.com/swifthe-objective-chun-bian-zai-you-zan-yi-dong-de-shi-jian/">Swift和Objective-C混编在有赞移动的实践</a><br><a target="_blank" rel="noopener" href="https://tech.meituan.com/2021/02/25/swift-objective-c.html">从预编译的角度理解Swift与Objective-C及混编机制</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/csdnnews/article/details/120139297">Swift与Objective-C混编时，我们是如何将编译时间优化了35%</a></p>
+<p>一方：（一方包，一方库），一般指的是本项目或者本工程中的类和方法、接口等。<br>二方：（二方包，二方库），一般指的是公司内部的依赖库，公司内部其他项目发布的jar包，如公司项目平台的核心依赖包。<br>三方：（三方包，三方库），一般指的是外部的开源库或开源项目贡献的jar， 比如apache、google、Ali等发布的依赖</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/20/%E5%87%8F%E5%B0%91%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E9%A1%B5/" rel="prev" title="【译】减少共享内存页">
+      <i class="fa fa-chevron-left"></i> 【译】减少共享内存页
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/01/define%E5%91%BD%E4%BB%A4/" rel="next" title="define">
+      define <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ObjC%E5%92%8CSwift%E6%B7%B7%E7%BC%96"><span class="nav-number">1.</span> <span class="nav-text">ObjC和Swift混编</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8C%E4%B8%80%E5%B7%A5%E7%A8%8B%E5%86%85%E7%9A%84%E6%B7%B7%E7%BC%96"><span class="nav-number">2.</span> <span class="nav-text">同一工程内的混编</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%BF%E4%B8%BB%E5%B7%A5%E7%A8%8B%E5%88%A9%E7%94%A8%E6%A1%A5%E6%8E%A5%E6%96%87%E4%BB%B6-Bridging-Header-h-%E8%BF%9B%E8%A1%8C%E6%B7%B7%E7%BC%96"><span class="nav-number">2.1.</span> <span class="nav-text">宿主工程利用桥接文件(Bridging-Header.h)进行混编</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A9%E7%94%A8cocoapods%E5%8C%85%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7%EF%BC%8C%E8%BF%9B%E8%A1%8C%E4%BA%8C-x2F-%E4%B8%89%E6%96%B9%E5%BA%93%E6%B7%B7%E7%BC%96"><span class="nav-number">2.2.</span> <span class="nav-text">利用cocoapods包管理工具，进行二&#x2F;三方库混编</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Module%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.</span> <span class="nav-text">Module系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LLVM-Module%E7%B3%BB%E7%BB%9F"><span class="nav-number">3.1.</span> <span class="nav-text">LLVM Module系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#modulemap%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">modulemap文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Swift-Module"><span class="nav-number">3.3.</span> <span class="nav-text">Swift Module</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Cocoapods%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.1.</span> <span class="nav-text">Cocoapods配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

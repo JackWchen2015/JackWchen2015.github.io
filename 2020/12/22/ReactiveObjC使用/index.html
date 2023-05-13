@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 Rx 在 Objective-C 语言中的实现   Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 RACSignal 和 RACSequence">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReactiveObjC 使用">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 Rx 在 Objective-C 语言中的实现   Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 RACSignal 和 RACSequence">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-22T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-13T12:05:52.110Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ReactiveObjC 使用 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ReactiveObjC 使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-22 08:00:00" itemprop="dateCreated datePublished" datetime="2020-12-22T08:00:00+08:00">2020-12-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:05:52" itemprop="dateModified" datetime="2023-05-13T20:05:52+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/RAC/" itemprop="url" rel="index"><span itemprop="name">RAC</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 <a target="_blank" rel="noopener" href="http://reactivex.io/languages.html">Rx</a> 在 Objective-C 语言中的实现</p>
+</blockquote>
+<p> Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 <code>RACSignal</code> 和 <code>RACSequence</code></p>
+<span id="more"></span>
+
+<h3 id="RACSignal-和-RACSequence"><a href="#RACSignal-和-RACSequence" class="headerlink" title="RACSignal 和 RACSequence"></a>RACSignal 和 RACSequence</h3><p>最大区别就是：</p>
+<ol>
+<li><p>RACSignal 是推驱动的，也就是在每次信号中的出现新的数据时，所有的订阅者都会自动接受到最新的值；</p>
+</li>
+<li><p>RACSequence 作为拉驱动的数据流，在改变时并不会通知使用当前序列的对象，只有使用者再次从这个 RACSequence 对象中获取数据才能更新，它的更新是需要使用者自己拉取的。</p>
+</li>
+</ol>
+<p>eg：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span>.networkingRAC.executionSignal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">        <span class="built_in">NSArray</span>&lt;WSFOrderAddressRegionModel*&gt;*  origionModelAry=[<span class="keyword">self</span>.adrRegionAPi fetchDataFromModel:WSFOrderAddressRegionModel.class];</span><br><span class="line">        </span><br><span class="line">        RACSequence *origionModelSeq = [origionModelAry.rac_sequence map:^<span class="type">id</span>(WSFOrderAddressRegionModel *model) &#123;</span><br><span class="line">            <span class="keyword">return</span> [[YWAddressModel alloc] initWithModel:model];</span><br><span class="line">        &#125;];</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">self</span>.orderAddrAry=origionModelSeq.array;</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="RACSignal-和-RACSequence转换"><a href="#RACSignal-和-RACSequence转换" class="headerlink" title="RACSignal 和 RACSequence转换"></a>RACSignal 和 RACSequence转换</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RACSequence *sequence = @[@<span class="number">1</span>, @<span class="number">2</span>, @<span class="number">3</span>].rac_sequence;</span><br><span class="line">RACSignal *signal = sequence.signal;</span><br><span class="line">[signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    [subscriber sendNext:@<span class="number">1</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">2</span>];</span><br><span class="line">    [subscriber sendNext:@<span class="number">3</span>];</span><br><span class="line">    [subscriber sendCompleted];</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">&#125;];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%@&quot;</span>, signal.toArray.rac_sequence);</span><br></pre></td></tr></table></figure>
+
+<h3 id="热信号-RACSubject"><a href="#热信号-RACSubject" class="headerlink" title="热信号 RACSubject"></a>热信号 RACSubject</h3><p>RACSubject 是 RACSignal 的子类,RACSubject 在 RACSignal 对象之上进行了简单的修改，将原有的冷信号改造成了热信号，将不可变变成了可变。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RACSubject 存储了一个遵循 RACSubscriber 协议的对象列表以及所有的消息，</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>RACSubject 对外的接口</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACSubject</span> : <span class="title">RACSignal</span> &lt;<span class="title">RACSubscriber</span>&gt;</span></span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)subject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+
+<p>它与 RACSignal 最大的不同就是：RACSubject 实现了 RACSubscriber 协议</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">RACSubscriber</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"><span class="keyword">@required</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="keyword">nullable</span> <span class="type">id</span>)value;</span><br><span class="line">- (<span class="type">void</span>)sendError:(<span class="keyword">nullable</span> <span class="built_in">NSError</span> *)error;</span><br><span class="line">- (<span class="type">void</span>)sendCompleted;</span><br><span class="line">- (<span class="type">void</span>)didSubscribeWithDisposable:(RACCompoundDisposable *)disposable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="冷热信号"><a href="#冷热信号" class="headerlink" title="冷热信号"></a>冷热信号</h4><p>冷信号是被动的，只会在被订阅时向订阅者发送通知；热信号是主动的，它会在任意时间发出通知，与订阅者的订阅时间无关。</p>
+<p>也就是说冷信号所有的订阅者会在订阅时收到完全相同的序列；而订阅热信号之后，只会收到在订阅之后发出的序列。</p>
+<p>热信号的订阅者能否收到消息取决于订阅的时间。</p>
+<p>eg:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//冷信号 RACSingal</span></span><br><span class="line">-(<span class="type">void</span>)setupRAC&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>)</span><br><span class="line">    [[RACObserve(<span class="keyword">self</span>, cellModel) skip:<span class="number">1</span>] subscribeNext:^(WSFOrderLogisticsCompanyLastestModel*  _Nullable model) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="keyword">if</span> (model.isSelected) &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">YES</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">self</span>-&gt;itemBtn.selected=<span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        [ <span class="keyword">self</span>-&gt;itemBtn setTitle:model.shipperName forState:<span class="built_in">UIControlStateNormal</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 热信号 RACSubject</span></span><br><span class="line"><span class="comment">// 直接指派</span></span><br><span class="line">    <span class="keyword">if</span> (kAppDelegate.appHadEnterBackground) &#123;</span><br><span class="line">        [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span><span class="comment">//第一次启动</span></span><br><span class="line">    &#123;</span><br><span class="line">        __block RACDisposable* disposable= [WSFUSERManger.userPermissionUpdatedSub subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">            [<span class="keyword">self</span> placeOrderWithAccountModel:acctountModel ServiceType:serviceType];</span><br><span class="line">            [disposable dispose];</span><br><span class="line">         &#125;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//用户权限</span></span><br><span class="line">       <span class="keyword">@property</span>(<span class="keyword">nonatomic</span>)RACSubject* userPermissionUpdatedSub;<span class="comment">//用户权限更新</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">        [[<span class="keyword">self</span>.networkingRACs[UserPermissionApiIdentifier] executionSignal] subscribeNext:^(<span class="type">id</span> x) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        <span class="built_in">NSMutableDictionary</span> *tempDic = [<span class="built_in">NSMutableDictionary</span> dictionary];</span><br><span class="line">        <span class="built_in">NSArray</span> *permissionModelArys = [<span class="keyword">self</span>.userPermissionApi fetchDataFromModel:WSFMenuPermissionModel.class];</span><br><span class="line">        [permissionModelArys enumerateObjectsUsingBlock:^(WSFMenuPermissionModel *obj, <span class="built_in">NSUInteger</span> idx, <span class="type">BOOL</span> * _Nonnull stop) &#123;</span><br><span class="line">            <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;allow&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ([obj.permission isEqualToString:<span class="string">@&quot;deny&quot;</span>]) &#123;</span><br><span class="line">                obj.isPermissionAllow = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            tempDic[obj.nameEN] = obj;</span><br><span class="line">        &#125;];</span><br><span class="line">        <span class="keyword">self</span>.menuPermissionModelDics = tempDic;</span><br><span class="line">        [<span class="keyword">self</span>.userPermissionUpdatedSub sendNext:<span class="literal">nil</span>];</span><br><span class="line">    &#125;];</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+
+<h4 id="RACBehaviorSubject-与-RACReplaySubject"><a href="#RACBehaviorSubject-与-RACReplaySubject" class="headerlink" title="RACBehaviorSubject 与 RACReplaySubject"></a>RACBehaviorSubject 与 RACReplaySubject</h4><p>RACBehaviorSubject 在订阅时会向订阅者发送最新的消息，<br>RACReplaySubject   在订阅之后可以重新发送之前的所有消息序列。</p>
+<h5 id="RACBehaviorSubject"><a href="#RACBehaviorSubject" class="headerlink" title="RACBehaviorSubject"></a>RACBehaviorSubject</h5><p>RACBehaviorSubject，它在内部会保存一个 currentValue 对象，也就是最后一次发送的消息：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACBehaviorSubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="type">id</span> currentValue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>)sendNext:(<span class="type">id</span>)value &#123;</span><br><span class="line">	<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">		<span class="keyword">self</span>.currentValue = value;</span><br><span class="line">		[<span class="variable language_">super</span> sendNext:value];</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>向最新的订阅者发送之前的消息，这是通过覆写 -subscribe: 方法实现的</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- (RACDisposable *)subscribe:(<span class="type">id</span>&lt;RACSubscriber&gt;)subscriber &#123;</span><br><span class="line">	RACDisposable *subscriptionDisposable = [<span class="variable language_">super</span> subscribe:subscriber];</span><br><span class="line"></span><br><span class="line">	RACDisposable *schedulingDisposable = [RACScheduler.subscriptionScheduler schedule:^&#123;</span><br><span class="line">		<span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">			[subscriber sendNext:<span class="keyword">self</span>.currentValue];</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> [RACDisposable disposableWithBlock:^&#123;</span><br><span class="line">		[subscriptionDisposable dispose];</span><br><span class="line">		[schedulingDisposable dispose];</span><br><span class="line">	&#125;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="RACReplaySubject"><a href="#RACReplaySubject" class="headerlink" title="RACReplaySubject"></a>RACReplaySubject</h5><p>RACReplaySubject 相当于一个自带 buffer 的 RACBehaviorSubject，它可以在每次有新的订阅者订阅之后发送之前的全部消息。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">RACReplaySubject</span> ()</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>, <span class="keyword">readonly</span>) <span class="built_in">NSUInteger</span> capacity;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">NSMutableArray</span> *valuesReceived;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="RACCommand"><a href="#RACCommand" class="headerlink" title="RACCommand"></a>RACCommand</h3><p>RACCommand 并不表示数据流，它只是一个继承自 NSObject 的类,是一个用于管理 RACSignal 的创建与订阅的类</p>
+<h4 id="RACCommand-的初始化与执行"><a href="#RACCommand-的初始化与执行" class="headerlink" title="RACCommand 的初始化与执行"></a>RACCommand 的初始化与执行</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">instancetype</span>)initWithSignalBlock:(RACSignal&lt;ValueType&gt; * (^)(InputType _Nullable input))signalBlock;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (RACSignal&lt;ValueType&gt; *)execute:(<span class="keyword">nullable</span> InputType)input;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>注意</li>
+</ul>
+<p>在默认情况下 RACCommand 都是不支持并发操作的，需要在上一次命令执行之后才可以发送下一次操作，否则就会返回错误信号 RACErrorSignal，这些错误可以通过订阅 command.errors 获得</p>
+<h4 id="RACCommand-接口中的高阶信号"><a href="#RACCommand-接口中的高阶信号" class="headerlink" title="RACCommand 接口中的高阶信号"></a>RACCommand 接口中的高阶信号</h4><p>它在接口中暴露出的四个信号</p>
+<ol>
+<li><p>executionSignals<br>在每次执行 -execute: 方法时，最终都会向 executionSignals 中传入一个最新的信号</p>
+</li>
+<li><p>executing<br>executing 是一个表示当前是否有任务执行的信号</p>
+</li>
+<li><p>enabled</p>
+</li>
+</ol>
+<p>enabled 信号流表示当前的命令是否可以再次被执行，也就是 -execute: 方法能否可以成功执行新的任务；</p>
+<ol start="4">
+<li>errors</li>
+</ol>
+<p>为了保证 RACCommand 对此执行 -execute: 方法也可以继续运行，我们只能将所有的错误以其它的形式发送到 errors 信号中，防止向 executionSignals 发送错误信号后，executionSignals 信号就会中止的问题。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">RACMulticastConnection *errorsConnection = [[[<span class="keyword">self</span>.addedExecutionSignalsSubject</span><br><span class="line">    flattenMap:^(RACSignal *signal) &#123;</span><br><span class="line">        <span class="keyword">return</span> [[signal</span><br><span class="line">            ignoreValues]</span><br><span class="line">            catch:^(<span class="built_in">NSError</span> *error) &#123;</span><br><span class="line">                <span class="keyword">return</span> [RACSignal <span class="keyword">return</span>:error];</span><br><span class="line">            &#125;];</span><br><span class="line">    &#125;]</span><br><span class="line">    deliverOn:RACScheduler.mainThreadScheduler]</span><br><span class="line">    publish];</span><br><span class="line"></span><br><span class="line">_errors = [errorsConnection.signal setNameWithFormat:<span class="string">@&quot;%@ -errors&quot;</span>, <span class="keyword">self</span>];</span><br><span class="line">[errorsConnection connect];</span><br></pre></td></tr></table></figure>
+
+<h3 id="RACChannel双向绑定"><a href="#RACChannel双向绑定" class="headerlink" title="RACChannel双向绑定"></a>RACChannel双向绑定</h3><p>一对一的双向数据流 RACChannel，RACChannel 可以被理解为一个双向的连接，这个连接的两端都是 RACSignal 实例，它们可以向彼此发送消息</p>
+<p>RACChannel 内部封装了两个 RACChannelTerminal 对象，它们都是 RACSignal 的子类：</p>
+<p>eg:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//下单 上门信息   ViewModel</span></span><br><span class="line">WSFPlaceOrderParamModel* modelName=[[WSFPlaceOrderParamModel alloc] init];</span><br><span class="line">    modelName.showTipText=<span class="literal">false</span>;</span><br><span class="line">    modelName.tilteParam=<span class="string">@&quot;姓名&quot;</span>;</span><br><span class="line">    modelName.valueTipParam=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceHolder=<span class="string">@&quot;请输入姓名&quot;</span>;</span><br><span class="line">    modelName.valuePlaceParam=<span class="literal">nil</span>;</span><br><span class="line">    modelName.modelType=WSFPlaceOrderCellTypeInput;</span><br><span class="line">    modelName.modelId=WSFPlaceOrderModelIdAddrName;</span><br><span class="line">    </span><br><span class="line">    RACChannelTo(modelName, valuePlaceParam)=RACChannelTo(WSFOrderManager,orderExtraData.buyerName);</span><br><span class="line">    </span><br><span class="line">  <span class="comment">// View    WSFPlaceOrderSingleLineInputCell</span></span><br><span class="line">  -(<span class="type">void</span>)setupRAC</span><br><span class="line">&#123;</span><br><span class="line">    @weakify(<span class="keyword">self</span>);</span><br><span class="line">    [[<span class="keyword">self</span>-&gt;_valueTxt.rac_textSignal filter:^<span class="type">BOOL</span>(<span class="built_in">NSString</span> * _Nullable value) &#123;</span><br><span class="line">        @strongify(<span class="keyword">self</span>);</span><br><span class="line">        &#125;]subscribeNext:^(<span class="built_in">NSString</span> * _Nullable x) &#123;</span><br><span class="line">            @strongify(<span class="keyword">self</span>);</span><br><span class="line">            <span class="keyword">self</span>.cellModel.valuePlaceParam=x;</span><br><span class="line">    &#125;];   </span><br></pre></td></tr></table></figure>
+
+<h3 id="多播的RACMulticastConnection（一对多）"><a href="#多播的RACMulticastConnection（一对多）" class="headerlink" title="多播的RACMulticastConnection（一对多）"></a>多播的RACMulticastConnection（一对多）</h3><blockquote>
+<p>将冷信号转变成热信号，并在合适的时间触发，向所有的订阅者发送消息</p>
+</blockquote>
+<p>使用</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">RACMulticastConnection *connection = [[RACSignal createSignal:^RACDisposable * _Nullable(<span class="type">id</span>&lt;RACSubscriber&gt;  _Nonnull subscriber) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;Send Request&quot;</span>);</span><br><span class="line">    ...</span><br><span class="line">&#125;] publish];</span><br><span class="line"></span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;product: %@&quot;</span>, x);</span><br><span class="line">&#125;];</span><br><span class="line">[connection.signal subscribeNext:^(<span class="type">id</span>  _Nullable x) &#123;</span><br><span class="line">    <span class="built_in">NSNumber</span> *productId = [x objectForKey:<span class="string">@&quot;id&quot;</span>];</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;productId: %@&quot;</span>, productId);</span><br><span class="line">&#125;];</span><br><span class="line"></span><br><span class="line">[connection connect];</span><br></pre></td></tr></table></figure>
+<p>使用 -publish 方法生成实例，订阅者不再订阅源信号，而是订阅 RACMulticastConnection 中的 RACSubject 热信号，最后通过 -connect 方法触发源信号中的任务。</p>
+<h4 id="publish-和-multicast-方法"><a href="#publish-和-multicast-方法" class="headerlink" title="publish 和 multicast 方法"></a>publish 和 multicast 方法</h4><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (RACMulticastConnection *)publish &#123;</span><br><span class="line">	RACSubject *subject = [RACSubject subject];</span><br><span class="line">	RACMulticastConnection *connection = [<span class="keyword">self</span> multicast:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (RACMulticastConnection *)multicast:(RACSubject *)subject &#123;</span><br><span class="line">	RACMulticastConnection *connection = [[RACMulticastConnection alloc] initWithSourceSignal:<span class="keyword">self</span> subject:subject];</span><br><span class="line">	<span class="keyword">return</span> connection;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 -publish 方法调用时相当于向 -multicast: 传入了 RACSubject。</p>
+<p>在使用 -multicast: 方法时，传入的信号其实就是用于广播的信号；这个信号必须是一个 RACSubject 本身或者它的子类</p>
+<h4 id="订阅源信号的时间点"><a href="#订阅源信号的时间点" class="headerlink" title="订阅源信号的时间点"></a>订阅源信号的时间点</h4><p>只有在调用 -connect 方法之后，RACSubject 才会订阅源信号 sourceSignal。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (RACDisposable *)connect &#123;</span><br><span class="line">	<span class="keyword">self</span>.serialDisposable.disposable = [<span class="keyword">self</span>.sourceSignal subscribe:_signal];</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">self</span>.serialDisposable;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时源信号的 didSubscribe 代码块才会执行，向 RACSubject 推送消息，消息向下继续传递到 RACSubject 所有的订阅者中。</p>
+<p> <code>-connect</code> 方法通过<code> -subscribe:</code> 实际上建立了 RACSignal 和 RACSubject 之间的连接，这种方式保证了 RACSignal 中的 didSubscribe 代码块只执行了一次。</p>
+<p>所有的订阅者不再订阅原信号，而是订阅 RACMulticastConnection 持有的热信号 RACSubject，实现对冷信号的一对多传播。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://draveness.me/racsignal/">『状态』驱动的世界：ReactiveCocoa</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/" rel="prev" title="MLeadksFinder使用">
+      <i class="fa fa-chevron-left"></i> MLeadksFinder使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/28/iOS%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%80%BB%E7%BB%93/" rel="next" title="iOS内存泄漏总结">
+      iOS内存泄漏总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#RACSignal-%E5%92%8C-RACSequence"><span class="nav-number">1.</span> <span class="nav-text">RACSignal 和 RACSequence</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACSignal-%E5%92%8C-RACSequence%E8%BD%AC%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">RACSignal 和 RACSequence转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%83%AD%E4%BF%A1%E5%8F%B7-RACSubject"><span class="nav-number">3.</span> <span class="nav-text">热信号 RACSubject</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%B7%E7%83%AD%E4%BF%A1%E5%8F%B7"><span class="nav-number">3.1.</span> <span class="nav-text">冷热信号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RACBehaviorSubject-%E4%B8%8E-RACReplaySubject"><span class="nav-number">3.2.</span> <span class="nav-text">RACBehaviorSubject 与 RACReplaySubject</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#RACBehaviorSubject"><span class="nav-number">3.2.1.</span> <span class="nav-text">RACBehaviorSubject</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RACReplaySubject"><span class="nav-number">3.2.2.</span> <span class="nav-text">RACReplaySubject</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACCommand"><span class="nav-number">4.</span> <span class="nav-text">RACCommand</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RACCommand-%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%8E%E6%89%A7%E8%A1%8C"><span class="nav-number">4.1.</span> <span class="nav-text">RACCommand 的初始化与执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RACCommand-%E6%8E%A5%E5%8F%A3%E4%B8%AD%E7%9A%84%E9%AB%98%E9%98%B6%E4%BF%A1%E5%8F%B7"><span class="nav-number">4.2.</span> <span class="nav-text">RACCommand 接口中的高阶信号</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RACChannel%E5%8F%8C%E5%90%91%E7%BB%91%E5%AE%9A"><span class="nav-number">5.</span> <span class="nav-text">RACChannel双向绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E6%92%AD%E7%9A%84RACMulticastConnection%EF%BC%88%E4%B8%80%E5%AF%B9%E5%A4%9A%EF%BC%89"><span class="nav-number">6.</span> <span class="nav-text">多播的RACMulticastConnection（一对多）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#publish-%E5%92%8C-multicast-%E6%96%B9%E6%B3%95"><span class="nav-number">6.1.</span> <span class="nav-text">publish 和 multicast 方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A2%E9%98%85%E6%BA%90%E4%BF%A1%E5%8F%B7%E7%9A%84%E6%97%B6%E9%97%B4%E7%82%B9"><span class="nav-number">6.2.</span> <span class="nav-text">订阅源信号的时间点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
