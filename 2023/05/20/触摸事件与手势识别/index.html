@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="需要给一个tableview添加一个tap手势识别，同时不影响tableview的滑动，应该如何实现？ 设置 tap.cancelTouchsInView &#x3D; NO;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="触摸事件与手势识别">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="需要给一个tableview添加一个tap手势识别，同时不影响tableview的滑动，应该如何实现？ 设置 tap.cancelTouchsInView &#x3D; NO;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/gesture01.png">
+<meta property="article:published_time" content="2023-05-20T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-05-21T09:05:00.397Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/gesture01.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>触摸事件与手势识别 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          触摸事件与手势识别
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-20 08:00:00" itemprop="dateCreated datePublished" datetime="2023-05-20T08:00:00+08:00">2023-05-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-21 17:05:00" itemprop="dateModified" datetime="2023-05-21T17:05:00+08:00">2023-05-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>需要给一个tableview添加一个tap手势识别，同时不影响tableview的滑动，应该如何实现？</p>
+<p>设置 tap.cancelTouchsInView &#x3D; NO;</p>
+<span id="more"></span>
+
+<h2 id="Gesture-Recognizer"><a href="#Gesture-Recognizer" class="headerlink" title="Gesture Recognizer"></a>Gesture Recognizer</h2><p>Gesture Recognizer是iOS3.2引入的，用来识别手势、简化定制视图事件处理的对象。基类为<code>UIGestureRecognizer</code>，这是一个抽象基类，定义了实现底层手势识别行为的编程接口。</p>
+<ul>
+<li>6个具体的手势识别类</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">UITapGestureRecognizer</span>:用来识别点击手势,包括单击，双击，甚至三击等。</span><br><span class="line"><span class="built_in">UIPinchGestureRecognizer</span>:用来识别手指捏合手势。</span><br><span class="line"><span class="built_in">UIPanGestureRecognizer</span>:用来识别拖动手势。</span><br><span class="line"><span class="built_in">UISwipeGestureRecognizer</span>:用来识别Swipe手势。</span><br><span class="line"><span class="built_in">UIRotationGestureRecognizer</span>:用来识别旋转手势。</span><br><span class="line"><span class="built_in">UILongPressGestureRecognizer</span>:用来识别长按手势。</span><br><span class="line"><span class="built_in">UIScreenEdgePanGestureRecognizer</span>:(iOS <span class="number">7</span> 新加入的手势识别器苹果官方给的唯一的一个属性是edges)</span><br></pre></td></tr></table></figure>
+<p><code>UIScreenEdgePanGestureRecognizer</code>跟pan(平移)手势差不多，需要从边缘进行拖动，在控制器转换的时候是有用的，看文档的话我们会发现 <code>UIScreenEdgePanGestureRecognizer</code>是 <code>UIPanGestureRecognizer</code>的子类，理解会更方便一点。</p>
+<h3 id="手势识别流程"><a href="#手势识别流程" class="headerlink" title="手势识别流程"></a>手势识别流程</h3><p>为了识别手势，需要将Gesture Recoginzers关联到其检测触摸事件的view上，可以使用UIView的addGestureRecognizer:方法将手势识别绑定到视图上。Gesture Recognizers在触摸事件处理流程中，处于观察者的角色，其不是view层级结构的一部分，所以也不参与responder chain。</p>
+<p>触摸事件传递的过程：在将触摸事件发送给hit-test view之前，系统会先将事件发送到hit-test上绑定的gesture recoginzers上或 hit-test view视图(superview)上绑定的Gesture Recognizers上。其流程图如下图所示:</p>
+<img src="/2023/05/20/%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E4%B8%8E%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB/gesture01.png" class="&#x3D;">
+
+<p>注:图中view与Gesture Recognizer的关系是,Gesture Recognizer关联在view或view的superview(可能多级)上</p>
+<h2 id="Gesture-Recoginzers与事件分发路径的关系"><a href="#Gesture-Recoginzers与事件分发路径的关系" class="headerlink" title="Gesture Recoginzers与事件分发路径的关系"></a>Gesture Recoginzers与事件分发路径的关系</h2><p>Gesture Recognizers可能会延迟将触摸事件发送到hit-test view上，默认情况下，当Gesture Recognizer识别到手势后，会向hit-test view发送cancel消息，来取消之前发给hit-test view的事件。</p>
+<ul>
+<li>控制这个流程的是UIGestureRecognizer的三个属性</li>
+</ul>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cancelTouchsInView （<span class="keyword">default</span> <span class="literal">YES</span>）</span><br><span class="line">delayTouchesBegin （<span class="keyword">default</span> <span class="literal">NO</span>）</span><br><span class="line">delayTouchesEnded （<span class="keyword">default</span> <span class="literal">YES</span>）</span><br></pre></td></tr></table></figure>
+<p><code>cancelsTouchesInView</code>为YES,表示当Gesture Recognizers识别到手势后，会向hit-test view发送 <code>touchesCancelled:withEvent:</code>消息来取消hit-test view对此触摸序列的处理,这样只有Gesture Recognizers能响应此触摸序列，hit-test view不再响应。</p>
+<p>如果为NO,则不发送<code>touchesCancelled:withEvent:</code>消息给hit-test view,这样会使Gesture Recognizers和hit-test view同时响应触摸序列。</p>
+<p><code>delaysTouchesBegan</code>为NO，表示触摸序列开始时，而手势识别器还未识别出此手势时，touch事件会同时发向hit-test view,这样在手势识别器还未识别出此手势，hit-test view同时也可以收到同样的触摸事件。</p>
+<p>如果为YES,则在手势识别器在识别手势的过程中，不会有任何触摸事件发送给hit-test view,如果手势识别器最终识别到了手势，则也不会发送任何消息(包括<code>touchesCancelled:withEvent:</code>)给hit-test view;如果手势识别最终没有识别到手势，则所有的触摸事件在发给hit-test view处理。关于这个特性，可参考UIScrollView的<code>delaysContentTouches</code>属性。这样属性也谨慎使用，使用不当会导致UI无响应。</p>
+<p><code>delaysTouchesEnded</code>,在文档上的解释是，当手势识别器在识别手势时，对于<code>UITouchPhaseEnded</code>阶段的touch会延迟发送给hit-test view,在手势识别成功后,发送给hit-test view cancel消息，手势识别失败时，发送原来的end消息。</p>
+<h2 id="多个Gesture-Recoginzer之间的关系"><a href="#多个Gesture-Recoginzer之间的关系" class="headerlink" title="多个Gesture Recoginzer之间的关系"></a>多个Gesture Recoginzer之间的关系</h2><p>在一个view上可以绑定多个Gesture Recognizer,在默认情况下，触摸序列中的触摸事件会以<strong>不确定的次序</strong>在各个gesture recognizer中传递，直到事件最终发送给hit-test view（如果中间没被Gesture Recognizer识别出并截获的话）。多个Gesture Recognizer之间的关系也可以根据需要定制，主要有下面几种行为</p>
+<h3 id="使其中一个gesture-recognizer失败的情况下，另一个gesture-recognizer才能分析事件。"><a href="#使其中一个gesture-recognizer失败的情况下，另一个gesture-recognizer才能分析事件。" class="headerlink" title="使其中一个gesture recognizer失败的情况下，另一个gesture recognizer才能分析事件。"></a>使其中一个gesture recognizer失败的情况下，另一个gesture recognizer才能分析事件。</h3><p>以同时识别单击操作和双击操作为例，两个gesture recognizers分别用来识别单击和双击，分别为singleTapGesture和doubleTapGesture。在默认情况下,当用户进行单击操作时，singleTapGesture会识别出一个单击操作，doubleTapGesture也会识别出一个双击动作，但我们的意图是，这仅仅是一个双击操作。在这种情况下我们可以使用UIGestureRecognizer的requireGestureRecognizerToFail:方法来使singleTapGesture在doubleTapGesture识别识别的时候才分析事件，如果doubleTapGesture识别出双击事件，则singleTapGesture不会有任何动作。</p>
+<p><code>[singleTapGesture requireGestureRecognizerToFail:doubleTapGesture];</code><br>需要注意的是，在这种情况下,如果用户进行单击操作，需要一段延时(即doubleTapGesture识别失败)，singleTapGesture才会识别出单击动作，进行单击处理，这段时间很多，对实际使用几乎没有影响。</p>
+<h3 id="精确控制gesture-recognizer是否响应某个事件或事件序列"><a href="#精确控制gesture-recognizer是否响应某个事件或事件序列" class="headerlink" title="精确控制gesture recognizer是否响应某个事件或事件序列."></a>精确控制gesture recognizer是否响应某个事件或事件序列.</h3><p>在<code>UIGestureRecognizerDelegate</code>协议中有两个可选方法可以控制gesture recognizer是否需要识别某些事件</p>
+<p><code>gestureRecognizerShouldBegin:</code><br>此方法在gesture recognizer视图转出UIGestureRecognizerStatePossible状态时调用，如果返回NO,则转换到UIGestureRecognizerStateFailed;如果返回YES,则继续识别触摸序列.(默认情况下为YES)<br><code>gestureRecognizer:shouldReceiveTouch:</code><br>此方法在window对象在有触摸事件发生时，调用gesture recognizer的touchesBegan:withEvent:方法之前调用，如果返回NO,则gesture recognizer不会看到此触摸事件。(默认情况下为YES).<br>另外，在UIGestureRecognizer类中也有两个可以重写的方法来完成与Delegate方法中相同的功能</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)canPreventGestureRecognizer:(<span class="built_in">UIGestureRecognizer</span> *)preventedGestureRecognizer;</span><br><span class="line">- (<span class="type">BOOL</span>)canBePreventedByGestureRecognizer:(<span class="built_in">UIGestureRecognizer</span> *)preventingGestureRecognizer;</span><br></pre></td></tr></table></figure>
+
+<h3 id="允许多个手势识别器共同识别"><a href="#允许多个手势识别器共同识别" class="headerlink" title="允许多个手势识别器共同识别"></a>允许多个手势识别器共同识别</h3><p>默认情况下，两个gesture recognizers不会同时识别它们的手势,但是你可以实现<code>UIGestureRecognizerDelegate</code>协议中的<br><code>gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:</code>方法对其进行控制。这个方法在这两个gesture recognizers中的任意一个将block另一个的触摸事件时调用，如果返回YES,则两个gesture recognizers可同时识别，如果返回NO，则并不保证两个gesture recognizers必不能同时识别，因为另外一个gesture recognizer的此方法可能返回YES。也就是说两个gesture recognizers的delegate方法只要任意一个返回YES，则这两个就可以同时识别；只有两个都返回NO的时候，才是互斥的。默认情况下是返回NO。</p>
+<p>有这样一个例子，如果要侦测在window上的所有触摸事件，可以将gesture recognizer关联到window上，默认情况下如果手势被window识别，则子视图中的gesture recognizer就失效了，而我们在window上的gesture recognizer的目的只是监控所有事件，但并不处理这些事件，具体事件的处理还需要子视图中的各个gesture recognizer去处理，这样我们可以实现window上绑定gesture recognizer的delegate方法，使<code>gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:</code>返回YES即可。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">BOOL</span>)gestureRecognizer:(<span class="built_in">UIGestureRecognizer</span> *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(<span class="built_in">UIGestureRecognizer</span> *)otherGestureRecognizer &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="UIScrollView的类似行为"><a href="#UIScrollView的类似行为" class="headerlink" title="UIScrollView的类似行为"></a>UIScrollView的类似行为</h2><p>scroll view没有滚动栏，当在scroll view上有触摸行为时其要识别出触摸行为的目的是scroll view本身还是其内容子视图。定制scrollview如何处理这种情况，看查看UIScrollView类的下列属性和方法。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">touchesShouldBegin:withEvent:inContentView:</span><br><span class="line">touchesShouldCancelInContentView:</span><br><span class="line">canCancelContentTouches</span><br><span class="line">delaysContentTouches</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/junhuawang/p/6133974.html">触摸事件与手势识别</a><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5ZV0eUljDYY36qaq0KzrUA">关于TapGesture、UIResponder 链和 target-action 事件的相互影响的机理和应用</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/04/%5B%E8%AF%91%5DCreating%20Custom%20Presentations/" rel="prev" title="【译】Creating Custom Presentations">
+      <i class="fa fa-chevron-left"></i> 【译】Creating Custom Presentations
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Gesture-Recognizer"><span class="nav-number">1.</span> <span class="nav-text">Gesture Recognizer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">手势识别流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gesture-Recoginzers%E4%B8%8E%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91%E8%B7%AF%E5%BE%84%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">2.</span> <span class="nav-text">Gesture Recoginzers与事件分发路径的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E4%B8%AAGesture-Recoginzer%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">3.</span> <span class="nav-text">多个Gesture Recoginzer之间的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E5%85%B6%E4%B8%AD%E4%B8%80%E4%B8%AAgesture-recognizer%E5%A4%B1%E8%B4%A5%E7%9A%84%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E5%8F%A6%E4%B8%80%E4%B8%AAgesture-recognizer%E6%89%8D%E8%83%BD%E5%88%86%E6%9E%90%E4%BA%8B%E4%BB%B6%E3%80%82"><span class="nav-number">3.1.</span> <span class="nav-text">使其中一个gesture recognizer失败的情况下，另一个gesture recognizer才能分析事件。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E7%A1%AE%E6%8E%A7%E5%88%B6gesture-recognizer%E6%98%AF%E5%90%A6%E5%93%8D%E5%BA%94%E6%9F%90%E4%B8%AA%E4%BA%8B%E4%BB%B6%E6%88%96%E4%BA%8B%E4%BB%B6%E5%BA%8F%E5%88%97"><span class="nav-number">3.2.</span> <span class="nav-text">精确控制gesture recognizer是否响应某个事件或事件序列.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%81%E8%AE%B8%E5%A4%9A%E4%B8%AA%E6%89%8B%E5%8A%BF%E8%AF%86%E5%88%AB%E5%99%A8%E5%85%B1%E5%90%8C%E8%AF%86%E5%88%AB"><span class="nav-number">3.3.</span> <span class="nav-text">允许多个手势识别器共同识别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UIScrollView%E7%9A%84%E7%B1%BB%E4%BC%BC%E8%A1%8C%E4%B8%BA"><span class="nav-number">4.</span> <span class="nav-text">UIScrollView的类似行为</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">124</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
