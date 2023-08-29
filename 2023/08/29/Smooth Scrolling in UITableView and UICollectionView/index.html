@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="【译】Smooth Scrolling in UITableView and UICollectionView">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/tableviewPreView.gif">
+<meta property="og:image" content="https://github.com/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/tableviewcell.png">
+<meta property="article:published_time" content="2023-08-29T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-29T03:02:01.822Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/tableviewPreView.gif">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】Smooth Scrolling in UITableView and UICollectionView | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】Smooth Scrolling in UITableView and UICollectionView
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-08-29 08:00:00 / 修改时间：11:02:01" itemprop="dateCreated datePublished" datetime="2023-08-29T08:00:00+08:00">2023-08-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">翻译</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img src="/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/tableviewPreView.gif" class="&#x3D;">
+
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>正如大多数iOS开发者所知，显示数据集是构建移动应用程序的一个相当常见的任务。苹果的SDK提供了两个组件来帮助完成这样的任务，而不必从头开始实现所有内容:一个表视图(<code>UITableView</code>)和一个集合视图(<code>UICollectionView</code>)。</p>
+<p>表视图和集合视图都被设计为支持显示可滚动的数据集。然而，当显示大量数据时，实现完美的平滑滚动可能会非常棘手。这并不理想，因为它会对用户体验产生负面影响。</p>
+<p>作为<code>Capital One Mobile</code>应用iOS开发团队的一员，我有机会尝试表格视图和集合视图;这篇文章反映了我个人在显示大量可滚动数据方面的经验。在本文中，我们将回顾优化上述SDK组件性能的最重要技巧。这一步对于实现流畅的滚动体验至关重要。请注意，下面的大多数要点都适用于<code>UITableView</code>和<code>UICollectionView</code>，因为它们共享了大量的“底层”行为。有几点是<code>UICollectionView</code>特有的，因为这个视图把额外的布局细节放在了开发人员的肩上。</p>
+<p>让我们从快速概述上述组件开始。<br><code>UITableView</code>被优化为将视图显示为行序列。由于布局是预定义的，SDK组件负责大部分布局，并提供主要关注于显示单元格内容的委托。<br>另一方面，<code>UICollectionView</code>提供了最大的灵活性，因为布局是完全可定制的。然而，集合视图的灵活性是以必须考虑如何执行布局的额外细节为代价的。</p>
+<h2 id="UITableView和UICollectionView的共同技巧"><a href="#UITableView和UICollectionView的共同技巧" class="headerlink" title="UITableView和UICollectionView的共同技巧"></a>UITableView和UICollectionView的共同技巧</h2><blockquote>
+<p>我将使用UITableView作为我的代码片段。但同样的概念也适用于UICollectionView。</p>
+</blockquote>
+<h3 id="Cells渲染是一项关键任务"><a href="#Cells渲染是一项关键任务" class="headerlink" title="Cells渲染是一项关键任务"></a>Cells渲染是一项关键任务</h3><p><code>UITableView</code>和<code>UITableViewCell</code>之间的主要交互可以用以下事件来描述:</p>
+<ul>
+<li>表视图正在请求需要显示的单元格(<code>tableView(_:cellForRowAt:)</code>)。 </li>
+<li>表视图即将显示单元格(<code>tableView(_:willDisplay:forRowAt:)</code>)。 </li>
+<li>单元格已经从表视图中移除(<code>tableView(_: didenddisplay:forRowAt:)</code>)。</li>
+</ul>
+<p>对于上述所有事件，表视图将传递正在进行交互的index(row)。这是<code>UITableViewCell</code>生命周期的可视化:</p>
+<img src="/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/tableviewcell.png" class="&#x3D;">
+
+<p>首先，<code>tableView(_:cellForRowAt:)</code>方法应该尽可能快。每次需要显示单元格时调用此方法。它执行得越快，表视图的滚动就会越平滑。 </p>
+<p>有一些事情我们可以做，以确保我们渲染cell尽可能快。下面是渲染单元格的基本代码，摘自苹果的文档:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">tableView</span>(<span class="keyword">_</span> <span class="params">tableView</span>: <span class="type">UITableView</span>, <span class="params">cellForRowAt</span> <span class="params">indexPath</span>: <span class="type">IndexPath</span>) -&gt; <span class="type">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="comment">// Table view cells are reused and should be dequeued using a cell identifier.</span></span><br><span class="line">    <span class="keyword">let</span> cell <span class="operator">=</span> tableView.dequeueReusableCell(withIdentifier: <span class="string">&quot;reuseIdentifier&quot;</span>, for: indexPath)</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Configure the cell ...</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cell</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在获取即将被重用的单元格实例(<code>dequeueReusableCell(withIdentifier:for:)</code>)之后，我们需要通过为其属性分配所需的值来配置它。让我们看一下如何使代码快速执行。</p>
+<h3 id="为单元格定义视图模型"><a href="#为单元格定义视图模型" class="headerlink" title="为单元格定义视图模型"></a>为单元格定义视图模型</h3><p>一种方法是让我们需要展示的所有属性都随时可用然后把它们分配给相应的单元格。为了实现这一点，我们可以利用<code>MVVM</code>模式。假设我们需要在表视图中显示一组用户。我们可以将用户模型定义为:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">Role</span>: <span class="title class_">String</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Unknown</span> <span class="operator">=</span> <span class="string">&quot;Unknown&quot;</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">User</span> <span class="operator">=</span> <span class="string">&quot;User&quot;</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">Owner</span> <span class="operator">=</span> <span class="string">&quot;Owner&quot;</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">Admin</span> <span class="operator">=</span> <span class="string">&quot;Admin&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">get</span>(<span class="params">from</span>: <span class="type">String</span>) -&gt; <span class="type">Role</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> from <span class="operator">==</span> <span class="type">User</span>.rawValue &#123;</span><br><span class="line">            <span class="keyword">return</span> .<span class="type">User</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> from <span class="operator">==</span> <span class="type">Owner</span>.rawValue &#123;</span><br><span class="line">            <span class="keyword">return</span> .<span class="type">Owner</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> from <span class="operator">==</span> <span class="type">Admin</span>.rawValue &#123;</span><br><span class="line">            <span class="keyword">return</span> .<span class="type">Admin</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> .<span class="type">Unknown</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> avatarUrl: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> username: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> role: <span class="type">Role</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">avatarUrl</span>: <span class="type">String</span>, <span class="params">username</span>: <span class="type">String</span>, <span class="params">role</span>: <span class="type">Role</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.avatarUrl <span class="operator">=</span> avatarUrl</span><br><span class="line">        <span class="keyword">self</span>.username <span class="operator">=</span> username</span><br><span class="line">        <span class="keyword">self</span>.role <span class="operator">=</span> role</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为用户定义视图模型很简单:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">UserViewModel</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> avatarUrl: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> username: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> role: <span class="type">Role</span></span><br><span class="line">    <span class="keyword">let</span> roleText: <span class="type">String</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">user</span>: <span class="type">User</span>) &#123;</span><br><span class="line">        <span class="comment">// Avatar</span></span><br><span class="line">        avatarUrl <span class="operator">=</span> user.avatarUrl</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Username</span></span><br><span class="line">        username <span class="operator">=</span> user.username</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// Role</span></span><br><span class="line">        role <span class="operator">=</span> user.role</span><br><span class="line">        roleText <span class="operator">=</span> user.role.rawValue</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="异步获取数据和缓存视图模型"><a href="#异步获取数据和缓存视图模型" class="headerlink" title="异步获取数据和缓存视图模型"></a>异步获取数据和缓存视图模型</h3><p>现在我们已经定义了模型和视图模型，让我们让它们工作吧!我们将通过web服务为用户获取数据。当然，我们希望实现最好的用户体验。因此，我们将关注以下方面:</p>
+<ul>
+<li>在获取数据时避免阻塞主线程。 </li>
+<li>在检索数据后立即更新表视图。</li>
+</ul>
+<p>这意味着我们将异步获取数据。我们将通过一个特定的控制器来执行这个任务，以便将获取逻辑与模型和视图模型分开，如下所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserViewModelController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fileprivate</span> <span class="keyword">var</span> viewModels: [<span class="type">UserViewModel</span>?] <span class="operator">=</span> []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">retrieveUsers</span>(<span class="keyword">_</span> <span class="params">completionBlock</span>: <span class="keyword">@escaping</span> (<span class="keyword">_</span> success: <span class="type">Bool</span>, <span class="keyword">_</span> error: <span class="type">NSError</span>?) -&gt; ()) &#123;</span><br><span class="line">        <span class="keyword">let</span> urlString <span class="operator">=</span> <span class="operator">...</span> <span class="comment">// Users Web Service URL</span></span><br><span class="line">        <span class="keyword">let</span> session <span class="operator">=</span> <span class="type">URLSession</span>.shared</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: urlString) <span class="keyword">else</span> &#123;</span><br><span class="line">            completionBlock(<span class="literal">false</span>, <span class="literal">nil</span>)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">let</span> task <span class="operator">=</span> session.dataTask(with: url) &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] (data, response, error) <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> strongSelf <span class="operator">=</span> <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> data <span class="operator">=</span> data <span class="keyword">else</span> &#123;</span><br><span class="line">                completionBlock(<span class="literal">false</span>, error <span class="keyword">as</span> <span class="type">NSError</span>?)</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> error <span class="operator">=</span> <span class="operator">...</span> <span class="comment">// Define a NSError for failed parsing</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">let</span> jsonData <span class="operator">=</span> <span class="keyword">try?</span> <span class="type">JSONSerialization</span>.jsonObject(with: data, options: .allowFragments) <span class="keyword">as?</span> [[<span class="type">String</span>: <span class="type">AnyObject</span>]] &#123;</span><br><span class="line">                <span class="keyword">guard</span> <span class="keyword">let</span> jsonData <span class="operator">=</span> jsonData <span class="keyword">else</span> &#123;</span><br><span class="line">                    completionBlock(<span class="literal">false</span>,  error)</span><br><span class="line">                    <span class="keyword">return</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">var</span> users <span class="operator">=</span> [<span class="type">User</span>?]()</span><br><span class="line">                <span class="keyword">for</span> json <span class="keyword">in</span> jsonData &#123;</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">let</span> user <span class="operator">=</span> <span class="type">UserViewModelController</span>.parse(json) &#123;</span><br><span class="line">                        users.append(user)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                strongSelf.viewModels <span class="operator">=</span> <span class="type">UserViewModelController</span>.initViewModels(users)</span><br><span class="line">                completionBlock(<span class="literal">true</span>, <span class="literal">nil</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                completionBlock(<span class="literal">false</span>, error)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        task.resume()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> viewModelsCount: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> viewModels.count</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">viewModel</span>(<span class="params">at</span> <span class="params">index</span>: <span class="type">Int</span>) -&gt; <span class="type">UserViewModel</span>? &#123;</span><br><span class="line">        <span class="keyword">guard</span> index <span class="operator">&gt;=</span> <span class="number">0</span> <span class="operator">&amp;&amp;</span> index <span class="operator">&lt;</span> viewModelsCount <span class="keyword">else</span> &#123; <span class="keyword">return</span> <span class="literal">nil</span> &#125;</span><br><span class="line">        <span class="keyword">return</span> viewModels[index]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">extension</span> <span class="title class_">UserViewModelController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">parse</span>(<span class="keyword">_</span> <span class="params">json</span>: [<span class="params">String</span>: <span class="type">AnyObject</span>]) -&gt; <span class="type">User</span>? &#123;</span><br><span class="line">        <span class="keyword">let</span> avatarUrl <span class="operator">=</span> json[<span class="string">&quot;avatar&quot;</span>] <span class="keyword">as?</span> <span class="type">String</span> <span class="operator">??</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">let</span> username <span class="operator">=</span> json[<span class="string">&quot;username&quot;</span>] <span class="keyword">as?</span> <span class="type">String</span> <span class="operator">??</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">let</span> role <span class="operator">=</span> json[<span class="string">&quot;role&quot;</span>] <span class="keyword">as?</span> <span class="type">String</span> <span class="operator">??</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> <span class="type">User</span>(avatarUrl: avatarUrl, username: username, role: <span class="type">Role</span>.get(from: role))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">initViewModels</span>(<span class="keyword">_</span> <span class="params">users</span>: [<span class="type">User</span>?]) -&gt; [<span class="type">UserViewModel</span>?] &#123;</span><br><span class="line">        <span class="keyword">return</span> users.map &#123; user <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">let</span> user <span class="operator">=</span> user &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="type">UserViewModel</span>(user: user)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在我们可以检索数据并异步更新表视图，如下面的代码片段所示:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MainViewController</span>: <span class="title class_">UITableViewController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">fileprivate</span> <span class="keyword">let</span> userViewModelController <span class="operator">=</span> <span class="type">UserViewModelController</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">viewDidLoad</span>() &#123;</span><br><span class="line">        <span class="keyword">super</span>.viewDidLoad()</span><br><span class="line"></span><br><span class="line">        userViewModelController.retrieveUsers &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] (success, error) <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> strongSelf <span class="operator">=</span> <span class="keyword">self</span> <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">            <span class="keyword">if</span> <span class="operator">!</span>success &#123;</span><br><span class="line">                <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">                    <span class="keyword">let</span> title <span class="operator">=</span> <span class="string">&quot;Error&quot;</span></span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">let</span> error <span class="operator">=</span> error &#123;</span><br><span class="line">                        strongSelf.showError(title, message: error.localizedDescription)</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        strongSelf.showError(title, message: <span class="type">NSLocalizedString</span>(<span class="string">&quot;Can&#x27;t retrieve contacts.&quot;</span>, comment: <span class="string">&quot;The message displayed when contacts can’t be retrieved.&quot;</span>))</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">                    strongSelf.tableView.reloadData()</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    [<span class="operator">...</span>]</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以使用上面的代码片段以几种不同的方式获取用户数据: </p>
+<ul>
+<li>只有在第一次加载表视图时，通过将其放置在<code>viewDidLoad()</code>中。 </li>
+<li>每次显示表视图时，通过将其放置在<code>viewWillAppear(_:)</code>中。 </li>
+<li>根据用户需求(例如通过下拉刷新)，将其放置在负责刷新数据的方法调用中。</li>
+</ul>
+<p>选择取决于后端数据更改的频率。如果数据大部分是静态的或不经常更改，则第一种选择更好。否则，我们应该选择第二种。</p>
+<h3 id="异步加载图像并缓存它们"><a href="#异步加载图像并缓存它们" class="headerlink" title="异步加载图像并缓存它们"></a>异步加载图像并缓存它们</h3><p>为单元格加载图像是很常见的。由于我们试图获得最佳的滚动性能，我们绝对不想阻塞主线程来获取图像。避免这种情况的一个简单方法是通过在<code>URLSession</code>周围创建一个简单的包装器来异步加载图像:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">UIImageView</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">downloadImageFromUrl</span>(<span class="keyword">_</span> <span class="params">url</span>: <span class="type">String</span>, <span class="params">defaultImage</span>: <span class="type">UIImage</span>? <span class="operator">=</span> <span class="type">UIImageView</span>.defaultAvatarImage()) &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: url) <span class="keyword">else</span> &#123; <span class="keyword">return</span> &#125;</span><br><span class="line">        <span class="type">URLSession</span>.shared.dataTask(with: url, completionHandler: &#123; [<span class="keyword">weak</span> <span class="keyword">self</span>] (data, response, error) -&gt; <span class="type">Void</span> <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> httpURLResponse <span class="operator">=</span> response <span class="keyword">as?</span> <span class="type">NSHTTPURLResponse</span> <span class="keyword">where</span> httpURLResponse.statusCode <span class="operator">==</span> <span class="number">200</span>,</span><br><span class="line">                <span class="keyword">let</span> mimeType <span class="operator">=</span> response<span class="operator">?</span>.mimeType, mimeType.hasPrefix(<span class="string">&quot;image&quot;</span>),</span><br><span class="line">                <span class="keyword">let</span> data <span class="operator">=</span> data <span class="keyword">where</span> error <span class="operator">==</span> <span class="literal">nil</span>,</span><br><span class="line">                <span class="keyword">let</span> image <span class="operator">=</span> <span class="type">UIImage</span>(data: data)</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).resume()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这让我们可以使用后台线程获取每个图像，然后在所需数据可用时更新UI。我们可以通过缓存图像进一步提高性能。 </p>
+<p>如果我们不想——或者负担不起——自己编写自定义的异步图像下载和缓存，我们可以利用像<code>SDWebImage</code>或<code>AlamofireImage</code>这样的库。这些库提供了我们正在寻找的开箱即用的功能。</p>
+<h3 id="自定义单元格"><a href="#自定义单元格" class="headerlink" title="自定义单元格"></a>自定义单元格</h3><p>为了充分利用缓存的视图模型，我们可以自定义用户单元格的子类(从<code>UITableViewCell</code>表视图和从<code>UICollectionViewCell</code>集合视图)。基本的方法是为需要显示的模型的每个属性创建一个出口，并从视图模型中初始化它:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserCell</span>: <span class="title class_">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> avatar: <span class="type">UIImageView</span>!</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> username: <span class="type">UILabel</span>!</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> role: <span class="type">UILabel</span>!</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">configure</span>(<span class="keyword">_</span> <span class="params">viewModel</span>: <span class="type">UserViewModel</span>) &#123;</span><br><span class="line">        avatar.downloadImageFromUrl(viewModel.avatarUrl)</span><br><span class="line">        username.text <span class="operator">=</span> viewModel.username</span><br><span class="line">        role.text <span class="operator">=</span> viewModel.roleText</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用不透明图层，避免渐变"><a href="#使用不透明图层，避免渐变" class="headerlink" title="使用不透明图层，避免渐变"></a>使用不透明图层，避免渐变</h3><p>由于使用透明层或应用渐变需要大量的计算，如果可能的话，我们应该避免使用它们来提高滚动性能。特别是，我们应该避免改变<code>alpha</code>值，最好使用标准的RGB颜色(避免<code>uiccolor .clear</code>)用于单元格和它包含的任何图像: </p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">UserCell</span>: <span class="title class_">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> avatar: <span class="type">UIImageView</span>!</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> username: <span class="type">UILabel</span>!</span><br><span class="line">    <span class="keyword">@IBOutlet</span> <span class="keyword">weak</span> <span class="keyword">var</span> role: <span class="type">UILabel</span>!</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">configure</span>(<span class="keyword">_</span> <span class="params">viewModel</span>: <span class="type">UserViewModel</span>) &#123;</span><br><span class="line">        setOpaqueBackground()</span><br><span class="line">        </span><br><span class="line">        [<span class="operator">...</span>]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">extension</span> <span class="title class_">UserCell</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> defaultBackgroundColor <span class="operator">=</span> <span class="type">UIColor</span>.groupTableViewBackgroundColor</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">setOpaqueBackground</span>() &#123;</span><br><span class="line">        alpha <span class="operator">=</span> <span class="number">1.0</span></span><br><span class="line">        backgroundColor <span class="operator">=</span> <span class="type">UserCell</span>.defaultBackgroundColor</span><br><span class="line">        avatar.alpha <span class="operator">=</span> <span class="number">1.0</span></span><br><span class="line">        avatar.backgroundColor <span class="operator">=</span> <span class="type">UserCell</span>.defaultBackgroundColor</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="把一切放在一起-优化cell渲染"><a href="#把一切放在一起-优化cell渲染" class="headerlink" title="把一切放在一起:优化cell渲染"></a>把一切放在一起:优化cell渲染</h3><p>在这一点上，在渲染单元格的时候配置它应该很容易，而且非常快，因为:</p>
+<ul>
+<li>我们正在使用缓存的视图模型数据。 </li>
+<li>我们正在异步获取图像。</li>
+</ul>
+<p>下面是更新后的代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">tableView</span>(<span class="keyword">_</span> <span class="params">tableView</span>: <span class="type">UITableView</span>, <span class="params">cellForRowAt</span> <span class="params">indexPath</span>: <span class="type">IndexPath</span>) -&gt; <span class="type">UITableViewCell</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> cell <span class="operator">=</span> tableView.dequeueReusableCell(withIdentifier: <span class="string">&quot;UserCell&quot;</span>, for: indexPath) <span class="keyword">as!</span> <span class="type">UserCell</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> viewModel <span class="operator">=</span> userViewModelController.viewModel(at: (indexPath <span class="keyword">as</span> <span class="type">NSIndexPath</span>).row) &#123;</span><br><span class="line">        cell.configure(viewModel)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> cell</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="UITableView的特别技巧"><a href="#UITableView的特别技巧" class="headerlink" title="UITableView的特别技巧"></a>UITableView的特别技巧</h2><h3 id="对可变高度的单元格使用自调整大小-Self-Sizing-的单元格"><a href="#对可变高度的单元格使用自调整大小-Self-Sizing-的单元格" class="headerlink" title="对可变高度的单元格使用自调整大小(Self-Sizing)的单元格"></a>对可变高度的单元格使用自调整大小(Self-Sizing)的单元格</h3><p>如果我们想要在表格视图中显示的单元格具有可变高度，我们可以使用<code>self sizable cells</code>。基本上，我们应该创建适当的Auto Layout约束，以确保具有可变高度的UI组件能够正确拉伸。然后我们只需要初始化<code>estimatedRowHeight</code>和<code>rowHeight</code>属性:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">viewDidLoad</span>() &#123;</span><br><span class="line">   [<span class="operator">...</span>]</span><br><span class="line">   tableView.estimatedRowHeight <span class="operator">=</span> <span class="operator">...</span> <span class="comment">// Estimated default row height</span></span><br><span class="line">   tableView.rowHeight <span class="operator">=</span> <span class="type">UITableViewAutomaticDimension</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主意：在不幸的情况下，我们不能使用<code>self-sizing cells</code>(例如，如果支持iOS7仍然是必需的)，我们必须实现<code>tableView(_:heightForRowAt:)</code>来计算每个单元格的高度。但是，仍然可以通过以下方式提高滚动性能:</p>
+<ul>
+<li>一次预先计算所有的行高。 </li>
+<li>当<code>tableView(_:heightForRowAt:)</code>被调用时返回缓存的值。</li>
+</ul>
+<h2 id="UICollectionView的特别技巧"><a href="#UICollectionView的特别技巧" class="headerlink" title="UICollectionView的特别技巧"></a>UICollectionView的特别技巧</h2><p>通过实现适当的<code>UICollectionViewFlowLayoutDelegate</code>协议方法，我们可以轻松地定制大部分集合视图。</p>
+<h3 id="计算单元格大小"><a href="#计算单元格大小" class="headerlink" title="计算单元格大小"></a>计算单元格大小</h3><p>我们可以通过实现<code>collectionView(_:layout:sizeForItemAt:)</code>来定制集合视图的单元格大小:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@objc</span>(collectionView:layout:sizeForItemAtIndexPath:)</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">collectionView</span>(<span class="keyword">_</span> <span class="params">collectionView</span>: <span class="type">UICollectionView</span>, <span class="params">layout</span> <span class="params">collectionViewLayout</span>: <span class="type">UICollectionViewLayout</span>, <span class="params">sizeForItemAt</span> <span class="params">indexPath</span>: <span class="type">IndexPath</span>) -&gt; <span class="type">CGSize</span></span><br><span class="line">    <span class="comment">// Calculate the appropriate cell size</span></span><br><span class="line">    <span class="keyword">return</span> <span class="type">CGSize</span>(width: <span class="operator">...</span>, height: <span class="operator">...</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="处理Size-Classes和Orientation的改变"><a href="#处理Size-Classes和Orientation的改变" class="headerlink" title="处理Size Classes和Orientation的改变"></a>处理Size Classes和Orientation的改变</h3><p>我们应该确保在以下情况下正确刷新集合视图布局:</p>
+<ul>
+<li>转换到不同的Size Class。 </li>
+<li>旋转设备。</li>
+</ul>
+<p>这可以通过实现<code>viewWillTransition(to:with:)</code>来实现:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">viewWillTransition</span>(<span class="params">to</span> <span class="params">size</span>: <span class="type">CGSize</span>, <span class="params">with</span> <span class="params">coordinator</span>: <span class="type">UIViewControllerTransitionCoordinator</span>) &#123;</span><br><span class="line">    <span class="keyword">super</span>.viewWillTransition(to: size, with: coordinator)</span><br><span class="line">    collectionView<span class="operator">?</span>.collectionViewLayout.invalidateLayout()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="动态调整单元格布局"><a href="#动态调整单元格布局" class="headerlink" title="动态调整单元格布局"></a>动态调整单元格布局</h3><p>如果我们需要动态调整单元格布局，我们应该通过在我们的自定义集合视图单元格(它是<code>UICollectionViewCell</code>的子类)中重写<code>apply(_:)</code>来处理这个问题:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">apply</span>(<span class="keyword">_</span> <span class="params">layoutAttributes</span>: <span class="type">UICollectionViewLayoutAttributes</span>) &#123;</span><br><span class="line">    <span class="keyword">super</span>.apply(layoutAttributes)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Customize the cell layout</span></span><br><span class="line">    [<span class="operator">...</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>例如，在这个方法中执行的常见任务之一是通过编程设置其<code>preferredmaxlayoutidth</code>属性来调整多行<code>UILabel</code>的最大宽度:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="keyword">func</span> <span class="title function_">apply</span>(<span class="keyword">_</span> <span class="params">layoutAttributes</span>: <span class="type">UICollectionViewLayoutAttributes</span>) &#123;</span><br><span class="line">    <span class="keyword">super</span>.apply(layoutAttributes)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Customize the cell layout</span></span><br><span class="line">    <span class="keyword">let</span> width <span class="operator">=</span> layoutAttributes.frame.width</span><br><span class="line">    username.preferredMaxLayoutWidth <span class="operator">=</span> width <span class="operator">-</span> <span class="number">16</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>你可以在<a href="https://github.com/andrea-prearo/SwiftExamples/tree/master/SmoothScrolling/Client">这里</a>找到一个关于<code>uitableview</code>和<code>UICollectionView</code>建议技巧的小示例。 </p>
+<p>在这篇文章中，我们研究了一些常见的技巧来实现<code>UITableView</code>和<code>UICollectionView</code>的平滑滚动。我们还介绍了一些适用于每种特定集合类型的特定技巧。根据特定的UI需求，可能有更好或不同的方法来优化集合类型。然而，这篇文章中描述的基本原则仍然适用。与往常一样，找出哪种优化最有效的最佳方法是分析你的应用。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://medium.com/capital-one-developers/smooth-scrolling-in-uitableview-and-uicollectionview-a012045d77f">Smooth Scrolling in UITableView and UICollectionView</a></li>
+<li><a href="">有道翻译</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/06/11/%E8%8A%92%E6%A0%BC%E7%9A%84%E5%8E%9F%E5%88%99/" rel="prev" title="查理芒格的原则">
+      <i class="fa fa-chevron-left"></i> 查理芒格的原则
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UITableView%E5%92%8CUICollectionView%E7%9A%84%E5%85%B1%E5%90%8C%E6%8A%80%E5%B7%A7"><span class="nav-number">2.</span> <span class="nav-text">UITableView和UICollectionView的共同技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cells%E6%B8%B2%E6%9F%93%E6%98%AF%E4%B8%80%E9%A1%B9%E5%85%B3%E9%94%AE%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.1.</span> <span class="nav-text">Cells渲染是一项关键任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%8D%95%E5%85%83%E6%A0%BC%E5%AE%9A%E4%B9%89%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">为单元格定义视图模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E5%92%8C%E7%BC%93%E5%AD%98%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.3.</span> <span class="nav-text">异步获取数据和缓存视图模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD%E5%9B%BE%E5%83%8F%E5%B9%B6%E7%BC%93%E5%AD%98%E5%AE%83%E4%BB%AC"><span class="nav-number">2.4.</span> <span class="nav-text">异步加载图像并缓存它们</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%95%E5%85%83%E6%A0%BC"><span class="nav-number">2.5.</span> <span class="nav-text">自定义单元格</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%B8%8D%E9%80%8F%E6%98%8E%E5%9B%BE%E5%B1%82%EF%BC%8C%E9%81%BF%E5%85%8D%E6%B8%90%E5%8F%98"><span class="nav-number">2.6.</span> <span class="nav-text">使用不透明图层，避免渐变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A%E4%B8%80%E5%88%87%E6%94%BE%E5%9C%A8%E4%B8%80%E8%B5%B7-%E4%BC%98%E5%8C%96cell%E6%B8%B2%E6%9F%93"><span class="nav-number">2.7.</span> <span class="nav-text">把一切放在一起:优化cell渲染</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UITableView%E7%9A%84%E7%89%B9%E5%88%AB%E6%8A%80%E5%B7%A7"><span class="nav-number">3.</span> <span class="nav-text">UITableView的特别技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E5%8F%AF%E5%8F%98%E9%AB%98%E5%BA%A6%E7%9A%84%E5%8D%95%E5%85%83%E6%A0%BC%E4%BD%BF%E7%94%A8%E8%87%AA%E8%B0%83%E6%95%B4%E5%A4%A7%E5%B0%8F-Self-Sizing-%E7%9A%84%E5%8D%95%E5%85%83%E6%A0%BC"><span class="nav-number">3.1.</span> <span class="nav-text">对可变高度的单元格使用自调整大小(Self-Sizing)的单元格</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UICollectionView%E7%9A%84%E7%89%B9%E5%88%AB%E6%8A%80%E5%B7%A7"><span class="nav-number">4.</span> <span class="nav-text">UICollectionView的特别技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%8D%95%E5%85%83%E6%A0%BC%E5%A4%A7%E5%B0%8F"><span class="nav-number">4.1.</span> <span class="nav-text">计算单元格大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86Size-Classes%E5%92%8COrientation%E7%9A%84%E6%94%B9%E5%8F%98"><span class="nav-number">4.2.</span> <span class="nav-text">处理Size Classes和Orientation的改变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E6%95%B4%E5%8D%95%E5%85%83%E6%A0%BC%E5%B8%83%E5%B1%80"><span class="nav-number">4.3.</span> <span class="nav-text">动态调整单元格布局</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">129</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
