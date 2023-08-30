@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="【译】Boost Smooth Scrolling with iOS 10 Pre-Fetching API">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/prefetch.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/dropframe.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/displayRefreshes.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/celllifecycle.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10lifecycle.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS9MultiColumn.png">
+<meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10MultiColumn.png">
+<meta property="article:published_time" content="2023-08-30T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-08-30T03:41:28.357Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/prefetch.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【译】Boost Smooth Scrolling with iOS 10 Pre-Fetching API | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【译】Boost Smooth Scrolling with iOS 10 Pre-Fetching API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-08-30 08:00:00 / 修改时间：11:41:28" itemprop="dateCreated datePublished" datetime="2023-08-30T08:00:00+08:00">2023-08-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E7%BF%BB%E8%AF%91/" itemprop="url" rel="index"><span itemprop="name">翻译</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/prefetch.png" class="&#x3D;">
+
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在<a target="_blank" rel="noopener" href="https://jackwchen2015.github.io/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/#more">之前</a>的一篇文章中，我们探讨了在iOS手机应用中实现流畅滚动的一些常见策略。应用这些策略的主要目标是避免起伏滚动(choppy scrolling)，这是一个对用户体验产生负面影响的常见问题。为了帮助开发者完成这样的任务，苹果在<code>iOS10</code>中对<code>UICollectionView</code>做了一些非常有用的改变。但是在回顾这个新引入的功能之前，让我们先看看是什么促使了对它们的需求。</p>
+<h2 id="是什么导致滚动出现起伏"><a href="#是什么导致滚动出现起伏" class="headerlink" title="是什么导致滚动出现起伏?"></a>是什么导致滚动出现起伏?</h2><p>你是否曾经接触过或开发过偶尔出现起伏不平的应用?如果答案是肯定的，那么你就会知道当你尝试快速滚动时，应用程序的内容似乎是断断续续的(stutter)，这是多么令人失望。你可能会问自己，是什么引发了这种起伏不定的滚动行为，以及随之而来的糟糕的用户体验。</p>
+<p><strong>简短的回答是:该应用正在掉帧。但这到底是什么意思呢?</strong></p>
+<p>为了确保持续流畅的滚动，应用程序需要能够稳定地显示<code>60 FPS</code>(帧每秒)。或者，换句话说，应用程序需要每秒刷新60次内容。这意味着每一帧大约有<code>16ms</code>的渲染时间(<code>1000ms/60frames ~ 16ms/frame</code>)。在不幸的情况下，显示一帧的时间超过了规定的时间，没有显示下一帧的数据，这被认为是应用程序“丢失了一帧”。这个不幸的场景如下图所示。蓝色标记表示绘图操作，其粗细(thickness)表示完成渲染所需的时间。正如我们所看到的，在第二帧中，我们有一些渲染事件花费的时间超过了分配的时间(约16ms)，因此，第三帧被丢弃了。</p>
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/dropframe.png" class="&#x3D;">
+
+<p>我们可以从刷新操作所花费的<code>CPU时间</code>的角度来可视化相同的场景。在下面的图表中，峰值对应于当应用程序花费超过预期的<code>16毫秒</code>来刷新当前内容时出现的丢弃帧。</p>
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/displayRefreshes.png" class="&#x3D;">
+
+
+<p>为了获得良好的用户体验，刷新时间必须始终低于允许的最大值<code>~16ms</code>。理想情况下，当我们想要创造一个很棒的用户体验时(and not just a good one)，每次刷新时间应该是:</p>
+<ul>
+<li>始终远低于允许的最大时间(~16ms)。 </li>
+<li>尽可能低，以节省CPU时间，这些时间可以用于其他任务。</li>
+</ul>
+<p>丢帧最常见的原因是从主线程为cell加载昂贵的数据模型。此场景的典型示例如下:</p>
+<ul>
+<li>从URL加载图像。 </li>
+<li>从数据库或CoreData访问items。</li>
+</ul>
+<p>在<code>iOS10</code>中，苹果对单元格的加载和显示方式进行了一些优化。让我们来看看<code>iOS10</code>的改进，以及它们是如何让开发者更容易地创建流畅的滚动用户体验的。</p>
+<h2 id="iOS9中的Cell生命周期"><a href="#iOS9中的Cell生命周期" class="headerlink" title="iOS9中的Cell生命周期"></a>iOS9中的Cell生命周期</h2><p><code>UICollectionViewCell</code>的生命周期可以可视化如下:</p>
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/celllifecycle.png" class="&#x3D;">
+
+<p>集合视图和它的单元格之间的主要交互是:</p>
+<ul>
+<li>集合视图正在请求将要显示的单元格的内容——单元格即将进入可见区域:<code>collectionView(_:cellForItemAt:)</code>。 </li>
+<li>集合视图请求显示单元格——单元格刚刚进入可见区域:<code>collectionView(_:willDisplay:forItemAt:)</code>。 </li>
+<li>收集视图正在删除单元格-单元格在可见区域之外:<code>collectionView(didenddisplay:forItemAt:)</code>。</li>
+</ul>
+<h2 id="iOS10中的Cell生命周期"><a href="#iOS10中的Cell生命周期" class="headerlink" title="iOS10中的Cell生命周期"></a>iOS10中的Cell生命周期</h2><p>在<code>iOS10</code>中，cell的生命周期与<code>iOS9</code>基本相同。然而，有一些显著的区别。 </p>
+<p>第一个区别是操作系统调用<code>collectionView(_:cellForItemAt:)</code>比以前早得多。这意味着两件事: </p>
+<ul>
+<li>加载单元格的繁重工作可以在需要显示单元格之前完成。 </li>
+<li>单元格可能最终根本不显示(因为它可能从未被带入可见区域)。</li>
+</ul>
+<p>第二个不同之处在于，当一个cell离开可见区域时会发生什么。在<code>iOS10</code>中，像往常一样调用<code>collectionView(didenddisplay:forItemAt:)</code>，但单元格不会立即回收。操作系统会保留它一段时间以防用户反转滚动方向;如果发生这种情况，单元格仍然可用，并且可以再次显示(将调用<code>collectionView(_:willDisplay:forItemAt:)</code>)，而不必重新加载其内容。</p>
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10lifecycle.png" class="&#x3D;">
+
+<p>将此与<code>iOS9</code>上的情况进行比较。您将注意到，对于这个特定的用例，不再需要重新加载单元格(<code>collectionView(_:cellForItemAt:)</code>)。这种优化允许我们在用户快速滚动和改变滚动方向时更快地渲染单元格。</p>
+<p><code>iOS9</code>和<code>iOS10</code>之间的第三个重要区别是为多列布局的collection views加载单元格的方式。</p>
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS9MultiColumn.png" class="&#x3D;">
+
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10MultiColumn.png" class="&#x3D;">
+
+<p>在<code>iOS10</code>中，关于进入可见区域的每个单元格都是分开(separately)加载的(<code>collectionView(_:cellForItemAt:)</code>)。正如我们在审查(examining)cell生命周期时所看到的，这比实际需要显示每个cell的时间要早得多。这为优化打开了大门，因为操作系统将能够处理不同的请求，将它们与单元格的加载解耦(interleaving)。</p>
+<p>当一行单元格(a row of cells)进入可见区域时，这些单元格将作为单个批处理(a single batch)显示(同时对整行调用<code>collectionView(_:willDisplay:forItemAt:)</code>)，因为此操作在CPU周期方面不是很昂贵(至少与加载单元格内容相比)。</p>
+<p>加载多列布局的差异是<code>iOS10</code>最重要的<code>UICollectionView</code>优化的核心:预抓取(Pre-Fetching)。让我们更详细地探讨一下。</p>
+<h2 id="预抓取API"><a href="#预抓取API" class="headerlink" title="预抓取API"></a>预抓取API</h2><p>在发布<code>iOS10</code>时，苹果将预抓取吹捧(touted)为一种自适应技术(Adaptive Technology)。这意味着<code>pre - fetching</code>将尝试利用用户与应用交互的方式来执行一些优化，以提高滚动性能。例如，这项新技术将寻找空闲时间(当用户缓慢滚动或根本不滚动时)来加载(Pre-Fetch)新的单元格。根据用户滚动模式(scrolling patterns)的不同，<code>Pre-Fetching</code>执行这种优化的机会可能更多(或更少)。</p>
+<p>在查看可用的API之前，让我们看一下使用该技术的一些最佳实践。为了充分利用预抓取，设置单元格内容的主体(bulk)必须在<code>collectionView(_:cellForItemAt:)</code>中执行。在<code>collectionView(_:willDisplay:forItemAt:)</code>和<code>collectionView(didenddisplay:forItemAt:)</code>中执行的操作应该保持最小化，并且必须是非cpu密集型的(non-CPU intensive)。更好的是，如果我们可以对这些生命周期事件根本不执行任何操作，那将是最优的!另外，请记住，即使为单元格调用了<code>collectionView(_:cellForItemAt:)</code>，仍然有可能永远不会显示该单元格。</p>
+<p>一些非常好的消息是，在<code>iOS10</code>上编译的应用程序默认启用预抓取。但是，可以通过将<code>UICollectionView</code>的<code>isPrefetchingEnabled</code>属性设置为<code>false</code>来关闭此功能。同样重要的是要注意，预取与单元格生命周期一起工作。这意味着我们为实现集合视图而编写的代码不需要修改——要充分利用预抓取功能，唯一需要做的就是实现预抓取<code>API</code>。</p>
+<h2 id="预取API和UICollectionView"><a href="#预取API和UICollectionView" class="headerlink" title="预取API和UICollectionView"></a>预取API和UICollectionView</h2><p><code>UICollectionView</code>的预取<code>API</code>是在<code>uicollectionviewdatasourcepre</code>抓取协议中定义的。<code>API</code>定义了以下两个方法。</p>
+<p><code>collectionView(_:prefetchItemsAt:) </code>(required) -该方法允许启动(initiate)<code>[IndexPath]</code>参数指定的单元格所需的数据的异步加载。异步加载既可以通过<code>Grand Central Dispatch</code>执行，也可以通过<code>OperationQueue</code>执行。在实现这些方法时，最重要的是编写代码，将数据加载的负担从主队列转移到后台队列。这样做的目的是减少主队列的工作负载，使其能够将大部分时间用于执行显示刷新等关键任务。</p>
+<p><code>collectionView(_:cancelPrefetchingForItemsAt:)</code>(optional)-该方法通知(communicates)不再需要<code>[IndexPath]</code>参数指定的单元格的数据。实现这个方法允许我们根据需要取消挂起的数据加载，这是通过取消不必要的工作(通常是因为用户改变了滚动方向)来节省CPU时间的好方法。</p>
+<p>如前所述，预取是一种自适应技术(Adaptive Technology)。因此，上述方法是基于用户与应用程序交互的方式触发的。这样做的一个后果是，可能不会对集合视图中的每个单元格都调用<code>collectionView(_:prefetchItemsAt:)</code>方法。这意味着，当通过<code>collectionView(_:cellForItemAt:)</code>加载单元格时，应用程序应该能够处理以下所有场景: </p>
+<ul>
+<li>数据已经预取完成，准备好了可以显示(The data has been pre-fetched and is ready to be displayed)。 </li>
+<li>正在提取数据，未准备好显示数据(The data is currently being fetched and is not ready to be displayed)。 </li>
+<li>数据还没被请求(The data has not been requested yet)。</li>
+</ul>
+<h2 id="预取API和UITableView"><a href="#预取API和UITableView" class="headerlink" title="预取API和UITableView"></a>预取API和UITableView</h2><p><code>iOS10</code>还为<code>UITableView</code>引入了<code>Pre-Fetching</code>功能。我们为<code>UICollectionView</code>演示的所有主要概念都以类似的方式应用于<code>UITableView</code>。<code>UITableView</code>的预取API在<code>UITableViewPrefetchingDataSource</code>协议中定义。<code>API</code>定义了以下两个方法。 </p>
+<p><code>tableView(_:prefetchRowsAt:)</code> (required) -这个方法允许启动异步加载<code>[IndexPath]</code>参数指定的单元格所需的数据。 </p>
+<p><code>tableView(_:cancelPrefetchingForRowsAt:)</code> (optional) -此方法通知不再需要<code>[IndexPath]</code>参数指定的单元格数据。 </p>
+<p>为每个<code>UICollectionView</code>预取API方法提出的建议同样适用于每个<code>UITableView</code>预取API方法。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我已经更新了<code>UITableView</code>和<code>UICollectionView</code>的代码样本，以支持<code>iOS10</code>上的预抓取。你可以在<a href="https://github.com/andrea-prearo/SwiftExamples/tree/master/SmoothScrolling/Client">这里</a>找到。 </p>
+<p>在这篇文章中，我们回顾了<code>iOS10</code>在提升<code>UICollectionView</code>和<code>UITableView</code>平滑滚动方面的改进。特别是，我们看到，通过实现特定的预取API，可以充分利用所有新的操作系统优化，并在与移动应用程序交互时提供最佳的用户体验。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://medium.com/capital-one-tech/boost-smooth-scrolling-with-ios-10-pre-fetching-api-818c25cd9c5d">Boost Smooth Scrolling with iOS 10 Pre-Fetching API</a></li>
+<li><a href="">有道翻译</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/08/29/Smooth%20Scrolling%20in%20UITableView%20and%20UICollectionView/" rel="prev" title="【译】Smooth Scrolling in UITableView and UICollectionView">
+      <i class="fa fa-chevron-left"></i> 【译】Smooth Scrolling in UITableView and UICollectionView
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88%E5%AF%BC%E8%87%B4%E6%BB%9A%E5%8A%A8%E5%87%BA%E7%8E%B0%E8%B5%B7%E4%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">是什么导致滚动出现起伏?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS9%E4%B8%AD%E7%9A%84Cell%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">3.</span> <span class="nav-text">iOS9中的Cell生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS10%E4%B8%AD%E7%9A%84Cell%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">4.</span> <span class="nav-text">iOS10中的Cell生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E6%8A%93%E5%8F%96API"><span class="nav-number">5.</span> <span class="nav-text">预抓取API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E5%8F%96API%E5%92%8CUICollectionView"><span class="nav-number">6.</span> <span class="nav-text">预取API和UICollectionView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E5%8F%96API%E5%92%8CUITableView"><span class="nav-number">7.</span> <span class="nav-text">预取API和UITableView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">131</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
