@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS9MultiColumn.png">
 <meta property="og:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10MultiColumn.png">
 <meta property="article:published_time" content="2023-08-30T00:00:00.000Z">
-<meta property="article:modified_time" content="2023-08-30T03:41:28.357Z">
+<meta property="article:modified_time" content="2023-09-04T03:38:41.472Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://github.com/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/prefetch.png">
@@ -217,10 +217,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-08-30 08:00:00 / 修改时间：11:41:28" itemprop="dateCreated datePublished" datetime="2023-08-30T08:00:00+08:00">2023-08-30</time>
+              <time title="创建时间：2023-08-30 08:00:00" itemprop="dateCreated datePublished" datetime="2023-08-30T08:00:00+08:00">2023-08-30</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-09-04 11:38:41" itemprop="dateModified" datetime="2023-09-04T11:38:41+08:00">2023-09-04</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -254,10 +260,11 @@
 <h2 id="是什么导致滚动出现起伏"><a href="#是什么导致滚动出现起伏" class="headerlink" title="是什么导致滚动出现起伏?"></a>是什么导致滚动出现起伏?</h2><p>你是否曾经接触过或开发过偶尔出现起伏不平的应用?如果答案是肯定的，那么你就会知道当你尝试快速滚动时，应用程序的内容似乎是断断续续的(stutter)，这是多么令人失望。你可能会问自己，是什么引发了这种起伏不定的滚动行为，以及随之而来的糟糕的用户体验。</p>
 <p><strong>简短的回答是:该应用正在掉帧。但这到底是什么意思呢?</strong></p>
 <p>为了确保持续流畅的滚动，应用程序需要能够稳定地显示<code>60 FPS</code>(帧每秒)。或者，换句话说，应用程序需要每秒刷新60次内容。这意味着每一帧大约有<code>16ms</code>的渲染时间(<code>1000ms/60frames ~ 16ms/frame</code>)。在不幸的情况下，显示一帧的时间超过了规定的时间，没有显示下一帧的数据，这被认为是应用程序“丢失了一帧”。这个不幸的场景如下图所示。蓝色标记表示绘图操作，其粗细(thickness)表示完成渲染所需的时间。正如我们所看到的，在第二帧中，我们有一些渲染事件花费的时间超过了分配的时间(约16ms)，因此，第三帧被丢弃了。</p>
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/dropframe.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/dropframe.png" class="&#x3D;" title="Dropped Frame">
+
 
 <p>我们可以从刷新操作所花费的<code>CPU时间</code>的角度来可视化相同的场景。在下面的图表中，峰值对应于当应用程序花费超过预期的<code>16毫秒</code>来刷新当前内容时出现的丢弃帧。</p>
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/displayRefreshes.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/displayRefreshes.png" class="&#x3D;" title="Display Refreshes">
 
 
 <p>为了获得良好的用户体验，刷新时间必须始终低于允许的最大值<code>~16ms</code>。理想情况下，当我们想要创造一个很棒的用户体验时(and not just a good one)，每次刷新时间应该是:</p>
@@ -272,7 +279,7 @@
 </ul>
 <p>在<code>iOS10</code>中，苹果对单元格的加载和显示方式进行了一些优化。让我们来看看<code>iOS10</code>的改进，以及它们是如何让开发者更容易地创建流畅的滚动用户体验的。</p>
 <h2 id="iOS9中的Cell生命周期"><a href="#iOS9中的Cell生命周期" class="headerlink" title="iOS9中的Cell生命周期"></a>iOS9中的Cell生命周期</h2><p><code>UICollectionViewCell</code>的生命周期可以可视化如下:</p>
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/celllifecycle.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/celllifecycle.png" class="&#x3D;" title="iOS9 cell lifecycle">
 
 <p>集合视图和它的单元格之间的主要交互是:</p>
 <ul>
@@ -287,13 +294,13 @@
 <li>单元格可能最终根本不显示(因为它可能从未被带入可见区域)。</li>
 </ul>
 <p>第二个不同之处在于，当一个cell离开可见区域时会发生什么。在<code>iOS10</code>中，像往常一样调用<code>collectionView(didenddisplay:forItemAt:)</code>，但单元格不会立即回收。操作系统会保留它一段时间以防用户反转滚动方向;如果发生这种情况，单元格仍然可用，并且可以再次显示(将调用<code>collectionView(_:willDisplay:forItemAt:)</code>)，而不必重新加载其内容。</p>
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10lifecycle.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10lifecycle.png" class="&#x3D;" title="iOS10 cell lifecycle changes">
 
 <p>将此与<code>iOS9</code>上的情况进行比较。您将注意到，对于这个特定的用例，不再需要重新加载单元格(<code>collectionView(_:cellForItemAt:)</code>)。这种优化允许我们在用户快速滚动和改变滚动方向时更快地渲染单元格。</p>
 <p><code>iOS9</code>和<code>iOS10</code>之间的第三个重要区别是为多列布局的collection views加载单元格的方式。</p>
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS9MultiColumn.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS9MultiColumn.png" class="&#x3D;" title="iOS9">
 
-<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10MultiColumn.png" class="&#x3D;">
+<img src="/2023/08/30/Boost%20Smooth%20Scrolling%20with%20iOS%2010%20Pre-Fetching%20API/iOS10MultiColumn.png" class="&#x3D;" title="iOS10">
 
 <p>在<code>iOS10</code>中，关于进入可见区域的每个单元格都是分开(separately)加载的(<code>collectionView(_:cellForItemAt:)</code>)。正如我们在审查(examining)cell生命周期时所看到的，这比实际需要显示每个cell的时间要早得多。这为优化打开了大门，因为操作系统将能够处理不同的请求，将它们与单元格的加载解耦(interleaving)。</p>
 <p>当一行单元格(a row of cells)进入可见区域时，这些单元格将作为单个批处理(a single batch)显示(同时对整行调用<code>collectionView(_:willDisplay:forItemAt:)</code>)，因为此操作在CPU周期方面不是很昂贵(至少与加载单元格内容相比)。</p>
