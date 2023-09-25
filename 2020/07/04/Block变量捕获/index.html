@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="变量类型 是否捕获到 block 内部 访问方式    全局变量 否 直接访问   局部变量（auto 类型） 是 值传递   局部变量（static 类型） 是 指针传递">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Block变量捕获">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="变量类型 是否捕获到 block 内部 访问方式    全局变量 否 直接访问   局部变量（auto 类型） 是 值传递   局部变量（static 类型） 是 指针传递">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/block_auto.png">
+<meta property="og:image" content="https://github.com/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/block_forwarding.png">
+<meta property="article:published_time" content="2020-07-04T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-09-25T01:49:10.394Z">
+<meta property="article:author" content="Jack Chen">
+<meta property="article:tag" content="Block">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/block_auto.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Block变量捕获 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Block变量捕获
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-04 08:00:00" itemprop="dateCreated datePublished" datetime="2020-07-04T08:00:00+08:00">2020-07-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-09-25 09:49:10" itemprop="dateModified" datetime="2023-09-25T09:49:10+08:00">2023-09-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <table>
+<thead>
+<tr>
+<th>变量类型</th>
+<th>是否捕获到 block 内部</th>
+<th>访问方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>全局变量</td>
+<td>否</td>
+<td>直接访问</td>
+</tr>
+<tr>
+<td>局部变量（auto 类型）</td>
+<td>是</td>
+<td>值传递</td>
+</tr>
+<tr>
+<td>局部变量（static 类型）</td>
+<td>是</td>
+<td>指针传递</td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+
+<h2 id="auto-类型的局部变量"><a href="#auto-类型的局部变量" class="headerlink" title="auto 类型的局部变量"></a>auto 类型的局部变量</h2><p><code>auto</code> 类型的局部变量（我们定义出来的变量，默认都是 auto 类型，只是省略了），block 内部会自动生成一个同类型成员变量，用来存储这个变量的值，访问方式为<strong>值传递</strong>。<strong>auto 类型的局部变量可能会销毁，其内存会消失，block 将来执行代码的时候不可能再去访问那块内存，所以捕获其值。</strong>由于是值传递，我们修改 block 外部被捕获变量的值，不会影响到 block 内部捕获的变量值。</p>
+<h3 id="对象类型的局部变量"><a href="#对象类型的局部变量" class="headerlink" title="对象类型的局部变量"></a>对象类型的局部变量</h3><p>对于对象类型的局部变量，block 会连同它的所有权修饰符一起捕获。</p>
+<ul>
+<li>如果 block 是在栈上，将不会对对象产生强引用</li>
+<li>如果 block 被拷贝到堆上，将会调用 block 内部的 <code>copy(__funcName_block_copy_num)</code>函数，copy 函数内部又会调用 <code>assign(_Block_object_assign)</code>函数，assign 函数将会根据变量的所有权修饰符做出相应的操作，形成强引用（retain）或者弱引用。</li>
+<li>如果 block 从堆上移除，也就是被释放的时候，会调用 block 内部的<code> dispose(_Block_object_dispose)</code>函数，dispose 函数会自动释放引用的变量（release）。</li>
+</ul>
+<h2 id="对于-block-修饰的变量"><a href="#对于-block-修饰的变量" class="headerlink" title="对于 __block 修饰的变量"></a>对于 __block 修饰的变量</h2><p>对于 <code>__block</code>（可用于解决 block 内部无法修改 auto 变量值的问题） 修饰的变量，编译器会将 <code>__block</code> 变量包装成一个 <code>__Block_byref_varName_num</code> 对象。它的内存管理几乎等同于访问对象类型的 auto 变量，但还是有差异。</p>
+<ul>
+<li>如果 block 是在栈上，将不会对 <code>__block</code> 变量产生强引用</li>
+<li>如果 block 被拷贝到堆上，将会调用 block 内部的 copy 函数，copy 函数内部又会调用 assign 函数，assign 函数将会直接对 <code>__block</code> 变量形成强引用（retain）。</li>
+<li>如果 block 从堆上移除，也就是被释放的时候，会调用 block 内部的 dispose 函数，dispose 函数会自动释放引用的 __block 变量（release）。</li>
+</ul>
+<img src="/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/block_auto.png" class="&#x3D;">
+
+<h2 id="block-的-forwarding-指针"><a href="#block-的-forwarding-指针" class="headerlink" title="__block 的 __forwarding 指针"></a>__block 的 __forwarding 指针</h2><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__block <span class="type">int</span> age = <span class="number">10</span>;</span><br><span class="line"><span class="type">void</span>(^block)(<span class="type">void</span>) = ^&#123;</span><br><span class="line">    age = <span class="number">20</span>;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;block-%d&quot;</span>,age);</span><br><span class="line">&#125;;</span><br><span class="line">block();</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%d&quot;</span>,age);</span><br><span class="line"><span class="comment">// block-20</span></span><br><span class="line"><span class="comment">// 20</span></span><br></pre></td></tr></table></figure>
+<p>为什么要通过 age 结构体里的<code>__forwarding</code>指针拿到 age 变量的值，而不直接 age 结构体拿到 age 变量的值呢？</p>
+<p><code>__block</code> 的<code>__forwarding</code>是指向自己本身的指针，<br>为了不论在任何内存位置，都可以顺利的访问同一个 <code>__block</code> 变量。</p>
+<ul>
+<li>block 对象 copy 到堆上时，内部的 <code>__block</code> 变量也会 copy 到堆上去。为了防止 age 的值赋值给栈上的 <code>__block</code> 变量，就使用了<code>__forwarding</code>；</li>
+<li>当 <code>__block</code> 变量在栈上的时候，<code>__block</code> 变量的结构体中的<code>__forwarding</code>指针指向自己，这样通过<code>__forwarding</code>取到结构体中的 age 给它赋值没有问题；</li>
+<li>当 <code>__block</code> 变量 copy 到堆上后，栈上的<code>__forwarding</code>指针会指向 copy 到堆上的 <code>_block</code> 变量结构体，而堆上的<code>__forwarding</code>指向自己；</li>
+</ul>
+<p>这样不管我们访问的是栈上还是堆上的 <code>__block</code> 变量结构体，只要是通过<code>__forwarding</code>指针访问，都是访问到堆上的 <code>__block</code> 变量结构体；给 age 赋值，就肯定会赋值给堆上的那个 <code>__block</code> 变量中的 age。</p>
+<img src="/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/block_forwarding.png" class="&#x3D;">
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6988533484524404773">block 的变量捕获机制</a><br><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904070746996750#heading-13">Block 详解</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Block/" rel="tag"># Block</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/03/%E5%85%B3%E4%BA%8EBlock/" rel="prev" title="关于Block">
+      <i class="fa fa-chevron-left"></i> 关于Block
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/20/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" rel="next" title="排序算法">
+      排序算法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#auto-%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F"><span class="nav-number">1.</span> <span class="nav-text">auto 类型的局部变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F"><span class="nav-number">1.1.</span> <span class="nav-text">对象类型的局部变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E-block-%E4%BF%AE%E9%A5%B0%E7%9A%84%E5%8F%98%E9%87%8F"><span class="nav-number">2.</span> <span class="nav-text">对于 __block 修饰的变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#block-%E7%9A%84-forwarding-%E6%8C%87%E9%92%88"><span class="nav-number">3.</span> <span class="nav-text">__block 的 __forwarding 指针</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">133</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
