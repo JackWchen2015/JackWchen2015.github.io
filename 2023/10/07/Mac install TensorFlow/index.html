@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="环境： Mac OS  Monterey 12.5.1 MacBook Air (M1, 2020) Xcode 14.1 Python 3.11.5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac install TensorFlow">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/10/07/Mac%20install%20TensorFlow/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="环境： Mac OS  Monterey 12.5.1 MacBook Air (M1, 2020) Xcode 14.1 Python 3.11.5">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2023/10/07/Mac%20install%20TensorFlow/pyenv_pycharm_1.png">
+<meta property="og:image" content="https://github.com/2023/10/07/Mac%20install%20TensorFlow/pyenv_pycharm_2.png">
+<meta property="article:published_time" content="2023-10-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-10-25T07:39:03.167Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2023/10/07/Mac%20install%20TensorFlow/pyenv_pycharm_1.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/10/07/Mac%20install%20TensorFlow/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mac install TensorFlow | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/10/07/Mac%20install%20TensorFlow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac install TensorFlow
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-10-07 00:00:00" itemprop="dateCreated datePublished" datetime="2023-10-07T00:00:00+08:00">2023-10-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-10-25 15:39:03" itemprop="dateModified" datetime="2023-10-25T15:39:03+08:00">2023-10-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>环境：<br>
+Mac OS  Monterey 12.5.1<br>
+MacBook Air (M1, 2020)<br>
+Xcode 14.1<br>
+Python 3.11.5</p>
+<span id="more"></span>
+<h1>直接下载提示</h1>
+<p>科学上网下，执行<code>pip3 install tensorflow</code></p>
+<p>报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ERROR: THESE PACKAGES DO NOT MATCH THE HASHES FROM THE REQUIREMENTS FILE. If you have updated the package versions, please update the hashes. Otherwise, examine the package contents carefully; someone may have tampered with them.</span><br><span class="line">    unknown package:</span><br><span class="line">        Expected sha256 7b3e4e01721bfc0105c99275113531a659e89fd6512340a7b8970593676e0114</span><br><span class="line">             Got        0d24ac38699964b36fde01eeae12a7350d0a49054e233af13d10f118364a2517</span><br></pre></td></tr></table></figure>
+<p>尝试解决：终端使用代理</p>
+<h2 id="开启Terminal-Proxy-失败">开启Terminal Proxy 失败</h2>
+<p>这里的失败是<code>curl</code>不开代理时返回正常，开启代理时无反应，长时间后返回错误</p>
+<p><code>curl: (97) Received invalid version in initial SOCKS5 response</code></p>
+<p>原因：<code>curl</code>没有配置代理或者代理配置有误。道理跟<code>apt</code>、<code>wget</code>不能联网差不多。</p>
+<p><strong>解决</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 查看curl代理配置（如果没有这个文件会自动新建）</span><br><span class="line">$ sudo vi ~/.curlrc</span><br><span class="line"> </span><br><span class="line"># 更改为正确的配置，加入你的代理IP地址：</span><br><span class="line">proxy = &quot;http://10.xxx.xxx.xxx:8080&quot;</span><br></pre></td></tr></table></figure>
+<p>开启代理后 <strong>curl能正常返回</strong></p>
+<h2 id="开启Terminal-Proxy代理后-失败">开启Terminal Proxy代理后 失败</h2>
+<p><code>Missing dependencies for SOCKS support</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jack:~/ $ pip3 install tensorflow                                    [21:23:07]</span><br><span class="line">ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.</span><br></pre></td></tr></table></figure>
+<p><strong>解决：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># unproxy</span><br><span class="line">pip install pysocks  </span><br></pre></td></tr></table></figure>
+<p><strong>代理运行正常</strong></p>
+<h2 id="Error-No-matching-distribution-found-for-tensorflow">Error: No matching distribution found for tensorflow</h2>
+<p>暂时无可用版本，尝试降低<code>Python</code>版本，安装<code>python</code>版本管理工具<a href="https://github.com/pyenv/pyenv#python-versions-with-extended-support">pyenv</a></p>
+<h1>pyenv py版本管理工具</h1>
+<h2 id="基本使用">基本使用</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pyenv versions # 显示已安装版本</span><br><span class="line">pyenv install -l # 显示可下载版本</span><br><span class="line">pyenv --version # 当前正在使用的版本</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Mac安装多个版本py环境时，想要执行哪个版本的pip install需要输入pip的完整路径，避免混淆</p>
+</blockquote>
+<h3 id="全局更改">全局更改</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pyenv global 3.10.4 #使用该版本</span><br><span class="line">pyenv   global system #使用系统版本</span><br></pre></td></tr></table></figure>
+<h3 id="局部环境">局部环境</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd ProjcetSpecial #进入局部py环境项目路径</span><br><span class="line">pyenv local 3.7</span><br><span class="line">ll  #显示所有文件  .python-version    (3.7)</span><br></pre></td></tr></table></figure>
+<h2 id="Pycharm-Add">Pycharm Add</h2>
+<p><strong>底部添加新的解释器 -&gt; Virtualenv Environment -&gt; Existing -&gt;path/bin/python</strong></p>
+<blockquote>
+<p>You should select “Existing environment”, and specify path to python binary from that environment.</p>
+</blockquote>
+<img src="/2023/10/07/Mac%20install%20TensorFlow/pyenv_pycharm_1.png" class="&#x3D;">
+<img src="/2023/10/07/Mac%20install%20TensorFlow/pyenv_pycharm_2.png" class="&#x3D;">
+<h1>Success</h1>
+<h3 id="尝试操作">尝试操作</h3>
+<ul>
+<li>[ ] 降低Py版本 python 3.9.5</li>
+<li>[ ] 安装<code>python -m pip install --upgrade --force-reinstall tensorflow-metal</code> 成功</li>
+<li>[ ] 解决hash不匹配<code>pip3 install --user --upgrade tf-nightly --no-cache-dir</code> 无效</li>
+<li>[x] 关闭代理客户端</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install tensorflow-macos</span><br><span class="line">...</span><br><span class="line">Successfully installed MarkupSafe-2.1.3 absl-py-2.0.0 astunparse-1.6.3 cachetools-5.3.1 certifi-2023.7.22 charset-normalizer-3.3.0 flatbuffers-23.5.26 gast-0.5.4 google-auth-2.23.2 google-auth-oauthlib-1.0.0 google-pasta-0.2.0 grpcio-1.59.0 h5py-3.9.0 idna-3.4 importlib-metadata-6.8.0 keras-2.14.0 libclang-16.0.6 markdown-3.5 ml-dtypes-0.2.0 numpy-1.26.0 oauthlib-3.2.2 opt-einsum-3.3.0 packaging-23.2 protobuf-4.24.4 pyasn1-0.5.0 pyasn1-modules-0.3.0 requests-2.31.0 requests-oauthlib-1.3.1 rsa-4.9 tensorboard-2.14.1 tensorboard-data-server-0.7.1 tensorflow-estimator-2.14.0 tensorflow-io-gcs-filesystem-0.34.0 tensorflow-macos-2.14.0 termcolor-2.3.0 typing-extensions-4.8.0 urllib3-2.0.6 werkzeug-3.0.0 wrapt-1.14.1 zipp-3.17.0</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pip install tensorflow</span><br><span class="line">...</span><br><span class="line">Installing collected packages: tensorflow</span><br><span class="line">Successfully installed tensorflow-2.14.0</span><br></pre></td></tr></table></figure>
+<p><code>tensorflow-metal</code>，它是一个TensorFlow的后端，使用苹果的Metal图形API来加速神经网络计算。 Metal是一种高性能图形和计算API，专门为苹果设备的GPU设计，可以实现更快的神经网络计算</p>
+<blockquote>
+<p>猜测正确操作是关闭了代理客户端 + 降低py版本起了作用，待后续验证</p>
+</blockquote>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Nire_Yeyu/article/details/104858223">安装TensorFlow报错：No matching distribution found for tensorflow</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qxqxqzzz/article/details/105565213">curl: (7) Received invalid version in initial SOCKS5 response. curl: (5) Could not resolve proxy:</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c86c739134ad">Missing dependencies for SOCKS support</a></li>
+<li><a href="">google:tensorflow-metal是什么</a></li>
+<li><a target="_blank" rel="noopener" href="https://youtrack.jetbrains.com/issue/PY-43212/pycharm-when-using-pyenv-does-not-pickup-packages">pycharm when using pyenv does not pickup packages</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=3my06DUnApM">pycharm when using pyenv:video</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/09/12/SDWebImage/" rel="prev" title="SDWebImage">
+      <i class="fa fa-chevron-left"></i> SDWebImage
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/10/15/Machine%20Learning/" rel="next" title="Machine Learning">
+      Machine Learning <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">直接下载提示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AFTerminal-Proxy-%E5%A4%B1%E8%B4%A5"><span class="nav-number">1.1.</span> <span class="nav-text">开启Terminal Proxy 失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AFTerminal-Proxy%E4%BB%A3%E7%90%86%E5%90%8E-%E5%A4%B1%E8%B4%A5"><span class="nav-number">1.2.</span> <span class="nav-text">开启Terminal Proxy代理后 失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Error-No-matching-distribution-found-for-tensorflow"><span class="nav-number">1.3.</span> <span class="nav-text">Error: No matching distribution found for tensorflow</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">pyenv py版本管理工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E6%9B%B4%E6%94%B9"><span class="nav-number">2.1.1.</span> <span class="nav-text">全局更改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E7%8E%AF%E5%A2%83"><span class="nav-number">2.1.2.</span> <span class="nav-text">局部环境</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pycharm-Add"><span class="nav-number">2.2.</span> <span class="nav-text">Pycharm Add</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">Success</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%9D%E8%AF%95%E6%93%8D%E4%BD%9C"><span class="nav-number">3.0.1.</span> <span class="nav-text">尝试操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.1.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">141</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
