@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="How to handle errors and expose them to the user 作为开发者，我们往往是一群相当乐观的人。至少这是您在查看我们编写的代码时得到的印象——我们主要关注的是正确的路径，并且倾向于在错误处理上花费较少的时间和精力。  即使在本系列中，我们也一直忽略了错误处理。事实上，我们大多忽略了这一点:在之前的文章中，我们用默认值替换了任何错误，这对于我们的应用原型来说">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Error Handling with Combine and SwiftUI [译]">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20[%E8%AF%91]%20/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="How to handle errors and expose them to the user 作为开发者，我们往往是一群相当乐观的人。至少这是您在查看我们编写的代码时得到的印象——我们主要关注的是正确的路径，并且倾向于在错误处理上花费较少的时间和精力。  即使在本系列中，我们也一直忽略了错误处理。事实上，我们大多忽略了这一点:在之前的文章中，我们用默认值替换了任何错误，这对于我们的应用原型来说">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/res/swiftui_combines_network.webp">
+<meta property="og:image" content="https://github.com/res/sound-breakpoint.webp">
+<meta property="article:published_time" content="2024-03-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-25T08:01:16.612Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/res/swiftui_combines_network.webp">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20[%E8%AF%91]%20/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Error Handling with Combine and SwiftUI [译] | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20[%E8%AF%91]%20/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Error Handling with Combine and SwiftUI [译]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-02 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-02T00:00:00+08:00">2024-03-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-25 16:01:16" itemprop="dateModified" datetime="2024-05-25T16:01:16+08:00">2024-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>How to handle errors and expose them to the user</p>
+<p>作为开发者，我们往往是一群相当乐观的人。至少这是您在查看我们编写的代码时得到的印象——我们主要关注的是正确的路径，并且倾向于在错误处理上花费较少的时间和精力。 </p>
+<p>即使在本系列中，我们也一直忽略了错误处理。事实上，我们大多忽略了这一点:在之前的文章中，我们用默认值替换了任何错误，这对于我们的应用原型来说是可以的，但对于任何进入生产阶段的应用来说，这可能不是一个可靠的策略。 </p>
+<p>这一次，让我们仔细看看如何适当地处理错误!</p>
+<span id="more"></span>
+
+<h1 id="Error-handling-strategies"><a href="#Error-handling-strategies" class="headerlink" title="Error handling strategies"></a>Error handling strategies</h1><p>在深入研究如何处理错误之前，让我们先讨论几种错误处理策略，以及它们是否适合我们的场景。</p>
+<h2 id="Ignoring-the-error"><a href="#Ignoring-the-error" class="headerlink" title="Ignoring the error"></a>Ignoring the error</h2><p>乍听起来，这可能是一个糟糕的想法，但在处理特定情况下的某些类型的错误时，这实际上是一个可行的选择。下面是一些例子: </p>
+<ul>
+<li>用户的设备暂时离线，或者有其他原因导致应用程序无法访问服务器。 </li>
+<li>服务器暂时关闭，但很快就会恢复。</li>
+</ul>
+<p>在许多情况下，用户可以继续离线工作，一旦设备恢复在线，应用程序可以与服务器同步。当然，这需要某种离线同步解决方案(如Cloud Firestore)。 </p>
+<p>提供一些用户反馈以确保用户理解他们的数据尚未同步是一种很好的做法。许多应用程序会显示一个图标(例如一个向上指向箭头的云)来表明同步过程仍在进行中，或者一个警告标志来提醒用户，一旦他们重新上线，他们需要手动触发同步。</p>
+<h2 id="Retrying-with-exponential-back-off"><a href="#Retrying-with-exponential-back-off" class="headerlink" title="Retrying (with exponential back-off)"></a>Retrying (with exponential back-off)</h2><p>在其他情况下，不能忽略错误。想象一下一个热门活动的预订系统:服务器可能会被大量的请求压垮。在这种情况下，我们希望确保系统不会因为用户每隔几秒钟点击“刷新”而崩溃。相反，我们希望分散重试之间的时间。使用指数后退(exponential backoff)策略既符合用户的利益，也符合系统运营商的利益:运营商可以确保他们的服务器不会因为用户不断刷新而不堪重负，用户最终应该通过应用程序自动重试来完成预订。</p>
+<h2 id="Showing-an-error-message"><a href="#Showing-an-error-message" class="headerlink" title="Showing an error message"></a>Showing an error message</h2><p>有些错误需要用户的操作——例如，如果保存文档失败。在这种情况下，适当的做法是显示一个模型对话框来引起用户的注意，并询问他们如何继续。对于不太严重的错误，显示<code>toast</code>(显示一小段时间然后消失的覆盖)可能就足够了。</p>
+<h2 id="Replacing-the-entire-view-with-an-error-view"><a href="#Replacing-the-entire-view-with-an-error-view" class="headerlink" title="Replacing the entire view with an error view"></a>Replacing the entire view with an error view</h2><p>在某些情况下，用错误UI替换整个UI可能是合适的。一个著名的例子是Chrome，如果设备离线，它会显示Chrome Dino，让用户知道他们的设备离线，并帮助他们度过时间，直到他们的连接恢复与一个有趣的跳跑游戏。</p>
+<h2 id="Showing-an-inline-error-message"><a href="#Showing-an-inline-error-message" class="headerlink" title="Showing an inline error message"></a>Showing an inline error message</h2><p>在用户提供的数据无效的情况下，这是一个很好的选择。不是所有的输入错误都能被本地表单验证检测到。例如，在线商店可能有一条业务规则，规定超过一定数量的货物必须使用特定的运输提供商进行运输。在客户端应用程序中实现所有这些业务规则并不总是可行的(一个可配置的规则引擎在这里肯定会有所帮助)，所以我们需要准备好处理这些类型的语义错误。 </p>
+<p>理想情况下，我们应该在相应的输入字段旁边显示这些类型的错误，以帮助用户提供正确的输入。</p>
+<h2 id="Typical-error-conditions-and-how-to-handle-them"><a href="#Typical-error-conditions-and-how-to-handle-them" class="headerlink" title="Typical error conditions and how to handle them"></a>Typical error conditions and how to handle them</h2><p>为了让您更好地理解如何在实际场景中应用它，让我们在本系列前面创建的注册表单中添加一些错误处理。特别是，我们将处理以下错误条件:</p>
+<ul>
+<li>设备&#x2F;网络离线 </li>
+<li>语义验证错误 </li>
+<li>响应解析错误&#x2F;无效URL </li>
+<li>服务器内部错误</li>
+</ul>
+<h1 id="Implementing-a-fallible-network-API"><a href="#Implementing-a-fallible-network-API" class="headerlink" title="Implementing a fallible network API"></a>Implementing a fallible network API</h1><p>在上一篇文章中，我们实现了一个与身份验证服务器接口的<code>AuthenticationService</code>。这有助于我们将所有内容整齐地组织起来，并按关注点分开: </p>
+<ul>
+<li>视图(<code>SignUpScreen</code>)显示状态并接受用户的输入 </li>
+<li>视图模型(<code>SignUpScreenViewModel</code>)保存视图显示的状态。反过来，它使用其他api对用户的操作做出反应。在这个特殊的应用中，视图模型使用<code>AuthenticationService</code>与认证服务器交互 </li>
+<li>服务(<code>AuthenticationService</code>)与身份验证服务器交互。它的主要职责是将服务器的响应转换为客户端可以使用的格式。例如，它将JSON转换为Swift结构体，并且(与本文最相关)它处理任何网络层错误并将它们转换为客户端可以更好地处理的ui级错误。</li>
+</ul>
+<p>下图概述了各个类型是如何协同工作的:</p>
+<p><img src="/./res/swiftui_combines_network.webp"></p>
+<p>如果你看一下我们在上一篇文章中写的代码，你会注意到<code>checkusernameavailablepublisher</code>有一个失败类型<code>Never</code>——这意味着它声明永远不会有错误。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">checkUserNameAvailablePublisher</span>(<span class="params">userName</span>: <span class="type">String</span>) -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123; <span class="operator">...</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个相当大胆的声明，特别是考虑到网络错误非常普遍!我们之所以能够保证这一点，是因为我们将任何错误都替换为返回值<code>false</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">checkUserNameAvailablePublisher</span>(<span class="params">userName</span>: <span class="type">String</span>)  -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Just</span>(<span class="literal">false</span>).eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">    .map(\.data)</span><br><span class="line">    .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">    .map(\.isAvailable)</span><br><span class="line">    .replaceError(with: <span class="literal">false</span>)</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>要将这个相当宽松的实现转换为向调用者返回有意义的错误消息的东西，我们首先需要更改publisher的failure type，并停止通过返回<code>false</code>来掩盖任何错误:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">APIError</span>: <span class="title class_">LocalizedError</span> &#123;</span><br><span class="line">  <span class="comment">/// Invalid request, e.g. invalid URL</span></span><br><span class="line">  <span class="keyword">case</span> invalidRequestError(<span class="type">String</span>)</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AuthenticationService</span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">checkUserNameAvailablePublisher</span>(<span class="params">userName</span>: <span class="type">String</span>)  -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Error</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> </span><br><span class="line">        <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="type">Fail</span>(error: <span class="type">APIError</span>.invalidRequestError(<span class="string">&quot;URL invalid&quot;</span>))</span><br><span class="line">        .eraseToAnyPublisher()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">      .map(\.data)</span><br><span class="line">      .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">      .map(\.isAvailable)</span><br><span class="line"><span class="comment">//      .replaceError(with: false)</span></span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们还引入了一个自定义错误类型<code>APIError</code>。这将允许我们将API内部可能发生的任何错误(无论是网络错误还是数据映射错误)转换为语义丰富的错误，以便在视图模型中更容易地处理。</p>
+<h1 id="Calling-the-API-and-handling-errors"><a href="#Calling-the-API-and-handling-errors" class="headerlink" title="Calling the API and handling errors"></a>Calling the API and handling errors</h1><p>既然API有了failure type，我们还需要更新调用方。一旦publisher发出failure，管道将终止——除非您捕获错误。使用<code>flatMap</code>时处理错误的典型方法是将其与<code>catch</code>操作符结合使用:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">somePublisher</span><br><span class="line">  .flatMap &#123; value <span class="keyword">in</span> </span><br><span class="line">    callSomePotentiallyFailingPublisher()</span><br><span class="line">    .catch &#123; error <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">return</span> <span class="type">Just</span>(someDefaultValue)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+<p>将此策略应用到视图模型中的代码中，得到以下代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> isUsernameAvailablePublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; <span class="operator">=</span> &#123;</span><br><span class="line">  <span class="variable">$username</span></span><br><span class="line">    .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">    .removeDuplicates()</span><br><span class="line">    .flatMap &#123; username -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">self</span>.authenticationService.checkUserNameAvailablePublisher(userName: username)</span><br><span class="line">        .catch &#123; error <span class="keyword">in</span> <span class="number">1</span></span><br><span class="line">          <span class="keyword">return</span> <span class="type">Just</span>(<span class="literal">false</span>) <span class="number">2</span></span><br><span class="line">        &#125;</span><br><span class="line">        .eraseToAnyPublisher()</span><br><span class="line">    &#125;</span><br><span class="line">    .receive(on: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">    .share()</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;()</span><br></pre></td></tr></table></figure>
+<p>就这样，我们回到了起点!如果API发出错误(例如，用户名太短)，我们捕获<code>error </code>(1)并将其替换为<code>false</code>(2) -这正是我们之前的行为。除了，我们写了更多的代码…… </p>
+<p>这种方法似乎毫无用处，所以让我们后退一步，看看我们的解决方案的需求:</p>
+<ul>
+<li>我们希望使用管道发出的值来驱动提交按钮的状态，并在选择的用户名不可用时显示一条警告消息。 </li>
+<li>如果管道发出失败，我们希望禁用提交按钮，并在用户名输入字段下面的错误标签中显示错误消息。 </li>
+<li>我们如何准确地处理errors将取决于failure的type，这将在本文后面讨论。</li>
+</ul>
+<p>This means: </p>
+<ul>
+<li>我们需要确保我们能够接受<code>failures </code>和<code>successes </code></li>
+<li>我们需要确保管道在接收到故障时不会终止</li>
+</ul>
+<p>为了实现这一切，我们将把<code>checkUserNameAvailablePublisher</code>的结果映射到<code>result</code>类型。<code>Result</code>是一个枚举，可以捕获success和failure状态。将<code>checkUserNameAvailablePublisherto</code>的结果映射到<code>Result</code>也意味着管道在发出失败时将不再终止。 </p>
+<p>让我们首先为<code>Result</code>类型定义一个类型别名，使我们的工作简单一些:</p>
+<p><code>typealias Available = Result&lt;Bool, Error&gt;</code></p>
+<p>要将<code>publisher</code>的结果转换为<code>result</code>类型，我们可以使用John Sundell在他的文章the power of extensions in Swift中实现的以下操作符:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">asResult</span>() -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Result</span>&lt;<span class="type">Output</span>, <span class="type">Failure</span>&gt;, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">self</span></span><br><span class="line">      .map(<span class="type">Result</span>.success)</span><br><span class="line">      .catch &#123; error <span class="keyword">in</span></span><br><span class="line">        <span class="type">Just</span>(.failure(error))</span><br><span class="line">      &#125;</span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这允许我们像这样在视图模型中更新<code>isUsernameAvailablePublisher</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> isUsernameAvailablePublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Available</span>, <span class="type">Never</span>&gt; <span class="operator">=</span> &#123;</span><br><span class="line">  <span class="variable">$username</span></span><br><span class="line">    .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">    .removeDuplicates()</span><br><span class="line">    .flatMap &#123; username -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Available</span>, <span class="type">Never</span>&gt; <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">self</span>.authenticationService.checkUserNameAvailablePublisher(userName: username)</span><br><span class="line">        .asResult()</span><br><span class="line">    &#125;</span><br><span class="line">    .receive(on: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">    .share()</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;()</span><br></pre></td></tr></table></figure>
+<p>有了这些基本的管道，让我们看一下如何处理我前面概述的不同错误场景。</p>
+<h2 id="Handling-Device-Network-Offline-Errors"><a href="#Handling-Device-Network-Offline-Errors" class="headerlink" title="Handling Device&#x2F;Network Offline Errors"></a>Handling Device&#x2F;Network Offline Errors</h2><p>在移动设备上，断断续续的连接是很常见的:尤其是当你在移动的时候，你可能在一个覆盖不好或没有覆盖的地区。 </p>
+<p>是否应该显示错误消息取决于具体情况: </p>
+<p>对于我们的用例，我们可以假设用户至少具有间歇性连接。当用户正在填写表单时，告诉用户我们无法访问服务器会分散他们的注意力。相反，我们应该忽略表单验证的任何连接错误(而是运行本地表单验证逻辑)。 </p>
+<p>一旦用户输入了所有详细信息并提交了表单，如果设备仍处于离线状态，我们应该显示一条错误消息。 </p>
+<p>捕获这种类型的错误需要我们在两个不同的地方进行更改。首先，在<code>checkUserNameAvailablePublisher</code>中，我们使用<code>mapError</code>捕获任何上游错误，并将它们转换为<code>APIError</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">APIError</span>: <span class="title class_">LocalizedError</span> &#123;</span><br><span class="line">  <span class="comment">/// Invalid request, e.g. invalid URL</span></span><br><span class="line">  <span class="keyword">case</span> invalidRequestError(<span class="type">String</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// Indicates an error on the transport layer, e.g. not being able to connect to the server</span></span><br><span class="line">  <span class="keyword">case</span> transportError(<span class="type">Error</span>)</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AuthenticationService</span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">checkUserNameAvailablePublisher</span>(<span class="params">userName</span>: <span class="type">String</span>) -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Error</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="type">Fail</span>(error: <span class="type">APIError</span>.invalidRequestError(<span class="string">&quot;URL invalid&quot;</span>))</span><br><span class="line">        .eraseToAnyPublisher()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">      .mapError &#123; error -&gt; <span class="type">Error</span> <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> <span class="type">APIError</span>.transportError(error)</span><br><span class="line">      &#125;</span><br><span class="line">      .map(\.data)</span><br><span class="line">      .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">      .map(\.isAvailable)</span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">       &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后，在我们的视图模型中，我们映射结果以检测它是否是failure(1,2)。如果是，我们提取error并检查它是否是网络传输error。如果是这种情况，我们返回一个空字符串(3)来抑制错误消息:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SignUpScreenViewModel</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">init</span>() &#123;</span><br><span class="line">    isUsernameAvailablePublisher</span><br><span class="line">      .map &#123; result <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">switch</span> result &#123;</span><br><span class="line">        <span class="keyword">case</span> .failure(<span class="keyword">let</span> error): <span class="number">1</span></span><br><span class="line">          <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.transportError(<span class="keyword">_</span>) <span class="operator">=</span> error &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;&quot;</span> <span class="number">3</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> error.localizedDescription</span><br><span class="line">          &#125;</span><br><span class="line">        <span class="keyword">case</span> .success(<span class="keyword">let</span> isAvailable):</span><br><span class="line">          <span class="keyword">return</span> isAvailable <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;This username is not available&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      .assign(to: <span class="operator">&amp;</span><span class="variable">$usernameMessage</span>) <span class="number">4</span></span><br><span class="line">    </span><br><span class="line">    isUsernameAvailablePublisher</span><br><span class="line">      .map &#123; result <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">case</span> .failure(<span class="keyword">let</span> error) <span class="operator">=</span> result &#123; <span class="number">2</span></span><br><span class="line">          <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.transportError(<span class="keyword">_</span>) <span class="operator">=</span> error &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">case</span> .success(<span class="keyword">let</span> isAvailable) <span class="operator">=</span> result &#123;</span><br><span class="line">          <span class="keyword">return</span> isAvailable</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">      &#125;</span><br><span class="line">      .assign(to: <span class="operator">&amp;</span><span class="variable">$isValid</span>) <span class="number">5</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果<code>isUsernameAvailablePublisher</code>返回成功，我们提取<code>Bool</code>值，告诉我们所需的用户名是否可用，并将其映射到适当的消息。 </p>
+<p>最后，我们将管道的结果赋值给<code>usernameMessage</code>(4)和<code>isValid</code>(5)已发布的(published)属性，它们驱动视图上的UI。 </p>
+<p>请记住，对于这种UI，忽略网络错误是一个可行的选择——对于您的用例来说，这可能是一个完全不同的故事，所以在应用此技术时请使用您自己的判断。 </p>
+<p>到目前为止，我们还没有向用户暴露任何错误，所以让我们来看看我们真正想让用户意识到的一类错误。</p>
+<h2 id="Handling-Validation-Errors"><a href="#Handling-Validation-Errors" class="headerlink" title="Handling Validation Errors"></a>Handling Validation Errors</h2><p>大多数验证错误应该在客户端本地处理，但有时我们无法避免在服务器上运行一些额外的验证步骤。理想情况下，服务器应该返回<code>4xx</code>范围内的<code>HTTP</code>状态码，并可选地返回提供更多详细信息的有效负载(payload)。 </p>
+<p>在我们的示例应用程序中，服务器要求用户名的最小长度为4个字符，并且我们有一个禁止的用户名列表(例如“admin”或“superuser”)。 </p>
+<p>对于这些情况，我们希望显示一条警告消息并禁用提交按钮。 </p>
+<p>我们的后端实现是基于<code>Vapor</code>的，并将响应<code>HTTP</code>状态<code>400</code>和任何验证错误的错误负载。如果你对它的实现感到好奇，可以查看<code>routes.swift</code>中的代码。 </p>
+<p>处理这个错误场景需要我们在两个地方进行更改:服务实现和视图模型。让我们首先看一下服务实现。 </p>
+<p>因为我们应该在尝试从响应中提取有效负载之前处理任何错误，所以处理服务器错误的代码需要在检查<code>URLErrors</code>之后和映射数据之前运行:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">APIErrorMessage</span>: <span class="title class_">Decodable</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> error: <span class="type">Bool</span></span><br><span class="line">  <span class="keyword">var</span> reason: <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">AuthenticationService</span> &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">checkUserNameAvailablePublisher</span>(<span class="params">userName</span>: <span class="type">String</span>) -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Error</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="type">Fail</span>(error: <span class="type">APIError</span>.invalidRequestError(<span class="string">&quot;URL invalid&quot;</span>))</span><br><span class="line">        .eraseToAnyPublisher()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">      <span class="comment">// handle URL errors (most likely not able to connect to the server)</span></span><br><span class="line">      .mapError &#123; error -&gt; <span class="type">Error</span> <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> <span class="type">APIError</span>.transportError(error)</span><br><span class="line">      &#125;</span><br><span class="line">    </span><br><span class="line">      <span class="comment">// handle all other errors</span></span><br><span class="line">      .tryMap &#123; (data, response) -&gt; (data: <span class="type">Data</span>, response: <span class="type">URLResponse</span>) <span class="keyword">in</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Received response from server, now checking status code&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> urlResponse <span class="operator">=</span> response <span class="keyword">as?</span> <span class="type">HTTPURLResponse</span> <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="type">APIError</span>.invalidResponse <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (<span class="number">200</span><span class="operator">..&lt;</span><span class="number">300</span>) <span class="operator">~=</span>  urlResponse.statusCode &#123; <span class="number">2</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">          <span class="keyword">let</span> apiError <span class="operator">=</span> <span class="keyword">try</span> decoder.decode(<span class="type">APIErrorMessage</span>.<span class="keyword">self</span>, from: data) <span class="number">3</span></span><br><span class="line">          </span><br><span class="line">          <span class="keyword">if</span> urlResponse.statusCode <span class="operator">==</span> <span class="number">400</span> &#123; <span class="number">4</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="type">APIError</span>.validationError(apiError.reason)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (data, response)</span><br><span class="line">      &#125;</span><br><span class="line"> </span><br><span class="line">      .map(\.data)</span><br><span class="line">      .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">      .map(\.isAvailable)</span><br><span class="line"><span class="comment">//      .replaceError(with: false)</span></span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>让我们仔细看看这段代码的作用: </p>
+<ol>
+<li>如果响应不是<code>httpurlresponse</code>，我们返回<code>APIError.invalidResponse </code></li>
+<li>我们使用Swift的模式匹配来检测请求是否成功执行，也就是说，使用<strong>200到299</strong>范围内的HTTP状态码 </li>
+<li>否则，服务器发生错误。由于我们使用了<code>Vapor</code>，服务器将在<code>JSON</code>有效负载中返回有关错误的详细信息，因此我们现在可以将此信息映射到<code>APIErrorMessage</code>结构体，并在下面的代码中使用它来创建更有意义的错误消息 </li>
+<li>如果服务器返回一个<code>HTTP</code>状态<code>400</code>，我们就知道这是一个验证错误(详细信息请参见服务器实现)，并返回一个<code>APIError.validationError</code>，包括我们从服务器接收到的详细错误消息</li>
+</ol>
+<p>在视图模型中，我们现在可以使用这些信息告诉用户他们选择的用户名不符合要求:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">init</span>() &#123;</span><br><span class="line">  isUsernameAvailablePublisher</span><br><span class="line">    .map &#123; result <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">switch</span> result &#123;</span><br><span class="line">      <span class="keyword">case</span> .failure(<span class="keyword">let</span> error):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.transportError(<span class="keyword">_</span>) <span class="operator">=</span> error &#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.validationError(<span class="keyword">let</span> reason) <span class="operator">=</span> error &#123;</span><br><span class="line">          <span class="keyword">return</span> reason</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> error.localizedDescription</span><br><span class="line">        &#125;</span><br><span class="line">      <span class="keyword">case</span> .success(<span class="keyword">let</span> isAvailable):</span><br><span class="line">        <span class="keyword">return</span> isAvailable <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;This username is not available&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .assign(to: <span class="operator">&amp;</span><span class="variable">$usernameMessage</span>)</span><br></pre></td></tr></table></figure>
+<p>没错，只有三行代码。我们已经完成了所有艰苦的工作，所以是时候收获好处了🎉</p>
+<h2 id="Handling-Response-Parsing-Errors"><a href="#Handling-Response-Parsing-Errors" class="headerlink" title="Handling Response Parsing Errors"></a>Handling Response Parsing Errors</h2><p>在许多情况下，服务器发送的数据与客户端期望的不匹配: </p>
+<ul>
+<li>响应包含额外的数据，或者重命名了一些字段 </li>
+<li>客户端通过强制门户(captive portal)进行连接(例如在酒店中)</li>
+</ul>
+<p>在这些情况下，客户端接收数据，但格式错误。为了帮助用户解决这种情况，我们需要分析用户的反应，然后提供适当的指导，例如: </p>
+<ul>
+<li>下载最新版本的应用程序 </li>
+<li>通过系统浏览器登录到强制门户 (captive portal)</li>
+</ul>
+<p>当前实现使用<code>decode</code>操作符解码响应有效负载，并在无法映射有效负载的情况下抛出错误。这工作得很好，任何解码错误都将被捕获并显示在UI上。然而，像“数据无法读取，因为它丢失了”这样的错误消息并不是真正的用户友好。相反，让我们尝试显示对用户更有意义的消息，并建议升级到最新版本的应用程序(假设服务器正在返回新应用程序能够利用的额外数据)。 </p>
+<p>为了能够提供关于解码错误的更细粒度的信息，我们需要与<code>decode</code>操作符分开，并返回到手动映射数据(不用担心，多亏了<code>JSONDecoder</code>和Swift的<code>Codable</code>协议，这非常简单):</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">.map(\.data)</span><br><span class="line"><span class="comment">// .decode(type: UserNameAvailableMessage.self, decoder: JSONDecoder())</span></span><br><span class="line">.tryMap &#123; data -&gt; <span class="type">UserNameAvailableMessage</span> <span class="keyword">in</span></span><br><span class="line">  <span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">try</span> decoder.decode(<span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, </span><br><span class="line">                              from: data)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="type">APIError</span>.decodingError(error)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">.map(\.isAvailable)</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>通过<code>APIError</code>遵循<code>LocalizedError</code>协议，并实现<code>errorDescription</code>属性，我们可以提供更加用户友好的错误消息(我也包括了其他错误条件的自定义消息):</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">APIError</span>: <span class="title class_">LocalizedError</span> &#123;</span><br><span class="line">  <span class="comment">/// Invalid request, e.g. invalid URL</span></span><br><span class="line">  <span class="keyword">case</span> invalidRequestError(<span class="type">String</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// Indicates an error on the transport layer, e.g. not being able to connect to the server</span></span><br><span class="line">  <span class="keyword">case</span> transportError(<span class="type">Error</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// Received an invalid response, e.g. non-HTTP result</span></span><br><span class="line">  <span class="keyword">case</span> invalidResponse</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// Server-side validation error</span></span><br><span class="line">  <span class="keyword">case</span> validationError(<span class="type">String</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/// The server sent data in an unexpected format</span></span><br><span class="line">  <span class="keyword">case</span> decodingError(<span class="type">Error</span>)</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">var</span> errorDescription: <span class="type">String</span>? &#123;</span><br><span class="line">    <span class="keyword">switch</span> <span class="keyword">self</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> .invalidRequestError(<span class="keyword">let</span> message):</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;Invalid request: <span class="subst">\(message)</span>&quot;</span></span><br><span class="line">    <span class="keyword">case</span> .transportError(<span class="keyword">let</span> error):</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;Transport error: <span class="subst">\(error)</span>&quot;</span></span><br><span class="line">    <span class="keyword">case</span> .invalidResponse:</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;Invalid response&quot;</span></span><br><span class="line">    <span class="keyword">case</span> .validationError(<span class="keyword">let</span> reason):</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;Validation Error: <span class="subst">\(reason)</span>&quot;</span></span><br><span class="line">    <span class="keyword">case</span> .decodingError:</span><br><span class="line">      <span class="keyword">return</span> <span class="string">&quot;The server returned data in an unexpected format. Try updating the app.&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，为了让用户清楚地知道他们应该更新应用，我们还会显示一个警告。下面是警报的代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SignUpScreen</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">  <span class="meta">@StateObject</span> <span class="keyword">private</span> <span class="keyword">var</span> viewModel <span class="operator">=</span> <span class="type">SignUpScreenViewModel</span>()</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Form</span> &#123;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// show update dialog</span></span><br><span class="line">    .alert(<span class="string">&quot;Please update&quot;</span>, isPresented: <span class="variable">$viewModel</span>.showUpdateDialog, actions: &#123;</span><br><span class="line">      <span class="type">Button</span>(<span class="string">&quot;Upgrade&quot;</span>) &#123;</span><br><span class="line">        <span class="comment">// open App Store listing page for the app</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">Button</span>(<span class="string">&quot;Not now&quot;</span>, role: .cancel) &#123; &#125;</span><br><span class="line">    &#125;, message: &#123;</span><br><span class="line">      <span class="type">Text</span>(<span class="string">&quot;It looks like you&#x27;re using an older version of this app. Please update your app.&quot;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line"> </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>您将注意到，该警报的表示状态是由视图模型上的已发布属性<code>showUpdateDialog</code>驱动的。让我们相应地更新视图模型(1)，并添加将<code>isUsernameAvailablePublisher</code>的结果映射到这个新属性的<code>Combine</code>管道:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SignUpScreenViewModel</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line"> </span><br><span class="line">  <span class="meta">@Published</span> <span class="keyword">var</span> showUpdateDialog: <span class="type">Bool</span> <span class="operator">=</span> <span class="literal">false</span> <span class="number">1</span></span><br><span class="line"> </span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> isUsernameAvailablePublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Available</span>, <span class="type">Never</span>&gt; <span class="operator">=</span> &#123;</span><br><span class="line">    <span class="variable">$username</span></span><br><span class="line">      .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">      .removeDuplicates()</span><br><span class="line">      .flatMap &#123; username -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Available</span>, <span class="type">Never</span>&gt; <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">self</span>.authenticationService.checkUserNameAvailablePublisher(userName: username)</span><br><span class="line">          .asResult()</span><br><span class="line">      &#125;</span><br><span class="line">      .receive(on: <span class="type">DispatchQueue</span>.main)</span><br><span class="line">      .share() <span class="number">3</span></span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">  &#125;()</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">init</span>() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">// decoding error: display an error message suggesting to download a newer version</span></span><br><span class="line">    isUsernameAvailablePublisher</span><br><span class="line">      .map &#123; result <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">case</span> .failure(<span class="keyword">let</span> error) <span class="operator">=</span> result &#123;</span><br><span class="line">          <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.decodingError <span class="operator">=</span> error  &#123; <span class="number">2</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">      &#125;</span><br><span class="line">      .assign(to: <span class="operator">&amp;</span><span class="variable">$showUpdateDialog</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>正如您所看到的，没有什么太花哨的—我们本质上只是从<code>isUsernameAvailablePublisher</code>获取任何事件，并将它们转换为<code>Bool</code>值，只有当我们接收到<code>.decodingerror(2)</code>时才变为真值。 </p>
+<p>我们现在使用<code>isUsernameAvailablePublisher</code>来驱动三个不同的<code>Combine</code>管道，我想要显式地调用它——因为<code>isUsernameAvailablePublisher</code>最终将导致一个网络请求被触发——确保每次击键最多只发送一个网络请求是很重要的。本系列的前一篇文章深入解释了如何做到这一点，但值得指出的是，使用<code>.share()(3)</code>起着关键作用。</p>
+<h2 id="Handling-Internal-Server-Errors"><a href="#Handling-Internal-Server-Errors" class="headerlink" title="Handling Internal Server Errors"></a>Handling Internal Server Errors</h2><p>在一些罕见的情况下，我们的应用程序的后端可能会有一些问题——可能是系统的一部分离线维护，某些进程死亡，或者服务器不堪重负。通常，服务器将返回一个5xx范围内的HTTP状态码来表示这一点。</p>
+<blockquote>
+<p>模拟错误条件示例服务器包含模拟本文中讨论的一些错误条件的代码。您可以通过发送特定的<code>username </code>值来触发错误条件: </p>
+</blockquote>
+<blockquote>
+<ul>
+<li><p>任何少于4个字符的用户名都会导致<code>tooshort</code>的验证错误，通过HTTP <code>400</code>状态码和包含详细错误消息的<code>JSON</code>有效负载发出信号。 </p>
+</li>
+<li><p>空的用户名将导致一个<code>emptyName</code>错误消息，指示用户名不能为空。 </p>
+</li>
+<li><p>有些用户名是被禁止的:“admin”或“superuser”将导致<code>illegalName</code>验证错误。 </p>
+</li>
+<li><p>其他用户名，如“peterfriese”、“johnnyappleseed”、“page”和“johndoe”已经被占用，因此服务器将告诉客户端这些用户名不再可用。 </p>
+</li>
+<li><p>发送<code>illegalresponse </code>作为用户名将返回一个字段太少的<code>JSON</code>响应，导致客户端上的解码错误。 </p>
+</li>
+<li><p>发送<code>servererror</code>将模拟数据库问题(<code>databasecorrupated</code>)，并将被标记为没有重试提示(with no retry hint)的HTTP 500(因为我们假设这不是临时情况，重试将是徒劳的)。 </p>
+</li>
+<li><p>发送“maintenance”作为用户名将返回一个<code>maintenance </code>(维护)错误，以及一个<code>retry-after</code>报头，该报头表明客户端可以在一段时间后重试此调用(这里的想法是服务器正在进行预定的维护，并且将在重新启动后进行备份)。</p>
+</li>
+</ul>
+</blockquote>
+<p>让我们添加处理服务器端错误所需的代码。正如我们在之前的错误场景中所做的那样，我们需要添加一些代码来将<code>HTTP</code>状态码映射到<code>APIError</code> enum:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="number">200</span><span class="operator">..&lt;</span><span class="number">300</span>) <span class="operator">~=</span> urlResponse.statusCode &#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">  <span class="keyword">let</span> apiError <span class="operator">=</span> <span class="keyword">try</span> decoder.decode(<span class="type">APIErrorMessage</span>.<span class="keyword">self</span>, from: data)</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> urlResponse.statusCode <span class="operator">==</span> <span class="number">400</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="type">APIError</span>.validationError(apiError.reason)</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (<span class="number">500</span><span class="operator">..&lt;</span><span class="number">600</span>) <span class="operator">~=</span> urlResponse.statusCode &#123;</span><br><span class="line">    <span class="keyword">let</span> retryAfter <span class="operator">=</span> urlResponse.value(forHTTPHeaderField: <span class="string">&quot;Retry-After&quot;</span>)</span><br><span class="line">    <span class="keyword">throw</span> <span class="type">APIError</span>.serverError(statusCode: urlResponse.statusCode, </span><br><span class="line">                               reason: apiError.reason, </span><br><span class="line">                               retryAfter: retryAfter)</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>要在UI中显示用户友好的错误信息，我们所需要做的就是向视图模型中添加几行代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">isUsernameAvailablePublisher</span><br><span class="line">  .map &#123; result <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">switch</span> result &#123;</span><br><span class="line">    <span class="keyword">case</span> .failure(<span class="keyword">let</span> error):</span><br><span class="line">      <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.transportError(<span class="keyword">_</span>) <span class="operator">=</span> error &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.validationError(<span class="keyword">let</span> reason) <span class="operator">=</span> error &#123;</span><br><span class="line">        <span class="keyword">return</span> reason</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.serverError(statusCode: <span class="keyword">_</span>, reason: <span class="keyword">let</span> reason, retryAfter: <span class="keyword">_</span>) <span class="operator">=</span> error &#123;</span><br><span class="line">        <span class="keyword">return</span> reason <span class="operator">??</span> <span class="string">&quot;Server error&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> error.localizedDescription</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="keyword">case</span> .success(<span class="keyword">let</span> isAvailable):</span><br><span class="line">      <span class="keyword">return</span> isAvailable <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;This username is not available&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  .assign(to: <span class="operator">&amp;</span><span class="variable">$usernameMessage</span>)</span><br></pre></td></tr></table></figure>
+<p>到目前为止，一切顺利。 </p>
+<p>对于某些服务器端错误场景，可能值得在短时间后重试请求。例如，如果服务器进行了维护，它可能会在几秒钟后再次备份。 </p>
+<p>Combine包含一个重试操作符，可用于自动重试任何失败的操作。将它添加到我们的代码中是一个简单的一行代码:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .mapError &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .retry(<span class="number">3</span>)</span><br><span class="line">  .map(\.data)</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .map(\.isAvailable)</span><br><span class="line">  .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+
+<p>然而，正如你在运行应用程序时所注意到的，这将导致任何失败的请求被重试三次。这不是我们想要的——例如，我们希望任何验证错误都出现在视图模型中。相反，它们也将被重试操作符捕获。 </p>
+<p>更重要的是，重试之间没有停顿。如果我们的目标是减轻已经不堪重负的服务器的压力，那么发送四个请求(原始请求加上三次重试)会使情况变得更糟。</p>
+<p>那么我们怎样才能确保 </p>
+<ol>
+<li>我们只重试某些类型的失败? </li>
+<li>重试失败的请求之前有暂停吗?</li>
+</ol>
+<p>我们的实现需要能够捕获任何上游(upstream)错误，并将它们沿管道传播到下一个操作符。然而，当我们捕获一个<code>serverError</code>时，我们希望暂停一会儿，然后重新启动整个管道，以便重试URL请求。 </p>
+<p>让我们首先确保能够(1)捕获所有错误，(2)过滤掉<code>serverError</code>，以及(3)沿着管道传播所有其他错误。<code>tryCatch</code>操作符“通过用另一个发布者替换它或抛出新的错误来处理来自上游发布者的错误”。这正是我们需要的:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .mapError &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .tryCatch &#123; error -&gt; <span class="type">AnyPublisher</span>&lt;(data: <span class="type">Data</span>, response: <span class="type">URLResponse</span>), <span class="type">Error</span>&gt; <span class="keyword">in</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.serverError(<span class="keyword">_</span>, <span class="keyword">_</span>, <span class="keyword">let</span> retryAfter) <span class="operator">=</span> error &#123; <span class="number">2</span></span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> error <span class="number">3</span></span><br><span class="line">  &#125;</span><br><span class="line">  .map(\.data)</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .map(\.isAvailable)</span><br><span class="line">  .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+<p>当我们捕获到<code>serverError</code>时，我们希望等待一小段时间，然后重新启动管道。 </p>
+<p>为此，我们可以触发一个新事件(使用<code>Just publisher</code>)，将其延迟几秒钟，然后使用<code>flatMap</code>启动一个新的<code>dataTaskPublisher</code>。我们没有将管道的整个代码粘贴到if语句中，而是将<code>dataTaskPublisher</code>赋值给一个局部变量:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> dataTaskPublisher <span class="operator">=</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .mapError &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">return</span> dataTaskPublisher</span><br><span class="line">  .tryCatch &#123; error -&gt; <span class="type">AnyPublisher</span>&lt;(data: <span class="type">Data</span>, response: <span class="type">URLResponse</span>), <span class="type">Error</span>&gt; <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">case</span> <span class="type">APIError</span>.serverError <span class="operator">=</span> error &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="type">Just</span>(()) <span class="number">1</span></span><br><span class="line">        .delay(for: <span class="number">3</span>, scheduler: <span class="type">DispatchQueue</span>.global())</span><br><span class="line">        .flatMap &#123; <span class="keyword">_</span> <span class="keyword">in</span></span><br><span class="line">          <span class="keyword">return</span> dataTaskPublisher</span><br><span class="line">        &#125;</span><br><span class="line">        .retry(<span class="number">10</span>) <span class="number">2</span></span><br><span class="line">        .eraseToAnyPublisher()</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> error</span><br><span class="line">  &#125;</span><br><span class="line">  .map(\.data)</span><br><span class="line">  .tryMap &#123; <span class="operator">...</span> &#125;</span><br><span class="line">  .map(\.isAvailable)</span><br><span class="line">  .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+<p>关于这段代码的几点注意事项: </p>
+<ol>
+<li><code>Just </code>发布者(publisher)期望它能发布一些价值。因为使用哪个值并不重要，所以我们可以发送任何想要的值。我决定发送一个空元组，这通常用于当你的意思是“nothing”的情况。 </li>
+<li>我们重试发送请求10次，这意味着它将总共发送11次(原始调用加上10次重试)。</li>
+</ol>
+<p>这个数字如此之高的唯一原因是为了更容易地看到，一旦服务器返回成功的结果，管道就会结束。当您以<code>username</code>发送<code>maintenance </code>时，演示服务器可以模拟从计划维护中恢复:它将抛出<code>InternalServerError.maintenance</code>对每个第一个和第二个请求进行维护(映射到HTTP 500)。每第三次请求，它将返回一个成功(即<code>HTTP 200</code>)。最好的方法是从<code>Xcode</code>中运行服务器(运行打开服务器项目并按下<code>run</code>按钮)。然后，为包含<code>throw InternalServerError.maintenance</code>的行创建一个<code>Sound breakpoint</code>:</p>
+<p><img src="/./res/sound-breakpoint.webp"></p>
+<p>每次服务器接收到<code>username=maintenace</code>的请求时，您都会听到一个声音。现在，运行示例应用程序并以<code>username</code>输入<code>maintenance</code>。您将听到服务器响应两次错误，然后才返回成功。</p>
+<h1 id="Closure"><a href="#Closure" class="headerlink" title="Closure"></a>Closure</h1><p>在本系列的最近一集中，我们使用了一种相当宽松的方法来处理错误，这一次，我们采取了更加严肃的态度。 </p>
+<p>在本集中，我们使用了几种策略来处理错误并将其公开给UI。错误处理是开发人员质量软件的一个重要方面，并且有很多相关的材料。然而，如何向用户暴露错误这方面的讨论并不多，我希望本文能帮助您更好地理解如何实现这一点。 </p>
+<p>与原始代码相比，代码变得有点复杂，这是我们将在下一集中讨论如何实现您自己的Combine操作符时要解决的问题。为了演示这是如何工作的，我们将实现一个操作符，使处理增量回退就像在组合管道中添加一行一样简单! </p>
+<p>感谢阅读🔥</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/03/02/Optimise%20your%20networking%20layer%20with%20Combine%20%5B%E8%AF%91%5D/" rel="prev" title="Optimise your networking layer with Combine [译]">
+      <i class="fa fa-chevron-left"></i> Optimise your networking layer with Combine [译]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/03/Building%20a%20Custom%20Combine%20Operator%20for%20Exponential%20Backoff%5B%E8%AF%91%5D/" rel="next" title="Building a Custom Combine Operator for Exponential Backoff[译]">
+      Building a Custom Combine Operator for Exponential Backoff[译] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Error-handling-strategies"><span class="nav-number">1.</span> <span class="nav-text">Error handling strategies</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ignoring-the-error"><span class="nav-number">1.1.</span> <span class="nav-text">Ignoring the error</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Retrying-with-exponential-back-off"><span class="nav-number">1.2.</span> <span class="nav-text">Retrying (with exponential back-off)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Showing-an-error-message"><span class="nav-number">1.3.</span> <span class="nav-text">Showing an error message</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Replacing-the-entire-view-with-an-error-view"><span class="nav-number">1.4.</span> <span class="nav-text">Replacing the entire view with an error view</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Showing-an-inline-error-message"><span class="nav-number">1.5.</span> <span class="nav-text">Showing an inline error message</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Typical-error-conditions-and-how-to-handle-them"><span class="nav-number">1.6.</span> <span class="nav-text">Typical error conditions and how to handle them</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Implementing-a-fallible-network-API"><span class="nav-number">2.</span> <span class="nav-text">Implementing a fallible network API</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Calling-the-API-and-handling-errors"><span class="nav-number">3.</span> <span class="nav-text">Calling the API and handling errors</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Handling-Device-Network-Offline-Errors"><span class="nav-number">3.1.</span> <span class="nav-text">Handling Device&#x2F;Network Offline Errors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handling-Validation-Errors"><span class="nav-number">3.2.</span> <span class="nav-text">Handling Validation Errors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handling-Response-Parsing-Errors"><span class="nav-number">3.3.</span> <span class="nav-text">Handling Response Parsing Errors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handling-Internal-Server-Errors"><span class="nav-number">3.4.</span> <span class="nav-text">Handling Internal Server Errors</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Closure"><span class="nav-number">4.</span> <span class="nav-text">Closure</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

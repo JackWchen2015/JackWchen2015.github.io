@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="常用的宏方法 @main The @main attribute identifies the app’s entry point. 1234567891011import SwiftUI@mainstruct MyApp: App &amp;#123;    var body: some Scene &amp;#123;        WindowGroup &amp;#123;            ContentV">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introducing SwiftUI 笔记">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="常用的宏方法 @main The @main attribute identifies the app’s entry point. 1234567891011import SwiftUI@mainstruct MyApp: App &amp;#123;    var body: some Scene &amp;#123;        WindowGroup &amp;#123;            ContentV">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-25T06:58:05.574Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Introducing SwiftUI 笔记 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Introducing SwiftUI 笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-07 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-07T00:00:00+08:00">2024-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-25 14:58:05" itemprop="dateModified" datetime="2024-05-25T14:58:05+08:00">2024-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>常用的宏方法</h1>
+<h2 id="main">@main</h2>
+<p>The <strong>@main</strong> attribute identifies the app’s entry point.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>The entry point is responsible for the start up of the app.</p>
+</blockquote>
+<p>The MyApp structure conforms to the <code>App protocol</code>,</p>
+<p>The structure implements the computed property <code>body</code>, which is a requirement of the <code>App protocol</code>.</p>
+<p>SwiftUI provides different types of scenes including <code>WindowGroup</code>, <code>Window</code>, <code>DocumentGroup</code>, and <code>Settings</code></p>
+<span id="more"></span>
+<h2 id="Observable">@Observable</h2>
+<h2 id="State">@State</h2>
+<p>State is a value, or a set of values, that can change over time, and that affects a view’s behavior, content, or layout.</p>
+<h2 id="Binding">@Binding</h2>
+<p>A binding acts as a reference to a mutable state. When a user taps the toggle from off to on, and off again, the control uses the binding to update the view’s state accordingly.</p>
+<h2 id="Environment">@Environment</h2>
+<p>The property gets its value automatically, as long as the <code>environment(_:)</code> modifier has been applied to a parent.</p>
+<p>The <code>@Environment</code> property wrapper enables you to read the model data of the current view.</p>
+<h2 id="Bindable">@Bindable</h2>
+<h1>常用控件和概念</h1>
+<h2 id="View-protocol">View protocol</h2>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Image</span>(systemName: <span class="string">&quot;globe&quot;</span>)</span><br><span class="line">                .imageScale(.large)</span><br><span class="line">                .foregroundColor(.accentColor)</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Hello, world!&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .padding()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>
+<p><code>ContentView</code> implements the computed property <code>body</code></p>
+</li>
+<li>
+<p><code>Text</code> a view that displays one or more lines of read-only text.</p>
+</li>
+<li>
+<p>ContentView applies the <code>padding(_:_:)</code> modifier to the VStack,that is,space — to the edges of the VStack view</p>
+<p>you can specify which edges and amount of padding to apply by providing edges and length parameter values;<code>padding([.bottom, .trailing], 20).</code></p>
+</li>
+</ol>
+<h2 id="modifiers-修饰符">modifiers 修饰符</h2>
+<p>To customize a SwiftUI view, you call methods called <strong>modifiers</strong></p>
+<blockquote>
+<p>Modifiers wrap a view to change its display or other properties.</p>
+<p>Each modifier returns a new view, so it’s common to chain multiple modifiers, stacked vertically.</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Turtle Rock&quot;</span>)</span><br><span class="line">            .font(.title)</span><br><span class="line">            .foregroundColor(.green)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Spacer">Spacer</h2>
+<p>A spacer expands to make its containing view use all of the space of its <strong>parent view</strong>, instead of having its size defined only by its contents.</p>
+<h2 id="padding">padding</h2>
+<p>the <strong>padding()</strong> modifier to give the View  a little more space around it outer edges.</p>
+<h2 id="Codable">Codable</h2>
+<p>Codable conformance makes it easier to <strong>move data between the structure and a data file</strong>.</p>
+<h2 id="List-or-ForEach">List or ForEach</h2>
+<p>To combine static and dynamic views in a list, or to combine two or more different groups of dynamic views, use the ForEach type instead of passing your collection of data to List.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">NavigationSplitView</span> &#123;</span><br><span class="line">            <span class="type">List</span>(filteredLandmarks) &#123; landmark <span class="keyword">in</span></span><br><span class="line">                <span class="type">NavigationLink</span> &#123;</span><br><span class="line">                    <span class="type">LandmarkDetail</span>(landmark: landmark)</span><br><span class="line">                &#125; label: &#123;</span><br><span class="line">                    <span class="type">LandmarkRow</span>(landmark: landmark)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            .navigationTitle(<span class="string">&quot;Landmarks&quot;</span>)</span><br><span class="line">        &#125; detail: &#123;</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Select a Landmark&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">NavigationSplitView</span> &#123;</span><br><span class="line">            <span class="type">List</span> &#123;</span><br><span class="line">                <span class="type">ForEach</span>(filteredLandmarks) &#123; landmark <span class="keyword">in</span></span><br><span class="line">                    <span class="type">NavigationLink</span> &#123;</span><br><span class="line">                        <span class="type">LandmarkDetail</span>(landmark: landmark)</span><br><span class="line">                    &#125; label: &#123;</span><br><span class="line">                        <span class="type">LandmarkRow</span>(landmark: landmark)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            .navigationTitle(<span class="string">&quot;Landmarks&quot;</span>)</span><br><span class="line">        &#125; detail: &#123;</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Select a Landmark&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h1>Canvas Skill</h1>
+<ol>
+<li>The canvas displays previews in <code>Live mode</code> by default so that you can interact with them</li>
+<li>you can use the<code> Selectable mode</code> to enable editing instead.</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// Source file for Section 1</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KeywordBubbleDefaultPadding</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> keyword: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> symbol: <span class="type">String</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Label</span>(keyword, systemImage: symbol)</span><br><span class="line">            .font(.title)</span><br><span class="line">            .foregroundColor(.white)</span><br><span class="line">            .padding()</span><br><span class="line">            .background(.purple.opacity(<span class="number">0.75</span>), in: <span class="type">Capsule</span>())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KeywordBubbleDefaultPadding_Previews</span>: <span class="title class_">PreviewProvider</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> keywords <span class="operator">=</span> [<span class="string">&quot;chives&quot;</span>, <span class="string">&quot;fern-leaf lavender&quot;</span>]</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">var</span> previews: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">ForEach</span>(keywords, id: \.<span class="keyword">self</span>) &#123; word <span class="keyword">in</span></span><br><span class="line">                <span class="type">KeywordBubbleDefaultPadding</span>(keyword: word, symbol: <span class="string">&quot;leaf&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="open-Show-SwiftUI-Inspector">open  Show SwiftUI Inspector</h2>
+<blockquote>
+<p>In the preview, <code>Command-Control-click</code> the greeting to bring up the structured editing popover, and choose “Show SwiftUI Inspector”.</p>
+<p>open the inspector by <code>Control-clicking</code> on the Text declaration in the code editor, and then choose “Show SwiftUI Inspector” from the popover.</p>
+</blockquote>
+<h1>Interfacing with UIKit</h1>
+<p>SwiftUI works seamlessly with the existing UI frameworks on all Apple platforms. For example, you can place UIKit views and view controllers inside SwiftUI views, and vice versa.</p>
+<h2 id="Create-a-view-to-represent-a-UIPageViewController">Create a view to represent a UIPageViewController</h2>
+<ol>
+<li>To represent UIKit views and view controllers in SwiftUI, you create types that conform to the <code>UIViewRepresentable</code> and <code>UIViewControllerRepresentable</code> protocols.</li>
+</ol>
+<blockquote>
+<p>SwiftUI manages their life cycle and updates them when needed.</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">PageViewController</span>&lt;<span class="title class_">Page</span>: <span class="title class_">View</span>&gt;: <span class="title class_">UIViewControllerRepresentable</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> pages: [<span class="type">Page</span>]</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>add the two requirements for the <code>UIViewControllerRepresentable</code> protocol.</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">makeUIViewController</span>(<span class="params">context</span>: <span class="type">Context</span>) -&gt; <span class="type">UIPageViewController</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> pageViewController <span class="operator">=</span> <span class="type">UIPageViewController</span>(</span><br><span class="line">        transitionStyle: .scroll,</span><br><span class="line">        navigationOrientation: .horizontal)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> pageViewController</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>SwiftUI calls this method a single time when it’s ready to display the view, and then manages the view controller’s life cycle.</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">func</span> <span class="title function_">updateUIViewController</span>(<span class="keyword">_</span> <span class="params">pageViewController</span>: <span class="type">UIPageViewController</span>, <span class="params">context</span>: <span class="type">Context</span>) &#123;</span><br><span class="line">    pageViewController.setViewControllers(</span><br><span class="line">        [<span class="type">UIHostingController</span>(rootView: pages[<span class="number">0</span>])], direction: .forward, animated: <span class="literal">true</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Create-the-view-controller’s-data-source">Create the view controller’s data source</h2>
+<ol>
+<li>Declare a nested Coordinator class inside PageViewController.</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Coordinator</span>: <span class="title class_">NSObject</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> parent: <span class="type">PageViewController</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">init</span>(<span class="keyword">_</span> <span class="params">pageViewController</span>: <span class="type">PageViewController</span>) &#123;</span><br><span class="line">            parent <span class="operator">=</span> pageViewController</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>SwiftUI manages your UIViewControllerRepresentable type’s coordinator, and provides it as part of the context when calling the methods you created above.</p>
+</blockquote>
+<ol start="2">
+<li>Add another method to PageViewController to make the coordinator.</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">makeCoordinator</span>() -&gt; <span class="type">Coordinator</span> &#123;</span><br><span class="line">       <span class="type">Coordinator</span>(<span class="keyword">self</span>)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>SwiftUI calls this makeCoordinator() method before makeUIViewController(context:), so that you have access to the coordinator object when configuring your view controller.</p>
+</blockquote>
+<ul>
+<li>Tip</li>
+</ul>
+<blockquote>
+<p>You can use this <strong>coordinator</strong> to implement common Cocoa patterns, such as delegates, data sources, and responding to user events via target-action.</p>
+</blockquote>
+<h1>Reference</h1>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/tutorials/SwiftUI">Introducing SwiftUI</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/11/01/Mac%20OS%20Notification%20with%20Py/" rel="prev" title="Mac OS Notification with Python">
+      <i class="fa fa-chevron-left"></i> Mac OS Notification with Python
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/02/11/SwiftUI%20Concepts%20Tutorials%20%E7%AC%94%E8%AE%B0/" rel="next" title="SwiftUI Concepts Tutorials 笔记">
+      SwiftUI Concepts Tutorials 笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">常用的宏方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#main"><span class="nav-number">1.1.</span> <span class="nav-text">@main</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Observable"><span class="nav-number">1.2.</span> <span class="nav-text">@Observable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#State"><span class="nav-number">1.3.</span> <span class="nav-text">@State</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binding"><span class="nav-number">1.4.</span> <span class="nav-text">@Binding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Environment"><span class="nav-number">1.5.</span> <span class="nav-text">@Environment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bindable"><span class="nav-number">1.6.</span> <span class="nav-text">@Bindable</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">常用控件和概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#View-protocol"><span class="nav-number">2.1.</span> <span class="nav-text">View protocol</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#modifiers-%E4%BF%AE%E9%A5%B0%E7%AC%A6"><span class="nav-number">2.2.</span> <span class="nav-text">modifiers 修饰符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spacer"><span class="nav-number">2.3.</span> <span class="nav-text">Spacer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#padding"><span class="nav-number">2.4.</span> <span class="nav-text">padding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Codable"><span class="nav-number">2.5.</span> <span class="nav-text">Codable</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#List-or-ForEach"><span class="nav-number">2.6.</span> <span class="nav-text">List or ForEach</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">Canvas Skill</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#open-Show-SwiftUI-Inspector"><span class="nav-number">3.1.</span> <span class="nav-text">open  Show SwiftUI Inspector</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">Interfacing with UIKit</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Create-a-view-to-represent-a-UIPageViewController"><span class="nav-number">4.1.</span> <span class="nav-text">Create a view to represent a UIPageViewController</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Create-the-view-controller%E2%80%99s-data-source"><span class="nav-number">4.2.</span> <span class="nav-text">Create the view controller’s data source</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

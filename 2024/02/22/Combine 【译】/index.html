@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="通过组合 事件处理操作符 自定义异步事件的处理。  Customize handling of asynchronous events by combining event-processing operators.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Combine [译]">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="通过组合 事件处理操作符 自定义异步事件的处理。  Customize handling of asynchronous events by combining event-processing operators.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-25T06:58:14.433Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Combine [译] | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Combine [译]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-22T00:00:00+08:00">2024-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-25 14:58:14" itemprop="dateModified" datetime="2024-05-25T14:58:14+08:00">2024-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>通过组合 事件处理操作符 自定义异步事件的处理。</p>
+</blockquote>
+<p>Customize handling of asynchronous events by combining event-processing operators.</p>
+<span id="more"></span>
+<h1>OverView</h1>
+<p><code>Combine</code>框架提供了一个声明式<code>Swift API</code>，用于处理随时间变化的值。这些值可以表示多种异步事件。<code>Combine</code>声明发布者(<code>publishers</code>)以公开可能随时间变化的值，并声明订阅者(<code>subscribers</code>)以从发布者接收这些值。</p>
+<ul>
+<li>
+<p><code>Publisher</code>协议声明了一种可以随时间传递一系列值的类型。发布者有操作符来处理从上游发布者接收到的值并重新发布它们。</p>
+</li>
+<li>
+<p>在发布者链的末端，订阅者(<code>Subscriber</code>)在接收到元素时对元素进行操作。发布者仅在订阅者显式请求时才发出值。这使订阅者代码可以控制从所连接的发布者接收事件的速度。</p>
+</li>
+</ul>
+<p>一些<code>Foundation</code>类型通过发布者公开它们的功能，包括<code>Timer</code>、<code>NotificationCenter</code>和<code>URLSession</code>。<code>Combine</code>还为符合键值观察(KVO)的任何属性提供了一个内置发布者。</p>
+<p>您可以<code>combine</code>多个发布者的输出并协调(coordinate)它们的交互。例如，您可以从文本字段的发布者订阅更新，并使用文本执行<code>URL</code>请求。然后，你可以使用另一个发布者来处理响应，并使用它们来更新你的应用。</p>
+<p>通过采用<code>Combine</code>，可以集中事件处理代码并消除嵌套闭包(<code>nested closures</code>)和基于约定的回调(<code>convention-based</code>)等麻烦的技术，从而使代码更易于阅读和维护。</p>
+<h1>Receiving and Handling Events with Combine</h1>
+<h2 id="OverView">OverView</h2>
+<p>Combine框架为应用程序如何处理事件提供了一种声明式的方法。您可以为给定的事件源创建单个处理链，而不是潜在地实现多个委托回调(multiple delegate callbacks)或完成处理程序闭包(completion handler closures)。链的每一部分都是一个<code>Combine</code>操作符，它对从前一步接收到的元素执行不同的操作。</p>
+<p>考虑一个需要根据文本字段的内容过滤表或集合视图的应用程序。在<code>AppKit</code>中，文本字段中的每次击键都会产生一个<code>Notification</code> ，您可以使用<code>Combine</code>订阅该通知。收到通知后，你可以使用<code>operators </code>更改事件传递的内容和时间，并使用最终结果更新应用程序的用户界面。</p>
+<h2 id="Connect-a-Publisher-to-a-Subscriber">Connect a Publisher to a Subscriber</h2>
+<p>要使用<code>Combine</code>接收文本字段的通知，请访问<code>NotificationCenter</code>的默认实例并调用<code>publisher(for:object:)</code>方法。此调用接受通知名称和希望从中获得通知的源对象(source object)，并返回生成通知元素的发布者。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> pub <span class="operator">=</span> <span class="type">NotificationCenter</span>.default</span><br><span class="line">    .publisher(for: <span class="type">NSControl</span>.textDidChangeNotification, object: filterField)</span><br></pre></td></tr></table></figure>
+<p>您使用<code>Subscriber </code>从发布者接收元素。订阅者定义一个关联类型<code>Input</code>来声明它接收的类型。发布者还定义了一个类型<code>Output</code>来声明它生成的内容。发布者和订阅者都定义了一个类型<code>Failure</code>，以指示它们产生或接收的错误类型。要将订阅者连接到生产者，<code>Output</code>必须匹配<code>Input</code>, <code>Failure</code>类型也必须匹配。</p>
+<p>Combine提供了两个内置订阅者，它们自动匹配其附加的发布者的输出(Output)和失败(Failure)类型:</p>
+<ul>
+<li>
+<p><code>sink(receivcompletion: receivvalue:)</code>接受两个闭包。第一个闭包在接收到<code>Subscribers.Completion</code>时执行。这是一个枚举，指示发布者是正常完成还是失败并出现错误。第二个闭包在从发布者接收到元素时执行。</p>
+</li>
+<li>
+<p><code>assign(to:on:) </code>立即将它接收到的每个元素分配给给定对象的一个属性，使用一个键路径来指示该属性。</p>
+</li>
+</ul>
+<p>例如，您可以使用接收器订阅者(sink subscriber)记录发布者何时完成，以及每次它接收到元素的时间:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sub <span class="operator">=</span> <span class="type">NotificationCenter</span>.default</span><br><span class="line">    .publisher(for: <span class="type">NSControl</span>.textDidChangeNotification, object: filterField)</span><br><span class="line">    .sink(receiveCompletion: &#123; print (<span class="variable">$0</span>) &#125;,</span><br><span class="line">          receiveValue: &#123; print (<span class="variable">$0</span>) &#125;)</span><br></pre></td></tr></table></figure>
+<p><code>sink(receiveCompletion:receiveValue:)</code>和<code> assign(to:on:)</code>订阅者都向发布者请求无限数量的元素。要控制接收元素的速率，请通过实现<code>Subscriber</code>协议创建自己的订阅者。</p>
+<h2 id="Change-the-Output-Type-with-Operators">Change the Output Type with Operators</h2>
+<p>上一节中的<code> sink subscriber</code>在<code>receiveValue </code>闭包中执行其所有工作。如果需要对接收到的元素执行大量自定义工作或维护调用之间的状态，那么这可能会很麻烦(burdensome)。<code>Combine</code>的优势来自于组合操作符(combining operators)来定制事件交付。</p>
+<p>例如，如果您只需要文本字段的字符串值，那么<code>NotificationCenter.Publisher.Output</code>就不是一个方便的回调类型。由于发布者的输出本质上是一个随时间变化的元素序列，因此<code>Combine</code>提供了<code>map(_:)</code>、<code>flatMap(maxPublishers:_:)</code>和<code>reduce(_:_:)</code>等序列修改操作符。这些操作符的行为类似于<code>Swift</code>标准库中的等价操作符。</p>
+<p>要更改发布者的输出类型，可以添加<code>map(_:)</code>操作符，其闭包返回不同的类型。在这种情况下，你可以获得通知的对象作为一个<code>NSTextField</code>，然后获得字段的<code>stringValue</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sub <span class="operator">=</span> <span class="type">NotificationCenter</span>.default</span><br><span class="line">    .publisher(for: <span class="type">NSControl</span>.textDidChangeNotification, object: filterField)</span><br><span class="line">    .map( &#123; (<span class="variable">$0</span>.object <span class="keyword">as!</span> <span class="type">NSTextField</span>).stringValue &#125; )</span><br><span class="line">    .sink(receiveCompletion: &#123; print (<span class="variable">$0</span>) &#125;,</span><br><span class="line">          receiveValue: &#123; print (<span class="variable">$0</span>) &#125;)</span><br></pre></td></tr></table></figure>
+<p>在发布者链生成您想要的类型之后，将<code>sink(receiveCompletion:receiveValue:)</code>替换为<code>assign(to:on:)</code>。下面的示例从发布者链接收字符串，并将它们分配给自定义视图模型对象的<code>filterString</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sub <span class="operator">=</span> <span class="type">NotificationCenter</span>.default</span><br><span class="line">    .publisher(for: <span class="type">NSControl</span>.textDidChangeNotification, object: filterField)</span><br><span class="line">    .map( &#123; (<span class="variable">$0</span>.object <span class="keyword">as!</span> <span class="type">NSTextField</span>).stringValue &#125; )</span><br><span class="line">    .assign(to: \<span class="type">MyViewModel</span>.filterString, on: myViewModel)</span><br></pre></td></tr></table></figure>
+<h2 id="Customize-Publishers-with-Operators">Customize Publishers with Operators</h2>
+<p>您可以使用一个操作符扩展<code>Publisher</code>实例，该操作符执行原本需要手动编写的操作。这里有三种使用操作符来改进事件处理链的方法:</p>
+<ul>
+<li>
+<p>您可以使用<code>filter(_:)</code>操作符来忽略特定长度以下的输入或拒绝非字母数字字符，而不是使用输入到文本字段中的任何字符串来更新视图模型。</p>
+</li>
+<li>
+<p>如果<code>filtering operation</code>开销很大——例如，查询一个大型数据库——您可能希望等待用户停止输入。为此，<code>debounce(For:scheduler:options:)</code>操作符允许您设置发布者发出事件之前必须经过的最小时间段。<code>RunLoop</code>类为以秒或毫秒为单位指定时间延迟提供了便利。</p>
+</li>
+<li>
+<p>如果结果更新UI，您可以通过调用<code>receive(on:options:)</code>方法向主线程交付回调。通过指定<code>RunLoop</code>类提供的<code>Scheduler</code>实例作为第一个参数，可以告诉<code>Combine</code>在主运行循环中调用订阅者。</p>
+</li>
+</ul>
+<p>生成的发布者声明如下:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sub <span class="operator">=</span> <span class="type">NotificationCenter</span>.default</span><br><span class="line">    .publisher(for: <span class="type">NSControl</span>.textDidChangeNotification, object: filterField)</span><br><span class="line">    .map( &#123; (<span class="variable">$0</span>.object <span class="keyword">as!</span> <span class="type">NSTextField</span>).stringValue &#125; )</span><br><span class="line">    .filter( &#123; <span class="variable">$0</span>.unicodeScalars.allSatisfy(&#123;<span class="type">CharacterSet</span>.alphanumerics.contains(<span class="variable">$0</span>)&#125;) &#125; )</span><br><span class="line">    .debounce(for: .milliseconds(<span class="number">500</span>), scheduler: <span class="type">RunLoop</span>.main)</span><br><span class="line">    .receive(on: <span class="type">RunLoop</span>.main)</span><br><span class="line">    .assign(to:\<span class="type">MyViewModel</span>.filterString, on: myViewModel)</span><br></pre></td></tr></table></figure>
+<h2 id="Cancel-Publishing-when-Desired">Cancel Publishing when Desired</h2>
+<p>发布者将继续发出元素，直到正常完成或失败。如果不再想订阅发布者，可以取消订阅。由<code>sink(receiveCompletion:receiveValue:)</code>和<code>assign(to:on:)</code>创建的订户类型都实现了<code>Cancellable</code>协议，该协议提供了一个<code>cancel()</code>方法:</p>
+<p><code>sub?.cancel()</code></p>
+<p>如果创建自定义<code>Subscriber</code>，则在首次订阅时，发布者将发送<code>Subscription</code>对象。存储此<code>subscription </code>，然后在需要取消发布时调用其<code>cancel()</code>方法。当您创建自定义<code>subscriber </code>时，您应该实现<code>Cancellable</code>协议，并让<code>cancel()</code>实现将调用转发给存储的<code>subscription </code>。</p>
+<h1>参考</h1>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/combine">Combine</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/" rel="prev" title="Networking with Combine and SwiftUI [译]">
+      <i class="fa fa-chevron-left"></i> Networking with Combine and SwiftUI [译]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/" rel="next" title="SwiftUI + Combine 【译】">
+      SwiftUI + Combine 【译】 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">OverView</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">Receiving and Handling Events with Combine</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#OverView"><span class="nav-number">2.1.</span> <span class="nav-text">OverView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Connect-a-Publisher-to-a-Subscriber"><span class="nav-number">2.2.</span> <span class="nav-text">Connect a Publisher to a Subscriber</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Change-the-Output-Type-with-Operators"><span class="nav-number">2.3.</span> <span class="nav-text">Change the Output Type with Operators</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Customize-Publishers-with-Operators"><span class="nav-number">2.4.</span> <span class="nav-text">Customize Publishers with Operators</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cancel-Publishing-when-Desired"><span class="nav-number">2.5.</span> <span class="nav-text">Cancel Publishing when Desired</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

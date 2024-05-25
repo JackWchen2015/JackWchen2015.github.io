@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Publisher 发布者向一个或多个订阅者发送值。它们遵循Publisher协议，并声明输出的类型和它们产生的任何错误: 12345public protocol Publisher &amp;#123;  associatedtype Output  associatedtype Failure : Error  func receive&lt;S&gt;(subscriber: S) where S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SwiftUI + Combine 【译】">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Publisher 发布者向一个或多个订阅者发送值。它们遵循Publisher协议，并声明输出的类型和它们产生的任何错误: 12345public protocol Publisher &amp;#123;  associatedtype Output  associatedtype Failure : Error  func receive&lt;S&gt;(subscriber: S) where S">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-25T06:57:52.022Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SwiftUI + Combine 【译】 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SwiftUI + Combine 【译】
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-23T00:00:00+08:00">2024-02-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-25 14:57:52" itemprop="dateModified" datetime="2024-05-25T14:57:52+08:00">2024-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>Publisher</h1>
+<p>发布者向一个或多个订阅者发送值。它们遵循<code>Publisher</code>协议，并声明输出的类型和它们产生的任何错误:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Output</span></span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>&lt;<span class="type">S</span>&gt;(<span class="params">subscriber</span>: <span class="type">S</span>) <span class="keyword">where</span> <span class="type">S</span> : <span class="type">Subscriber</span>, <span class="keyword">Self</span>.<span class="type">Failure</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Failure</span>, <span class="keyword">Self</span>.<span class="type">Output</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Input</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>发布者可以随时间发送任意数量的值，也可以发送错误而失败。关联类型<code>Output</code>定义发布者可以发送哪些类型的值，而关联类型<code>Failure</code>定义它可能失败的错误类型。发布者可以通过指定<code>never</code>关联类型来声明它永远不会失败。</p>
+<span id="more"></span>
+<h1>Subscribers</h1>
+<p>另一方面，订阅者订阅一个特定的发布者实例，并接收一个值流，直到取消订阅。</p>
+<p>它们符合<code>Subscriber </code>协议。为了订阅发布者，订阅者的关联<code>Input </code>和<code>Failure </code>类型必须符合发布者的关联<code>Output </code>和<code>Failure </code>类型。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Subscriber</span> : <span class="title class_">CustomCombineIdentifierConvertible</span> &#123;</span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Input</span></span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>(<span class="params">subscription</span>: <span class="type">Subscription</span>)</span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>(<span class="keyword">_</span> <span class="params">input</span>: <span class="keyword">Self</span>.<span class="type">Input</span>) -&gt; <span class="type">Subscribers</span>.<span class="type">Demand</span></span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>(<span class="params">completion</span>: <span class="type">Subscribers</span>.<span class="type">Completion</span>&lt;<span class="keyword">Self</span>.<span class="type">Failure</span>&gt;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1>Operators</h1>
+<p>发布者和订阅者是<code>SwiftUI</code>在UI和底层模型之间双向同步的支柱。我想你会同意，用<code>SwiftUI</code>保持你的UI和模型同步从来没有比这更容易，这都要归功于<code>Combine</code>框架的这一部分。</p>
+<p>然而，<code>Operators</code>才是<code>Combine </code>的超级力量。它们是对<code>Publisher </code>进行操作、执行一些计算并生成另一个发布者(Publisher)的<strong>方法</strong>。</p>
+<ul>
+<li>例如，可以使用<code>filter </code>操作符根据某些条件忽略值。</li>
+<li>或者，如果需要执行开销较大的任务(例如通过网络获取信息)，可以使用<code>debounce</code>操作符等待，直到用户停止输入</li>
+<li><code>map</code>操作符允许您将某种类型的输入值转换为不同类型的输出值</li>
+</ul>
+<h1>Validating the Username  - simple validation</h1>
+<p>考虑到这一点，让我们实现一个简单的验证，以确保用户输入的名称至少包含三个字符。</p>
+<p>视图模型上的所有属性都使用<code>@Published</code>属性包装器进行包装。这意味着每个属性都有自己的发布者，我们可以订阅它。</p>
+<p>要指示用户名是否有效，可使用<code>map</code>操作符将用户的输入从<code>String</code>转换为<code>Bool</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$username</span></span><br><span class="line">  .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">RunLoop</span>.main)</span><br><span class="line">  .removeDuplicates()</span><br><span class="line">  .map &#123; input <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">return</span> input.count <span class="operator">&gt;=</span> <span class="number">3</span></span><br><span class="line">  &#125;</span><br><span class="line">  .assign(to: \.valid, on: <span class="keyword">self</span>)</span><br><span class="line">  .store(in: <span class="operator">&amp;</span>cancellableSet)</span><br></pre></td></tr></table></figure>
+<p>然后，<code>assign </code>订阅者使用此转换的结果，它(顾名思义)将接收到的值分配给视图模型的输出属性<code>valid </code>。</p>
+<h2 id="debounce">debounce</h2>
+<p><code>debounce</code>操作符允许我们指定在事件交付中等待暂停，例如当用户停止输入时。</p>
+<blockquote>
+<p>The debounce operator lets us specify that we want to wait for a pause in the delivery of events, for example when the user stops typing.</p>
+</blockquote>
+<p>例如，在输入用户名时，不需要检查用户名是否有效，或者用户输入的每个字母是否可用。仅在他们停止输入(或暂停片刻)时执行此检查就足够了。</p>
+<h2 id="removeDuplicates">removeDuplicates</h2>
+<p><code>removeduplicate</code>操作符仅在事件不同于之前的任何事件时才发布事件。例如，如果用户先输入john，然后是joe，然后又是john，我们将只接收到john一次。这有助于提高UI的工作效率。</p>
+<blockquote>
+<p>the <code>removeDuplicates</code> operator will publish events only if they are different from any previous events. For example, if the user first types john, then joe, and then john again, we will only receive john once. This helps make our UI work more efficiently.</p>
+</blockquote>
+<h2 id="Cancellable">Cancellable</h2>
+<p>这个调用链的结果是一个<code>Cancellable</code>，如果需要，我们可以使用它来取消处理(对于长时间运行的链很有用)。我们将把它(以及我们稍后将创建的所有其他对象)存储到<code>Set&lt;AnyCancellable&gt;</code>中，这样我们就可以在<code>deinit </code>时进行清理。</p>
+<h1>Validating the Password(s)   multi-staged validation</h1>
+<p>现在让我们换个角度，看看如何执行多阶段(multi-staged)验证逻辑。这是必需的，因为表单上的密码字段需要满足多个要求:它们不能为空，它们必须匹配，而且(最重要的是)所选择的密码必须足够强。除了将输入值转换为<code>Bool</code>值以指明密码是否满足我们的要求外，我们还希望通过返回适当的警告消息为用户提供一些指导。</p>
+<p>让我们一步一步来，首先实现验证用户输入的密码的管道。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> isPasswordEmptyPublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">   <span class="comment">// (1)</span></span><br><span class="line">   <span class="variable">$password</span></span><br><span class="line">     .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">RunLoop</span>.main)</span><br><span class="line">     .removeDuplicates()</span><br><span class="line">     .map &#123; password <span class="keyword">in</span></span><br><span class="line">       <span class="keyword">return</span> password <span class="operator">==</span> <span class="string">&quot;&quot;</span></span><br><span class="line">     &#125;</span><br><span class="line">     .eraseToAnyPublisher()</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>我们没有将转换结果直接赋值给<code>isValid</code>输出属性，而是返回一个<code>AnyPublisher&lt;Bool, Never&gt;</code>。这样我们就可以在订阅最终结果(valid or not)之前，将多个发布者组合成一个多阶段链(multi-stage chain)。</p>
+<p>为了验证两个单独的属性是否包含相等的字符串，我们使用了<code>combinellatest</code>操作符。请记住，每次用户输入字符时，绑定到相应<code>SecureField</code>的属性都会触发，我们希望比较每个字段的最新值。<code>combinellatest</code>让我们做到了这一点。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> arePasswordsEqualPublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">   <span class="type">Publishers</span>.<span class="type">CombineLatest</span>(<span class="variable">$password</span>, <span class="variable">$passwordAgain</span>)</span><br><span class="line">     .debounce(for: <span class="number">0.2</span>, scheduler: <span class="type">RunLoop</span>.main)</span><br><span class="line">     .map &#123; password, passwordAgain <span class="keyword">in</span></span><br><span class="line">       <span class="keyword">return</span> password <span class="operator">==</span> passwordAgain</span><br><span class="line">     &#125;</span><br><span class="line">     .eraseToAnyPublisher()</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>eraseToAnyPublisher()</li>
+</ul>
+<p>如果你想知道为什么我们需要在每个链的末尾调用<code>eraseToAnyPublisher():</code>,这将执行一些类型擦除，以确保我们不会得到一些疯狂的嵌套返回类型。</p>
+<blockquote>
+<p>this performs some type erasure that makes sure we don’t end up with some crazy nested return types.</p>
+</blockquote>
+<p>很好，现在我们对用户输入的密码有了很多了解，让我们把它归结为我们真正想知道的一件事:这是一个有效的密码吗?</p>
+<p>正如您可能已经猜到的，我们将需要使用<code>CombineLatest</code>操作符，但由于这次我们有三个参数，我们将使用<code>CombineLatest3</code>，它接受三个输入参数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">PasswordCheck</span> &#123;</span><br><span class="line">   <span class="keyword">case</span> valid</span><br><span class="line">   <span class="keyword">case</span> empty</span><br><span class="line">   <span class="keyword">case</span> noMatch</span><br><span class="line">   <span class="keyword">case</span> notStrongEnough</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">var</span> isPasswordValidPublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">PasswordCheck</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">   <span class="type">Publishers</span>.<span class="type">CombineLatest3</span>(isPasswordEmptyPublisher, arePasswordsEqualPublisher, isPasswordStrongEnoughPublisher)</span><br><span class="line">     .map &#123; passwordIsEmpty, passwordsAreEqual, passwordIsStrongEnough <span class="keyword">in</span></span><br><span class="line">       <span class="keyword">if</span> (passwordIsEmpty) &#123;</span><br><span class="line">         <span class="keyword">return</span> .empty</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>passwordsAreEqual) &#123;</span><br><span class="line">         <span class="keyword">return</span> .noMatch</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">else</span> <span class="keyword">if</span> (<span class="operator">!</span>passwordIsStrongEnough) &#123;</span><br><span class="line">         <span class="keyword">return</span> .notStrongEnough</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">else</span> &#123;</span><br><span class="line">         <span class="keyword">return</span> .valid</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     .eraseToAnyPublisher()</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>将三个布尔值映射到单个<code>enum </code>的主要原因是，我们希望能够根据验证结果生成合适的警告消息。告诉用户他们的密码不好，并不是很有帮助，不是吗?如果我们告诉他们为什么不成立会更好。</p>
+<h1>Putting it All Together</h1>
+<p>为了计算验证的最终结果，我们需要将用户名验证的结果与密码验证的结果结合起来。但是，在此之前，我们需要重构用户名验证，以便它也返回一个包含在验证链中的发布者。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> isUsernameValidPublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">    <span class="variable">$username</span></span><br><span class="line">      .debounce(for: <span class="number">0.8</span>, scheduler: <span class="type">RunLoop</span>.main)</span><br><span class="line">      .removeDuplicates()</span><br><span class="line">      .map &#123; input <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> input.count <span class="operator">&gt;=</span> <span class="number">3</span></span><br><span class="line">      &#125;</span><br><span class="line">      .eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>完成这些后，我们可以实现表单验证的最后阶段:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">var</span> isFormValidPublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">    <span class="type">Publishers</span>.<span class="type">CombineLatest</span>(isUsernameValidPublisher, isPasswordValidPublisher)</span><br><span class="line">      .map &#123; usernameIsValid, passwordIsValid <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> usernameIsValid <span class="operator">&amp;&amp;</span> (passwordIsValid <span class="operator">==</span> .valid)</span><br><span class="line">      &#125;</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h1>Updating the UI</h1>
+<p>如果不将其连接到UI，这些都不会很有用。为了驱动<code>Sign up</code>按钮的状态，我们需要更新视图模型上的<code>isValid</code>输出属性。</p>
+<p>为此，我们只需订阅<code>isFormValidPublisher</code>并将其发布的值赋给<code>isValid</code>属性:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">init</span>() &#123;</span><br><span class="line">    isFormValidPublisher</span><br><span class="line">      .receive(on: <span class="type">RunLoop</span>.main)</span><br><span class="line">      .assign(to: \.isValid, on: <span class="keyword">self</span>)</span><br><span class="line">      .store(in: <span class="operator">&amp;</span>cancellableSet)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>由于此代码与UI交互，因此需要在UI线程上运行。我们可以通过调用<code>receive(on: RunLoop.main)</code>告诉SwiftUI在UI线程上执行这段代码。</p>
+<p>最后，我们将警告消息输出属性绑定到UI，以帮助指导用户填写注册表单。</p>
+<p>首先，我们订阅各自的发布者，以了解何时用户名和密码属性无效。同样，我们需要确保这发生在UI线程上，所以我们将调用<code>receive(on:)</code>并传递主运行循环。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">init</span>() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    isUsernameValidPublisher</span><br><span class="line">      .receive(on: <span class="type">RunLoop</span>.main)</span><br><span class="line">      .map &#123; valid <span class="keyword">in</span></span><br><span class="line">        valid <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;username must at leat have 3 characters&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">      .assign(to: \.usernameMessage, on: <span class="keyword">self</span>)</span><br><span class="line">      .store(in: <span class="operator">&amp;</span>cancellableSet)</span><br><span class="line">    </span><br><span class="line">    isPasswordValidPublisher</span><br><span class="line">      .receive(on: <span class="type">RunLoop</span>.main)</span><br><span class="line">      .map &#123; passwordCheck <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">switch</span> passwordCheck &#123;</span><br><span class="line">        <span class="keyword">case</span> .empty:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Password must not be empty&quot;</span></span><br><span class="line">        <span class="keyword">case</span> .noMatch:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Passwords don&#x27;t match&quot;</span></span><br><span class="line">        <span class="keyword">case</span> .notStrongEnough:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Password not strong enough&quot;</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      .assign(to: \.passwordMessage, on: <span class="keyword">self</span>)</span><br><span class="line">      .store(in: <span class="operator">&amp;</span>cancellableSet)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，我们需要将输出属性<code>usernameMessage</code>和<code>passwordMessage</code>绑定到UI。section页脚(footers)是显示错误信息的一个方便的地方，我们可以通过将它们涂成红色来使它们更加突出:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Form</span> &#123;</span><br><span class="line">      <span class="type">Section</span>(footer: <span class="type">Text</span>(userModel.usernameMessage).foregroundColor(.red)) &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">Section</span>(footer: <span class="type">Text</span>(userModel.passwordMessage).foregroundColor(.red)) &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h1>参考</h1>
+<p><a target="_blank" rel="noopener" href="https://peterfriese.dev/blog/2019/swift-combine-love/">SwiftUI + Combine</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/" rel="prev" title="Combine [译]">
+      <i class="fa fa-chevron-left"></i> Combine [译]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/01/%E5%8D%95%E4%BE%8B%20%E5%92%8C%20%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E3%80%90%E8%AF%91%E3%80%91/" rel="next" title="单例 和 依赖注入 【译】">
+      单例 和 依赖注入 【译】 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Publisher</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">Subscribers</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">Operators</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">Validating the Username  - simple validation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#debounce"><span class="nav-number">4.1.</span> <span class="nav-text">debounce</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#removeDuplicates"><span class="nav-number">4.2.</span> <span class="nav-text">removeDuplicates</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cancellable"><span class="nav-number">4.3.</span> <span class="nav-text">Cancellable</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text">Validating the Password(s)   multi-staged validation</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">6.</span> <span class="nav-text">Putting it All Together</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">7.</span> <span class="nav-text">Updating the UI</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

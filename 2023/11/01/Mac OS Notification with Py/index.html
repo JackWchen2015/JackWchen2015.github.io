@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一些在后台运行的任务，需要在特定条件下对用户发起通知，如果有跨端要求，可以用第三方库，不过需要付费，优势在于可同时兼容移动端和桌面端，这里只是个人使用，所以推荐使用Mac自带Apple Script来添加，本来考虑通过向Reminders添加Event的方式，实现Mack &amp; iOS同时提醒，不过只找到OC和Swift的API，没找到Py的API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac OS Notification with Python">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/11/01/Mac%20OS%20Notification%20with%20Py/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="一些在后台运行的任务，需要在特定条件下对用户发起通知，如果有跨端要求，可以用第三方库，不过需要付费，优势在于可同时兼容移动端和桌面端，这里只是个人使用，所以推荐使用Mac自带Apple Script来添加，本来考虑通过向Reminders添加Event的方式，实现Mack &amp; iOS同时提醒，不过只找到OC和Swift的API，没找到Py的API">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-01T00:00:00.000Z">
+<meta property="article:modified_time" content="2023-11-01T11:04:43.295Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/11/01/Mac%20OS%20Notification%20with%20Py/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mac OS Notification with Python | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/11/01/Mac%20OS%20Notification%20with%20Py/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac OS Notification with Python
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-11-01 08:00:00 / 修改时间：19:04:43" itemprop="dateCreated datePublished" datetime="2023-11-01T08:00:00+08:00">2023-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>一些在后台运行的任务，需要在特定条件下对用户发起通知，如果有跨端要求，可以用第三方库，不过需要付费，优势在于可同时兼容移动端和桌面端，这里只是个人使用，所以推荐使用Mac自带Apple Script来添加，本来考虑通过向<code>Reminders</code>添加<code>Event</code>的方式，实现Mack &amp; iOS同时提醒，不过只找到OC和Swift的API，没找到Py的API</p>
+<span id="more"></span>
+<h1>Notification</h1>
+<h2 id="display-notification">display notification</h2>
+<p>The AppleScript command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display notification &quot;hello world!&quot; with title &quot;Greeting&quot; subtitle &quot;More text&quot;</span><br></pre></td></tr></table></figure>
+<p>With osascript:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">osascript -e &#x27;display notification &quot;hello world!&quot; with title &quot;Greeting&quot; subtitle &quot;More text&quot;&#x27;</span><br></pre></td></tr></table></figure>
+<h3 id="make-sound">make sound</h3>
+<p>The AppleScript command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display notification &quot;hello world!&quot; with title &quot;Greeting&quot; subtitle &quot;More text&quot; sound name &quot;Submarine&quot;</span><br></pre></td></tr></table></figure>
+<p>executed by osascript:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">osascript -e &#x27;display notification &quot;hello world!&quot; with title &quot;Greeting&quot; subtitle &quot;More text&quot; sound name &quot;Submarine&quot;&#x27;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>If the name of the sound is incorrect Mac will make an alert sound.</p>
+<p>The sound can be one of the files in /System/Library/Sounds or in ~/Library/Sounds.</p>
+</blockquote>
+<h3 id="Code-in-Py-sup-id-fnref-1-a-href-fn-1-rel-footnote-1-a-sup">Code in Py <sup id="fnref:1"><a href="#fn:1" rel="footnote">1</a></sup></h3>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">notify</span>(<span class="params">title, text</span>):</span><br><span class="line">    os.system(<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">              osascript -e &#x27;display notification &quot;&#123;&#125;&quot; with title &quot;&#123;&#125;&quot;&#x27;</span></span><br><span class="line"><span class="string">              &quot;&quot;&quot;</span>.<span class="built_in">format</span>(text, title))</span><br><span class="line"></span><br><span class="line">notify(<span class="string">&quot;Title&quot;</span>, <span class="string">&quot;Heres an alert&quot;</span>)</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>此示例没有转义引号、双引号或其他特殊字符，因此这些字符将无法在通知的文本或标题中正确工作</p>
+</blockquote>
+<p>update：这应该适用于任何字符串，不需要转义任何内容。它的工作原理是<strong>将原始字符串作为参数传递给apple脚本，而不是试图将它们嵌入到apple脚本程序的文本中</strong>。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line">CMD = <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">on run argv</span></span><br><span class="line"><span class="string">  display notification (item 2 of argv) with title (item 1 of argv)</span></span><br><span class="line"><span class="string">end run</span></span><br><span class="line"><span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">notify</span>(<span class="params">title, text</span>):</span><br><span class="line">  subprocess.call([<span class="string">&#x27;osascript&#x27;</span>, <span class="string">&#x27;-e&#x27;</span>, CMD, title, text])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Example uses:</span></span><br><span class="line">notify(<span class="string">&quot;Title&quot;</span>, <span class="string">&quot;Heres an alert&quot;</span>)</span><br><span class="line">notify(<span class="string">r&#x27;Weird\/|&quot;!@#$%^&amp;*()\ntitle&#x27;</span>, <span class="string">r&#x27;!@#$%^&amp;*()&quot;&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="Code-Demo-2">Code Demo 2</h3>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">displayNotification</span>(<span class="params">message,title=<span class="literal">None</span>,subtitle=<span class="literal">None</span>,soundname=<span class="literal">None</span></span>):</span><br><span class="line">	<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">		Display an OSX notification with message title an subtitle</span></span><br><span class="line"><span class="string">		sounds are located in /System/Library/Sounds or ~/Library/Sounds</span></span><br><span class="line"><span class="string">	&quot;&quot;&quot;</span></span><br><span class="line">	titlePart = <span class="string">&#x27;&#x27;</span></span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">not</span> title <span class="keyword">is</span> <span class="literal">None</span>):</span><br><span class="line">		titlePart = <span class="string">&#x27;with title &quot;&#123;0&#125;&quot;&#x27;</span>.<span class="built_in">format</span>(title)</span><br><span class="line">	subtitlePart = <span class="string">&#x27;&#x27;</span></span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">not</span> subtitle <span class="keyword">is</span> <span class="literal">None</span>):</span><br><span class="line">		subtitlePart = <span class="string">&#x27;subtitle &quot;&#123;0&#125;&quot;&#x27;</span>.<span class="built_in">format</span>(subtitle)</span><br><span class="line">	soundnamePart = <span class="string">&#x27;&#x27;</span></span><br><span class="line">	<span class="keyword">if</span>(<span class="keyword">not</span> soundname <span class="keyword">is</span> <span class="literal">None</span>):</span><br><span class="line">		soundnamePart = <span class="string">&#x27;sound name &quot;&#123;0&#125;&quot;&#x27;</span>.<span class="built_in">format</span>(soundname)</span><br><span class="line"></span><br><span class="line">	appleScriptNotification = <span class="string">&#x27;display notification &quot;&#123;0&#125;&quot; &#123;1&#125; &#123;2&#125; &#123;3&#125;&#x27;</span>.<span class="built_in">format</span>(message,titlePart,subtitlePart,soundnamePart)</span><br><span class="line">	os.system(<span class="string">&quot;osascript -e &#x27;&#123;0&#125;&#x27;&quot;</span>.<span class="built_in">format</span>(appleScriptNotification))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">	displayNotification(<span class="string">&quot;message&quot;</span>,<span class="string">&quot;title&quot;</span>,<span class="string">&quot;subtitle&quot;</span>,<span class="string">&quot;Pop&quot;</span>)</span><br><span class="line">	<span class="comment">#displayNotification(&quot;message&quot;,&quot;title&quot;,&quot;subtitle&quot;)</span></span><br><span class="line">	<span class="comment"># displayNotification(&quot;message&quot;,&quot;title&quot;)</span></span><br><span class="line">	<span class="comment">#displayNotification(&quot;message&quot;)</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="display-alert">display alert</h2>
+<h3 id="display-alert-with-confirmation-request">display alert with confirmation request</h3>
+<p>the AppleScript command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">display alert &quot;Hello World!&quot; message &quot;longer text can be added in the message field and it will be all shown on the pop-up alert.&quot;</span><br></pre></td></tr></table></figure>
+<p>The osascript wrapped command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">osascript -e &#x27;display alert &quot;Hello World!&quot; message &quot;longer text can be added in the message field and it will be all shown on the pop-up alert.&quot;&#x27;</span><br></pre></td></tr></table></figure>
+<h2 id="Saying">Saying</h2>
+<h3 id="Saying-Hello-World">Saying Hello World</h3>
+<p>The AppleScript command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">say &quot;Hello World!&quot;</span><br></pre></td></tr></table></figure>
+<p>wrapped in osascript on the command line:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">osascript -e &#x27;say &quot;Hello World!&quot;&#x27;</span><br></pre></td></tr></table></figure>
+<h1>参考</h1>
+<p><a target="_blank" rel="noopener" href="https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayNotifications.html#//apple_ref/doc/uid/TP40016239-CH61-SW1">Displaying Notifications</a></p>
+<p><a target="_blank" rel="noopener" href="https://code-maven.com/display-notification-from-the-mac-command-line">Display notification from the Mac command line</a><div id="footnotes"><hr><div id="footnotelist"><ol style="list-style:none; padding-left: 0;"><li id="fn:1"><span style="display: inline-block; vertical-align: top; padding-right: 10px;">1.</span><span style="display: inline-block; vertical-align: top;"><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/17651017/python-post-osx-notification">Python post osx notification</a></span><a href="#fnref:1" rev="footnote"> ↩</a></li></ol></div></div></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/10/24/iPhone4s%20downgrade%209.3.6%20to%206.1.3%20in%202023/" rel="prev" title="iPhone4s downgrade 9.3.6 to 6.1.3 in 2023">
+      <i class="fa fa-chevron-left"></i> iPhone4s downgrade 9.3.6 to 6.1.3 in 2023
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/" rel="next" title="Introducing SwiftUI 笔记">
+      Introducing SwiftUI 笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Notification</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#display-notification"><span class="nav-number">1.1.</span> <span class="nav-text">display notification</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#make-sound"><span class="nav-number">1.1.1.</span> <span class="nav-text">make sound</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-in-Py-sup-id-fnref-1-a-href-fn-1-rel-footnote-1-a-sup"><span class="nav-number">1.1.2.</span> <span class="nav-text">Code in Py 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-Demo-2"><span class="nav-number">1.1.3.</span> <span class="nav-text">Code Demo 2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#display-alert"><span class="nav-number">1.2.</span> <span class="nav-text">display alert</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#display-alert-with-confirmation-request"><span class="nav-number">1.2.1.</span> <span class="nav-text">display alert with confirmation request</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Saying"><span class="nav-number">1.3.</span> <span class="nav-text">Saying</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Saying-Hello-World"><span class="nav-number">1.3.1.</span> <span class="nav-text">Saying Hello World</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

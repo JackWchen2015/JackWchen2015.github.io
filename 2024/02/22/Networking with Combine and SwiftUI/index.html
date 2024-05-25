@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Getting StartedSwiftUI’s reactive state management makes this a lot easier by introducing the notion of a source of truth that can be shared across your app using SwiftUI’s property wrappers such as @">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Networking with Combine and SwiftUI [译]">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Getting StartedSwiftUI’s reactive state management makes this a lot easier by introducing the notion of a source of truth that can be shared across your app using SwiftUI’s property wrappers such as @">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-25T08:03:06.165Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Networking with Combine and SwiftUI [译] | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Networking with Combine and SwiftUI [译]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-22T00:00:00+08:00">2024-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-25 16:03:06" itemprop="dateModified" datetime="2024-05-25T16:03:06+08:00">2024-05-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Getting-Started"><a href="#Getting-Started" class="headerlink" title="Getting Started"></a>Getting Started</h1><p>SwiftUI’s reactive state management makes this a lot easier by introducing the notion of <code>a source of truth</code> that can be shared across your app using SwiftUI’s property wrappers such as <code>@EnvironmentObject</code>, <code>@ObservedObject</code>, and <code>@StateObject</code></p>
+<blockquote>
+<p>the notion of a source of truth 事实源<br>This source of truth usually is your in-memory data model</p>
+</blockquote>
+<p>In this series, we will look at how to use Combine in the context of SwiftUI to</p>
+<ul>
+<li>access the network,</li>
+<li>map data,</li>
+<li>handle errors</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">GET localhost:8080/isUserNameAvailable?userName=sjobs HTTP/1.1</span><br><span class="line"></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">content-type: application/json; charset=utf-8</span><br><span class="line">content-length: 39</span><br><span class="line">connection: close</span><br><span class="line">date: Thu, 06 Jan 2022 16:09:08 GMT</span><br><span class="line"> </span><br><span class="line">&#123;&quot;isAvailable&quot;:false, &quot;userName&quot;:&quot;sjobs&quot;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="network-using-URLSession"><a href="#network-using-URLSession" class="headerlink" title="network using URLSession"></a>network using URLSession</h2><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">checkUserNameAvailableOldSchool</span>(<span class="params">userName</span>: <span class="type">String</span>, <span class="params">completion</span>: <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">Bool</span>, <span class="type">NetworkError</span>&gt;) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">  <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123; <span class="number">2</span></span><br><span class="line">    completion(.failure(.invalidRequestError(<span class="string">&quot;URL invalid&quot;</span>)))</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">let</span> task <span class="operator">=</span> <span class="type">URLSession</span>.shared.dataTask(with: url) &#123; data, response, error <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> error <span class="operator">=</span> error &#123; <span class="number">3</span></span><br><span class="line">      completion(.failure(.transportError(error)))</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> response <span class="operator">=</span> response <span class="keyword">as?</span> <span class="type">HTTPURLResponse</span>, <span class="operator">!</span>(<span class="number">200</span><span class="operator">...</span><span class="number">299</span>).contains(response.statusCode) &#123; <span class="number">4</span></span><br><span class="line">      completion(.failure(.serverError(statusCode: response.statusCode)))</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> data <span class="operator">=</span> data <span class="keyword">else</span> &#123; <span class="number">5</span></span><br><span class="line">      completion(.failure(.noData))</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">      <span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">      <span class="keyword">let</span> userAvailableMessage <span class="operator">=</span> <span class="keyword">try</span> decoder.decode(<span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, from: data)</span><br><span class="line">      completion(.success(userAvailableMessage.isAvailable)) <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> &#123;</span><br><span class="line">      completion(.failure(.decodingError(error)))</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  task.resume() <span class="number">6</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>issues:</li>
+</ul>
+<ol>
+<li>It’s not immediately clear what the happy path is - the only location that returns a successful result is pretty hidden (1), and developers who are new to using completion handlers might be confused by the fact that the happy path doesn’t even use a <code>return</code> statement to deliver the result of the network call to the caller.</li>
+<li>Error handling is scattered all over the place (2, 3, 4, 5).</li>
+<li>There are several exit points, and it’s easy to forget one of the <code>return</code> statements in the <code>if let</code> conditions.</li>
+<li>Overall, it is hard to read and maintain, even if you’re an experienced Swift developer.</li>
+<li>It’s easy to forget you have to call <code>resume() </code>to actually perform the request (6). I am pretty sure most of us have been frantically looking for bugs, only to find out we forgot to actually kick off the request using resume. And yes, I think <code>resume</code> is not a great name for an API that is inteded to send the request.</li>
+</ol>
+<h2 id="fetch-data-using-Combine"><a href="#fetch-data-using-Combine" class="headerlink" title="fetch data using Combine"></a>fetch data using Combine</h2><p>When they introduced <code>Combine</code>, <strong>Apple added publishers for many of their own asynchronous APIs</strong>. This is great, as this makes it easier for us to use them in our own <code>Combine</code> pipelines.</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">checkUserNameAvailable</span>(<span class="params">userName</span>: <span class="type">String</span>) -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Just</span>(<span class="literal">false</span>).eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url) <span class="number">1</span></span><br><span class="line">    .map &#123; data, response <span class="keyword">in</span> <span class="number">2</span></span><br><span class="line">      <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> decoder <span class="operator">=</span> <span class="type">JSONDecoder</span>()</span><br><span class="line">        <span class="keyword">let</span> userAvailableMessage <span class="operator">=</span> <span class="keyword">try</span> decoder.decode(<span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, from: data)</span><br><span class="line">        <span class="keyword">return</span> userAvailableMessage.isAvailable <span class="number">3</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">catch</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span> <span class="number">4</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .replaceError(with: <span class="literal">false</span>) <span class="number">5</span></span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>This is a lot easier to read already, and (except for the guard statement that makes sure we’ve got a valid URL) there is just one exit point.<br>Let’s walk through the code step by step:     </p>
+<ol>
+<li>We use <code>dataTaskPublisher</code> to perform the request. This publisher is a one-shot publisher(一次性发布者) and will emit an event once the requested data has arrived. It’s worth keeping in mind that <code>Combine publishers</code> don’t perform any work if there is no <code>subscriber</code>. This means that <strong>this publisher will not perform any call to the given <code>URL</code> unless there is at least one subscriber</strong>. I will later show you how to connect this pipeline to the <code>UI</code> and make sure it gets called every time the user enters their preferred username.</li>
+<li>Once the request returns, the publisher emits a value that contains both the data and the response . In this line, we use the map operator to transform this result. As you can see, we can reuse most of the data mapping code from the previous version of the code, except for a couple of small changes:</li>
+<li>Instead of calling the completion closure, we can return a <code>Boolean</code> value to indicate whether the username is still available or not. This value will be passed down the <code>pipeline</code>.</li>
+<li>In case the data mapping fails, we catch the <code>error</code> and just return false, which seems to be a good compromise.</li>
+<li>We do the same for any errors that might occur when accessing the network. This is a simplification that we might need to revisit in the future.</li>
+</ol>
+<h2 id="do-better"><a href="#do-better" class="headerlink" title="do better"></a>do better</h2><p>Here are three changes that will make the code more linear and easier to reason about:</p>
+<h3 id="Destructuring-tuples-using-key-paths-使用关键路径解构元组"><a href="#Destructuring-tuples-using-key-paths-使用关键路径解构元组" class="headerlink" title="Destructuring tuples using key paths(使用关键路径解构元组)"></a>Destructuring tuples using key paths(使用关键路径解构元组)</h3><p>我们经常会遇到需要从变量中提取特定属性的情况。在我们的示例中，我们接收到一个元组，其中包含我们发送的<code>URL</code>请求的数据和响应。下面是<code>URLSession</code>中各自的声明:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">DataTaskPublisher</span> : <span class="title class_">Publisher</span> &#123;</span><br><span class="line"> </span><br><span class="line">  <span class="comment">/// The kind of values published by this publisher.</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">typealias</span> <span class="type">Output</span> <span class="operator">=</span> (data: <span class="type">Data</span>, response: <span class="type">URLResponse</span>)</span><br><span class="line">  <span class="operator">...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Combine</code>提供了<code>map</code>操作符的重载版本，允许我们使用键路径解构元组，并只访问我们关心的属性:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .map(\.data)</span><br></pre></td></tr></table></figure>
+<h3 id="Mapping-Data-more-easily"><a href="#Mapping-Data-more-easily" class="headerlink" title="Mapping Data more easily"></a>Mapping Data more easily</h3><p>由于映射数据是一项如此常见的任务，<code>Combine</code>附带了专门的操作符<code>:decode (type:decoder:)</code>来简化此任务。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .map(\.data)</span><br><span class="line">  .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br></pre></td></tr></table></figure>
+<p>这将返回来自上游发布者(upstream publisher)的解码数据值，并将其解码为<code>UserNameAvailableMessage</code>实例。 </p>
+<p>最后，我们可以再次使用<code>map</code>操作符来解构<code>UserNameAvailableMessage</code>并访问它的<code>isAvailable</code>属性:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">  .map(\.data)</span><br><span class="line">  .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">  .map(\.isAvailable)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Fetching-data-using-Combine-simplified"><a href="#Fetching-data-using-Combine-simplified" class="headerlink" title="Fetching data using Combine, simplified"></a>Fetching data using Combine, simplified</h3><p>有了这些变化，我们现在有了一个易于阅读的管道版本，并且有一个线性流:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">checkUserNameAvailable</span>(<span class="params">userName</span>: <span class="type">String</span>) -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://127.0.0.1:8080/isUserNameAvailable?userName=<span class="subst">\(userName)</span>&quot;</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="type">Just</span>(<span class="literal">false</span>).eraseToAnyPublisher()</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url)</span><br><span class="line">    .map(\.data)</span><br><span class="line">    .decode(type: <span class="type">UserNameAvailableMessage</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>())</span><br><span class="line">    .map(\.isAvailable)</span><br><span class="line">    .replaceError(with: <span class="literal">false</span>)</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="How-to-connect-to-SwiftUI"><a href="#How-to-connect-to-SwiftUI" class="headerlink" title="How to connect to SwiftUI"></a>How to connect to SwiftUI</h2><p>最后，让我们看看如何在我们假设的注册表单(hypothetical sign up form)中集成这个新的<code>Combine</code>管道。 </p>
+<p>下面是一个简化版的注册表单，它只包含一个用户名字段、一个显示消息的文本标签和一个注册按钮。在实际应用程序中，我们还需要一些UI元素来提供密码和密码确认。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">SignUpScreen</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">  <span class="meta">@StateObject</span> <span class="keyword">private</span> <span class="keyword">var</span> viewModel <span class="operator">=</span> <span class="type">SignUpScreenViewModel</span>()</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">Form</span> &#123;</span><br><span class="line">      <span class="comment">// Username</span></span><br><span class="line">      <span class="type">Section</span> &#123;</span><br><span class="line">        <span class="type">TextField</span>(<span class="string">&quot;Username&quot;</span>, text: <span class="variable">$viewModel</span>.username)</span><br><span class="line">          .autocapitalization(.none)</span><br><span class="line">          .disableAutocorrection(<span class="literal">true</span>)</span><br><span class="line">      &#125; footer: &#123;</span><br><span class="line">        <span class="type">Text</span>(viewModel.usernameMessage)</span><br><span class="line">          .foregroundColor(.red)</span><br><span class="line">      &#125;</span><br><span class="line">      </span><br><span class="line">      <span class="comment">// Submit button</span></span><br><span class="line">      <span class="type">Section</span> &#123;</span><br><span class="line">        <span class="type">Button</span>(<span class="string">&quot;Sign up&quot;</span>) &#123;</span><br><span class="line">          <span class="built_in">print</span>(<span class="string">&quot;Signing up as <span class="subst">\(viewModel.username)</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        .disabled(<span class="operator">!</span>viewModel.isValid)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所有<code>UI</code>元素都连接到一个视图模型，以分离关注点，并保持视图的整洁和易读:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SignUpScreenViewModel</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">  <span class="comment">// MARK: Input</span></span><br><span class="line">  <span class="meta">@Published</span> <span class="keyword">var</span> username: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// MARK: Output</span></span><br><span class="line">  <span class="meta">@Published</span> <span class="keyword">var</span> usernameMessage: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="meta">@Published</span> <span class="keyword">var</span> isValid: <span class="type">Bool</span> <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">  <span class="operator">...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于<code>@Published</code>属性是Combine 发布者，我们可以订阅它们，以便在它们的值发生变化时接收更新。这允许我们调用上面创建的<code>checkUserNameAvailable</code>管道。 </p>
+<p>让我们创建一个可重用的发布者，我们可以使用它来驱动<code>UI</code>的各个部分，这些部分需要根据用户名是否可用来显示信息。一种方法是创建一个惰性计算属性。这确保了管道只在需要时才会被设置，并且管道只有一个实例。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> isUsernameAvailablePublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; <span class="operator">=</span> &#123;</span><br><span class="line">  <span class="variable">$username</span></span><br><span class="line">    .flatMap &#123; username <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">self</span>.authenticationService.checkUserNameAvailable(userName: username)</span><br><span class="line">    &#125;</span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;()</span><br></pre></td></tr></table></figure>
+<p>要调用另一个管道并使用其结果，可以使用<code>flatMap</code>操作符。这将接受来自上游发布者的所有输入事件(即，<code>$username</code> published属性发出的值)，并将它们转换为新的发布者(在我们的示例中，发布者<code>checkUserNameAvailable</code> in)。 </p>
+<p>在下一步也是最后一步中，我们将把<code>isUsernameAvailablePublisher</code>的结果连接到UI。如果查看一下视图模型，您会注意到在视图模型的输出部分有两个属性:一个用于与用户名相关的任何消息，另一个用于保存表单的总体验证状态(请记住，在实际的注册表单中，我们可能还需要验证密码字段)。 </p>
+<p>Combine发布者可以连接到多个订阅者，所以我们可以将<code>isValid</code>和<code>usernameMessage</code>都连接到<code>isUsernameAvailablePublisher</code>:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SignUpScreenViewModel</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">  <span class="operator">...</span></span><br><span class="line">  <span class="keyword">init</span>() &#123;</span><br><span class="line">    isUsernameAvailablePublisher</span><br><span class="line">      .assign(to: <span class="operator">&amp;</span><span class="variable">$isValid</span>)</span><br><span class="line">    </span><br><span class="line">    isUsernameAvailablePublisher</span><br><span class="line">      .map &#123; <span class="variable">$0</span> <span class="operator">?</span> <span class="string">&quot;&quot;</span> : <span class="string">&quot;Username not available. Try a different one.&quot;</span>&#125;</span><br><span class="line">      .assign(to: <span class="operator">&amp;</span><span class="variable">$usernameMessage</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用这种方法，我们可以重用<code>isUsernameAvailablePublisher</code>，并使用它来驱动表单的整体<code>isValid</code>状态(它将启用&#x2F;禁用<code>Submit</code>按钮)和错误消息标签(通知用户他们选择的用户名是否仍然可用)。</p>
+<h2 id="How-to-handle-Publishing-changes-from-background-threads-is-not-allowed"><a href="#How-to-handle-Publishing-changes-from-background-threads-is-not-allowed" class="headerlink" title="How to handle Publishing changes from background threads is not allowed"></a>How to handle Publishing changes from background threads is not allowed</h2><p>当你运行这段代码时，你会注意到几个问题: </p>
+<ol>
+<li>对于您键入的每个字符，API端点将被调用几次 </li>
+<li>Xcode告诉你不应该从后台线程更新<code>UI </code><br>我们将在下一集中深入探讨这些问题的原因，但现在，让我们解决这个错误消息:</li>
+</ol>
+<blockquote>
+<p>[SwiftUI] Publishing changes from background threads is not allowed; make sure to publish values from the main thread (via operators like receive(on:)) on model updates.</p>
+</blockquote>
+<p>出现此错误消息的原因是<code>Combine</code>将在后台线程上执行网络请求。当请求得到满足时，我们将结果分配给视图模型上已发布的属性之一。反过来，这将提示SwiftUI更新UI——这将发生在前台线程上。 </p>
+<p>为了防止这种情况发生，我们需要指示<code>Combine</code>在收到网络请求的结果后切换到前台线程，使用<code>receive(on:)</code>操作符:</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> isUsernameAvailablePublisher: <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; <span class="operator">=</span> &#123;</span><br><span class="line">  <span class="variable">$username</span></span><br><span class="line">    .flatMap &#123; username -&gt; <span class="type">AnyPublisher</span>&lt;<span class="type">Bool</span>, <span class="type">Never</span>&gt; <span class="keyword">in</span></span><br><span class="line">      <span class="keyword">self</span>.authenticationService.checkUserNameAvailableNaive(userName: username)</span><br><span class="line">    &#125;</span><br><span class="line"><span class="operator">||&gt;</span>    .receive(on: <span class="type">DispatchQueue</span>.main)<span class="operator">&lt;||</span></span><br><span class="line">    .eraseToAnyPublisher()</span><br><span class="line">&#125;()</span><br></pre></td></tr></table></figure>
+<p>当我们在下一集中讨论组合调度程序时，我们将更深入地研究线程。</p>
+<h1 id="Closure"><a href="#Closure" class="headerlink" title="Closure"></a>Closure</h1><p>在这篇文章中，我向您展示了如何使用<code>Combine</code>访问网络，以及它如何使您能够编写比相应的回调驱动的对应代码更容易阅读和维护的直线代码。 </p>
+<p>我们还学习了如何使用视图模型连接一个向<code>SwiftUI</code>发出网络请求的<code>Combine</code>管道，并将该管道附加到<code>@Published</code>属性。 </p>
+<p>现在，您可能想知道为什么<code>isUsernameAvailablePublisher</code>使用<code>Never</code>作为其错误类型—毕竟，网络错误是我们非常需要处理的事情。 </p>
+<p>我们将在下一集中讨论错误处理(和自定义数据映射)。我们还将探讨优化基于<code>Combine</code>的网络层的方法，敬请期待! </p>
+<p>感谢阅读🔥</p>
+<p>#参考<br><a target="_blank" rel="noopener" href="https://peterfriese.dev/blog/2022/swiftui-combine-networking-gettingstarted/#how-to-connect-to-swiftui">Networking with Combine and SwiftUI</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/02/11/SwiftUI%20Concepts%20Tutorials%20%E7%AC%94%E8%AE%B0/" rel="prev" title="SwiftUI Concepts Tutorials 笔记">
+      <i class="fa fa-chevron-left"></i> SwiftUI Concepts Tutorials 笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/" rel="next" title="Combine [译]">
+      Combine [译] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Getting-Started"><span class="nav-number">1.</span> <span class="nav-text">Getting Started</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Demo"><span class="nav-number">2.</span> <span class="nav-text">Demo</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#network-using-URLSession"><span class="nav-number">2.1.</span> <span class="nav-text">network using URLSession</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fetch-data-using-Combine"><span class="nav-number">2.2.</span> <span class="nav-text">fetch data using Combine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#do-better"><span class="nav-number">2.3.</span> <span class="nav-text">do better</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Destructuring-tuples-using-key-paths-%E4%BD%BF%E7%94%A8%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84%E8%A7%A3%E6%9E%84%E5%85%83%E7%BB%84"><span class="nav-number">2.3.1.</span> <span class="nav-text">Destructuring tuples using key paths(使用关键路径解构元组)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapping-Data-more-easily"><span class="nav-number">2.3.2.</span> <span class="nav-text">Mapping Data more easily</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fetching-data-using-Combine-simplified"><span class="nav-number">2.3.3.</span> <span class="nav-text">Fetching data using Combine, simplified</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-connect-to-SwiftUI"><span class="nav-number">2.4.</span> <span class="nav-text">How to connect to SwiftUI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-to-handle-Publishing-changes-from-background-threads-is-not-allowed"><span class="nav-number">2.5.</span> <span class="nav-text">How to handle Publishing changes from background threads is not allowed</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Closure"><span class="nav-number">3.</span> <span class="nav-text">Closure</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
