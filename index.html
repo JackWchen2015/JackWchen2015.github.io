@@ -184,7 +184,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/03/Building%20a%20Custom%20Combine%20Operator%20for%20Exponential%20Backoff[%E8%AF%91]/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -198,7 +198,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/03/03/Building%20a%20Custom%20Combine%20Operator%20for%20Exponential%20Backoff%5B%E8%AF%91%5D/" class="post-title-link" itemprop="url">Building a Custom Combine Operator for Exponential Backoff[译]</a>
+            <a href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/" class="post-title-link" itemprop="url">Swift花园笔记 -  CoreData</a>
         </h2>
 
         <div class="post-meta">
@@ -208,14 +208,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-03-03 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-03T00:00:00+08:00">2024-03-03</time>
+              <time title="创建时间：2024-05-05 00:00:00" itemprop="dateCreated datePublished" datetime="2024-05-05T00:00:00+08:00">2024-05-05</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 16:02:28" itemprop="dateModified" datetime="2024-05-25T16:02:28+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:46:21" itemprop="dateModified" datetime="2024-05-27T17:46:21+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -242,14 +242,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>Make your Combine code reusable</p>
-<p>在上一篇文章中，我向你展示了如何使用Combine来改善Combine管道的错误处理，并以一种对用户有意义的方式暴露SwiftUI应用中的错误。 </p>
-<p>不出所料，我们最终得到的代码看起来比开始时要复杂一些。正确处理错误比完全不处理错误(或忽略错误)占用更多的代码行。 </p>
-<p>但是我们可以做得更好! </p>
-<p>在这篇文章中，你将了解Combine操作符:它们是什么，它们是如何工作的，以及如何将我们的代码重构成一个自定义的Combine操作符，从而使其更容易推理(reason about)，同时更易于重用。</p>
+          <h1 id="结合-Core-Data-和-SwiftUI"><a href="#结合-Core-Data-和-SwiftUI" class="headerlink" title="结合 Core Data 和 SwiftUI"></a>结合 Core Data 和 SwiftUI</h1><p>SwiftUI 和 Core Data 几乎是在十年前后被分别引入 —— SwiftUI 是伴随 iOS 13， 而 Core Data 是伴随 iPhoneOS 3 发布；</p>
+<p>Core Data 是一个“对象图谱和持久化框架”，这是对于定义对象和对象属性，然后从永久存储中读写它们的高级叫法。表面上看，使用它意味着使用<code>Codable</code>和<code>UserDefaults</code>这些东西，但它远不止这些：Core Data 能够排序和过滤我们的数据，对于更大的数据也成立 —— 基本上对于数据量没有限制。更棒的是，Core Data 还实现了各种高级的功能，你会依赖它们：包括数据可视化，数据懒加载，撤销和重做，等等。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/03/Building%20a%20Custom%20Combine%20Operator%20for%20Exponential%20Backoff%5B%E8%AF%91%5D/#more" rel="contents">
+              <a class="btn" href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -273,7 +270,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20[%E8%AF%91]%20/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%AD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -287,7 +284,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20%5B%E8%AF%91%5D%20/" class="post-title-link" itemprop="url">Error Handling with Combine and SwiftUI [译]</a>
+            <a href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%AD/" class="post-title-link" itemprop="url">Swift花园笔记 -  SwiftUI知识碎片 中</a>
         </h2>
 
         <div class="post-meta">
@@ -297,14 +294,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-03-02 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-02T00:00:00+08:00">2024-03-02</time>
+              <time title="创建时间：2024-05-05 00:00:00" itemprop="dateCreated datePublished" datetime="2024-05-05T00:00:00+08:00">2024-05-05</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 16:01:16" itemprop="dateModified" datetime="2024-05-25T16:01:16+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:47:41" itemprop="dateModified" datetime="2024-05-27T17:47:41+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -331,13 +328,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>How to handle errors and expose them to the user</p>
-<p>作为开发者，我们往往是一群相当乐观的人。至少这是您在查看我们编写的代码时得到的印象——我们主要关注的是正确的路径，并且倾向于在错误处理上花费较少的时间和精力。 </p>
-<p>即使在本系列中，我们也一直忽略了错误处理。事实上，我们大多忽略了这一点:在之前的文章中，我们用默认值替换了任何错误，这对于我们的应用原型来说是可以的，但对于任何进入生产阶段的应用来说，这可能不是一个可靠的策略。 </p>
-<p>这一次，让我们仔细看看如何适当地处理错误!</p>
+          <h1 id="让GeometryReader来解决吧"><a href="#让GeometryReader来解决吧" class="headerlink" title="让GeometryReader来解决吧"></a>让GeometryReader来解决吧</h1><h2 id="父级视图想要什么？"><a href="#父级视图想要什么？" class="headerlink" title="父级视图想要什么？"></a>父级视图想要什么？</h2><p>当你给自定义视图编码时，你通常不需要担心它周围的环境和它的尺寸。举个例子，假设你需要创建一个绘制矩形的视图，你只要绘制一个 <code>Rectangle</code> 就好了。它会以父级视图指定的尺寸和位置被绘制。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/02/Error%20Handling%20with%20Combine%20and%20SwiftUI%20%5B%E8%AF%91%5D%20/#more" rel="contents">
+              <a class="btn" href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%AD/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -361,7 +355,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/02/Optimise%20your%20networking%20layer%20with%20Combine%20[%E8%AF%91]/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -375,7 +369,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/03/02/Optimise%20your%20networking%20layer%20with%20Combine%20%5B%E8%AF%91%5D/" class="post-title-link" itemprop="url">Optimise your networking layer with Combine [译]</a>
+            <a href="/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/" class="post-title-link" itemprop="url">Swift花园笔记 -  SwiftUI知识碎片 下</a>
         </h2>
 
         <div class="post-meta">
@@ -385,14 +379,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-03-02 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-02T00:00:00+08:00">2024-03-02</time>
+              <time title="创建时间：2024-04-27 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-27T00:00:00+08:00">2024-04-27</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 16:03:36" itemprop="dateModified" datetime="2024-05-25T16:03:36+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:47:01" itemprop="dateModified" datetime="2024-05-27T17:47:01+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -419,12 +413,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>由于大多数地方都有高速、低延迟(low-latency)的互联网，我们很容易忘记，并不是所有用户在使用我们的应用程序时都在快速、低延迟的上行链路上。你甚至不用去偏远的地方就能体验到不稳定的网络连接。我住在德国汉堡，尽管高速移动互联网无处不在，但在一些主要的地面交通线路上，有相当多的地方没有或非常糟糕的连接。 </p>
-<p>在构建访问互联网的应用程序时，我们应该注意这一点，并确保我们不会浪费带宽。 </p>
-<p>在本系列的这一部分中，我想重点讨论如何在使用Combine时优化应用程序中的网络访问。</p>
+          <h1 id="Hot-Prospects-理解-Swift-的-Result-类型"><a href="#Hot-Prospects-理解-Swift-的-Result-类型" class="headerlink" title="Hot Prospects 理解 Swift 的 Result 类型"></a>Hot Prospects 理解 Swift 的 Result 类型</h1><p>让一个函数在执行成功时返回某些数据，执行失败时返回某个错误是很常见的做法。我们通常会利用抛出错误的函数来实现这个要求，一旦函数抛出错误运行 <code>catch</code> 块，这样就独立地处理成功和失败的逻辑。但是假如函数并不是立即返回的呢？</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/02/Optimise%20your%20networking%20layer%20with%20Combine%20%5B%E8%AF%91%5D/#more" rel="contents">
+              <a class="btn" href="/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -448,7 +440,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/03/01/%E5%8D%95%E4%BE%8B%20%E5%92%8C%20%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E3%80%90%E8%AF%91%E3%80%91/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%201%20[%E8%AF%91]/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -462,7 +454,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/03/01/%E5%8D%95%E4%BE%8B%20%E5%92%8C%20%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E3%80%90%E8%AF%91%E3%80%91/" class="post-title-link" itemprop="url">单例 和 依赖注入 【译】</a>
+            <a href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%201%20%5B%E8%AF%91%5D/" class="post-title-link" itemprop="url">Random Lessons from the SwiftUI Digital Lounge . Part 1 [译]</a>
         </h2>
 
         <div class="post-meta">
@@ -472,14 +464,365 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-03-01 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-01T00:00:00+08:00">2024-03-01</time>
+              <time title="创建时间：2024-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-24T00:00:00+08:00">2024-04-24</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 14:58:22" itemprop="dateModified" datetime="2024-05-25T14:58:22+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:43:16" itemprop="dateModified" datetime="2024-05-27T17:43:16+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Animations"><a href="#Animations" class="headerlink" title="Animations"></a>Animations</h2><h3 id="视图从一个位置到另一个位置的过程可以动画化吗？比如改变父级视图的场景？"><a href="#视图从一个位置到另一个位置的过程可以动画化吗？比如改变父级视图的场景？" class="headerlink" title="视图从一个位置到另一个位置的过程可以动画化吗？比如改变父级视图的场景？"></a>视图从一个位置到另一个位置的过程可以动画化吗？比如改变父级视图的场景？</h3><p>当然，你可以去看一看 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/swiftui/view/matchedgeometryeffect(id:in:properties:anchor:issource:)">matchedGeometryEffect()</a> ，这是去年的 SwiftUI 2.0 版本引入的 API</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%201%20%5B%E8%AF%91%5D/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20[%E8%AF%91]/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20%5B%E8%AF%91%5D/" class="post-title-link" itemprop="url">Random Lessons from the SwiftUI Digital Lounge . Part 2 [译]</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-24T00:00:00+08:00">2024-04-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:44:49" itemprop="dateModified" datetime="2024-05-27T17:44:49+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><h3 id="refreshable-是否是-SwiftUI-中唯一支持异步代码的属性呢？"><a href="#refreshable-是否是-SwiftUI-中唯一支持异步代码的属性呢？" class="headerlink" title="refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？"></a>refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？</h3><p><code>task</code> modifier 也提供了开箱即用的异步代码支持。通常来说，我们只有在能为开发者提供附加的实用工具时才会将你们提供的闭包放进异步环境中执行，比如在 <code>task</code> 附着的视图生命周期结束时取消 <code>task</code>，或者结束刷新动画。当然，如果你希望在别的地方也能把代码分发到异步环境中执行，可以使用 <code>async</code> 代码块！</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20%5B%E8%AF%91%5D/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20%E5%85%AB%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84SwiftUI%E8%AF%AF%E7%94%A8%E5%8F%8A%E5%AF%B9%E5%BA%94%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/04/24/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20%E5%85%AB%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84SwiftUI%E8%AF%AF%E7%94%A8%E5%8F%8A%E5%AF%B9%E5%BA%94%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/" class="post-title-link" itemprop="url">Swift花园笔记 -  八个常见的SwiftUI误用及对应的正确打开方式</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-24T00:00:00+08:00">2024-04-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:49:43" itemprop="dateModified" datetime="2024-05-27T17:49:43+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="八个常见的SwiftUI误用及对应的正确打开方式"><a href="#八个常见的SwiftUI误用及对应的正确打开方式" class="headerlink" title="八个常见的SwiftUI误用及对应的正确打开方式"></a>八个常见的SwiftUI误用及对应的正确打开方式</h1><p>直接把八条误用先简明扼要地罗列如下，然后我们逐条深入展开： </p>
+<ol>
+<li>添加不必要的 View 和 Modifier  </li>
+<li>在需要用 @StateObject 的地方用了 @ObservedObject  </li>
+<li>Modifier 顺序错误  </li>
+<li>给属性包装器添加属性观察者  </li>
+<li>在需要用描边框的地方使用了描形状  </li>
+<li>Alert 和 Sheet 与可选状态的使用  </li>
+<li>尝试改变 SwiftUI 视图后面的东西  </li>
+<li>用错误的范围动态创建视图</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/04/24/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20%E5%85%AB%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84SwiftUI%E8%AF%AF%E7%94%A8%E5%8F%8A%E5%AF%B9%E5%BA%94%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/" class="post-title-link" itemprop="url">Swift花园笔记 -  SwiftUI知识碎片</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-22T00:00:00+08:00">2024-04-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:48:05" itemprop="dateModified" datetime="2024-05-27T17:48:05+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="表单"><a href="#表单" class="headerlink" title="表单"></a>表单</h1><p>用户输入一些信息，SwiftUI 为这种场景专门提供了一个视图类型，称为<code>Form</code>，Form是一个可滚动列表，除了可以包含文本和图像这样的静态控件，也可以包含文本框，开关，按钮这些用户可交互的控件。</p>
+<p>可以在form里放进任意多你想要的元素，不过如果元素超过10个，SwiftUI会要求你对元素进行分组。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/20/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/04/20/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%8B/" class="post-title-link" itemprop="url">Swift花园之设计模式 下</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-20 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-20T00:00:00+08:00">2024-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:53:09" itemprop="dateModified" datetime="2024-05-27T17:53:09+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -502,14 +845,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1>overview</h1>
-<p>单例类是一种设计模式，在任何给定时间，程序中只能存在一个类的实例。这意味着每次从该类创建对象时，它都会返回相同的实例。当我们想要确保应用程序中只有一个类的实例时，通常使用单例类，例如应该在整个程序中使用的配置类。</p>
-<p>另一方面，依赖注入是一种设计模式，其中对象的依赖项由外部实体注入到对象中，而不是对象自己创建它们。换句话说，<strong>对象不是创建自己的依赖项，而是提供来自外部的依赖项</strong>。这<strong>使得对象更具模块化和可测试性</strong>，因为它可以很容易地替换为模拟对象以进行测试。</p>
-<p>依赖注入通常用于代码复杂性较高的大型应用程序中，并且需要减少应用程序不同部分之间的耦合。它还允许在应用程序的设计中具有更大的灵活性，使其更容易修改和扩展。</p>
-<p>总之，单例类和依赖注入的主要区别在于单例确保一个类在程序中只存在一个实例，而依赖注入是一种从外部向对象提供其依赖的方法。它们可以一起使用，但是它们在软件设计中服务于不同的目的。</p>
+          <h1 id="静态工厂"><a href="#静态工厂" class="headerlink" title="静态工厂"></a>静态工厂</h1><p>静态工厂模式的三个好处</p>
+<h2 id="命名构造器"><a href="#命名构造器" class="headerlink" title="命名构造器"></a>命名构造器</h2><p>静态工厂模式的头等好处是：每一个静态工厂方法都有一个自己的名字。Apple 在 <code>UIColor</code> 类实现中使用这个模式创建了许多命名颜色，比如 <code>.red</code>， <code>.yellow</code>，等。 注意，<code>Swift</code> 中的这种实现并非是方法，而是<code>静态属性</code>，返回一个实际的实例。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">extension</span> <span class="title class_">TimeInterval</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> second: <span class="type">TimeInterval</span> &#123; <span class="keyword">return</span> <span class="number">1</span> &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> minute: <span class="type">TimeInterval</span> &#123; <span class="keyword">return</span> <span class="number">60</span> &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> hour: <span class="type">TimeInterval</span> &#123; <span class="keyword">return</span> <span class="number">3_600</span> &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> day: <span class="type">TimeInterval</span> &#123; <span class="keyword">return</span> <span class="number">86_400</span> &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">var</span> week: <span class="type">TimeInterval</span> &#123; <span class="keyword">return</span> <span class="number">604_800</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>记住一天或者一周有多少秒很困难吧？所以 <code>TimeInterval.week</code>比<code>604_80 </code>好多了。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/03/01/%E5%8D%95%E4%BE%8B%20%E5%92%8C%20%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E3%80%90%E8%AF%91%E3%80%91/#more" rel="contents">
+              <a class="btn" href="/2024/04/20/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%8B/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -533,7 +875,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -547,7 +889,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/" class="post-title-link" itemprop="url">SwiftUI + Combine 【译】</a>
+            <a href="/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/" class="post-title-link" itemprop="url">Swift花园之设计模式 中</a>
         </h2>
 
         <div class="post-meta">
@@ -557,14 +899,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-23T00:00:00+08:00">2024-02-23</time>
+              <time title="创建时间：2024-04-18 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-18T00:00:00+08:00">2024-04-18</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 14:57:52" itemprop="dateModified" datetime="2024-05-25T14:57:52+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:52:48" itemprop="dateModified" datetime="2024-05-27T17:52:48+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -572,11 +914,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
                 </span>
             </span>
 
@@ -591,13 +929,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1>Publisher</h1>
-<p>发布者向一个或多个订阅者发送值。它们遵循<code>Publisher</code>协议，并声明输出的类型和它们产生的任何错误:</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Output</span></span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>&lt;<span class="type">S</span>&gt;(<span class="params">subscriber</span>: <span class="type">S</span>) <span class="keyword">where</span> <span class="type">S</span> : <span class="type">Subscriber</span>, <span class="keyword">Self</span>.<span class="type">Failure</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Failure</span>, <span class="keyword">Self</span>.<span class="type">Output</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Input</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>发布者可以随时间发送任意数量的值，也可以发送错误而失败。关联类型<code>Output</code>定义发布者可以发送哪些类型的值，而关联类型<code>Failure</code>定义它可能失败的错误类型。发布者可以通过指定<code>never</code>关联类型来声明它永远不会失败。</p>
+          <h1 id="委托代理"><a href="#委托代理" class="headerlink" title="委托代理"></a>委托代理</h1><p>委托代理设计模式一种相对易用的两个对象间通信的方式。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/02/23/SwiftUI%20+%20Combine%20%E7%BF%BB%E8%AF%91/#more" rel="contents">
+              <a class="btn" href="/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -621,7 +956,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -635,7 +970,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/" class="post-title-link" itemprop="url">Combine [译]</a>
+            <a href="/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">Swift花园之设计模式 上</a>
         </h2>
 
         <div class="post-meta">
@@ -645,14 +980,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2024-02-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-22T00:00:00+08:00">2024-02-22</time>
+              <time title="创建时间：2024-04-17 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-17T00:00:00+08:00">2024-04-17</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 14:58:14" itemprop="dateModified" datetime="2024-05-25T14:58:14+08:00">2024-05-25</time>
+                <time title="修改时间：2024-05-27 17:51:18" itemprop="dateModified" datetime="2024-05-27T17:51:18+08:00">2024-05-27</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -660,11 +995,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
                 </span>
             </span>
 
@@ -679,368 +1010,16 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <blockquote>
-<p>通过组合 事件处理操作符 自定义异步事件的处理。</p>
+          <h1 id="init模式"><a href="#init模式" class="headerlink" title="init模式"></a>init模式</h1><blockquote>
+<p>初始化是准备要使用的类，结构体或枚举的实例的过程。</p>
 </blockquote>
-<p>Customize handling of asynchronous events by combining event-processing operators.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/02/22/Combine%20%E3%80%90%E8%AF%91%E3%80%91/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/" class="post-title-link" itemprop="url">Networking with Combine and SwiftUI [译]</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-02-22 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-22T00:00:00+08:00">2024-02-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 16:03:06" itemprop="dateModified" datetime="2024-05-25T16:03:06+08:00">2024-05-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Getting-Started"><a href="#Getting-Started" class="headerlink" title="Getting Started"></a>Getting Started</h1><p>SwiftUI’s reactive state management makes this a lot easier by introducing the notion of <code>a source of truth</code> that can be shared across your app using SwiftUI’s property wrappers such as <code>@EnvironmentObject</code>, <code>@ObservedObject</code>, and <code>@StateObject</code></p>
+<h2 id="逐一成员构造器-只有结构体有"><a href="#逐一成员构造器-只有结构体有" class="headerlink" title="逐一成员构造器 (只有结构体有)"></a>逐一成员构造器 (只有结构体有)</h2><p>编译器会为结构体自动生成一个逐一成员构造器。生成的构造器将包含除拥有默认值的常量属性之外的所有属性，包括可选型；它的可访问性是 <code>internal</code>，所以对其他模块不可见。</p>
 <blockquote>
-<p>the notion of a source of truth 事实源<br>This source of truth usually is your in-memory data model</p>
+<p>只要结构体的任何一个存储属性是 private 的，那么结构体的默认逐一成员构造器也将是 private 的。同样，如果结构体的任何一个存储属性是 file private 的，那么逐一成员构造器也将是 file private 的。其他情况，这个构造器的访问级别是 internal。</p>
 </blockquote>
-<p>In this series, we will look at how to use Combine in the context of SwiftUI to</p>
-<ul>
-<li>access the network,</li>
-<li>map data,</li>
-<li>handle errors</li>
-</ul>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/02/22/Networking%20with%20Combine%20and%20SwiftUI/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/11/SwiftUI%20Concepts%20Tutorials%20%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/02/11/SwiftUI%20Concepts%20Tutorials%20%E7%AC%94%E8%AE%B0/" class="post-title-link" itemprop="url">SwiftUI Concepts Tutorials 笔记</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-02-11 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-11T00:00:00+08:00">2024-02-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 14:57:39" itemprop="dateModified" datetime="2024-05-25T14:57:39+08:00">2024-05-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Scene">Scene</h2>
-<p>A scene contains the view hierarchy of your app.</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">TabView</span> &#123;</span><br><span class="line">                <span class="type">ContentView</span>()</span><br><span class="line">                    .tabItem &#123;</span><br><span class="line">                        <span class="type">Label</span>(<span class="string">&quot;Journal&quot;</span>, systemImage: <span class="string">&quot;book&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">                <span class="type">SettingsView</span>()</span><br><span class="line">                    .tabItem &#123;</span><br><span class="line">                        <span class="type">Label</span>(<span class="string">&quot;Settings&quot;</span>, systemImage: <span class="string">&quot;gear&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>In this sample, body returns the primary scene <code>WindowGroup</code>, which describes the view hierarchy of the sample’s main window.</p>
-<blockquote>
-<p>WindowGroup: It provides platform-specific behaviors for your app, such as supporting multiple windows in macOS and iPadOS.</p>
-</blockquote>
-<p>The computed <code>body</code> property can return one or more primary and secondary scenes.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/02/11/SwiftUI%20Concepts%20Tutorials%20%E7%AC%94%E8%AE%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/" class="post-title-link" itemprop="url">Introducing SwiftUI 笔记</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-02-07 00:00:00" itemprop="dateCreated datePublished" datetime="2024-02-07T00:00:00+08:00">2024-02-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-25 14:58:05" itemprop="dateModified" datetime="2024-05-25T14:58:05+08:00">2024-05-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1>常用的宏方法</h1>
-<h2 id="main">@main</h2>
-<p>The <strong>@main</strong> attribute identifies the app’s entry point.</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>The entry point is responsible for the start up of the app.</p>
-</blockquote>
-<p>The MyApp structure conforms to the <code>App protocol</code>,</p>
-<p>The structure implements the computed property <code>body</code>, which is a requirement of the <code>App protocol</code>.</p>
-<p>SwiftUI provides different types of scenes including <code>WindowGroup</code>, <code>Window</code>, <code>DocumentGroup</code>, and <code>Settings</code></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/02/07/Introducing%20SwiftUI%20%E7%AC%94%E8%AE%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2023/11/01/Mac%20OS%20Notification%20with%20Py/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/11/01/Mac%20OS%20Notification%20with%20Py/" class="post-title-link" itemprop="url">Mac OS Notification with Python</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2023-11-01 08:00:00 / 修改时间：19:04:43" itemprop="dateCreated datePublished" datetime="2023-11-01T08:00:00+08:00">2023-11-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>一些在后台运行的任务，需要在特定条件下对用户发起通知，如果有跨端要求，可以用第三方库，不过需要付费，优势在于可同时兼容移动端和桌面端，这里只是个人使用，所以推荐使用Mac自带Apple Script来添加，本来考虑通过向<code>Reminders</code>添加<code>Event</code>的方式，实现Mack &amp; iOS同时提醒，不过只找到OC和Swift的API，没找到Py的API</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/11/01/Mac%20OS%20Notification%20with%20Py/#more" rel="contents">
+              <a class="btn" href="/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1063,7 +1042,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1129,7 +1108,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-count">160</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="委托代理委托代理设计模式一种相对易用的两个对象间通信的方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift花园之设计模式 中">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="委托代理委托代理设计模式一种相对易用的两个对象间通信的方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/res/adapter.jpg">
+<meta property="article:published_time" content="2024-04-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-27T09:52:48.926Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/res/adapter.jpg">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Swift花园之设计模式 中 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/18/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%AD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Swift花园之设计模式 中
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-18 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-18T00:00:00+08:00">2024-04-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:52:48" itemprop="dateModified" datetime="2024-05-27T17:52:48+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="委托代理"><a href="#委托代理" class="headerlink" title="委托代理"></a>委托代理</h1><p>委托代理设计模式一种相对易用的两个对象间通信的方式。</p>
+<span id="more"></span>
+
+<h2 id="实现-Swift-中的委托代理"><a href="#实现-Swift-中的委托代理" class="headerlink" title="实现 Swift 中的委托代理"></a>实现 Swift 中的委托代理</h2><p>委托协议：一个委托者将任务委派出去，一个代理对象实现委托协议，完成”老板“交待的工作。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">InputDelegate</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> shouldContinueListening: <span class="type">Bool</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">didStartListening</span>()</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">didReceive</span>(<span class="params">input</span>: <span class="type">String</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">InputHandler</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> delegate: <span class="type">InputDelegate</span>?</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">listen</span>() &#123;</span><br><span class="line">        <span class="keyword">self</span>.delegate<span class="operator">?</span>.didStartListening()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">repeat</span> &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> input <span class="operator">=</span> <span class="built_in">readLine</span>() <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">self</span>.delegate<span class="operator">?</span>.didReceive(input: input)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">self</span>.delegate<span class="operator">?</span>.shouldContinueListening <span class="operator">??</span> <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">InputReceiver</span>: <span class="title class_">InputDelegate</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> shouldContinueListening: <span class="type">Bool</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">didStartListening</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;  <span class="subst">\&quot;</span>hi<span class="subst">\&quot;</span>, 离开时请说 <span class="subst">\&quot;</span>bye<span class="subst">\&quot;</span>:&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">didReceive</span>(<span class="params">input</span>: <span class="type">String</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span> input &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;hi&quot;</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;  Hello world!&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;bye&quot;</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;  Bye!&quot;</span>)</span><br><span class="line">            exit(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;  找不到命令，请重试：&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> inputHandler <span class="operator">=</span> <span class="type">InputHandler</span>()</span><br><span class="line"><span class="keyword">let</span> inputReceiver <span class="operator">=</span> <span class="type">InputReceiver</span>()</span><br><span class="line">inputHandler.delegate <span class="operator">=</span> inputReceiver</span><br><span class="line">inputHandler.listen()</span><br></pre></td></tr></table></figure>
+<p>Apple 在底层其实做着一样的事情，比如 <code>UICollectionViewDataSource</code>, <code>UICollectionViewDelegate</code> 等等。你只需要实现代理，而它们提供协议和委托者。</p>
+<h2 id="Weak属性，委托和类"><a href="#Weak属性，委托和类" class="headerlink" title="Weak属性，委托和类"></a>Weak属性，委托和类</h2><p>类的所有代理对象都应该是 weak 属性，否则你可能会陷入糟糕的引用循环。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">InputDelegate</span>: <span class="title class_">class</span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">InputHandler</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">weak</span> <span class="keyword">var</span> delegate: <span class="type">InputDelegate</span>?</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">InputReceiver</span>: <span class="title class_">InputDelegate</span> &#123;</span><br><span class="line">    <span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="builder"><a href="#builder" class="headerlink" title="builder"></a>builder</h1><p>实现 <code>builder</code> 模式，隐藏创建拥有大量属性的对象的复杂性。</p>
+<h2 id="builder-模式如何工作？"><a href="#builder-模式如何工作？" class="headerlink" title="builder 模式如何工作？"></a>builder 模式如何工作？</h2><p><code>Builder</code> 设计模式的意图在于从复杂对象的表达中分离出构造对象的部分。</p>
+<p>因此，如果你的对象有很多属性，而你想要隐藏构造过程的复杂性，那么你可以写一个 <code>builder</code>，通过它来构造你的对象。这个 <code>builder</code> 可以简单如一个 <code>build</code> 方法，也可以复杂如一个控制全部构建过程的外部类。这些都是由环境决定的。</p>
+<h2 id="简单发射器-builder"><a href="#简单发射器-builder" class="headerlink" title="简单发射器 builder"></a>简单发射器 builder</h2><p> <code>SKEmitterNode</code> 是一个很不错的例子。如果你打算创建自定义发射器并且通过程序设置属性，通过是在 <code>SpriteKit</code> 游戏当中。那么像下面这样的一个发射器 <code>builder</code> 类就是一种很合理的解决方案。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">EmitterBuilder</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">SKEmitterNode</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> emitter <span class="operator">=</span> <span class="type">SKEmitterNode</span>()</span><br><span class="line">        emitter.particleTexture <span class="operator">=</span> <span class="type">SKTexture</span>(imageNamed: <span class="string">&quot;MyTexture&quot;</span>)</span><br><span class="line">        emitter.particleBirthRate <span class="operator">=</span> <span class="number">100</span></span><br><span class="line">        emitter.particleLifetime <span class="operator">=</span> <span class="number">60</span></span><br><span class="line">        emitter.particlePositionRange <span class="operator">=</span> <span class="type">CGVector</span>(dx: <span class="number">100</span>, dy: <span class="number">100</span>)</span><br><span class="line">        emitter.particleSpeed <span class="operator">=</span> <span class="number">10</span></span><br><span class="line">        emitter.particleColor <span class="operator">=</span> .red</span><br><span class="line">        emitter.particleColorBlendFactor <span class="operator">=</span> <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> emitter</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">EmitterBuilder</span>().build()</span><br></pre></td></tr></table></figure>
+
+<h2 id="简单主题-builder"><a href="#简单主题-builder" class="headerlink" title="简单主题 builder"></a>简单主题 builder</h2><p>想象一下你正在为你的 UIKit 应用设计一个主题引擎，它有许多自定义字体、颜色等。构造标准主题时一个 builder 会很有用。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Theme</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> textColor: <span class="type">UIColor</span>?</span><br><span class="line">    <span class="keyword">let</span> backgroundColor: <span class="type">UIColor</span>?</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThemeBuilder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">enum</span> <span class="title class_">Style</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> light</span><br><span class="line">        <span class="keyword">case</span> dark</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>(<span class="keyword">_</span> <span class="params">style</span>: <span class="type">Style</span>) -&gt; <span class="type">Theme</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> style &#123;</span><br><span class="line">        <span class="keyword">case</span> .light:</span><br><span class="line">            <span class="keyword">return</span> <span class="type">Theme</span>(textColor: .black, backgroundColor: .white)</span><br><span class="line">        <span class="keyword">case</span> .dark:</span><br><span class="line">            <span class="keyword">return</span> <span class="type">Theme</span>(textColor: .white, backgroundColor: .black)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> builder <span class="operator">=</span> <span class="type">ThemeBuilder</span>()</span><br><span class="line"><span class="keyword">let</span> light <span class="operator">=</span> builder.build(.light)</span><br><span class="line"><span class="keyword">let</span> dark <span class="operator">=</span> builder.build(.dark)</span><br></pre></td></tr></table></figure>
+<h2 id="“链式”-URL-builder"><a href="#“链式”-URL-builder" class="headerlink" title="“链式” URL builder"></a>“链式” URL builder</h2><p>利用这种方式，你可以用各种方法配置对象，每一个方法都会返回同一个 builder 对象，然后在最后一步构建最终产品。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">URLBuilder</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> components: <span class="type">URLComponents</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        <span class="keyword">self</span>.components <span class="operator">=</span> <span class="type">URLComponents</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">set</span>(<span class="params">scheme</span>: <span class="type">String</span>) -&gt; <span class="type">URLBuilder</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.components.scheme <span class="operator">=</span> scheme</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">set</span>(<span class="params">host</span>: <span class="type">String</span>) -&gt; <span class="type">URLBuilder</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.components.host <span class="operator">=</span> host</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">set</span>(<span class="params">port</span>: <span class="type">Int</span>) -&gt; <span class="type">URLBuilder</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.components.port <span class="operator">=</span> port</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">set</span>(<span class="params">path</span>: <span class="type">String</span>) -&gt; <span class="type">URLBuilder</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> path <span class="operator">=</span> path</span><br><span class="line">        <span class="keyword">if</span> <span class="operator">!</span>path.hasPrefix(<span class="string">&quot;/&quot;</span>) &#123;</span><br><span class="line">            path <span class="operator">=</span> <span class="string">&quot;/&quot;</span> <span class="operator">+</span> path</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">self</span>.components.path <span class="operator">=</span> path</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">addQueryItem</span>(<span class="params">name</span>: <span class="type">String</span>, <span class="params">value</span>: <span class="type">String</span>) -&gt; <span class="type">URLBuilder</span>  &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">self</span>.components.queryItems <span class="operator">==</span> <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">self</span>.components.queryItems <span class="operator">=</span> []</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">self</span>.components.queryItems<span class="operator">?</span>.append(<span class="type">URLQueryItem</span>(name: name, value: value))</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">URL</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.components.url</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URLBuilder</span>()</span><br><span class="line">    .set(scheme: <span class="string">&quot;https&quot;</span>)</span><br><span class="line">    .set(host: <span class="string">&quot;localhost&quot;</span>)</span><br><span class="line">    .set(path: <span class="string">&quot;api/v1&quot;</span>)</span><br><span class="line">    .addQueryItem(name: <span class="string">&quot;sort&quot;</span>, value: <span class="string">&quot;name&quot;</span>)</span><br><span class="line">    .addQueryItem(name: <span class="string">&quot;order&quot;</span>, value: <span class="string">&quot;asc&quot;</span>)</span><br><span class="line">    .build()</span><br></pre></td></tr></table></figure>
+
+<h2 id="带director的builder模式"><a href="#带director的builder模式" class="headerlink" title="带director的builder模式"></a>带director的builder模式</h2><p>让我们来见一见<code>director</code>对象，它的功能是将 <code>builder</code> 和配置部分的代码解耦。</p>
+<p>举个例子，你本来想创建一个圆形，可是忽然改主意要换成一个正方形。这可以很容易实现。只需要创建一个新的 builder，其他的都不变。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protocol</span> <span class="title class_">NodeBuilder</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span> &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">    <span class="keyword">var</span> color: <span class="type">SKColor</span> &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">    <span class="keyword">var</span> size: <span class="type">CGFloat</span> &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">SKShapeNode</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">NodeDirector</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> builder: <span class="type">NodeBuilder</span> &#123; <span class="keyword">get</span> <span class="keyword">set</span> &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">SKShapeNode</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CircleNodeBuilder</span>: <span class="title class_">NodeBuilder</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> color: <span class="type">SKColor</span> <span class="operator">=</span> .clear</span><br><span class="line">    <span class="keyword">var</span> size: <span class="type">CGFloat</span> <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">SKShapeNode</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> node <span class="operator">=</span> <span class="type">SKShapeNode</span>(circleOfRadius: <span class="keyword">self</span>.size)</span><br><span class="line">        node.name <span class="operator">=</span> <span class="keyword">self</span>.name</span><br><span class="line">        node.fillColor <span class="operator">=</span> <span class="keyword">self</span>.color</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PlayerNodeDirector</span>: <span class="title class_">NodeDirector</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> builder: <span class="type">NodeBuilder</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="params">builder</span>: <span class="type">NodeBuilder</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.builder <span class="operator">=</span> builder</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">build</span>() -&gt; <span class="type">SKShapeNode</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.builder.name <span class="operator">=</span> <span class="string">&quot;Hello&quot;</span></span><br><span class="line">        <span class="keyword">self</span>.builder.size <span class="operator">=</span> <span class="number">32</span></span><br><span class="line">        <span class="keyword">self</span>.builder.color <span class="operator">=</span> .red</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.builder.build()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> builder <span class="operator">=</span> <span class="type">CircleNodeBuilder</span>()</span><br><span class="line"><span class="keyword">let</span> director <span class="operator">=</span> <span class="type">PlayerNodeDirector</span>(builder: builder)</span><br><span class="line"><span class="keyword">let</span> player <span class="operator">=</span> director.build()</span><br></pre></td></tr></table></figure>
+
+<h2 id="基于block的builders"><a href="#基于block的builders" class="headerlink" title="基于block的builders"></a>基于block的builders</h2><p>一种更 Swift 的方法可以使用 block 来代替 builder 类来配置对象。当然，可能有人要问这样还算不算 builder 模式…</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">UILabel</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">build</span>(<span class="params">block</span>: ((<span class="type">UILabel</span>) -&gt; <span class="type">Void</span>)) -&gt; <span class="type">UILabel</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> label <span class="operator">=</span> <span class="type">UILabel</span>(frame: .zero)</span><br><span class="line">        block(label)</span><br><span class="line">        <span class="keyword">return</span> label</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> label <span class="operator">=</span> <span class="type">UILabel</span>.build &#123; label <span class="keyword">in</span></span><br><span class="line">    label.translatesAutoresizingMaskIntoConstraints <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    label.text <span class="operator">=</span> <span class="string">&quot;Hello wold!&quot;</span></span><br><span class="line">    label.font <span class="operator">=</span> <span class="type">UIFont</span>.systemFont(ofSize: <span class="number">12</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，builder 的实现根据特定的用例可能有所差别。有的时候 builder 会跟工厂结合。每个人对这个模式的解读都不同，但并不是问题。设计模式是制作精良的准则，但有的时候规则是可以被打破的。</p>
+</blockquote>
+<h1 id="命令"><a href="#命令" class="headerlink" title="命令"></a>命令</h1><p>当你需要为支持即时调用的不同的动作提供一个通用接口时，命令模式可以派上用场。通常来说，命令是一个封装了执行动作需要用到的所有数据和方法的单一对象。</p>
+<p>命令常被用来处理人机接口的动作，<strong>实现撤销管理器，或者管理事务</strong>。让我们来看一下 Swift 中如何实现一个命令模式。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation</span><br><span class="line"></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">Command</span> &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">execute</span>()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HelpCommand</span>: <span class="title class_">Command</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">execute</span>() &#123;</span><br><span class="line">        <span class="type">Help</span>().info()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Help</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">info</span>() &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">               Commander  </span></span><br><span class="line"><span class="string">                  v1.0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Available commands:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">              help      This command</span></span><br><span class="line"><span class="string">              ls        List documents</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Bye!  </span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ListCommand</span>: <span class="title class_">Command</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">execute</span>() &#123;</span><br><span class="line">        <span class="type">List</span>().homeDirectoryContents()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">List</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">homeDirectoryContents</span>() &#123;</span><br><span class="line">        <span class="keyword">let</span> fileManager <span class="operator">=</span> <span class="type">FileManager</span>.default</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> documentsURL <span class="operator">=</span> fileManager.urls(for: .documentDirectory, in: .userDomainMask).first <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Could not open documents directory&quot;</span>)</span><br><span class="line">            exit(<span class="operator">-</span><span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> fileURLs <span class="operator">=</span> <span class="keyword">try</span> fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: <span class="literal">nil</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;<span class="subst">\n</span><span class="subst">\t</span>  Listing documents directory:<span class="subst">\n</span>&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(fileURLs.map &#123; <span class="string">&quot;<span class="subst">\t</span><span class="subst">\t</span>  &quot;</span> <span class="operator">+</span> <span class="variable">$0</span>.lastPathComponent &#125;.joined(separator: <span class="string">&quot;<span class="subst">\n</span><span class="subst">\n</span>&quot;</span>) <span class="operator">+</span> <span class="string">&quot;<span class="subst">\n</span>&quot;</span> )</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">catch</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(error.localizedDescription)</span><br><span class="line">            exit(<span class="operator">-</span><span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">App</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> commands: [<span class="type">String</span>:<span class="type">Command</span>] <span class="operator">=</span> [:]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        <span class="keyword">self</span>.commands[<span class="string">&quot;help&quot;</span>] <span class="operator">=</span> <span class="type">HelpCommand</span>()</span><br><span class="line">        <span class="keyword">self</span>.commands[<span class="string">&quot;ls&quot;</span>] <span class="operator">=</span> <span class="type">ListCommand</span>()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">run</span>() &#123;</span><br><span class="line">        <span class="keyword">let</span> arguments <span class="operator">=</span> <span class="type">CommandLine</span>.arguments[<span class="number">1</span><span class="operator">...</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> key <span class="operator">=</span> arguments.first, <span class="keyword">self</span>.commands[key] <span class="operator">!=</span> <span class="literal">nil</span> <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Usage: ./command.swift [<span class="subst">\(<span class="keyword">self</span>.commands.keys.joined(separator: <span class="string">&quot;|&quot;</span>))</span>]&quot;</span>)</span><br><span class="line">            exit(<span class="operator">-</span><span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">self</span>.commands[key]<span class="operator">!</span>.execute()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">App</span>().run()</span><br></pre></td></tr></table></figure>
+<p>保存下这个文件，然后在终端中输入<code>./file-name.swift</code>运行它。Swift 编译器会替你完成剩下的工作</p>
+<h2 id="现实世界中命令模式的用例："><a href="#现实世界中命令模式的用例：" class="headerlink" title="现实世界中命令模式的用例："></a>现实世界中命令模式的用例：</h2><ol>
+<li>各种按钮的动作</li>
+<li>集合 &#x2F; 表 视图的选择动作</li>
+<li>在控制器间导航</li>
+<li>历史管理 &#x2F; 撤销管理器</li>
+<li>事务行为</li>
+<li>进度管理</li>
+</ol>
+<p>Apple 甚至还为它实现了一个专门的类叫 <code>NSInvocation</code>，不过由于这个类的动作行为，在 Swift 中并不可用。</p>
+<h1 id="适配器"><a href="#适配器" class="headerlink" title="适配器"></a>适配器</h1><p>将一个不兼容的对象转换成目标接口或者类，这是适配器模式的作用。</p>
+<p>下面这件东西是适配器模式在现实世界中最贴切的表达。</p>
+<p><img src="/./res/adapter.jpg"></p>
+<h2 id="实现适配器模式"><a href="#实现适配器模式" class="headerlink" title="实现适配器模式"></a>实现适配器模式</h2><p>在 Swift 中，实现适配器相当简单。你只需要创建一个新对象，把旧对象放进去，然后在新对象的类或者结构体上实现要求的接口。换言之，这个将源角色包装起来的类就是我们用来适配目标接口的适配器。</p>
+<h3 id="源角色"><a href="#源角色" class="headerlink" title="源角色"></a>源角色</h3><p>我们要适配目标接口的对象（例如，旧的USB-A接口）。</p>
+<h3 id="适配器-1"><a href="#适配器-1" class="headerlink" title="适配器"></a>适配器</h3><p>包装原始对象并且实现某个目标接口要求的对象。</p>
+<h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>需要和源角色一起使用的对象 （我们的USB-C插槽）。</p>
+<h2 id="Swift中如何使用适配器模式？"><a href="#Swift中如何使用适配器模式？" class="headerlink" title="Swift中如何使用适配器模式？"></a>Swift中如何使用适配器模式？</h2><p>当你想要在代码中集成第三方库时，可以用到适配器。第三方库的接口可能不符合你的需求，因此你可以在整个SDK或者后端API节点上创建一个包装器，以便提供统一的接口。</p>
+<p>举个例子，我们将包装一个 <code>EKEvent</code> 对象，实现一个全新的协议。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Foundation </span><br><span class="line"><span class="keyword">import</span> EventKit</span><br><span class="line"></span><br><span class="line"><span class="comment">// 目标的协议</span></span><br><span class="line"><span class="keyword">protocol</span> <span class="title class_">Event</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> title: <span class="type">String</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">    <span class="keyword">var</span> startDate: <span class="type">String</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">    <span class="keyword">var</span> endDate: <span class="type">String</span> &#123; <span class="keyword">get</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 适配器 (包装类)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventAdapter</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">lazy</span> <span class="keyword">var</span> dateFormatter: <span class="type">DateFormatter</span> <span class="operator">=</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> dateFormatter <span class="operator">=</span> <span class="type">DateFormatter</span>()</span><br><span class="line">        dateFormatter.dateFormat <span class="operator">=</span> <span class="string">&quot;yyyy. MM. dd. HH:mm&quot;</span></span><br><span class="line">        <span class="keyword">return</span> dateFormatter</span><br><span class="line">    &#125;()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> event: <span class="type">EKEvent</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">event</span>: <span class="type">EKEvent</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.event <span class="operator">=</span> event</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实际的适配器实现</span></span><br><span class="line"><span class="keyword">extension</span> <span class="title class_">EventAdapter</span>: <span class="title class_">Event</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> title: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.event.title</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> startDate: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.dateFormatter.string(from: event.startDate)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> endDate: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.dateFormatter.string(from: event.endDate)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建 EKEvent 源对象实例</span></span><br><span class="line"><span class="keyword">let</span> dateFormatter <span class="operator">=</span> <span class="type">DateFormatter</span>()</span><br><span class="line">dateFormatter.dateFormat <span class="operator">=</span> <span class="string">&quot;MM/dd/yyyy HH:mm&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> calendarEvent <span class="operator">=</span> <span class="type">EKEvent</span>(eventStore: <span class="type">EKEventStore</span>())</span><br><span class="line">calendarEvent.title <span class="operator">=</span> <span class="string">&quot;Adapter tutorial deadline&quot;</span></span><br><span class="line">calendarEvent.startDate <span class="operator">=</span> dateFormatter.date(from: <span class="string">&quot;07/30/2018 10:00&quot;</span>)</span><br><span class="line">calendarEvent.endDate <span class="operator">=</span> dateFormatter.date(from: <span class="string">&quot;07/30/2018 11:00&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 我们以 Event 协议的形式使用适配器</span></span><br><span class="line"><span class="keyword">let</span> adapter <span class="operator">=</span> <span class="type">EventAdapter</span>(event: calendarEvent)</span><br><span class="line"><span class="comment">// adapter.title</span></span><br><span class="line"><span class="comment">// adapter.startDate</span></span><br><span class="line"><span class="comment">// adapter.endDate</span></span><br></pre></td></tr></table></figure>
+<p>还有一种用法，当你不得不使用几个已经存在的类或者结构体，而这些类都是 <code>final</code> 的，并且缺少某些功能，因此你需要基于它们之上构建一些新的接口。这种情况下，最好的选择就是实现一个包装类，也就是适配器。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="prev" title="Swift花园之设计模式 上">
+      <i class="fa fa-chevron-left"></i> Swift花园之设计模式 上
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/04/20/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%20%E4%B8%8B/" rel="next" title="Swift花园之设计模式 下">
+      Swift花园之设计模式 下 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A7%94%E6%89%98%E4%BB%A3%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">委托代理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0-Swift-%E4%B8%AD%E7%9A%84%E5%A7%94%E6%89%98%E4%BB%A3%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">实现 Swift 中的委托代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Weak%E5%B1%9E%E6%80%A7%EF%BC%8C%E5%A7%94%E6%89%98%E5%92%8C%E7%B1%BB"><span class="nav-number">1.2.</span> <span class="nav-text">Weak属性，委托和类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#builder"><span class="nav-number">2.</span> <span class="nav-text">builder</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#builder-%E6%A8%A1%E5%BC%8F%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">builder 模式如何工作？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E5%8F%91%E5%B0%84%E5%99%A8-builder"><span class="nav-number">2.2.</span> <span class="nav-text">简单发射器 builder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E4%B8%BB%E9%A2%98-builder"><span class="nav-number">2.3.</span> <span class="nav-text">简单主题 builder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E2%80%9C%E9%93%BE%E5%BC%8F%E2%80%9D-URL-builder"><span class="nav-number">2.4.</span> <span class="nav-text">“链式” URL builder</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%A6director%E7%9A%84builder%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.5.</span> <span class="nav-text">带director的builder模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8Eblock%E7%9A%84builders"><span class="nav-number">2.6.</span> <span class="nav-text">基于block的builders</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">命令</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E5%AE%9E%E4%B8%96%E7%95%8C%E4%B8%AD%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%94%A8%E4%BE%8B%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">现实世界中命令模式的用例：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">适配器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F"><span class="nav-number">4.1.</span> <span class="nav-text">实现适配器模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E8%A7%92%E8%89%B2"><span class="nav-number">4.1.1.</span> <span class="nav-text">源角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E9%85%8D%E5%99%A8-1"><span class="nav-number">4.1.2.</span> <span class="nav-text">适配器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87"><span class="nav-number">4.1.3.</span> <span class="nav-text">目标</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swift%E4%B8%AD%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">Swift中如何使用适配器模式？</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

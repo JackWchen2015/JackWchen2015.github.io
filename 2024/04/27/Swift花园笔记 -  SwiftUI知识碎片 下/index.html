@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Hot Prospects 理解 Swift 的 Result 类型让一个函数在执行成功时返回某些数据，执行失败时返回某个错误是很常见的做法。我们通常会利用抛出错误的函数来实现这个要求，一旦函数抛出错误运行 catch 块，这样就独立地处理成功和失败的逻辑。但是假如函数并不是立即返回的呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift花园笔记 -  SwiftUI知识碎片 下">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Hot Prospects 理解 Swift 的 Result 类型让一个函数在执行成功时返回某些数据，执行失败时返回某个错误是很常见的做法。我们通常会利用抛出错误的函数来实现这个要求，一旦函数抛出错误运行 catch 块，这样就独立地处理成功和失败的逻辑。但是假如函数并不是立即返回的呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-27T09:47:01.022Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Swift花园笔记 -  SwiftUI知识碎片 下 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/27/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Swift花园笔记 -  SwiftUI知识碎片 下
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-27 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-27T00:00:00+08:00">2024-04-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:47:01" itemprop="dateModified" datetime="2024-05-27T17:47:01+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Hot-Prospects-理解-Swift-的-Result-类型"><a href="#Hot-Prospects-理解-Swift-的-Result-类型" class="headerlink" title="Hot Prospects 理解 Swift 的 Result 类型"></a>Hot Prospects 理解 Swift 的 Result 类型</h1><p>让一个函数在执行成功时返回某些数据，执行失败时返回某个错误是很常见的做法。我们通常会利用抛出错误的函数来实现这个要求，一旦函数抛出错误运行 <code>catch</code> 块，这样就独立地处理成功和失败的逻辑。但是假如函数并不是立即返回的呢？</p>
+<span id="more"></span>
+
+<p>我们可以回顾一下之前使用过的 <code>URLSession</code> 的网络代码，然后在一个新的默认工程里看看下面这样一个例子：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello, World!&quot;</span>)</span><br><span class="line">    .onAppear &#123;</span><br><span class="line">        <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;https://www.apple.com&quot;</span>)<span class="operator">!</span></span><br><span class="line">        <span class="type">URLSession</span>.shared.dataTask(with: url) &#123; data, response, error <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> data <span class="operator">!=</span> <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;We got data!&quot;</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="keyword">let</span> error <span class="operator">=</span> error &#123;</span><br><span class="line">                <span class="built_in">print</span>(error.localizedDescription)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;.resume()</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>文本视图呈现的时候，网络请求就会启动，从 <code>http://apple.com</code> 获取数据，然后根据网络请求的执行情况打印两条消息中的一条。</p>
+<p>回忆一下，我们说过完成闭包要么会设置 <code>data</code>，要么会设置 <code>error</code> —— 不能两者都设置，也不能两者都不设置，因为这两种情况都不合理。但是由于 <code>URLSession</code> 并没有强制这个约束，我们不得不写代码处理不可能的情况，只是为了让所有的代码分支能被覆盖。</p>
+<p>Swift 对此提供了一种解决方案，它是一个叫 <code>Result</code> 的专用数据类型。它能帮我们实现非此即彼的行为，同时也很好<strong>适用于非阻塞式的函数</strong> —— 这是一种异步执行工作的函数，因此它们不会阻塞主要代码的执行。作为额外的好处，它允许我们返回特定类型的错误，这就让出错时排查错误变得更加容易。</p>
+<p>我们要做的是给上面的网络代码添加一层封装，让它是利用 Swift 的 <code>Result</code> 类型，也就是说，你可以很清楚地看到改造前后的差异。</p>
+<p>首先，我们要定义可能被抛出的错误的类型。如果你愿意，可以定义任意多，但在这里，我们假定只有 URL 错误，请求失败和未知错误三种情况。把下面这个枚举放到 <code>ContentView</code> 结构体外面：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">NetworkError</span>: <span class="title class_">Error</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> badURL, requestFailed, unknown</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来，我们要写一个方法，这个方法能够返回一个 <code>Result</code>。记住，<code>Result</code> 是用于代表某种成功或者失败的情况。在这个例子里，我们说成功的情况是某个从网络返回的字符串，而错误的情况就是 <code>NetworkError</code> 的某一种。</p>
+<p>我们要逐渐加大难度，把同一个方法的写法升级四次。系好安全带，你会看到东西是怎么建起来的。先从最简单的版本开始，我们直接返回一个 <code>URL</code> 错误的版本，像下面这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">fetchData</span>(<span class="params">from</span> <span class="params">urlString</span>: <span class="type">String</span>) -&gt; <span class="type">Result</span>&lt;<span class="type">String</span>, <span class="type">NetworkError</span>&gt; &#123;</span><br><span class="line">    .failure(.badURL)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如你所见，方法的返回类型是 <code>Result&lt;String, NetworkError&gt;</code>，也就说，要么是一个代表成功的字符串，要么是代表失败的某个 <code>NetworkError</code>。注意，这个时候函数还是阻塞式的调用，一个非常快的调用。</p>
+<p>但我们实际上要的是一个非阻塞式的函数，也就是说，我们不能返回一个 <code>Result</code>。取而代之的是，我们需要让我们的方法接收两个参数：一个用于 <code>URL</code> 请求，另一个是带一个执行参数的完成闭包。这意味着函数本身不返回任何东西，它的数据会被返回给完成闭包，这个闭包是在未来某个节点被调用。</p>
+<p>这一次，为了让事情简化，我们还是直接使用 URL 错误的失败作为默认的实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">fetchData</span>(<span class="params">from</span> <span class="params">urlString</span>: <span class="type">String</span>, <span class="params">completion</span>: (<span class="type">Result</span>&lt;<span class="type">String</span>, <span class="type">NetworkError</span>&gt;) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">    completion(.failure(.badURL))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们使用完成闭包的目的是让方法变成非阻塞式的：在方法里面，我们可以启动一些异步的工作，让方法直接返回，以便后面的代码能够继续运行，然后在未来某个时间调用完成闭包。</p>
+<p>这里面有一个难点，我之前简要提过，现在变得很重要了。当我们把一个闭包传给一个函数时，Swift 需要知道这个闭包是被立刻使用还是可能稍后才被使用。如果它是被立即使用的 —— 也就是默认的情况 —— Swift 很欣然接受代码，然后运行闭包。但如果它是稍后才使用的，那么很有可能创建闭包的东西在闭包被调用时已经被销毁掉，不再存在于内存中，这个时候闭包也会被销毁，不被执行。为了处理这种情况，Swift 允许我们给闭包参数标记 <code>@escaping</code>（逃逸闭包），它的意思是“这个闭包可能会脱离当前方法的运行周期被使用，所以请在内存中保留它，直到我们把事情做完。”</p>
+<p>以我们的方法为例，我们将先执行一个异步的工作，然后调用在该工作做完时调用你闭包。这个调用动作可能立即发生，也可能需要几分钟。但我们不关心这一点，关键是闭包在方法返回之后还需要保留，因此我们必须把它标记为<code>@escaping</code>。你可能会担心自己遗漏这一点，大可不必担心：如果你不加 <code>@escaping</code> 属性的话 Swift 实际上回拒绝编译。</p>
+<p>下面是函数的第三个版本，使用了 <code>@escaping</code> 的闭包，以便我们可以异步调用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">fetchData</span>(<span class="params">from</span> <span class="params">urlString</span>: <span class="type">String</span>, <span class="params">completion</span>: <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">String</span>, <span class="type">NetworkError</span>&gt;) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">    <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">        completion(.failure(.badURL))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>记住，完成闭包是在未来某个时点被调用的。</p>
+<p>最后是第四个版本：我们要讲 <code>URLSession</code> 的 <code>code</code> 合入之前的 <code>Result</code>。这个版本的函数签名不变 —— 仍是接收一个字符串和一个闭包，不返回任何东西 —— 但这次我们调用完成闭包的方式不同：</p>
+<ol>
+<li>如果 <code>URL</code> 非法，我们调用 <code>completion(.failure(.badURL))</code>。</li>
+<li>如果我们从请求的返回中得到合法的数据，则将其转换成字符串并调用 <code>completion(.success(stringData))</code>。</li>
+<li>如果我们从请求得到错误，则调用 <code>completion(.failure(.requestFailed))</code>。</li>
+<li>如果既没有得到数据，也没有得到错误，则调用<code> completion(.failure(.unknown))</code>。</li>
+</ol>
+<p>这里头唯一的新知识点是将 <code>Data</code> 实例转换成字符串。回忆一下，你知道如何从字符串构建 <code>Data: let data = Data(someString.utf8)</code>，而从 <code>Data</code> 转 <code>String</code> 的代码是相似的：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> stringData <span class="operator">=</span> <span class="type">String</span>(decoding: data, as: <span class="type">UTF8</span>.<span class="keyword">self</span>)</span><br></pre></td></tr></table></figure>
+<p>好了，下面是完整的代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">fetchData</span>(<span class="params">from</span> <span class="params">urlString</span>: <span class="type">String</span>, <span class="params">completion</span>: <span class="keyword">@escaping</span> (<span class="type">Result</span>&lt;<span class="type">String</span>, <span class="type">NetworkError</span>&gt;) -&gt; <span class="type">Void</span>) &#123;</span><br><span class="line">    <span class="comment">// check the URL is OK, otherwise return with a failure</span></span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> url <span class="operator">=</span> <span class="type">URL</span>(string: urlString) <span class="keyword">else</span> &#123;</span><br><span class="line">        completion(.failure(.badURL))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">URLSession</span>.shared.dataTask(with: url) &#123; data, response, error <span class="keyword">in</span></span><br><span class="line">        <span class="comment">// the task has completed – push our work back to the main thread</span></span><br><span class="line">        <span class="type">DispatchQueue</span>.main.async &#123;</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">let</span> data <span class="operator">=</span> data &#123;</span><br><span class="line">                <span class="comment">// success: convert the data to a string and send it back</span></span><br><span class="line">                <span class="keyword">let</span> stringData <span class="operator">=</span> <span class="type">String</span>(decoding: data, as: <span class="type">UTF8</span>.<span class="keyword">self</span>)</span><br><span class="line">                completion(.success(stringData))</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> error <span class="operator">!=</span> <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="comment">// any sort of network failure</span></span><br><span class="line">                completion(.failure(.requestFailed))</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// this ought not to be possible, yet here we are</span></span><br><span class="line">                completion(.failure(.unknown))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;.resume()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>讲完四个版本的函数费了不少篇幅，之所以一步一步解释的原因在于需要理解消化的内容着实不少。 最后的代码实现了一个更清爽的 API，借助它我们可以确保要么得到字符串，要么得到某个错误 —— 不可能同时得到两者或两者都得不到，这正是 <code>Result</code> 的特点。更棒的是，我们得到错误的话，必定是 <code>NetworkError</code> 的某一条 case，这使得错误处理更加容易。</p>
+<p>目前为止我们实现了使用 <code>Result</code> 的函数，但还没有编写处理 <code>Result</code> 的函数。无论何种情况，<code>Result</code> 总是携带两部分的信息：结果的类型（成功或者失败），以及内部包含的东西。对于我们而言，这东西就是字符串或者某个 <code>NetworkError</code>。在幕后，<code>Result</code> 实际上是一个有关联值的枚举，Swift 对此提供了特别的语法：我们可以对 <code>Result</code> 使用 <code>switch</code>，编写像 <code>.success(let str)</code> 这样的代码来表示 “如果成功，取出字符串放进一个叫 str 的新常量中。” 这样的意思。</p>
+<p>在实例中更容易明白我的意思，就让我们在文本视图的 <code>onAppear</code> 闭包里处理所有可能的情况：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Text</span>(<span class="string">&quot;Hello, World!&quot;</span>)</span><br><span class="line">    .onAppear &#123;</span><br><span class="line">        <span class="keyword">self</span>.fetchData(from: <span class="string">&quot;https://www.apple.com&quot;</span>) &#123; result <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">switch</span> result &#123;</span><br><span class="line">            <span class="keyword">case</span> .success(<span class="keyword">let</span> str):</span><br><span class="line">                <span class="built_in">print</span>(str)</span><br><span class="line">            <span class="keyword">case</span> .failure(<span class="keyword">let</span> error):</span><br><span class="line">                <span class="keyword">switch</span> error &#123;</span><br><span class="line">                <span class="keyword">case</span> .badURL:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">&quot;Bad URL&quot;</span>)</span><br><span class="line">                <span class="keyword">case</span> .requestFailed:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">&quot;Network problems&quot;</span>)</span><br><span class="line">                <span class="keyword">case</span> .unknown:</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">&quot;Unknown error&quot;</span>)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>希望你能发现这么做的益处：我们不仅消除了对于返回的数据做检查的不确定因素，也完全消除了可选性。对于错误处理，甚至不再需要 <code>default</code> 的 <code>case</code>，因为 <code>NetworkError</code> 的所有 <code>case</code> 都会被覆盖到。</p>
+<h1 id="allowsHitTesting"><a href="#allowsHitTesting" class="headerlink" title="allowsHitTesting()"></a>allowsHitTesting()</h1><p>SwiftUI 可以让我们通过设置 allowsHitTesting() 为 false 来禁用交互，在项目中我们可以用它来在倒计时消耗完时禁用卡片的轻扫操作。</p>
+<p>在内层的 ZStack 里添加这个 modifier —— 显示卡片的那个 stack：<br><code>.allowsHitTesting(timeRemaining &gt; 0)</code><br>只有在 <code>timeRemaining</code> 大于等于 1 时才可以接收拖拽手势。</p>
+<h1 id="手动发布ObservedObject的变化"><a href="#手动发布ObservedObject的变化" class="headerlink" title="手动发布ObservedObject的变化"></a>手动发布ObservedObject的变化</h1><p>遵循 <code>ObservableObject</code> 协议的类可以使用 SwiftUI 的 <code>@Published</code> 属性包装器来自动发布属性的变化，以便使用该类的实例的任何视图能够自动重新调用 <code>body</code> 属性，保持界面与数据的一致。多数情况下，这个机制都可以很好 地工作，不过有时候你可能会需要更多的控制，SwiftUI 对此的解决方式是 <code>objectWillChange</code>。</p>
+<p>每个遵循 <code>ObservableObject</code> 的类都自动获得一个叫 <code>objectWillChange</code> 的属性。它是一个 <code>publisher</code>，也就是说它做的是和 <code>@Published</code> 属性包装器一样的事情：通知正在观察的视图被观察的对象即将有重要的事情发生。正如它的名字所暗示的，这个 <code>publisher</code> 是在我们即将做出改变的时候发出，这能让 SwiftUI 检查 UI 的状态，并未动画化改变做好准备。</p>
+<p>为了演示这一点，我们将构建一个会更新自己 10 次的 <code>ObservableObject</code> 子类。你之前已经见过用 <code>DispatchQueue.main.async()</code> 将工作推回主线程的做法，这一次我们要认识一个类似的方法，叫 <code>DispatchQueue.main.asyncAfter()</code>。它能指定附加的闭包在何时运行，也就是说，我们可以要求闭包 “1 秒后运行”，而不是立刻运行。</p>
+<p>在测试的例子中， 我们将在一个从 1 到 10 的循环中使用 <code>asyncAfter()</code> 增加一个整数。这个整数会用 <code>@Published</code> 包装，这样它的所有变化都会被发布给观察该对象的视图。</p>
+<p>在代码的某个地方添加下面这个类：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DelayedUpdater</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> value <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>() &#123;</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="number">1</span><span class="operator">...</span><span class="number">10</span> &#123;</span><br><span class="line">            <span class="type">DispatchQueue</span>.main.asyncAfter(deadline: .now() <span class="operator">+</span> <span class="type">Double</span>(i)) &#123;</span><br><span class="line">                <span class="keyword">self</span>.value <span class="operator">+=</span> <span class="number">1</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用这个类只需要在 <code>ContentView</code> 的某个地方用 <code>ObservedObject</code> 注解某个 <code>DelayedUpdate</code> 类型的属性，然后在 body 中显示它的值，如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@ObservedObject</span> <span class="keyword">var</span> updater <span class="operator">=</span> <span class="type">DelayedUpdater</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Value is: <span class="subst">\(updater.value)</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行代码，你会看到数值一直往上增加，知道 10，正如你预期的那样。现在，移除 <code>@Published</code>，你会看到 UI 不再变化了。虽然幕后的 <code>asyncAfter()</code> 仍然在执行，但由于没有变化通知发出，UI 不再刷新。我们可以通过手动发送我前面提到的 <code>objectWillChange</code> 来解决。这种方式能让我们在任意时刻发送变化通知，而不用依赖于 <code>@Published</code> 的自动行为。</p>
+<p>把 value 属性改成下面这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> value <span class="operator">=</span> <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">willSet</span> &#123;</span><br><span class="line">        objectWillChange.send()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样改完你又获得和之前一样的应用行为 —— UI 会计数增加到 10。但这回，我们有机会在 <code>willSet</code> 观察者中添加额外的功能。也许你需要打日志，或者调用另一个方法，又或者你要 <code>clamp</code> 整数，确保它永远不会超出某个范围 —— 一切尽在掌握之中。</p>
+<h1 id="薛定谔的-State"><a href="#薛定谔的-State" class="headerlink" title="薛定谔的 @State"></a>薛定谔的 @State</h1><p><code>value</code>，<code>$value</code>和<code>_value</code>代表三个完全不同的东西！</p>
+<p>这几个 <code>@Things</code> 其实只是 <code>SwiftUI</code> 框架中的几个结构体，并非 Swift 语言的一部分。</p>
+<p>而真正属于语言的一部分的是 Swift 5.1 引入的一个新特性：属性包装器.</p>
+<p>当我们用 SwiftUI 里的 <code>@Something</code> 给变量标注属性时，比如 <code>@State var value: Int = 0</code>，Swift 编译器将为我们生成三个变量！（其中有两个是计算属性）：</p>
+<ol>
+<li>value —— 被包装的由我们声明类型的原始值（wrappedValue），比如例子中的 Int。</li>
+<li>$value —— 一个 “额外的” <code>projectedValue</code>，它的类型由我们使用的属性包装器决定。<code>@State </code>的<code>projectedValue</code> 的类型是 <code>Binding</code>，因此我们的例子中就是 Binding 类型。</li>
+<li>_value —— 属性包装器本身的引用，在视图初始化过程中可能用到：</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@Binding</span> <span class="keyword">var</span> flag: <span class="type">Bool</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">flag</span>: <span class="type">Binding</span>&lt;<span class="type">Bool</span>&gt;) &#123;</span><br><span class="line">        <span class="keyword">self</span>._flag <span class="operator">=</span> flag</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="根据-projectedValue-进行分类"><a href="#根据-projectedValue-进行分类" class="headerlink" title="根据 projectedValue 进行分类"></a>根据 projectedValue 进行分类</h2><p>让我们浏览一下 SwiftUI 中最常用的 <code>@Things</code>，看看他们的 <code>projectedValue</code> 分别都是些什么：</p>
+<ul>
+<li>@State —— Binding<Value></li>
+<li>@Binding —— Binding<Value></li>
+<li>@ObservedObject —— Binding<Value> (*)</li>
+<li>@EnvironmentObject - Binding<Value> (*)</li>
+<li>@Published - Publisher&lt;Value, Never&gt;</li>
+</ul>
+<p>技术上来讲，(*) 给到我们的是 <code>Wrapper</code> 类型的中间值，一旦我们为该对象中的实际值指定了 <code>keyPath</code>，就会变成一个 <code>Binding</code>。</p>
+<p>如你所见，SwiftUI 中大部分的属性包装器，其职能都是跟视图的状态有关，并且被投射为 <code>Binding</code>，用于在视图之间传递状态。唯一的跟大多数包装器不同的是 <code>@Published</code>，不过请注意：</p>
+<ol>
+<li>它是在 Combine 框架而不是 SwiftUI 里声明的</li>
+<li>它的用途是让值变为可观察的</li>
+<li>它不用于视图的变量声明，只用在 ObservableObject 内部。</li>
+</ol>
+<p>考虑一个在 SwiftUI 中相当常见的场景：声明一个 <code>ObservableObject</code>，并在某个视图中以 <code>@ObservedObject </code>属性使用它：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ViewModel</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> value: <span class="type">Int</span> <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@ObservedObject</span> <span class="keyword">var</span> viewModel <span class="operator">=</span> <span class="type">ViewModel</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123; <span class="operator">...</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>MyView 可以引用 <code>$viewModel.value</code> 和 <code>viewModel.$value</code> —— 两个表达式都是合法的。有点犯迷糊了是不是？</p>
+<p>其实这两个表达式分别代表了完全不同的两个类型：<code>Binding</code> 和 <code>Publisher</code>。</p>
+<p>两者都有实际的用途：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">    <span class="type">OtherView</span>(binding: <span class="variable">$viewModel</span>.value)     <span class="comment">// Binding</span></span><br><span class="line">        .onReceive(viewModel.<span class="variable">$value</span>) &#123; value <span class="comment">// Publisher</span></span><br><span class="line">            <span class="comment">// 执行某些不需要视图更新的操作</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="薛定谔的-State-1"><a href="#薛定谔的-State-1" class="headerlink" title="薛定谔的 @State"></a>薛定谔的 @State</h2><p>我们都知道包含在一个不可变的 struct 内部的 struct 也是不可变的。</p>
+<p>在 SwiftUI 中，多数情况下我们面对是一个不可修改的 <code>self</code>，例如，在某个 <code>Button</code> 的回调中。基于这种上下文，每个实例变量，包括 <code>@State</code> 结构体也都是不可变的。</p>
+<p>那么，你能解释一下为什么下面的代码是完全合法的吗？</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">var</span> counter: <span class="type">Int</span> <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Button</span>(action: &#123;</span><br><span class="line">            <span class="keyword">self</span>.counter <span class="operator">+=</span> <span class="number">1</span> <span class="comment">// 修改一个不可变的结构体！ </span></span><br><span class="line">        &#125;, label: &#123; <span class="type">Text</span>(<span class="string">&quot;Tap me!&quot;</span>) &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>@State </code>有什么魔法？</li>
+</ul>
+<p>这里有一份关于 SwiftUI 如何处理这种场景下的值的变化的详细解释，但这里我想强调一个事实：对于 @State 变量实际的值，SwiftUI 使用了隐藏的外部存储。</p>
+<p><code>@State</code> 其实是一个代理：它拥有一个内部变量 <code>_location</code>，用于访问外部存储。</p>
+<p>让我给你出道面试题：下面这个例子会打印出什么内容？</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">test</span>() &#123;</span><br><span class="line">    <span class="keyword">var</span> view <span class="operator">=</span> <span class="type">MyView</span>()</span><br><span class="line">    view.counter <span class="operator">=</span> <span class="number">10</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;<span class="subst">\(view.counter)</span>&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码相当直观；直觉告诉我们打印的值应该是 10。</p>
+<p>然而并不是 —— 输出是 0。</p>
+<p>这其中的玄机在于视图并非总是同状态存储连接：SwiftUI 会在视图需要重绘或者视图接收来自 SwiftUI 的回调的时候接通连接，而在之后又断开。</p>
+<p>与此同时，在 <code>DispatchQueue.main.async</code> 中对 State 做出的修改将不能保证成功：某些时候可能是工作的。但假如你引入某个延迟，而存储连接在闭包执行时已经被断开了，那么状态修改就不会生效了。</p>
+<p>对于 SwiftUI 视图来说，传统的异步分发是不安全的 —— 不要引火烧身。</p>
+<h2 id="幽灵般的状态更新"><a href="#幽灵般的状态更新" class="headerlink" title="幽灵般的状态更新"></a>幽灵般的状态更新</h2><p>在用了多年的 RxSwift 和 ReactiveSwift 之后，对于数据流通过响应式绑定和视图的属性建立连接这件事，我认为是理所当然的。</p>
+<p>但是当我尝试将 SwiftUI 和 Combine 放在一起协作的时候，我震惊了。这两个框架之间表现得相当异质：一方并不能很轻松地把某个 Publisher 连接到某个 Binding，或者把某个 CurrentValueSubject 转换成 ObservableObject。两种框架之间互操作的方式只有几种。</p>
+<p>第一个接触点是 <code>ObservableObject</code> —— 它是一个声明在 Combine 里的协议，但已经广泛地用于 SwiftUI 的视图。</p>
+<p>第二个是 <code>.onReceive()</code> 视图 modifier，它是让你将视图和任意数据连接的唯一 API。我的下一个大大的疑惑正是和这个 modifier 有关。看一下这个例子：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> publisher: <span class="type">AnyPublisher</span>&lt;<span class="type">String</span>, <span class="type">Never</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">var</span> text: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">var</span> didAppear: <span class="type">Bool</span> <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(text)</span><br><span class="line">            .onAppear &#123; <span class="keyword">self</span>.didAppear <span class="operator">=</span> <span class="literal">true</span> &#125;</span><br><span class="line">            .onReceive(publisher) &#123;</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;onReceive&quot;</span>)</span><br><span class="line">                <span class="keyword">self</span>.text <span class="operator">=</span> <span class="variable">$0</span></span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是视图只是显示了由 Publisher 生产的字符串，并且在视图出现在屏幕时设置 didAppear 标记 ，就这么简单而已。</p>
+<p>现在，试着回答我，你认为在下面这两个用例中，print(“onReceive”) 会被触发几次？</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">TestView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> publisher <span class="operator">=</span> <span class="type">PassthroughSubject</span>&lt;<span class="type">String</span>, <span class="type">Never</span>&gt;()    <span class="comment">// 1</span></span><br><span class="line">    <span class="keyword">let</span> publisher <span class="operator">=</span> <span class="type">CurrentValueSubject</span>&lt;<span class="type">String</span>, <span class="type">Never</span>&gt;(<span class="string">&quot;&quot;</span>) <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">MyView</span>(publisher: publisher.eraseToAnyPublisher())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>让我们先考虑 PassthroughSubject。</p>
+<p>如果你的答案是 0，那么恭喜你，回答正确。<code>PassthroughSubject</code> 从未接收到任何值，因此没有东西会被提交到 <code>onReceive</code> 闭包。</p>
+<p>第二用例有一点欺骗性。请认真点，仔细分析其中的猫腻。</p>
+<p>当试图被创建时，<code>onReceive</code> modifier 将订阅 <code>Publisher</code>，提供无限制的值“要求” (参考 Combine 中的说明)。</p>
+<p>由于 <code>CurrentValueSubject</code> 拥有初始值 “” ，它会立即将值推送给它的新订阅者，触发 <code>onReceive</code> 回调。</p>
+<p>然后，当视图即将第一次显示在屏幕上时，SwiftUI 会调用它的 <code>onAppear</code> 回调，在我们的例子，这个回调会通过设置 didAppear 为 true 来修改视图的状态。</p>
+<p>那么接下来会发生什么？ 你猜的没错！<code>onReceive</code> 闭包再次调用了！为什么会这样？</p>
+<p>当 MyView 修改 onAppear 中的状态时，SwiftUI 需要创建一个新的视图，以便和状态改变之前的视图做对比！ 这是给视图层级打上合适的补丁所要求的步骤。</p>
+<p>由于第二次创建过程的视图也订阅了 Publisher，后者欢欢喜喜地又推送了自己的值。</p>
+<p>正确答案是 2。</p>
+<p>你能想象我在调试这些被传递给 onReceive 的幽灵般的更新调用时的困惑吗？当我试图去过滤掉这些重复的更新调用时，我的脑门上挂满了问号。</p>
+<p>最后一个测验：如果我们在 onAppear 里设置 self.text &#x3D; “abc”，那最后会显示什么文本？</p>
+<p>如果你不知道上面这个故事，那合乎逻辑的答案应当是 “abc”，但是当你已经用新知识升级了自己：无论何时何地你给 text 赋值，<code>onReceive</code> 回调都会如影随形，用 <code>CurrentValueSubject</code> 的值擦掉你刚刚赋的值。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%201%20%5B%E8%AF%91%5D/" rel="prev" title="Random Lessons from the SwiftUI Digital Lounge . Part 1 [译]">
+      <i class="fa fa-chevron-left"></i> Random Lessons from the SwiftUI Digital Lounge . Part 1 [译]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%AD/" rel="next" title="Swift花园笔记 -  SwiftUI知识碎片 中">
+      Swift花园笔记 -  SwiftUI知识碎片 中 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Hot-Prospects-%E7%90%86%E8%A7%A3-Swift-%E7%9A%84-Result-%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Hot Prospects 理解 Swift 的 Result 类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#allowsHitTesting"><span class="nav-number">2.</span> <span class="nav-text">allowsHitTesting()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%8F%91%E5%B8%83ObservedObject%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">手动发布ObservedObject的变化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%96%9B%E5%AE%9A%E8%B0%94%E7%9A%84-State"><span class="nav-number">4.</span> <span class="nav-text">薛定谔的 @State</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE-projectedValue-%E8%BF%9B%E8%A1%8C%E5%88%86%E7%B1%BB"><span class="nav-number">4.1.</span> <span class="nav-text">根据 projectedValue 进行分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%96%9B%E5%AE%9A%E8%B0%94%E7%9A%84-State-1"><span class="nav-number">4.2.</span> <span class="nav-text">薛定谔的 @State</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%BD%E7%81%B5%E8%88%AC%E7%9A%84%E7%8A%B6%E6%80%81%E6%9B%B4%E6%96%B0"><span class="nav-number">4.3.</span> <span class="nav-text">幽灵般的状态更新</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

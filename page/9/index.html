@@ -184,7 +184,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/01/28/iOS%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%80%BB%E7%BB%93/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/22/iOS%20Memory%20%E5%86%85%E5%AD%98%E8%AF%A6%E8%A7%A3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -198,7 +198,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/01/28/iOS%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">iOS内存泄漏总结</a>
+            <a href="/2021/11/22/iOS%20Memory%20%E5%86%85%E5%AD%98%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">iOS Memory 内存详解</a>
         </h2>
 
         <div class="post-meta">
@@ -208,14 +208,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2021-01-28 08:00:00" itemprop="dateCreated datePublished" datetime="2021-01-28T08:00:00+08:00">2021-01-28</time>
+              <time title="创建时间：2021-11-22 08:00:00" itemprop="dateCreated datePublished" datetime="2021-11-22T08:00:00+08:00">2021-11-22</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-13 20:05:25" itemprop="dateModified" datetime="2023-05-13T20:05:25+08:00">2023-05-13</time>
+                <time title="修改时间：2023-05-13 19:59:38" itemprop="dateModified" datetime="2023-05-13T19:59:38+08:00">2023-05-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -242,15 +242,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="内存泄漏和内存溢出"><a href="#内存泄漏和内存溢出" class="headerlink" title="内存泄漏和内存溢出"></a>内存泄漏和内存溢出</h4><blockquote>
-<p>内存泄漏（memory leak）：是指申请的内存空间使用完毕之后未回收。 一次内存泄露危害可以忽略，但若一直泄漏，无论有多少内存，迟早都会被占用光，最终导致程序crash</p>
-</blockquote>
-<blockquote>
-<p>内存溢出（out of memory）：是指程序在申请内存时，没有足够的内存空间供其使用。<br>通俗理解就是内存不够用了，通常在运行大型应用或游戏时，应用或游戏所需要的内存远远超出了你主机内安装的内存所承受大小，就叫内存溢出。最终导致机器重启或者程序crash</p>
-</blockquote>
+          <p>iOS是基于BSD发展而来，本文将涉及一般桌面系统的内存机制，然后着重讲解iOS系统层面，单个App的内存管理策略</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/01/28/iOS%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%80%BB%E7%BB%93/#more" rel="contents">
+              <a class="btn" href="/2021/11/22/iOS%20Memory%20%E5%86%85%E5%AD%98%E8%AF%A6%E8%A7%A3/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -274,7 +269,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -288,7 +283,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">ReactiveObjC 使用</a>
+            <a href="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">iOS Rendering 渲染解析</a>
         </h2>
 
         <div class="post-meta">
@@ -298,14 +293,104 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-12-22 08:00:00" itemprop="dateCreated datePublished" datetime="2020-12-22T08:00:00+08:00">2020-12-22</time>
+              <time title="创建时间：2021-11-21 08:00:00" itemprop="dateCreated datePublished" datetime="2021-11-21T08:00:00+08:00">2021-11-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-13 20:05:52" itemprop="dateModified" datetime="2023-05-13T20:05:52+08:00">2023-05-13</time>
+                <time title="修改时间：2023-05-13 20:00:06" itemprop="dateModified" datetime="2023-05-13T20:00:06+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="计算机渲染原理"><a href="#计算机渲染原理" class="headerlink" title="计算机渲染原理"></a>计算机渲染原理</h2><h3 id="CPU与GPU的架构"><a href="#CPU与GPU的架构" class="headerlink" title="CPU与GPU的架构"></a>CPU与GPU的架构</h3><h4 id="设计目的"><a href="#设计目的" class="headerlink" title="设计目的"></a>设计目的</h4><blockquote>
+<p>CPU 是运算核心与控制核心，需要有很强的运算通用性，兼容各种数据类型，同时也需要能处理大量不同的跳转、中断等指令，因此 CPU 的内部结构更为复杂。</p>
+</blockquote>
+<blockquote>
+<p>而 GPU 则面对的是类型统一、更加单纯的运算，也不需要处理复杂的指令，但也肩负着更大的运算任务。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/21/iOS%20Rendering%20%E6%B8%B2%E6%9F%93%E8%A7%A3%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/01/ReactiveObjC%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/01/ReactiveObjC%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">ReactiveObjC基础</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-01 08:00:00" itemprop="dateCreated datePublished" datetime="2021-11-01T08:00:00+08:00">2021-11-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:00:25" itemprop="dateModified" datetime="2023-05-13T20:00:25+08:00">2023-05-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -332,13 +417,93 @@
     <div class="post-body" itemprop="articleBody">
 
       
+          <p>RAC 被描述为函数响应式编程</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/01/ReactiveObjC%E5%9F%BA%E7%A1%80/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/10/07/Hash%E6%80%9D%E6%83%B3%E4%B8%8EhashTable/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/10/07/Hash%E6%80%9D%E6%83%B3%E4%B8%8EhashTable/" class="post-title-link" itemprop="url">Hash思想与hashTable</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-07 08:00:00" itemprop="dateCreated datePublished" datetime="2021-10-07T08:00:00+08:00">2021-10-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-10-10 12:33:12" itemprop="dateModified" datetime="2021-10-10T12:33:12+08:00">2021-10-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
           <blockquote>
-<p>ReactiveCocoa 在设计上很大程度借鉴了 Reactive Extension 中的概念，可以说 ReactiveCocoa 是 <a target="_blank" rel="noopener" href="http://reactivex.io/languages.html">Rx</a> 在 Objective-C 语言中的实现</p>
+<p>Hash就是一种将任意长度的消息压缩到某一固定长度的消息摘要的函数。Hash算法没有一个固定的公式，只要符合Hash思想的算法都可以被称为是Hash算法</p>
 </blockquote>
-<p> Rx 中主要的两个概念信号和序列都在 ReactiveCocoa 中有着相对应的组件 <code>RACSignal</code> 和 <code>RACSequence</code></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/12/22/ReactiveObjC%E4%BD%BF%E7%94%A8/#more" rel="contents">
+              <a class="btn" href="/2021/10/07/Hash%E6%80%9D%E6%83%B3%E4%B8%8EhashTable/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -362,7 +527,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -376,7 +541,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">MLeadksFinder使用</a>
+            <a href="/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">Objective-C方法缓存实现</a>
         </h2>
 
         <div class="post-meta">
@@ -386,14 +551,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-12-21 08:00:00" itemprop="dateCreated datePublished" datetime="2020-12-21T08:00:00+08:00">2020-12-21</time>
+              <time title="创建时间：2021-10-05 08:00:00" itemprop="dateCreated datePublished" datetime="2021-10-05T08:00:00+08:00">2021-10-05</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-13 20:06:09" itemprop="dateModified" datetime="2023-05-13T20:06:09+08:00">2023-05-13</time>
+                <time title="修改时间：2022-02-09 11:11:13" itemprop="dateModified" datetime="2022-02-09T11:11:13+08:00">2022-02-09</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -405,7 +570,7 @@
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
                 </span>
             </span>
 
@@ -420,19 +585,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="MLeaksFinder"><a href="#MLeaksFinder" class="headerlink" title="MLeaksFinder"></a><a href="https://github.com/Tencent/MLeaksFinder">MLeaksFinder</a></h3><h4 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h4><blockquote>
-<p>MLeaksFinder helps you find memory leaks in your iOS apps at develop time</p>
-</blockquote>
-<h4 id="优点-VS-Instrument"><a href="#优点-VS-Instrument" class="headerlink" title="优点  VS Instrument"></a>优点  VS Instrument</h4><p>MLeaksFinder 具备以下优点：</p>
-<ol>
-<li>使用简单，不侵入业务逻辑代码，不用打开 Instrument</li>
-<li>不需要额外的操作，你只需开发你的业务逻辑，在你运行调试时就能帮你检测</li>
-<li>内存泄露发现及时，更改完代码后一运行即能发现（这点很重要，你马上就能意识到哪里写错了）</li>
-<li>精准，能准确地告诉你哪个对象没被释放</li>
-</ol>
+          <p>为什么需要学习Objective-C底层实现，因为底层使用的技术都是值得花时间学习的，特别是使用的数据结构，通常都是权衡使用场景，以及考虑后续可持续迭代的优质代码。</p>
+<p>OC为了实现其动态性，将方法的调用包装成了<code>SEL</code>寻找<code>IMP</code>的过程。OC采用了方法缓存的机制来提高调用效率，也就是<code>cache_t</code>，其作用就是缓存已调用的方法。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/12/21/MLeadksFinder%E4%BD%BF%E7%94%A8/#more" rel="contents">
+              <a class="btn" href="/2021/10/05/Objective-C%E6%96%B9%E6%B3%95%E7%BC%93%E5%AD%98%E5%AE%9E%E7%8E%B0/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -456,7 +613,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -470,7 +627,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/" class="post-title-link" itemprop="url">多分支 if-else 重构</a>
+            <a href="/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/" class="post-title-link" itemprop="url">【读书笔记】Objective-C编程之道：iOS设计模式解析  下</a>
         </h2>
 
         <div class="post-meta">
@@ -480,14 +637,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-10-25 08:00:00" itemprop="dateCreated datePublished" datetime="2020-10-25T08:00:00+08:00">2020-10-25</time>
+              <time title="创建时间：2021-09-26 08:00:00" itemprop="dateCreated datePublished" datetime="2021-09-26T08:00:00+08:00">2021-09-26</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-23 08:13:35" itemprop="dateModified" datetime="2021-06-23T08:13:35+08:00">2021-06-23</time>
+                <time title="修改时间：2023-01-16 15:53:36" itemprop="dateModified" datetime="2023-01-16T15:53:36+08:00">2023-01-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -510,10 +667,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="多分支-if-else-重构"><a href="#多分支-if-else-重构" class="headerlink" title="多分支 if-else 重构"></a>多分支 if-else 重构</h2><p><code>if-else不外乎两种场景：异常逻辑处理和不同状态处理</code></p>
+          <blockquote>
+<p>iOS应用程序的基础框架Cocoa Touch框架内容丰富、结构优美，通过将各种设计模式应用到其基础结构中，为第三方开发者提供了很好的可扩展性和灵活性。因此，要充分利用这一框架，应当深刻理解<br>并恰当应用设计模式。</p>
+</blockquote>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/10/25/%E5%A4%9A%E5%88%86%E6%94%AF%20if-else%E9%87%8D%E6%9E%84/#more" rel="contents">
+              <a class="btn" href="/2021/09/26/iOS%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8B/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -537,7 +696,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/10/03/iOS%E5%8F%AF%E5%A4%8D%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -551,7 +710,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/10/03/iOS%E5%8F%AF%E5%A4%8D%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/" class="post-title-link" itemprop="url">iOS可复用项目框架搭建</a>
+            <a href="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/" class="post-title-link" itemprop="url">【读书笔记】Objective-C编程之道：iOS设计模式解析 上</a>
         </h2>
 
         <div class="post-meta">
@@ -561,14 +720,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-10-03 08:00:00" itemprop="dateCreated datePublished" datetime="2020-10-03T08:00:00+08:00">2020-10-03</time>
+              <time title="创建时间：2021-09-21 08:00:00" itemprop="dateCreated datePublished" datetime="2021-09-21T08:00:00+08:00">2021-09-21</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-06-23 08:14:19" itemprop="dateModified" datetime="2021-06-23T08:14:19+08:00">2021-06-23</time>
+                <time title="修改时间：2023-01-16 15:53:56" itemprop="dateModified" datetime="2023-01-16T15:53:56+08:00">2023-01-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -591,10 +750,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>入职了一家公司，刚好处于项目启动阶段，花了一周时间搭建了项目框架，现在总结一下。</p>
+          <img src="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/iOS_design_01.png" class="">
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/10/03/iOS%E5%8F%AF%E5%A4%8D%E7%94%A8%E9%A1%B9%E7%9B%AE%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/#more" rel="contents">
+              <a class="btn" href="/2021/09/21/iOS%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%A7%A3%E6%9E%90%20%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0%20%E4%B8%8A/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -618,7 +777,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/20/BST%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/08/22/Git%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -632,88 +791,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/07/20/BST%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="post-title-link" itemprop="url">BST数据结构</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-07-20 08:00:00 / 修改时间：17:50:15" itemprop="dateCreated datePublished" datetime="2020-07-20T08:00:00+08:00">2020-07-20</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>二叉查找树（Binary Search Treee），也称二叉搜索树，是指一课空树或者具有下列性质的二叉树：</p>
-<ol>
-<li>若任意节点的左子树不空，则左子树上所有节点的值均小于它的根节点的值；</li>
-<li>若任意节点的右子树不空，则右子树上所有节点的值均大于或等于它的根节点的值；</li>
-<li>任意节点的左、右子树也分别为二叉搜索树；</li>
-</ol>
-<p>二叉搜索树相比其他数据结构的优势在于查找、插入的时间复杂度较低。为O（log n）</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/20/BST%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/20/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/07/20/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">排序算法</a>
+            <a href="/2021/08/22/Git%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/" class="post-title-link" itemprop="url">Git入门</a>
         </h2>
 
         <div class="post-meta">
@@ -723,14 +801,14 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2020-07-20 08:00:00" itemprop="dateCreated datePublished" datetime="2020-07-20T08:00:00+08:00">2020-07-20</time>
+              <time title="创建时间：2021-08-22 08:00:00" itemprop="dateCreated datePublished" datetime="2021-08-22T08:00:00+08:00">2021-08-22</time>
             </span>
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-09-13 23:00:00" itemprop="dateModified" datetime="2020-09-13T23:00:00+08:00">2020-09-13</time>
+                <time title="修改时间：2023-05-13 20:26:32" itemprop="dateModified" datetime="2023-05-13T20:26:32+08:00">2023-05-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -738,7 +816,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%AE%97%E6%B3%95%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">算法与数据结构</span></a>
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
                 </span>
             </span>
 
@@ -753,303 +831,184 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h3><ol>
-<li>从数列中挑出一个元素，称为 “基准”（pivot）;</li>
-<li>重新排序数列，所有元素比基准值小的摆放在基准前面，所有元素比基准值大的摆在基准的后面（相同的数可以到任一边）。在这个分区退出之后，该基准就处于数列的中间位置。这个称为分区（partition）操作；</li>
-<li>递归地（recursive）把小于基准值元素的子数列和大于基准值元素的子数列排序；</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/20/%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/05/Protocol%20in%20ObjC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/07/05/Protocol%20in%20ObjC/" class="post-title-link" itemprop="url">Protocol in ObjC</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-07-05 08:00:00" itemprop="dateCreated datePublished" datetime="2020-07-05T08:00:00+08:00">2020-07-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-25 12:51:58" itemprop="dateModified" datetime="2023-09-25T12:51:58+08:00">2023-09-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="如何处理带有property的Protol"><a href="#如何处理带有property的Protol" class="headerlink" title="如何处理带有property的Protol"></a>如何处理带有property的Protol</h2><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@protocol</span> <span class="title">MyProtocol</span> &lt;<span class="title">NSObject</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@required</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>) <span class="built_in">NSString</span> *title;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@optional</span></span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>) someMethod;</span><br><span class="line"></span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/05/Protocol%20in%20ObjC/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/" class="post-title-link" itemprop="url">Block变量捕获</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-07-04 08:00:00" itemprop="dateCreated datePublished" datetime="2020-07-04T08:00:00+08:00">2020-07-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-25 09:49:10" itemprop="dateModified" datetime="2023-09-25T09:49:10+08:00">2023-09-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <table>
-<thead>
-<tr>
-<th>变量类型</th>
-<th>是否捕获到 block 内部</th>
-<th>访问方式</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>全局变量</td>
-<td>否</td>
-<td>直接访问</td>
-</tr>
-<tr>
-<td>局部变量（auto 类型）</td>
-<td>是</td>
-<td>值传递</td>
-</tr>
-<tr>
-<td>局部变量（static 类型）</td>
-<td>是</td>
-<td>指针传递</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/04/Block%E5%8F%98%E9%87%8F%E6%8D%95%E8%8E%B7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/07/03/%E5%85%B3%E4%BA%8EBlock/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/07/03/%E5%85%B3%E4%BA%8EBlock/" class="post-title-link" itemprop="url">关于Block</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-07-03 08:00:00" itemprop="dateCreated datePublished" datetime="2020-07-03T08:00:00+08:00">2020-07-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-25 09:48:26" itemprop="dateModified" datetime="2023-09-25T09:48:26+08:00">2023-09-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>几个关于block的问题</p>
-<ul>
-<li><input disabled="" type="checkbox"> block的内部实现，结构体是什么样的</li>
-<li><input disabled="" type="checkbox"> block是类吗，有哪些类型</li>
-<li><input disabled="" type="checkbox"> 一个int变量被 __block 修饰与否的区别？block的变量截获</li>
-<li><input disabled="" type="checkbox"> block在修改NSMutableArray，需不需要添加__block</li>
-<li><input disabled="" type="checkbox"> 怎么进行内存管理的</li>
-<li><input disabled="" type="checkbox"> block可以用strong修饰吗</li>
-<li><input disabled="" type="checkbox"> 解决循环引用时为什么要用__strong、__weak修饰</li>
-<li><input disabled="" type="checkbox"> block发生copy时机</li>
-<li><input disabled="" type="checkbox"> Block访问对象类型的auto变量时，在ARC和MRC下有什么区别</li>
+          <h2 id="Git从入门到熟练"><a href="#Git从入门到熟练" class="headerlink" title="Git从入门到熟练"></a>Git从入门到熟练</h2><h3 id="1-分布式版本控制"><a href="#1-分布式版本控制" class="headerlink" title="1. 分布式版本控制"></a>1. 分布式版本控制</h3><ul>
+<li>集中式VS分布式</li>
 </ul>
+<img src="/2021/08/22/Git%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/cvcs.png" class="&#x3D;">
+
+<img src="/2021/08/22/Git%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/dvcs.png" class="&#x3D;">
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/07/03/%E5%85%B3%E4%BA%8EBlock/#more" rel="contents">
+              <a class="btn" href="/2021/08/22/Git%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/06/17/UML%E7%BB%9F%E4%B8%80%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/17/UML%E7%BB%9F%E4%B8%80%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80/" class="post-title-link" itemprop="url">UML统一建模语言</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-17 00:00:00" itemprop="dateCreated datePublished" datetime="2021-06-17T00:00:00+08:00">2021-06-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-23 08:14:02" itemprop="dateModified" datetime="2021-06-23T08:14:02+08:00">2021-06-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>UML 明明是一种图形，为什么说是语言呢？</p>
+<p>语言是包括文字和图形的，有很多内容文字是无法表达的。</p>
+<p>你见过建筑设计图纸吗？里面还不是很多图形，光用文字能表达清楚建筑设计吗？在建筑界，有一套标准来描述设计，同样道理，在软件开发界，我们也需要一套标准来帮助我们做好软件开发的工作。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/17/UML%E7%BB%9F%E4%B8%80%E5%BB%BA%E6%A8%A1%E8%AF%AD%E8%A8%80/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/06/15/%E9%AB%98%E5%B0%BF%E9%85%B8%E8%A1%80%E7%97%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/06/15/%E9%AB%98%E5%B0%BF%E9%85%B8%E8%A1%80%E7%97%87/" class="post-title-link" itemprop="url">程序员的健康修养（高尿酸血症）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-15 08:00:00" itemprop="dateCreated datePublished" datetime="2021-06-15T08:00:00+08:00">2021-06-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:04:42" itemprop="dateModified" datetime="2023-05-13T20:04:42+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>19年体检，查出尿酸偏高 452 umol&#x2F;L，查了下有什么潜在疾病风险，其中就有痛风<br>21年体检，尿酸偏高441 umol&#x2F;L，两周后，右脚大拇指关节处剧痛，痛风来了。</p>
+</blockquote>
+<blockquote>
+<p>高尿酸血症和痛风的发病率呈逐年上升趋势，我国高尿酸血症患病率约为13.3%，约1&#x2F;3的高尿酸血症患者最终发展为痛风。 痛风可表现为关节炎、皮肤病变及肾脏损害等，严重影响生活质量</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/15/%E9%AB%98%E5%B0%BF%E9%85%B8%E8%A1%80%E7%97%87/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1072,7 +1031,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/8/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/10/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1138,7 +1097,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">149</span>
+          <span class="site-state-item-count">160</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

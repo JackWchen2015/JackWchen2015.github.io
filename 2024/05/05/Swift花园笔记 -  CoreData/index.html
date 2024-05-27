@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="结合 Core Data 和 SwiftUISwiftUI 和 Core Data 几乎是在十年前后被分别引入 —— SwiftUI 是伴随 iOS 13， 而 Core Data 是伴随 iPhoneOS 3 发布； Core Data 是一个“对象图谱和持久化框架”，这是对于定义对象和对象属性，然后从永久存储中读写它们的高级叫法。表面上看，使用它意味着使用Codable和UserDefault">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift花园笔记 -  CoreData">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="结合 Core Data 和 SwiftUISwiftUI 和 Core Data 几乎是在十年前后被分别引入 —— SwiftUI 是伴随 iOS 13， 而 Core Data 是伴随 iPhoneOS 3 发布； Core Data 是一个“对象图谱和持久化框架”，这是对于定义对象和对象属性，然后从永久存储中读写它们的高级叫法。表面上看，使用它意味着使用Codable和UserDefault">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-05-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-27T09:46:21.429Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Swift花园笔记 -  CoreData | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Swift花园笔记 -  CoreData
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-05-05 00:00:00" itemprop="dateCreated datePublished" datetime="2024-05-05T00:00:00+08:00">2024-05-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:46:21" itemprop="dateModified" datetime="2024-05-27T17:46:21+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="结合-Core-Data-和-SwiftUI"><a href="#结合-Core-Data-和-SwiftUI" class="headerlink" title="结合 Core Data 和 SwiftUI"></a>结合 Core Data 和 SwiftUI</h1><p>SwiftUI 和 Core Data 几乎是在十年前后被分别引入 —— SwiftUI 是伴随 iOS 13， 而 Core Data 是伴随 iPhoneOS 3 发布；</p>
+<p>Core Data 是一个“对象图谱和持久化框架”，这是对于定义对象和对象属性，然后从永久存储中读写它们的高级叫法。表面上看，使用它意味着使用<code>Codable</code>和<code>UserDefaults</code>这些东西，但它远不止这些：Core Data 能够排序和过滤我们的数据，对于更大的数据也成立 —— 基本上对于数据量没有限制。更棒的是，Core Data 还实现了各种高级的功能，你会依赖它们：包括数据可视化，数据懒加载，撤销和重做，等等。</p>
+<span id="more"></span>
+
+<p>当你创建工程时，我让你把 Use Core Data 的 checkbox 勾选起来，它会给你的项目带来几项改变：</p>
+<ul>
+<li>你会拥有一个叫 <code>Bookworm.xcdatamodeld</code> 的文件，它描述了你的数据模型，实际上是一张类和它们属性的清单。</li>
+<li>在 <code>AppDelegate.swift</code> 和 <code>SceneDelegate.swift</code> 有配置 Core Data 的额外代码。</li>
+</ul>
+<p>设置 Core Data 需要两步：创建一个<code>“persistent container”</code>，用于从设备存储中加载和保存实际的数据，并且把它注入 SwiftUI 环境，以便所有的视图都能访问它。</p>
+<p>以上两步 Xcode 模板都已经为你完成。</p>
+<p>从 Core Data 中查询数据是通过一个<code>fetch</code> 请求来完成的 —— 我们描述我们需要的东西，它们应当如何排序，以及是否使用某些过滤器，而 Core Data 会返回所有匹配的数据。我们需要确保这个 <code>fetch</code> 请求随着时间的推移是足够新的，这样我们的界面上的学生信息才能保持同步。</p>
+<p>SwiftUI 对此有一个解决方案 —— 你可以猜猜它是什么 —— 它是另一个属性包装器。这个属性包装器称为<code>@FetchRequest</code>，它接收两个参数：我们想要查询的实体，以及我们希望结果执行的排序方式。有一个特定的格式 —— 我们在 students 之前添加 <code>fetch request</code> 注解 —— 请将下面这个属性添加到ContentView：</p>
+<p>Core Data 将极大地困扰你的地方：它有可选数据的概念，但这种可选与 Swift 的可选型是完全不同的概念。如果我们在 Core Data 里说 “这个东西不能是可选的” (在模型编辑里操作)，它仍然会生成可选的 Swift 属性，因为 Core Data 关注属性在保存时是否有值 —— 它们也可以没有值。</p>
+<p>当我们定义 “Student” 实体时，实际发生在 Core Data 里的事情是，它为我们创建了一个继承自<code>NSManagedObject</code>的类。我们在代码中看不到这个类，因为它是在我们编译项目时自动生成的，就像 Core ML 的模型。这些对象之所以被称为<code>managed</code>，是因为 Core Data 负责管理它们：它从持久化容器中加载它们，也把它们写回持久化容器。</p>
+<p>我们所有的 <code>managed</code> 对象都住在一个<code>managed object context</code>里，它负责实际获取 managed 对象，以及为我们保存变动等等。如果你愿意，可以拥有许多个 managed object contexts ，但我们一般不会这么做 —— 实际上多数情况下一个就够了。</p>
+<p>我们并不需要自行创建这个 <code>managed object context</code>，因为 Xcode 已经为我们创建好它了。更好的是，它已经被添加到 SwiftUI 的环境，这也是<code>@FetchRequest</code>属性包装器能工作的原因 —— 它使用环境中可用的任何 <code>managed object context</code>。</p>
+<p>尽管如此，<strong>当涉及到添加和保持对象时</strong>，我们还是需要访问 SwiftUI 环境中的 <code>managed object context</code>。这里是使用<code>@Environment</code>属性包装器的又一个例子 —— 我们可以请求当前的 <code>managed object context</code>，然后赋给一个属性为我们所用。</p>
+<p>把这个属性添加到ContentView：</p>
+<p><code>@Environment(\.managedObjectContext) var moc</code></p>
+<p>下一步是添加一个生成随机学生并且把它保存到 managed object context 的按钮。为了凸显学生，我们用<code>randomElement()</code>从数组中随机选择姓和名。</p>
+<p>把下面这个按钮添加到List：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Button</span>(<span class="string">&quot;Add&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> firstNames <span class="operator">=</span> [<span class="string">&quot;Ginny&quot;</span>, <span class="string">&quot;Harry&quot;</span>, <span class="string">&quot;Hermione&quot;</span>, <span class="string">&quot;Luna&quot;</span>, <span class="string">&quot;Ron&quot;</span>]</span><br><span class="line">    <span class="keyword">let</span> lastNames <span class="operator">=</span> [<span class="string">&quot;Granger&quot;</span>, <span class="string">&quot;Lovegood&quot;</span>, <span class="string">&quot;Potter&quot;</span>, <span class="string">&quot;Weasley&quot;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> chosenFirstName <span class="operator">=</span> firstNames.randomElement()<span class="operator">!</span></span><br><span class="line">    <span class="keyword">let</span> chosenLastName <span class="operator">=</span> lastNames.randomElement()<span class="operator">!</span></span><br><span class="line"></span><br><span class="line">   	<span class="comment">// 更多代码    </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来是有趣的部分：我们将创建一个Student对象 —— 用 Core Data 为我们生成的类，它需要被附着到一个 managed object context，以便对象知道自己应当被存储在哪里。我们可以像操作常规结构体一样给它的属性赋值。</p>
+<p>把下面三行代码添加到按钮的 action 闭包：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> student <span class="operator">=</span> <span class="type">Student</span>(context: <span class="keyword">self</span>.moc)</span><br><span class="line">student.id <span class="operator">=</span> <span class="type">UUID</span>()</span><br><span class="line">student.name <span class="operator">=</span> <span class="string">&quot;<span class="subst">\(chosenFirstName)</span> <span class="subst">\(chosenLastName)</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<p>最后，我们需要让 <code>managed object context</code> 保存这个对象。这是一个可能抛出错误的函数调用，因为理论上它可能失败。实践上，我们做的事情几乎没有机会失败，所以我们可以用try?来调用 —— 我们不关心错误捕获。</p>
+<p>把最后一行代码添加到按钮的 action：</p>
+<p><code>try? self.moc.save()</code></p>
+<h1 id="删除-Core-Data-对象"><a href="#删除-Core-Data-对象" class="headerlink" title="删除 Core Data 对象"></a>删除 Core Data 对象</h1><h2 id="从一个-Core-Data-fetech-request-中删除对象"><a href="#从一个-Core-Data-fetech-request-中删除对象" class="headerlink" title="从一个 Core Data fetech request 中删除对象"></a>从一个 Core Data fetech request 中删除对象</h2><p>像常规的数据数组一样，大部分的工作是通过附加一个<code>onDelete(perform:)modifier</code> 给<code>ForEach</code>来实现的，不过相对于从数组中移除项，我们需要从 <code>fetch </code>请求中找到请求的对象，然后对其调用我们的 <code>managed object context</code> 的<code>delete()</code>方法。<strong>一旦目标对象都删除完成，我们需要触发 context 的保存</strong>。如果不这么做，变更不会被实际写入磁盘。把下面这个方法添加到ContentView：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">deleteBooks</span>(<span class="params">at</span> <span class="params">offsets</span>: <span class="type">IndexSet</span>) &#123;</span><br><span class="line">    <span class="keyword">for</span> offset <span class="keyword">in</span> offsets &#123;</span><br><span class="line">        <span class="comment">// find this book in our fetch request</span></span><br><span class="line">        <span class="keyword">let</span> book <span class="operator">=</span> books[offset]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// delete it from the context</span></span><br><span class="line">        moc.delete(book)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// save the context</span></span><br><span class="line">    <span class="keyword">try?</span> moc.save()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意，<code>onDelete(perform:)</code>modifier 是附着在ForEach而不是List。</p>
+<h1 id="Core-Data-ForEach-self-的工作机制"><a href="#Core-Data-ForEach-self-的工作机制" class="headerlink" title="Core Data ForEach .self 的工作机制"></a>Core Data ForEach .self 的工作机制</h1><h2 id="为什么-ForEach-可以使用-self"><a href="#为什么-ForEach-可以使用-self" class="headerlink" title="为什么 ForEach 可以使用 .self"></a>为什么 ForEach 可以使用 .self</h2><p>之前我们了解了使用<code>ForEach</code>来创建动态视图的不同方式，它们都有一个共同点：SwiftUI 需要知道如何唯一识别动态视图的每一项，以便正确地动画化改变。</p>
+<p>如果一个对象遵循<code>Identifiable</code>协议，那么 SwiftUI 会自动使用它的<code>id</code>属性作为唯一标识。如果我们不使用<code>Identifiable</code>，那就需要指定一个我们知道是唯一的属性的 <code>key path</code>，比如图书的 ISBN 号。但假如我们不遵循<code>Identifiable</code>也没有唯一的 <code>key path</code>，我们通常会使用<code>\.self</code>。</p>
+<p>我们对原始数据类型，例如Int和String使用过<code>\.self</code>，就像下面这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> &#123;</span><br><span class="line">    <span class="type">ForEach</span>([<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">8</span>, <span class="number">10</span>], id: \.<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;<span class="subst">\(<span class="variable">$0</span>)</span> is even&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于 Core Data 为我们生成托管类，我们也使用<code>\.self</code>，当时我没有解释这是如何工作的，或者说它究竟是如何与我们的ForEach关联的。不过今天我要再来讨论这个问题，因为我觉得这会给你提供一些有助益的洞察。</p>
+<p>当我们使用<code>\.self</code>作为标识符时，我们指的是“整个对象”，但实践上这个指代并没有包含太多的含义 —— 一个结构体就是结构体，除了内容之外，它并没有包含任何特定的标识信息。因此，实际发生的事情是，Swift 计算了结构体的哈希值 —— 一种以固定长度的值表示复杂数据的方法 —— 然后以哈希值作为标识符。</p>
+<p>哈希值可以以很多种方法生成，但所有方法的背后的概念是一致的：</p>
+<ol>
+<li>无论输入的数据多大，输出总是固定大小。</li>
+<li>对同一个对象计算两次哈希值，应该返回相同的值。</li>
+</ol>
+<p>哈希常见于数据校验。Xcode 为我们生成托管对象的类时，它会让这些类遵循<code>Hashable</code>，这是一个表示 Swift 可以从中生成哈希值的协议，也就是说，我们可以用它的<code>\.self</code>作为标识符。这也是为什么<code>String</code>和<code>Int</code>可以用<code>\.self</code>的原因：它们也遵循<code>Hashable</code>。</p>
+<p>你可能想，这样会导致问题吧：如果我们用相同的值创建了两个 Core Data 对象，它们会生成相同的哈希值，这样我们就遇到问题了。不过，其实 Core Data 是一种很聪明的方式来工作：它为我们创建的对象实际上有一组我们定义数据模型时定义的属性之外的其他属性，包括一个叫 <code>ID</code> 的对象 —— 这是一个可以唯一标识对象的标识符，不管对象包含的属性是什么。这些 <code>ID</code> 类似于 <code>UUID</code>，在我们创建对象时，Core Data 顺序产生它们。</p>
+<p>因此，<code>\.self</code>适用于所有遵循<code>Hashable</code>的类，因为 Swift 会为其生成哈希值并用该值作为对象的唯一标识。这对于 Core Data 的对象同样适用，因为它们已经遵循了<code>Hashable</code>。</p>
+<h1 id="创建-NSManagedObject-子类"><a href="#创建-NSManagedObject-子类" class="headerlink" title="创建 NSManagedObject 子类"></a>创建 NSManagedObject 子类</h1><p>Xcode 会为我们生成两个文件，但我们只关心其中的一个：Movie+CoreDataProperties.swift。在那个文件里，你会看到下面三行代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> title: <span class="type">String</span>?</span><br><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> director: <span class="type">String</span>?</span><br><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> year: <span class="type">Int16</span></span><br></pre></td></tr></table></figure>
+
+<p><code>@NSManaged</code> 并不是一个属性包装器 —— 它比 SwiftUI 的属性包装器要古老的多。实际上，它其实稍稍揭示了 Core Data 内部的工作机制：相对于直接存在于类中作为属性，它们实际上是由 Core Data 存储在一个字典中，由 Core Data 读取和写入。当我们读取或者写入标记了<code>@NSManaged</code>的属性时，Core Data 缓存这些操作，然后在内部处理 —— 远非一个简单的 Swift 字符串。</p>
+<p>现在，当你凝视着代码，然后在想“我可不想要这些可选型”，然后把代码改成下面这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> title: <span class="type">String</span></span><br><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> director: <span class="type">String</span></span><br><span class="line"><span class="keyword">@NSManaged</span> <span class="keyword">public</span> <span class="keyword">var</span> year: <span class="type">Int16</span></span><br></pre></td></tr></table></figure>
+<p>你可能会注意有些事情变得有点奇怪：尽管我们的属性都已经不是可选型了，我们仍然可以不提供任何值而创建出一个Movie类的实例。这本来应该是不可能的：这些属性并不是可选型，意味着它们必须一直有值，而我们却可以不给值创建它们。</p>
+<p>发生的事情可以透露出<code>@NSManaged</code>的魔法，这些并非实际的属性，结果<code>@NSManaged</code>让我们做到了本不能做到的事情。事实上，这么做是优雅的，尤其对于小型的 Core Data 项目或者对于学习者来说。但是，有一个更深层次的问题：<strong>Core Data 是懒加载的</strong>。</p>
+<p>还记得 Swift 的<code>lazy</code>关键字吧，它可以让我们延迟实际的初始化，直到我们实际需要用到的时刻。Core Data 的做法差不多，只是针对数据：有的时候，有些数据看似已经加载了，但实际上没有。因此 Core Data 会尝试最小化它的内存占用。Core Data 把这值称为<em>堕值</em>，取义 “断层” —— 一条介于某样东西实际存在和某样东西只是占位符的断层。</p>
+<p>对于这些堕值，我们并不需要做什么实际的工作，因为只要我们尝试读取这些值 Core Data 会透明地为我们获取实际的数据并且返回给我们 —— 这是<code>@NSManaged</code>的又一好处。不过，当我们开始在这些 Core Data 的属性上游走的时候，我们要承担暴露其软肋的风险。这些东西特别不符合 Swift 预期的工作方式，如果我们尝试回避这个事实，那我们很可能会引入问题 —— 某些我们认为绝对不会是 <code>nil </code>的值可能在某个时刻突然变成 <code>nil</code>。</p>
+<p>因此，为了帮助我们更安全地访问这些可选值，你可能会考虑添加一些计算属性，这也能帮助我们把所有的空合操作符放在一个地方处理。例如，给Movie添加下面这个属性，以确保我们总是有一个合法的标题字符串可以使用：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">var</span> wrappedTitle: <span class="type">String</span> &#123;</span><br><span class="line">    title <span class="operator">??</span> <span class="string">&quot;Unknown Title&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一来，你的代码的其余部分，就不用担心 Core Data 的可选性，如果你想要改变默认值，可以在单个文件里就解决掉。</p>
+<h1 id="条件化保存-NSManagedObjectContext"><a href="#条件化保存-NSManagedObjectContext" class="headerlink" title="条件化保存 NSManagedObjectContext"></a>条件化保存 NSManagedObjectContext</h1><h2 id="条件化保存-NSManagedObjectContext-1"><a href="#条件化保存-NSManagedObjectContext-1" class="headerlink" title="条件化保存 NSManagedObjectContext"></a>条件化保存 NSManagedObjectContext</h2><p>我们之前使用<code>NSManagedObjectContext</code>的<code>save()</code>方法把所有未保存的更改 <code>flush</code> 到永久存储中，但我们没有实现的是检查更改是否真的需要被保存。一般来说这不会有问题，因为通常我们是在做出诸如插入或者删除的操作之后，才调用<code>save()</code>方法。</p>
+<p>Apple 特别指出，我们应该总是在调用save()之前检查更改，以避免 Core Data 做不必要的工作。</p>
+<p>我们可以用两种方式来检查更改。首先，每个托管对象都有一个<code>hasChanges</code>属性，当对象有未保存的改动时，这个属性的值为<code>true</code>，并且整个 context 也有一个<code>hasChanges</code>属性，用于检查 context 所有拥有的对象中，是否有对象包含改动。因此，与其直接调用<code>save()</code>，你可以总是先做一个检查，像这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">self</span>.moc.hasChanges &#123;</span><br><span class="line">    <span class="keyword">try?</span> <span class="keyword">self</span>.moc.save()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="通过约束确保-Core-Data-对象是唯一的"><a href="#通过约束确保-Core-Data-对象是唯一的" class="headerlink" title="通过约束确保 Core Data 对象是唯一的"></a>通过约束确保 Core Data 对象是唯一的</h2><p>Core Data 提供了 <code>constraints</code>：我们可以指定某个属性被约束，以便它总是唯一的。然后我们就可以构建任意多的对象，在我们请求 Core Data 保存那些对象时，它会解决重复，确保只有一份数据被写入。更好的是，如果已经存储某些数据和约束冲突，我们可以选择如何处理数据合并。</p>
+<p>现在，回到 ContentView.swift，提供下面的代码：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@Environment</span>(\.managedObjectContext) <span class="keyword">var</span> moc</span><br><span class="line"></span><br><span class="line">    <span class="meta">@FetchRequest</span>(entity: <span class="type">Wizard</span>.entity(), sortDescriptors: []) <span class="keyword">var</span> wizards: <span class="type">FetchedResults</span>&lt;<span class="type">Wizard</span>&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">List</span>(wizards, id: \.<span class="keyword">self</span>) &#123; wizard <span class="keyword">in</span></span><br><span class="line">                <span class="type">Text</span>(wizard.name <span class="operator">??</span> <span class="string">&quot;Unknown&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;Add&quot;</span>) &#123;</span><br><span class="line">                <span class="keyword">let</span> wizard <span class="operator">=</span> <span class="type">Wizard</span>(context: <span class="keyword">self</span>.moc)</span><br><span class="line">                wizard.name <span class="operator">=</span> <span class="string">&quot;Harry Potter&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;Save&quot;</span>) &#123;</span><br><span class="line">                <span class="keyword">do</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> <span class="keyword">self</span>.moc.save()</span><br><span class="line">                &#125; <span class="keyword">catch</span> &#123;</span><br><span class="line">                    <span class="built_in">print</span>(error.localizedDescription)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你会看到一张显示巫师的清单，以及一个添加巫师的按钮，一个保存的按钮。但你运行应用，你会发现你可以多次点击按钮，多个 “Harry Potter” 滑入表格，但是当你点击 “Save” 时，我们会遭遇一个错误 —— Core Data 检测到冲突，拒绝保存变动。如果你的确希望 Core Data 写入这些变动，你需要打开 <code>SceneDelegate.swift</code> 添加下面这行导入：</p>
+<p><code>import CoreData</code></p>
+<p>然后在<code>willConnectTo</code>方法中添加下面这样，在<code>let context</code>那行后面：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">context.mergePolicy <span class="operator">=</span> <span class="type">NSMergeByPropertyObjectTrumpMergePolicy</span></span><br></pre></td></tr></table></figure>
+<p>这会要求 Core Data 基于对象的属性来合并重复的对象 —— 它会用新版本对象的属性智能地覆盖旧版本对象的属性。再次运行应用，现在你可以添加任意多次，不过点下保存按钮时，所有的行会坍缩成一行，因为 Core Data 剔除了所有的重复。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%AD/" rel="prev" title="Swift花园笔记 -  SwiftUI知识碎片 中">
+      <i class="fa fa-chevron-left"></i> Swift花园笔记 -  SwiftUI知识碎片 中
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BB%93%E5%90%88-Core-Data-%E5%92%8C-SwiftUI"><span class="nav-number">1.</span> <span class="nav-text">结合 Core Data 和 SwiftUI</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A0%E9%99%A4-Core-Data-%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.</span> <span class="nav-text">删除 Core Data 对象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E4%B8%80%E4%B8%AA-Core-Data-fetech-request-%E4%B8%AD%E5%88%A0%E9%99%A4%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.1.</span> <span class="nav-text">从一个 Core Data fetech request 中删除对象</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Core-Data-ForEach-self-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">3.</span> <span class="nav-text">Core Data ForEach .self 的工作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-ForEach-%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8-self"><span class="nav-number">3.1.</span> <span class="nav-text">为什么 ForEach 可以使用 .self</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-NSManagedObject-%E5%AD%90%E7%B1%BB"><span class="nav-number">4.</span> <span class="nav-text">创建 NSManagedObject 子类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E5%8C%96%E4%BF%9D%E5%AD%98-NSManagedObjectContext"><span class="nav-number">5.</span> <span class="nav-text">条件化保存 NSManagedObjectContext</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E5%8C%96%E4%BF%9D%E5%AD%98-NSManagedObjectContext-1"><span class="nav-number">5.1.</span> <span class="nav-text">条件化保存 NSManagedObjectContext</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%BA%A6%E6%9D%9F%E7%A1%AE%E4%BF%9D-Core-Data-%E5%AF%B9%E8%B1%A1%E6%98%AF%E5%94%AF%E4%B8%80%E7%9A%84"><span class="nav-number">5.2.</span> <span class="nav-text">通过约束确保 Core Data 对象是唯一的</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

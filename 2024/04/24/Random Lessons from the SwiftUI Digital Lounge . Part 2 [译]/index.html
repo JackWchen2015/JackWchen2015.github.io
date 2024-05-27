@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="并发refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？task modifier 也提供了开箱即用的异步代码支持。通常来说，我们只有在能为开发者提供附加的实用工具时才会将你们提供的闭包放进异步环境中执行，比如在 task 附着的视图生命周期结束时取消 task，或者结束刷新动画。当然，如果你希望在别的地方也能把代码分发到异步环境中执行，可以使用 async 代码块！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Random Lessons from the SwiftUI Digital Lounge . Part 2 [译]">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20[%E8%AF%91]/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="并发refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？task modifier 也提供了开箱即用的异步代码支持。通常来说，我们只有在能为开发者提供附加的实用工具时才会将你们提供的闭包放进异步环境中执行，比如在 task 附着的视图生命周期结束时取消 task，或者结束刷新动画。当然，如果你希望在别的地方也能把代码分发到异步环境中执行，可以使用 async 代码块！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/res/spacer_frame.jpg">
+<meta property="article:published_time" content="2024-04-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-05-27T09:44:49.550Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/res/spacer_frame.jpg">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20[%E8%AF%91]/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Random Lessons from the SwiftUI Digital Lounge . Part 2 [译] | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%202%20[%E8%AF%91]/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Random Lessons from the SwiftUI Digital Lounge . Part 2 [译]
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-24 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-24T00:00:00+08:00">2024-04-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-27 17:44:49" itemprop="dateModified" datetime="2024-05-27T17:44:49+08:00">2024-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h2><h3 id="refreshable-是否是-SwiftUI-中唯一支持异步代码的属性呢？"><a href="#refreshable-是否是-SwiftUI-中唯一支持异步代码的属性呢？" class="headerlink" title="refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？"></a>refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？</h3><p><code>task</code> modifier 也提供了开箱即用的异步代码支持。通常来说，我们只有在能为开发者提供附加的实用工具时才会将你们提供的闭包放进异步环境中执行，比如在 <code>task</code> 附着的视图生命周期结束时取消 <code>task</code>，或者结束刷新动画。当然，如果你希望在别的地方也能把代码分发到异步环境中执行，可以使用 <code>async</code> 代码块！</p>
+<span id="more"></span>
+
+<h3 id="Swift并发可以向后发布吗？"><a href="#Swift并发可以向后发布吗？" class="headerlink" title="Swift并发可以向后发布吗？"></a>Swift并发可以向后发布吗？</h3><p>目前为止你可以认为 Swift 并发无法向后发布，不过开发团队理解这是一个很受欢迎的需求，正在评审。</p>
+<p>有趣的部分在于 Swift 是开源的，你可以访问 <a target="_blank" rel="noopener" href="https://forums.swift.org/">https://forums.swift.org</a> 来查看 Swift 并发的开发进度，他们会对这个话题进行讨论。</p>
+<h2 id="数据管理"><a href="#数据管理" class="headerlink" title="数据管理"></a>数据管理</h2><h3 id="StateObject-和-ObservedObject-该怎么选？"><a href="#StateObject-和-ObservedObject-该怎么选？" class="headerlink" title="@StateObject 和 ObservedObject 该怎么选？"></a><code>@StateObject</code> 和 <code>ObservedObject</code> 该怎么选？</h3><p>原问题：假设我们有一个纯 SwiftUI 的数据流。我有一个 <code>List</code> 视图，它拥有一个 <code>@StateObject var listFetcher</code> 属性，这个属性会请求列表项。点击一个列表项会导航到详情视图 <code>DetailView</code>，这个详情视图有一个 <code>detailFetcher</code> 的 <code>ObservableObject</code> 属性，它会请求列表项的详情。那么，以什么样的方式组织 <code>DetailView</code> 更好呢？<code>detailFetcher</code> 属性应该采用哪个属性包装器？ </p>
+<ol>
+<li>提供一个 <code>init(itemID: Int)</code> 构造器，然后使用 <code>@StateObject</code> 这种方式。这样最终会要求我们在 <code>body</code> 的 <code>onAppear</code> 里执行类似 <code>detailFetcher.itemID = itemID</code> 这样的更新操作。  </li>
+<li>把 <code>detailFetcher</code> 传入构造器，比如 <code>init(detailFetcher: ObservableObject)</code> 并且将属性标记为 <code>@ObservedObject</code> 。如果采取这种方式，那么这个 <code>detailFetcher</code> 应当存放在哪里？</li>
+</ol>
+<p>答复：通常情况下，我们在视图拥有关联对象时使用 <code>@StateObject</code>，比如对象是在视图被创建的时候创建，且需要跟随视图销毁而销毁。对应的，在视图需要引用其他视图或者别的东西拥有的对象时使用 <code>@ObservedObject</code>。这时视图虽然依赖该对象，但两者的生命周期不绑定。</p>
+<p>例如，你可以在应用的主屏幕使用 <code>@StateObject</code> 来初始化 app 的 <code>model</code>，然后用 <code>@ObservedObject</code> 把 <code>model</code> 传给详情界面。建议看一看 “解密 SwiftUI” 以了解更多这方面的内容。</p>
+<h3 id="SceneStorage-的存储时机可以自己控制吗？"><a href="#SceneStorage-的存储时机可以自己控制吗？" class="headerlink" title="@SceneStorage 的存储时机可以自己控制吗？"></a>@SceneStorage 的存储时机可以自己控制吗？</h3><p>原问题：有没有办法控制 <code>@SceneStorage</code> 的存储时机呢？我的应用里这个存储大部分都是在根视图，它们似乎只有在应用进入后台时才会被保存，而不是进入后台之前。</p>
+<p>答复：我们没有提供控制 场景存储时机的 API，因为我们的本意就是让它们在后台保存，在应用回到前台或者场景重建时恢复。</p>
+<h3 id="State-和-StateObject-通常是不是都应该定义成-private-？"><a href="#State-和-StateObject-通常是不是都应该定义成-private-？" class="headerlink" title="@State 和 @StateObject 通常是不是都应该定义成 private ？"></a>@State 和 @StateObject 通常是不是都应该定义成 private ？</h3><p>是的！将它们标记为 <code>private</code> 可以明确状态是属于该视图及其子孙视图的。</p>
+<h3 id="当视图的-identity-发生改变时，采用-State，-StateObject-和-ObservedObject-有没有一些关键性的区别？"><a href="#当视图的-identity-发生改变时，采用-State，-StateObject-和-ObservedObject-有没有一些关键性的区别？" class="headerlink" title="当视图的 identity 发生改变时，采用 @State，@StateObject 和 @ObservedObject 有没有一些关键性的区别？"></a>当视图的 identity 发生改变时，采用 @State，@StateObject 和 @ObservedObject 有没有一些关键性的区别？</h3><p>是的，<code>ObservedObject</code> 不包含任何生命周期的暗示 —— 当你使用这个属性包装器时，你需要自行负责管理对象的生命周期。这个对象可能存在于任何地方 —— 比如来自某个 <code>StateObject</code> 或者 app 里的另一个数据结构。</p>
+<h3 id="在根视图中以单个-StateObject-保持整个应用的状态有哪些坏处？"><a href="#在根视图中以单个-StateObject-保持整个应用的状态有哪些坏处？" class="headerlink" title="在根视图中以单个 @StateObject 保持整个应用的状态有哪些坏处？"></a>在根视图中以单个 @StateObject 保持整个应用的状态有哪些坏处？</h3><p>原问题： 我有一个 <code>class Store&lt;State, Action&gt;: ObservableObject</code>，它持有整个 app 的状态，作为 <code>@StateObject</code> 在整个 App 的生命周期内存在，并且以环境对象的方式传递给所有视图。视图发送 <code>action</code> 给这个 <code>store</code>，并根据 <code>store</code> 的状态来更新自己。这种做法让我可以保持 app 状态的一致性。你能说一说这种做法的坏处吗？</p>
+<p>答复： 这种做法会使得应用中的所有视图都依赖单一的 <code>Observable</code> 对象。任何一个 <code>Published</code> 属性变化都会强制引用该环境对象的视图刷新。</p>
+<p>追加的问题：那么你的建议是什么呢？假设我们有多个视图都依赖相同的数据，并且需要保持视图之间状态的一致性？</p>
+<p>答复：对不起，架构问题是依赖具体上下文的，没有放之四海而皆准的策略。收敛你的模型是一种方法，把状态以绑定的方式传递给子组件也是一种方法。</p>
+<h3 id="State-Binding-相比-EnvironmentObject-有什么区别？"><a href="#State-Binding-相比-EnvironmentObject-有什么区别？" class="headerlink" title="@State&#x2F;@Binding 相比 @EnvironmentObject 有什么区别？"></a>@State&#x2F;@Binding 相比 @EnvironmentObject 有什么区别？</h3><p>原问题：把 <code>State</code> 以绑定的形式传递给层级中的每个视图和以环境对象的方式注入，并在需要用到的子视图中访问它们，这两种方式有什么区别？会不会有一者的 <code>dependency graph</code> 比另一者更糟糕的情况？</p>
+<p>答复：环境对象与 <code>State</code> 相比稍有不同，因为它必须是 <code>ObservableObject</code>。我们对环境对象做了优化，只会触发实际读取它的视图的更新。</p>
+<p>至于 <code>State</code>，当你以绑定的形式传递给子视图时，改变绑定将会反过来改变状态，从而刷新所有持有该状态的视图及其子视图。</p>
+<h3 id="出于性能考虑，我们应该如何取舍-ObservableObject-和-EnvironmentObject"><a href="#出于性能考虑，我们应该如何取舍-ObservableObject-和-EnvironmentObject" class="headerlink" title="出于性能考虑，我们应该如何取舍 ObservableObject 和 @EnvironmentObject?"></a>出于性能考虑，我们应该如何取舍 ObservableObject 和 @EnvironmentObject?</h3><p>原问题：从性能角度考虑，我们应该优先使用显式传递 <code>ObservableObject</code> 到子视图的方式还是使用 <code>EnvironmentObject</code>？</p>
+<p>答复：这两种方式对于任何给定视图都没有大的区别。不过假如你在某些中间层级的视图中并不需要使用目标对象 ，那么 <code>EnvironmentObject</code> 是一种减少样板代码的绝佳方式，而且可以避免创建偶然的依赖。</p>
+<h3 id="可以使用-Core-Data-的子上下文作为-StateObject-吗？"><a href="#可以使用-Core-Data-的子上下文作为-StateObject-吗？" class="headerlink" title="可以使用 Core Data 的子上下文作为 @StateObject 吗？"></a>可以使用 Core Data 的子上下文作为 @StateObject 吗？</h3><p>原问题：可以使用 <code>CoreData</code> 的子上下文作为 SwiftUI 视图的 <code>@StateObject</code> 变量吗？或者你会建议我以环境对象的方式传递它们，还是在 SwiftUI 之外保存它们？</p>
+<p>答复：没有使用 <code>@StateObject </code>的必要，而且上下文也不是 <code>ObservableObject</code>。通过 <code>environment</code> 向下传递是一个好选择。</p>
+<h3 id="“view-environmentObject-may-be-missing-as-an-ancestor-of-this-view-”这个错误是怎么回事呢？"><a href="#“view-environmentObject-may-be-missing-as-an-ancestor-of-this-view-”这个错误是怎么回事呢？" class="headerlink" title="“view environmentObject may be missing as an ancestor of this view? ”这个错误是怎么回事呢？"></a>“view environmentObject may be missing as an ancestor of this view? ”这个错误是怎么回事呢？</h3><p>原问题：在使用 <code>@EnvironmentObject </code>时，貌似我需要给所有层级的子视图传入 <code>.environmentObject</code> modifier。假如我不这么做，编译器就会抛出 “view environmentObject may be missing as an ancestor of this view” 的错误。但我以为 <code>EnvironmentObject</code> 的作用不就是让数据可以不用写很多代码就能让所有的视图使用吗？这是一个设计上的选择还是我的打开方式有误？</p>
+<p>答复：感谢提出这个问题。多数情况下，<code>.environmentObject(…)</code> 是能够顺着视图层级往下传递的，但是有一些情况我们是有意地不传递环境对象。例如，一个 <code>NavigationLink</code> 的目标视图不会得到环境对象，因为这里面存在一个冲突：对象是该由发起链接的地方传入呢？还是目标视图的占位符传入，又或者是导航栈里的前一个视图传入？</p>
+<p><code>Sheet</code> 和 <code>Popover</code> 因为 bug 的关系也无法得到环境对象，不过这个问题已经被修复了（iOS 15）。</p>
+<p>假如你有发现其他地方环境对象没有被传递的情况，请给我们发送反馈，这对于我们修复这个功能很重要。</p>
+<h3 id="我可以直接调用-StateObject-的构造器吗？"><a href="#我可以直接调用-StateObject-的构造器吗？" class="headerlink" title="我可以直接调用 @StateObject 的构造器吗？"></a>我可以直接调用 @StateObject 的构造器吗？</h3><p>原问题：当需要注入数据给一个详情视图，且要让该视图拥有这个数据的 <code>StateObject</code> 时，我直接使用了 <code>StateObject(wrappedValue:)</code> 构造器，就像这样：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">struct</span> <span class="title class_">PlanDetailsView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@StateObject</span> <span class="keyword">var</span> model: <span class="type">PlanDetailsModel</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">plan</span>: <span class="type">Plan</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>._model <span class="operator">=</span> <span class="type">StateObject</span>(wrappedValue: <span class="type">PlanDetailsModel</span>(plan: plan))</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种使用构造器的方式是可以接受的吗？据我所知 <code>StateObject</code> 本应该在视图生命周期开始的时候被初始化，而不是放在 View 值的实例化中。我想要确认我的这种写法有没有迫使对象的存储在 View 重新实例化时被再次分配内存。</p>
+<p>答复：是的，构造器的这种用法是可以的。你的理解没错：对象会在视图生命周期开始时被创建并且保持。 <code>StateObject</code> 的包装值是一个自动闭包，它只会在视图生命周期开始被调用一次。这也意味着 SwiftUI 会在 plan 第一次创建时捕获它的值。值得注意的是，假如你的视图 identity 没有变化，但传了一个不同的 plan，SwiftUI 不会注意到这个变化。</p>
+<h3 id="State-变量可以在主线程之外更改吗？"><a href="#State-变量可以在主线程之外更改吗？" class="headerlink" title="@State 变量可以在主线程之外更改吗？"></a>@State 变量可以在主线程之外更改吗？</h3><p>原问题： <code>State</code> 的文档上说 “It is safe to mutate state properties from any thread.” 那为什么在非主线程发布 <code>SwiftUI</code> 会发布  <code>PassthroughSubject</code> 会收到运行时警告呢？</p>
+<p>答复： <code>State</code> 是线程安全的，可以在任何线程修改。至于 <code>PassthroughSubject</code> ，我假设你是在 <code>@StateObject</code>, <code>@ObserverdObject</code>, 或者 <code>@EnvironmentObject</code> 上下文使用的 <code>ObservableObject</code>。<code>ObservableObject</code> 的确要求其属性在主线程修改。 我建议你查阅我的同事 Curt 和 Jessica 在 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10019/">Discover Concurrency in SwiftUI session</a> 中对于 Swift 并发的讨论。</p>
+<p>追加的问题：我是用 <code>onReceive</code> 和 <code>CurrentValueSubject</code> 在一个 modifier 里设置一个 State，所以我应该报告一个反馈给你们吗？<br>答复：我明白了。 目前 <code>onReceive</code> 也是期望你在主线程发布变化。一般来说，在主线程通知或者更改与 UI 交互的代码能帮你避免很多麻烦。</p>
+<h3 id="假如一个-ObservedObject-被传入视图，但视图并未使用它的值，-ObservedObject-变化时视图会刷新吗？"><a href="#假如一个-ObservedObject-被传入视图，但视图并未使用它的值，-ObservedObject-变化时视图会刷新吗？" class="headerlink" title="假如一个 @ObservedObject 被传入视图，但视图并未使用它的值，@ObservedObject 变化时视图会刷新吗？"></a>假如一个 @ObservedObject 被传入视图，但视图并未使用它的值，@ObservedObject 变化时视图会刷新吗？</h3><p>原问题：当一个 <code>ObservedObject</code> 对象被传入一个视图时，SwiftUI 会区分实际使用它的视图（body 里用到）和“中间视图”（只是为了把视图传递给子孙）吗？还是所有的视图都会被更新？</p>
+<p>答复：是的，两者是有区别的。如果你没有使用 <code>ObservableObject</code> 的属性包装器 (指 @StateObject, @ObservedObject) ，那么视图不会观察和更新。假如你只是需要在中间视图传递 <code>ObservableObject</code>，可以使用常规属性。反之如果你的视图读取了其中的任何值，则应当使用属性包装器，否则视图可能与数据状态不一致。另外，<code> @EnvironmetObject</code> 可以用来取代人工传递 <code>ObservableObject</code> 的好工具。</p>
+<blockquote>
+<p>为了明确说明，我用下面的代码演示 <code>IntermediaryA</code> 是如何做了不必要的 <code>body</code> 计算，而 <code>IntermediaryB</code> 没有这个问题：</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Model</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> flag <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ExampleView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@StateObject</span> <span class="keyword">var</span> model <span class="operator">=</span> <span class="type">Model</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">HStack</span>(spacing: <span class="number">20</span>) &#123;</span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;Toggle&quot;</span>) &#123;</span><br><span class="line">                model.flag.toggle()</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">IntermediaryA</span>(model: model)</span><br><span class="line"></span><br><span class="line">            <span class="type">IntermediaryB</span>(model: model)</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">IntermediaryA</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@ObservedObject</span> <span class="keyword">var</span> model: <span class="type">Model</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;IntermediaryA body computed!&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="type">Flag</span>(model: model)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">IntermediaryB</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> model: <span class="type">Model</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;IntermediaryB body computed!&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="type">Flag</span>(model: model)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Flag</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@ObservedObject</span> <span class="keyword">var</span> model: <span class="type">Model</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Image</span>(systemName: model.flag <span class="operator">?</span> <span class="string">&quot;flag.fill&quot;</span> : <span class="string">&quot;flag.slash.fill&quot;</span>)</span><br><span class="line">            .font(.largeTitle)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好在这正是 <code>EnvironmentObject</code> 发挥作用的场景，它能极大地简化代码。 <code>Intermediary</code> 和 <code>Flag</code> 不再需要构造器里的参数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Model</span>: <span class="title class_">ObservableObject</span> &#123;</span><br><span class="line">    <span class="meta">@Published</span> <span class="keyword">var</span> flag <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ExampleView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@StateObject</span> <span class="keyword">var</span> model <span class="operator">=</span> <span class="type">Model</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">HStack</span>(spacing: <span class="number">20</span>) &#123;</span><br><span class="line">            <span class="type">Button</span>(<span class="string">&quot;Toggle&quot;</span>) &#123;</span><br><span class="line">                model.flag.toggle()</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="type">Intermediary</span>()</span><br><span class="line">                .environmentObject(model)</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Intermediary</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Intermediary body computed!&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="type">Flag</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Flag</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@EnvironmentObject</span> <span class="keyword">var</span> model: <span class="type">Model</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Image</span>(systemName: model.flag <span class="operator">?</span> <span class="string">&quot;flag.fill&quot;</span> : <span class="string">&quot;flag.slash.fill&quot;</span>)</span><br><span class="line">            .font(.largeTitle)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="为什么在-sheet-里我的-EnvironmentObject-会得到-nil-？"><a href="#为什么在-sheet-里我的-EnvironmentObject-会得到-nil-？" class="headerlink" title="为什么在 sheet 里我的 @EnvironmentObject 会得到 nil ？"></a>为什么在 sheet 里我的 @EnvironmentObject 会得到 nil ？</h3><p>原问题：我遇到过几次环境对象为 <code>nil</code> 的情况，发生在我把它们传给一个 <code>sheet</code> 或者 <code>NavigationLink</code> 的场景。因为复现有点难，并且偶然出现，我通常解决这个问题的办法是重新组织我的代码，避免传递环境对象。你知道为什么会这样吗？我怀疑 <code>environmentObject</code> 的内存在视图层级传递过程中被销毁了。希望你能提供帮助！</p>
+<p>答复 (工程师 #1)：<code>NavigationLink</code> 是设计上有意不传递 <code>EnvironmentObjects</code> 。因为 <code>environmentObject</code> 的继承关系在这里无法明确。我怀疑这是导致你的问题的原因。为了得到预期的结果，你需要显式地传入 <code>environmentObject</code>。</p>
+<p>答复 (工程师 #2)：你也可以把 <code>environmentObject</code> 应用到 <code>NavigationView</code> 本身，那么能够让环境对象对所有推入（导航栈）的内容可用。</p>
+<h3 id="我需要支持-iOS-13，但我又需要-StateObject，我该怎么做？"><a href="#我需要支持-iOS-13，但我又需要-StateObject，我该怎么做？" class="headerlink" title="我需要支持 iOS 13，但我又需要 @StateObject，我该怎么做？"></a>我需要支持 iOS 13，但我又需要 @StateObject，我该怎么做？</h3><p>原问题：为了支持 iOS 13， 我在模型中用的是 <code>@ObservedObject</code>，但我知道 <code>@StateObject</code> 的行为才是我要的。有没有建议的方法可以实现向后兼容。我原以为 <code>if #available</code> 可能可以工作，但它不能用于属性。</p>
+<p>答复：为了支持 OS 13，你需要使用 <code>@ObservedObject</code>，并以某种别的方式保持对象，比如使用静态属性或者在应用委托中持有引用。我不认为在 <code>ObservedObject</code> 和 <code>@StateObject</code> 之间切换会给你的场景带来好处，因为通过可用性检查改变对象的所有者的做法不合适。</p>
+<h3 id="EnvironmentObject-和-ObservedObject-哪个更好？"><a href="#EnvironmentObject-和-ObservedObject-哪个更好？" class="headerlink" title="@EnvironmentObject 和 @ObservedObject 哪个更好？"></a>@EnvironmentObject 和 @ObservedObject 哪个更好？</h3><p>原问题：通常情况下，在视图里用 <code>EnvironmentObject</code> 更好还是用传递的 <code>ObservedObject</code> 更好？</p>
+<p>答复：两种用法都有用户，这取决于你的代码架构。如果你有一个或者很少的大型 <code>ObservableObjects</code> ，大部分视图层级都需要看到它，我通常建议用 <code>EnvironmentObject</code>，因为 SwiftUI 会帮你照顾到所有实际使用该对象的视图。 当然，用 <code>ObservedObject</code> 也能做到，只是相对笨重。前者也不会因为视图没有实际使用对象而让代码变得凌乱。</p>
+<p>也就是说，如果你的模型很大程度上不是基于你的视图层级构建的对象图，那么在视图中使用 <code>ObservedObject</code> 抓取自己需要的那部分可能会更合理。</p>
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><h3 id="如何调试-AttributeGraph-崩溃？"><a href="#如何调试-AttributeGraph-崩溃？" class="headerlink" title="如何调试 AttributeGraph 崩溃？"></a>如何调试 AttributeGraph 崩溃？</h3><p>原问题：有没有方法可以调试 <code>AttributeGraph</code> 的崩溃？我遇到 AttributeGraph precondition failure: “setting value during update”: 696. 这样的错误，可能是哪里的某个 hosting controller，但我不知道如何追踪。</p>
+<p>答复：这个错误说明某个 <code>body</code> 或者 <code>updateUIViewController (or NS…) </code>里的代码正在修改状态。我们在新的 SDK 里提供了一个新的调试工具，可以帮助你缩小排查的范围。在 <code>body</code> 里，如果你写了 <code>Self._printChanges()</code>， SwiftUI 会把导致视图重绘的属性名称通过日志的形式输出到调试区域。（注意下划线。这不是一个 API，只是暴露给调试用的。）</p>
+<h3 id="如何对-SwiftUI-代码做性能调优？"><a href="#如何对-SwiftUI-代码做性能调优？" class="headerlink" title="如何对 SwiftUI 代码做性能调优？"></a>如何对 SwiftUI 代码做性能调优？</h3><p>原问题：我要如何对 SwiftUI 代码做性能调优，比如知道如何优化我的视图。Instruments 显示的几乎都是 SwiftUI 库的代码，要看清哪部分渲染开销昂贵很困难…</p>
+<p>答复：SwiftUI instrument 可以帮助唤出比较重的 body 方法。同时，限制每个视图 body 被重新计算的次数也很重要。强烈建议你去观看 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">解密 SwiftUI</a>，深入了解这其中的工作方式。提示： 在 body 里调用新的 <code>Self._printChanges()</code> 工具，可以打印导致视图重新计算的属性。技术上它并不是一个 API —— 它有一个下划线，所以只能用于调试。</p>
+<h2 id="布局"><a href="#布局" class="headerlink" title="布局"></a>布局</h2><h3 id="为了避免影响布局，把-GeometryReader-放进一个透明的-overlay-这种做法可取吗"><a href="#为了避免影响布局，把-GeometryReader-放进一个透明的-overlay-这种做法可取吗" class="headerlink" title="为了避免影响布局，把 GeometryReader 放进一个透明的 overlay 这种做法可取吗?"></a>为了避免影响布局，把 GeometryReader 放进一个透明的 overlay 这种做法可取吗?</h3><p>原问题：我看到不少在透明的 <code>overlay</code> 里使用 <code>GeometryReader</code> 的例子，这样做是为了避免影响布局… 这个做法可取吗？看起来并不是这个 API 的原本设计的用法。</p>
+<p>答复：通常我们会把这个用法看作是对该 API 的误用。假如你有某些需要这么做的场景，欢迎给我们反馈！</p>
+<h3 id="怎么获取另一个视图的尺寸？"><a href="#怎么获取另一个视图的尺寸？" class="headerlink" title="怎么获取另一个视图的尺寸？"></a>怎么获取另一个视图的尺寸？</h3><p>原问题：有没有办法从另外一个视图获取 <code>GeometryReader</code> 的尺寸。我想把下面的 “???” 文本的高度换成 “Hello world!” 文本的高度。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Hello world!&quot;</span>)</span><br><span class="line">                .background(</span><br><span class="line">                    <span class="type">GeometryReader</span> &#123; proxy <span class="keyword">in</span></span><br><span class="line">                        <span class="type">Color</span>.clear <span class="comment">/// placeholder</span></span><br><span class="line">                        <span class="keyword">let</span> <span class="keyword">_</span> <span class="operator">=</span> <span class="built_in">print</span>(proxy.size.height) <span class="comment">/// 20.333333333333332</span></span><br><span class="line">                    &#125;</span><br><span class="line">                )</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Height of first text is ???&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>答复： 你好！ 把 <code>GeometryReader</code> 放在视图的背景里可以确保 <code>GeometryReader</code> 不会超出其所包含的视图尺寸，但是提取它的尺寸需要一点小技巧。你可以像这样做：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> height <span class="operator">=</span> <span class="number">100.0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">MyView</span>().background &#123;</span><br><span class="line">            <span class="type">GeometryReader</span> &#123; proxy <span class="keyword">in</span></span><br><span class="line">                <span class="type">Color</span>.clear</span><br><span class="line">                    .onAppear &#123;</span><br><span class="line">                        height <span class="operator">=</span> proxy.size.height</span><br><span class="line">                    &#125;</span><br><span class="line">                    .onChange(of: proxy.size.height) &#123;</span><br><span class="line">                        height <span class="operator">=</span> <span class="variable">$0</span></span><br><span class="line">                    &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后你就能想往常一样使用 State 属性。</p>
+<blockquote>
+<p>⚠️注意：你必须确保你不会因此导致一个连续的布局循环。如果因为你的布局响应了 height 变化而导致 GeometryReader 再次布局，你将陷入一个无限循环。</p>
+</blockquote>
+<p>我认为只要你注意这个 ⚠️ ，你就可以使用这个技术。我想说的是，尽管这个模式已经常见，我们乐于收到反馈，以便提供 SwiftUI 的体验 —— 在反馈中解释你的场景，这能帮助开发团队理解你要做的事情！</p>
+<blockquote>
+<p>关于这项技术，有几种选项（参考前面的一个问题），我重写了问题的例子，以适应 Apple 给出的答复：</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ExampleView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> height <span class="operator">=</span> <span class="number">100.0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">Text</span>(<span class="string">&quot;Hello world!&quot;</span>)</span><br><span class="line">                .background(</span><br><span class="line">                    <span class="type">GeometryReader</span> &#123; proxy <span class="keyword">in</span></span><br><span class="line">                    <span class="type">Color</span>.clear</span><br><span class="line">                        .onAppear &#123;</span><br><span class="line">                            height <span class="operator">=</span> proxy.size.height</span><br><span class="line">                        &#125;</span><br><span class="line">                        .onChange(of: proxy.size.height) &#123;</span><br><span class="line">                            height <span class="operator">=</span> <span class="variable">$0</span></span><br><span class="line">                        &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Height of first text is <span class="subst">\(height)</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Dependency-Graph-可不可以包含循环？"><a href="#Dependency-Graph-可不可以包含循环？" class="headerlink" title="Dependency Graph 可不可以包含循环？"></a>Dependency Graph 可不可以包含循环？</h3><p>Graph 循环是不允许的。</p>
+<h3 id="把视图容器从-HStack-切换成-VStack-时，要怎么保持视图的等价性呢？"><a href="#把视图容器从-HStack-切换成-VStack-时，要怎么保持视图的等价性呢？" class="headerlink" title="把视图容器从 HStack 切换成 VStack 时，要怎么保持视图的等价性呢？"></a>把视图容器从 HStack 切换成 VStack 时，要怎么保持视图的等价性呢？</h3><p>原问题：有没有办法在切换 <code>HStack</code> 和 <code>VStack</code> 的同时让 SwiftUI 知道两个 stack 里的内容是相同的？</p>
+<p>答复：和这个问题类似的问题有很多，重复之前的答案：是的！你可以试试 <code>matchedGeometryEffect()</code> API，去年引入的，文档在 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/swiftui/view/matchedgeometryeffect(id:in:properties:anchor:issource:)">这里</a>.</p>
+<h3 id="frame-和-Spacer-要怎么选？"><a href="#frame-和-Spacer-要怎么选？" class="headerlink" title="frame() 和 Spacer() 要怎么选？"></a>frame() 和 Spacer() 要怎么选？</h3><p>原问题：在大多数场景下， Spacer 的布局行为可以用<code> .frame(maxWidth:alignment:)</code>（或者 height） 无缝替换。因为 <code>Spacer</code> 是一个实际的视图，参与视图层级的布局，使用 <code>Spacer</code> 会消耗更多的内存和 CPU 资源 <a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">“解密 SwiftUI”</a>  也提到 “modifier is cheap”。所以我是不是应该尽可能地用 <code>.frame</code> 代替 <code>Spacer</code> ？</p>
+<p>答复 (工程师 #1)：尽管 <code>Spacer</code> 是一个视图，但它最终并不显示任何东西，所以其本身非常轻量。 使用 <code>.frame</code> 会引入其他行为导致视图改变尺寸。两者都有使用场景，所以请在各自合适的场景下选用。</p>
+<p>答复 (工程师 #2)：稍微补充一点，尽管你可以用两种方式取得几乎一致的效果，但因为性能的差异微乎其微，我会强烈建议在决策时把代码可读性放在性能&#x2F;内存占用之前。假如 <code>Spacer</code> 使你的布局意图更清晰，那么就用它，反之亦然。</p>
+<blockquote>
+<p>为了演示 frame 和 Spacer 表现不同的场景，请看下面的代码。<br>因为在 HStack 容器的间距参数在未指定时， SwiftUI 会采用自动留白，这时  Spacer 和 .frame 的处理方式就是不一样的。虽然两个 HStack  视图的输出看起非常相似，但并不是相等的。</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ExampleView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">VStack</span> &#123;</span><br><span class="line">            <span class="type">HStack</span> &#123;</span><br><span class="line">                <span class="type">Spacer</span>()</span><br><span class="line"></span><br><span class="line">                <span class="type">Circle</span>().frame(width: <span class="number">50</span>, height: <span class="number">50</span>)</span><br><span class="line"></span><br><span class="line">                <span class="type">Spacer</span>()</span><br><span class="line"></span><br><span class="line">                <span class="type">Circle</span>().frame(width: <span class="number">50</span>, height: <span class="number">50</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            .border(<span class="type">Color</span>.blue)</span><br><span class="line"></span><br><span class="line">            <span class="type">HStack</span> &#123;</span><br><span class="line">                <span class="type">Color</span>.clear.frame(maxWidth: .infinity, maxHeight: <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">                <span class="type">Circle</span>().frame(width: <span class="number">50</span>, height: <span class="number">50</span>)</span><br><span class="line"></span><br><span class="line">                <span class="type">Color</span>.clear.frame(maxWidth: .infinity, maxHeight: <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">                <span class="type">Circle</span>().frame(width: <span class="number">50</span>, height: <span class="number">50</span>)</span><br><span class="line">            &#125;</span><br><span class="line">            .border(<span class="type">Color</span>.blue)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/./res/spacer_frame.jpg"></p>
+<p>不过通过指定 <code>HStack</code> 的间距可以让两个 <code>HStack</code> 生成相同的结果。</p>
+<h3 id="“Bound-preference-SizePreferenceKey-tried-to-update-multiple-times-per-frame”-这是什么错误？"><a href="#“Bound-preference-SizePreferenceKey-tried-to-update-multiple-times-per-frame”-这是什么错误？" class="headerlink" title="“Bound preference SizePreferenceKey tried to update multiple times per frame” 这是什么错误？"></a>“Bound preference SizePreferenceKey tried to update multiple times per frame” 这是什么错误？</h3><p>原问题： 如何避免出现 Bound preference SizePreferenceKey tried to update multiple times per frame？ 这个错误？</p>
+<p>看起来你遇到循环更新的问题。举个例子，一个 <code>GeometryReader</code> 对一个属性写入，会导致包含它的视图重绘，这又会导致 GeometryReader 再次写入属性。应当避免创建这类循环。通常我们可以通过把 GeometryReader 移到更外层的视图，以便其尺寸不发生变化来解决这个问题。不过没有看到你的代码，我恐怕不能再给出更具体的建议，希望对你解决这个问题有帮助。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://swiftui-lab.com/random-lessons/">Random Lessons from the SwiftUI Digital Lounge</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.apple.com/videos/play/wwdc2021/10022/">解密 SwiftUI</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/24/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20%E5%85%AB%E4%B8%AA%E5%B8%B8%E8%A7%81%E7%9A%84SwiftUI%E8%AF%AF%E7%94%A8%E5%8F%8A%E5%AF%B9%E5%BA%94%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%89%93%E5%BC%80%E6%96%B9%E5%BC%8F/" rel="prev" title="Swift花园笔记 -  八个常见的SwiftUI误用及对应的正确打开方式">
+      <i class="fa fa-chevron-left"></i> Swift花园笔记 -  八个常见的SwiftUI误用及对应的正确打开方式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/04/24/Random%20Lessons%20from%20the%20SwiftUI%20Digital%20Lounge%20.%20Part%201%20%5B%E8%AF%91%5D/" rel="next" title="Random Lessons from the SwiftUI Digital Lounge . Part 1 [译]">
+      Random Lessons from the SwiftUI Digital Lounge . Part 1 [译] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#refreshable-%E6%98%AF%E5%90%A6%E6%98%AF-SwiftUI-%E4%B8%AD%E5%94%AF%E4%B8%80%E6%94%AF%E6%8C%81%E5%BC%82%E6%AD%A5%E4%BB%A3%E7%A0%81%E7%9A%84%E5%B1%9E%E6%80%A7%E5%91%A2%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">refreshable 是否是 SwiftUI 中唯一支持异步代码的属性呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Swift%E5%B9%B6%E5%8F%91%E5%8F%AF%E4%BB%A5%E5%90%91%E5%90%8E%E5%8F%91%E5%B8%83%E5%90%97%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">Swift并发可以向后发布吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">数据管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#StateObject-%E5%92%8C-ObservedObject-%E8%AF%A5%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">@StateObject 和 ObservedObject 该怎么选？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SceneStorage-%E7%9A%84%E5%AD%98%E5%82%A8%E6%97%B6%E6%9C%BA%E5%8F%AF%E4%BB%A5%E8%87%AA%E5%B7%B1%E6%8E%A7%E5%88%B6%E5%90%97%EF%BC%9F"><span class="nav-number">2.2.</span> <span class="nav-text">@SceneStorage 的存储时机可以自己控制吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#State-%E5%92%8C-StateObject-%E9%80%9A%E5%B8%B8%E6%98%AF%E4%B8%8D%E6%98%AF%E9%83%BD%E5%BA%94%E8%AF%A5%E5%AE%9A%E4%B9%89%E6%88%90-private-%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">@State 和 @StateObject 通常是不是都应该定义成 private ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E8%A7%86%E5%9B%BE%E7%9A%84-identity-%E5%8F%91%E7%94%9F%E6%94%B9%E5%8F%98%E6%97%B6%EF%BC%8C%E9%87%87%E7%94%A8-State%EF%BC%8C-StateObject-%E5%92%8C-ObservedObject-%E6%9C%89%E6%B2%A1%E6%9C%89%E4%B8%80%E4%BA%9B%E5%85%B3%E9%94%AE%E6%80%A7%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">2.4.</span> <span class="nav-text">当视图的 identity 发生改变时，采用 @State，@StateObject 和 @ObservedObject 有没有一些关键性的区别？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E6%A0%B9%E8%A7%86%E5%9B%BE%E4%B8%AD%E4%BB%A5%E5%8D%95%E4%B8%AA-StateObject-%E4%BF%9D%E6%8C%81%E6%95%B4%E4%B8%AA%E5%BA%94%E7%94%A8%E7%9A%84%E7%8A%B6%E6%80%81%E6%9C%89%E5%93%AA%E4%BA%9B%E5%9D%8F%E5%A4%84%EF%BC%9F"><span class="nav-number">2.5.</span> <span class="nav-text">在根视图中以单个 @StateObject 保持整个应用的状态有哪些坏处？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#State-Binding-%E7%9B%B8%E6%AF%94-EnvironmentObject-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">2.6.</span> <span class="nav-text">@State&#x2F;@Binding 相比 @EnvironmentObject 有什么区别？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BA%E4%BA%8E%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91%EF%BC%8C%E6%88%91%E4%BB%AC%E5%BA%94%E8%AF%A5%E5%A6%82%E4%BD%95%E5%8F%96%E8%88%8D-ObservableObject-%E5%92%8C-EnvironmentObject"><span class="nav-number">2.7.</span> <span class="nav-text">出于性能考虑，我们应该如何取舍 ObservableObject 和 @EnvironmentObject?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E4%BB%A5%E4%BD%BF%E7%94%A8-Core-Data-%E7%9A%84%E5%AD%90%E4%B8%8A%E4%B8%8B%E6%96%87%E4%BD%9C%E4%B8%BA-StateObject-%E5%90%97%EF%BC%9F"><span class="nav-number">2.8.</span> <span class="nav-text">可以使用 Core Data 的子上下文作为 @StateObject 吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9Cview-environmentObject-may-be-missing-as-an-ancestor-of-this-view-%E2%80%9D%E8%BF%99%E4%B8%AA%E9%94%99%E8%AF%AF%E6%98%AF%E6%80%8E%E4%B9%88%E5%9B%9E%E4%BA%8B%E5%91%A2%EF%BC%9F"><span class="nav-number">2.9.</span> <span class="nav-text">“view environmentObject may be missing as an ancestor of this view? ”这个错误是怎么回事呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E5%8F%AF%E4%BB%A5%E7%9B%B4%E6%8E%A5%E8%B0%83%E7%94%A8-StateObject-%E7%9A%84%E6%9E%84%E9%80%A0%E5%99%A8%E5%90%97%EF%BC%9F"><span class="nav-number">2.10.</span> <span class="nav-text">我可以直接调用 @StateObject 的构造器吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#State-%E5%8F%98%E9%87%8F%E5%8F%AF%E4%BB%A5%E5%9C%A8%E4%B8%BB%E7%BA%BF%E7%A8%8B%E4%B9%8B%E5%A4%96%E6%9B%B4%E6%94%B9%E5%90%97%EF%BC%9F"><span class="nav-number">2.11.</span> <span class="nav-text">@State 变量可以在主线程之外更改吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%87%E5%A6%82%E4%B8%80%E4%B8%AA-ObservedObject-%E8%A2%AB%E4%BC%A0%E5%85%A5%E8%A7%86%E5%9B%BE%EF%BC%8C%E4%BD%86%E8%A7%86%E5%9B%BE%E5%B9%B6%E6%9C%AA%E4%BD%BF%E7%94%A8%E5%AE%83%E7%9A%84%E5%80%BC%EF%BC%8C-ObservedObject-%E5%8F%98%E5%8C%96%E6%97%B6%E8%A7%86%E5%9B%BE%E4%BC%9A%E5%88%B7%E6%96%B0%E5%90%97%EF%BC%9F"><span class="nav-number">2.12.</span> <span class="nav-text">假如一个 @ObservedObject 被传入视图，但视图并未使用它的值，@ObservedObject 变化时视图会刷新吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%9C%A8-sheet-%E9%87%8C%E6%88%91%E7%9A%84-EnvironmentObject-%E4%BC%9A%E5%BE%97%E5%88%B0-nil-%EF%BC%9F"><span class="nav-number">2.13.</span> <span class="nav-text">为什么在 sheet 里我的 @EnvironmentObject 会得到 nil ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%91%E9%9C%80%E8%A6%81%E6%94%AF%E6%8C%81-iOS-13%EF%BC%8C%E4%BD%86%E6%88%91%E5%8F%88%E9%9C%80%E8%A6%81-StateObject%EF%BC%8C%E6%88%91%E8%AF%A5%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="nav-number">2.14.</span> <span class="nav-text">我需要支持 iOS 13，但我又需要 @StateObject，我该怎么做？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EnvironmentObject-%E5%92%8C-ObservedObject-%E5%93%AA%E4%B8%AA%E6%9B%B4%E5%A5%BD%EF%BC%9F"><span class="nav-number">2.15.</span> <span class="nav-text">@EnvironmentObject 和 @ObservedObject 哪个更好？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">3.</span> <span class="nav-text">调试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%B0%83%E8%AF%95-AttributeGraph-%E5%B4%A9%E6%BA%83%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">如何调试 AttributeGraph 崩溃？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AF%B9-SwiftUI-%E4%BB%A3%E7%A0%81%E5%81%9A%E6%80%A7%E8%83%BD%E8%B0%83%E4%BC%98%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">如何对 SwiftUI 代码做性能调优？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E5%B1%80"><span class="nav-number">4.</span> <span class="nav-text">布局</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BA%86%E9%81%BF%E5%85%8D%E5%BD%B1%E5%93%8D%E5%B8%83%E5%B1%80%EF%BC%8C%E6%8A%8A-GeometryReader-%E6%94%BE%E8%BF%9B%E4%B8%80%E4%B8%AA%E9%80%8F%E6%98%8E%E7%9A%84-overlay-%E8%BF%99%E7%A7%8D%E5%81%9A%E6%B3%95%E5%8F%AF%E5%8F%96%E5%90%97"><span class="nav-number">4.1.</span> <span class="nav-text">为了避免影响布局，把 GeometryReader 放进一个透明的 overlay 这种做法可取吗?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E8%8E%B7%E5%8F%96%E5%8F%A6%E4%B8%80%E4%B8%AA%E8%A7%86%E5%9B%BE%E7%9A%84%E5%B0%BA%E5%AF%B8%EF%BC%9F"><span class="nav-number">4.2.</span> <span class="nav-text">怎么获取另一个视图的尺寸？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dependency-Graph-%E5%8F%AF%E4%B8%8D%E5%8F%AF%E4%BB%A5%E5%8C%85%E5%90%AB%E5%BE%AA%E7%8E%AF%EF%BC%9F"><span class="nav-number">4.3.</span> <span class="nav-text">Dependency Graph 可不可以包含循环？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A%E8%A7%86%E5%9B%BE%E5%AE%B9%E5%99%A8%E4%BB%8E-HStack-%E5%88%87%E6%8D%A2%E6%88%90-VStack-%E6%97%B6%EF%BC%8C%E8%A6%81%E6%80%8E%E4%B9%88%E4%BF%9D%E6%8C%81%E8%A7%86%E5%9B%BE%E7%9A%84%E7%AD%89%E4%BB%B7%E6%80%A7%E5%91%A2%EF%BC%9F"><span class="nav-number">4.4.</span> <span class="nav-text">把视图容器从 HStack 切换成 VStack 时，要怎么保持视图的等价性呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#frame-%E5%92%8C-Spacer-%E8%A6%81%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="nav-number">4.5.</span> <span class="nav-text">frame() 和 Spacer() 要怎么选？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E2%80%9CBound-preference-SizePreferenceKey-tried-to-update-multiple-times-per-frame%E2%80%9D-%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88%E9%94%99%E8%AF%AF%EF%BC%9F"><span class="nav-number">4.6.</span> <span class="nav-text">“Bound preference SizePreferenceKey tried to update multiple times per frame” 这是什么错误？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
