@@ -184,6 +184,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">并发编程带来的问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-08-26 08:00:00 / 修改时间：17:17:19" itemprop="dateCreated datePublished" datetime="2024-08-26T08:00:00+08:00">2024-08-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="并发编程的幕后"><a href="#并发编程的幕后" class="headerlink" title="并发编程的幕后"></a>并发编程的幕后</h2><p>随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是<strong>速度不一致问题</strong>。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。</p>
+<p>我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。</p>
+<p>为了最大化体现出CPU的性能，计算机底层主要做了三部分优化：</p>
+<ol>
+<li><p>CPU增加了缓存，比内存速度更快，平衡内存的速度</p>
+</li>
+<li><p>操作系统增加了进程和线程，可以对CPU分时复用</p>
+</li>
+<li><p>编译程序会进行指令的重排，使缓存更好的发挥性能</p>
+</li>
+</ol>
+<p>我们平时的工作中其实一直都享受着这些优化后的成果，但同时他们也会导致一些很难找到原因的BUG。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -705,7 +795,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8A/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -719,7 +809,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/" class="post-title-link" itemprop="url">Swift花园笔记 -  SwiftUI知识碎片</a>
+            <a href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8A/" class="post-title-link" itemprop="url">Swift花园笔记 -  SwiftUI知识碎片 上</a>
         </h2>
 
         <div class="post-meta">
@@ -736,7 +826,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-27 17:48:05" itemprop="dateModified" datetime="2024-05-27T17:48:05+08:00">2024-05-27</time>
+                <time title="修改时间：2024-08-26 17:16:33" itemprop="dateModified" datetime="2024-08-26T17:16:33+08:00">2024-08-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -767,7 +857,7 @@
 <p>可以在form里放进任意多你想要的元素，不过如果元素超过10个，SwiftUI会要求你对元素进行分组。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87/#more" rel="contents">
+              <a class="btn" href="/2024/04/22/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20SwiftUI%E7%9F%A5%E8%AF%86%E7%A2%8E%E7%89%87%20%E4%B8%8A/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -952,97 +1042,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">Swift花园之设计模式 上</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-04-17 00:00:00" itemprop="dateCreated datePublished" datetime="2024-04-17T00:00:00+08:00">2024-04-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-05-27 17:51:18" itemprop="dateModified" datetime="2024-05-27T17:51:18+08:00">2024-05-27</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="init模式"><a href="#init模式" class="headerlink" title="init模式"></a>init模式</h1><blockquote>
-<p>初始化是准备要使用的类，结构体或枚举的实例的过程。</p>
-</blockquote>
-<h2 id="逐一成员构造器-只有结构体有"><a href="#逐一成员构造器-只有结构体有" class="headerlink" title="逐一成员构造器 (只有结构体有)"></a>逐一成员构造器 (只有结构体有)</h2><p>编译器会为结构体自动生成一个逐一成员构造器。生成的构造器将包含除拥有默认值的常量属性之外的所有属性，包括可选型；它的可访问性是 <code>internal</code>，所以对其他模块不可见。</p>
-<blockquote>
-<p>只要结构体的任何一个存储属性是 private 的，那么结构体的默认逐一成员构造器也将是 private 的。同样，如果结构体的任何一个存储属性是 file private 的，那么逐一成员构造器也将是 file private 的。其他情况，这个构造器的访问级别是 internal。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/04/17/Swift%E8%8A%B1%E5%9B%AD%E4%B9%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1108,7 +1111,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-count">161</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

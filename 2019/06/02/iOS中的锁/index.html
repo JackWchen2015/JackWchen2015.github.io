@@ -20,19 +20,18 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
-<meta property="og:type" content="article">
+  <meta property="og:type" content="article">
 <meta property="og:title" content="iOS中的锁">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，锁分为建议锁和强制锁建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/locks.png">
 <meta property="og:image" content="https://github.com/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/syn01.png">
 <meta property="article:published_time" content="2019-06-02T00:00:00.000Z">
-<meta property="article:modified_time" content="2020-06-07T08:46:26.000Z">
+<meta property="article:modified_time" content="2024-08-26T07:20:09.937Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/syn01.png">
+<meta name="twitter:image" content="https://github.com/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/locks.png">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/">
 
@@ -221,7 +220,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-07 16:46:26" itemprop="dateModified" datetime="2020-06-07T16:46:26+08:00">2020-06-07</time>
+                <time title="修改时间：2024-08-26 15:20:09" itemprop="dateModified" datetime="2024-08-26T15:20:09+08:00">2024-08-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -248,29 +247,47 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <blockquote>
-<p>在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足，<br>锁分为建议锁和强制锁<br>建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。<br>强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。</p>
-</blockquote>
+        <img src="/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/locks.png" class="">
+
 <span id="more"></span>
 
-
+<h2 id="锁的分类"><a href="#锁的分类" class="headerlink" title="锁的分类"></a>锁的分类</h2><blockquote>
+<p>在计算机科学中，锁是执行多线程时用于强行限制资源访问的同步机制，即用于在并发控制中保证对互斥要求的满足</p>
+<p>锁分为建议锁和强制锁</p>
+<p>建议锁：每个线程在访问对应资源前都需要获取锁的信息，再根据信息决定是否可以访问，若访问对应信息，锁的状态会改变为锁定，因此其它线程此时不会访问该资源，当资源结束后，会恢复锁的状态，允许其他线程的访问。</p>
+<p>强制锁：若有未授权的线程想要访问锁定的数据，在访问时就会发生异常。</p>
+</blockquote>
 <p>iOS中，锁分为互斥锁，递归锁，信号量，条件锁，自旋锁，读写锁，分布式锁</p>
-<h3 id="互斥锁-synchronized-NSLock"><a href="#互斥锁-synchronized-NSLock" class="headerlink" title="互斥锁   (@synchronized,NSLock)"></a>互斥锁   (@synchronized,NSLock)</h3><blockquote>
+<h2 id="atomic-and-nonatomic"><a href="#atomic-and-nonatomic" class="headerlink" title="atomic and nonatomic"></a>atomic and nonatomic</h2><p>原子性(Atomicity）<br>即一个操作或者多个操作要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行</p>
+<h3 id="nonatomic简单实现"><a href="#nonatomic简单实现" class="headerlink" title="nonatomic简单实现"></a>nonatomic简单实现</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">retain</span>) <span class="built_in">UITextField</span> *userName;</span><br><span class="line"><span class="comment">//Generates roughly</span></span><br><span class="line"></span><br><span class="line">- (<span class="built_in">UITextField</span> *) userName &#123;</span><br><span class="line">    <span class="keyword">return</span> userName;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>) setUserName:(<span class="built_in">UITextField</span> *)userName_ &#123;</span><br><span class="line">    [userName_ <span class="keyword">retain</span>];</span><br><span class="line">    [userName release];</span><br><span class="line">    userName = userName_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="atomic简单实现"><a href="#atomic简单实现" class="headerlink" title="atomic简单实现"></a>atomic简单实现</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span>(<span class="keyword">retain</span>) <span class="built_in">UITextField</span> *userName;</span><br><span class="line"><span class="comment">//Generates roughly</span></span><br><span class="line"></span><br><span class="line">- (<span class="built_in">UITextField</span> *) userName &#123;</span><br><span class="line">    <span class="built_in">UITextField</span> *retval = <span class="literal">nil</span>;</span><br><span class="line">    <span class="keyword">@synchronized</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">        retval = [[userName <span class="keyword">retain</span>] autorelease];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="type">void</span>) setUserName:(<span class="built_in">UITextField</span> *)userName_ &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span>(<span class="keyword">self</span>) &#123;</span><br><span class="line">      [userName_ <span class="keyword">retain</span>];</span><br><span class="line">      [userName release];</span><br><span class="line">      userName = userName_;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="下面三个有什么区别-？"><a href="#下面三个有什么区别-？" class="headerlink" title="下面三个有什么区别 ？"></a>下面三个有什么区别 ？</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span>(<span class="keyword">nonatomic</span>, <span class="keyword">retain</span>) <span class="built_in">UITextField</span> *userName;</span><br><span class="line"><span class="keyword">@property</span>(atomic, <span class="keyword">retain</span>) <span class="built_in">UITextField</span> *userName;</span><br><span class="line"><span class="keyword">@property</span>(<span class="keyword">retain</span>) <span class="built_in">UITextField</span> *userName;</span><br></pre></td></tr></table></figure>
+
+<p>“atomic”是默认关键字，使用”atomic”，合成<code>setter/getter</code>将确保始终从<code>getter</code>或<code>setter</code>返回一个完整的值，而不管<code>setter</code>在任何其他线程上的活动如何。也就是说，如果线程A处于<code>getter</code>的访问中，而线程B正调用<code>setter</code>，那么一个实际可行的值——很可能是一个自动释放的对象(an autoreleased object)——将返回给A中的调用者。</p>
+<p>“atomic”不能保证线程安全。如果线程A调用<code>getter</code>的同时，线程B和线程C用不同的值调用setter，线程A可能会得到三个返回值中的任何一个——调用任何<code>setter</code>之前的值，或者B和C中传递给<code>setter</code>的值中的任何一个。同样，对象可能最终得到B或C中的值，无法判断。</p>
+<h3 id="单个属性的原子性也不能保证在使用多个依赖属性时的线程安全性。"><a href="#单个属性的原子性也不能保证在使用多个依赖属性时的线程安全性。" class="headerlink" title="单个属性的原子性也不能保证在使用多个依赖属性时的线程安全性。"></a>单个属性的原子性也不能保证在使用多个依赖属性时的线程安全性。</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span>(atomic, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *firstName;</span><br><span class="line"> <span class="keyword">@property</span>(atomic, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *lastName;</span><br><span class="line"> <span class="keyword">@property</span>(<span class="keyword">readonly</span>, atomic, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *fullName;</span><br></pre></td></tr></table></figure>
+<p>在这种情况下，线程A可以通过调用<code>setFirstName:</code>来重命名对象，然后调用<code>setLastName:</code>。同时，线程B可能会在线程A的两次调用之间调用<code>fullName</code>，并将接收新的名字和旧的姓氏。 </p>
+<p>为了解决这个问题，您需要一个事务模型。也就是说，一些其他类型的同步和&#x2F;或排除，允许一个人排除访问<code>fullName</code>，而依赖的属性正在更新。</p>
+<blockquote>
+<p>原子关键字意味着合成访问器保证对象在跨线程同时访问时被完全设置或读取。如果您使用atomic关键字，这并不意味着您的属性是线程安全的。它仅仅意味着对象被保证是完整的</p>
+</blockquote>
+<h2 id="互斥锁-synchronized-NSLock"><a href="#互斥锁-synchronized-NSLock" class="headerlink" title="互斥锁   (@synchronized,NSLock)"></a>互斥锁   (@synchronized,NSLock)</h2><blockquote>
 <p>在编程中，引入对象互斥锁的的概念，来保证共享数据操作的完整性，每个对象都对应于一个可称为“互斥锁”的标记，这个标记用来保证在任一时刻，只能有一个线程访问对象。</p>
 </blockquote>
-<p>@synchronized要一个参数，这个参数相当于信号量</p>
+<p><code>@synchronized</code>要一个参数，这个参数相当于信号量</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用在防止多线程访问属性上比较多</span></span><br><span class="line">- (<span class="type">void</span>)setTestInt:(<span class="built_in">NSInteger</span>)testInt &#123;</span><br><span class="line">    <span class="keyword">@synchronized</span> (<span class="keyword">self</span>) &#123;</span><br><span class="line">        _testInt = testInt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h3><blockquote>
+<h2 id="自旋锁"><a href="#自旋锁" class="headerlink" title="自旋锁"></a>自旋锁</h2><blockquote>
 <p>何谓自旋锁？它是为实现保护共享资源而提出一种锁机制，其实，自旋锁与互斥锁比较类似，他们都是为了解决对某项资源的互斥使用。无论是互斥锁还是自旋锁，在任何时刻，最多只能有一个保持着，也就说，在任何时刻最多只能有一个执行单元获得锁，但是两者在调度机制上略有不同，对于互斥锁，如果资源已经被占用， 资源申请者只能进入睡眠状态，但是自旋锁不会引起调用者睡眠，如果自旋锁已经被别的执行单元保持，调用者就一直循环在那里看是否该自旋锁的保持者已经释放了锁，“自旋”一词就是因此而得名。</p>
 </blockquote>
-<h4 id="OSSpinLock"><a href="#OSSpinLock" class="headerlink" title="OSSpinLock"></a>OSSpinLock</h4><p>使用方式</p>
+<h3 id="OSSpinLock"><a href="#OSSpinLock" class="headerlink" title="OSSpinLock"></a>OSSpinLock</h3><p>使用方式</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化</span></span><br><span class="line">spinLock = OS_SPINKLOCK_INIT;</span><br><span class="line"><span class="comment">// 加锁</span></span><br><span class="line">OSSpinLockLock(&amp;spinLock);</span><br><span class="line"><span class="comment">// 解锁</span></span><br><span class="line">OSSpinLockUnlock(&amp;spinLock);</span><br></pre></td></tr></table></figure>
 <p>这个自旋锁存在优先级反转的问题,已经不再线程安全。</p>
-<h4 id="自旋锁和互斥锁对比"><a href="#自旋锁和互斥锁对比" class="headerlink" title="自旋锁和互斥锁对比"></a>自旋锁和互斥锁对比</h4><p>自旋锁会忙等：所谓忙等，即在访问被锁资源时，调用者线程不会休眠，而是不停循环在那里，直到被锁资源释放锁。</p>
+<h3 id="自旋锁和互斥锁对比"><a href="#自旋锁和互斥锁对比" class="headerlink" title="自旋锁和互斥锁对比"></a>自旋锁和互斥锁对比</h3><p>自旋锁会忙等：所谓忙等，即在访问被锁资源时，调用者线程不会休眠，而是不停循环在那里，直到被锁资源释放锁。</p>
 <p>互斥锁会休眠：所谓休眠，即在访问被锁资源时，调用者线程会休眠，此时CPU可以调度其他线程工作，直到被锁资源释放锁，此时会唤醒休眠线程。</p>
 <p>如果能在短时间内获得锁，自旋锁的效率远高于互斥锁，如果不能在很短的时间获得锁，会使CPU效率降低，自旋锁不能实现递归调用。</p>
-<h3 id="Dispatch-Semaphore（信号量）"><a href="#Dispatch-Semaphore（信号量）" class="headerlink" title="Dispatch Semaphore（信号量）"></a>Dispatch Semaphore（信号量）</h3><p>信号量其实就是用来保证访问资源的线程数，当信号量大于等于1时，资源可以访问，否则无法访问资源，直到其它线程释放资源。</p>
+<h2 id="Dispatch-Semaphore（信号量）"><a href="#Dispatch-Semaphore（信号量）" class="headerlink" title="Dispatch Semaphore（信号量）"></a>Dispatch Semaphore（信号量）</h2><p>信号量其实就是用来保证访问资源的线程数，当信号量大于等于1时，资源可以访问，否则无法访问资源，直到其它线程释放资源。</p>
 <p>主要有三个函数</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dispatch_semaphore_t dispatch_semaphore_create(<span class="type">long</span> value);  <span class="comment">//创建一个dispatch_semaphore_t，value为初始信号量</span></span><br><span class="line"><span class="type">long</span> dispatch_semaphore_wait(dispatch_semaphore_t dsema, dispatch_time_t timeout);   <span class="comment">//信号量-1</span></span><br><span class="line"><span class="type">long</span> dispatch_semaphore_signal(dispatch_semaphore_t dsema);   <span class="comment">//信号量+1</span></span><br></pre></td></tr></table></figure>
 
@@ -279,14 +296,14 @@
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">-(<span class="type">void</span>)Action</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span>  queueA=dispatch_queue_create(<span class="string">&quot;com.Jack.SerialA&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span>  queueB=dispatch_queue_create(<span class="string">&quot;com.Jack.SerialB&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    dispatch_semaphore_t  semaphoreA=dispatch_semaphore_create(<span class="number">0</span>);</span><br><span class="line">    dispatch_semaphore_t  semaphoreB=dispatch_semaphore_create(<span class="number">1</span>);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queueA, ^&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; ++i) &#123;</span><br><span class="line">             dispatch_semaphore_wait(semaphoreB, DISPATCH_TIME_FOREVER);</span><br><span class="line">             <span class="built_in">NSLog</span>(<span class="string">@&quot;%dHello&quot;</span>,i+<span class="number">1</span>);</span><br><span class="line">            dispatch_semaphore_signal(semaphoreA);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queueB, ^&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">100</span>; ++i) &#123;</span><br><span class="line">            dispatch_semaphore_wait(semaphoreA, DISPATCH_TIME_FOREVER);</span><br><span class="line">            <span class="built_in">NSLog</span>(<span class="string">@&quot;%dWorld!&quot;</span>,i+<span class="number">1</span>);</span><br><span class="line">            dispatch_semaphore_signal(semaphoreB);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 
-<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><blockquote>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><blockquote>
 <p>读写锁实际是一种特殊的自旋锁，它把对共享资源的访问者划分为读者和写者，读者只对共享资源进行读访问，写者只对共享资源进行写操作。允许同时有多个读者来访问共享资源，最大可能的读者数为实际的逻辑CPU数，写者是排他性的，一个读写锁同时只能有一个写者或多个读者，但不能同时既有读者又有写者。</p>
 </blockquote>
-<h4 id="dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><a href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）" class="headerlink" title="dispatch_barrier_async和dispatch_barrier_sync（栅栏）"></a><code>dispatch_barrier_async</code>和<code>dispatch_barrier_sync</code>（栅栏）</h4><img src="/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/syn01.png" class="">
+<h3 id="dispatch-barrier-async和dispatch-barrier-sync（栅栏）"><a href="#dispatch-barrier-async和dispatch-barrier-sync（栅栏）" class="headerlink" title="dispatch_barrier_async和dispatch_barrier_sync（栅栏）"></a><code>dispatch_barrier_async</code>和<code>dispatch_barrier_sync</code>（栅栏）</h3><img src="/2019/06/02/iOS%E4%B8%AD%E7%9A%84%E9%94%81/syn01.png" class="">
 
 <p>相同：这两个函数的作用差不多，都是把它前面和它后面的函数分隔开，使它前面的任务先执行，再执行它添加的任务，最后执行它后面的任务</p>
 <p>不同：提交任务的方式不同，一个是同步，一个是异步。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://juejin.im/post/5b4c179ee51d4518e3117c9f">iOS中常见的几种锁</a></li>
 <li><a target="_blank" rel="noopener" href="https://juejin.im/post/5a0a92996fb9a0451f307479">iOS多线程的锁</a></li>
 </ol>
@@ -370,7 +387,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E9%94%81-synchronized-NSLock"><span class="nav-number">1.</span> <span class="nav-text">互斥锁   (@synchronized,NSLock)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81"><span class="nav-number">2.</span> <span class="nav-text">自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OSSpinLock"><span class="nav-number">2.1.</span> <span class="nav-text">OSSpinLock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81%E5%92%8C%E4%BA%92%E6%96%A5%E9%94%81%E5%AF%B9%E6%AF%94"><span class="nav-number">2.2.</span> <span class="nav-text">自旋锁和互斥锁对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatch-Semaphore%EF%BC%88%E4%BF%A1%E5%8F%B7%E9%87%8F%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Dispatch Semaphore（信号量）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%94%81"><span class="nav-number">4.</span> <span class="nav-text">读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dispatch-barrier-async%E5%92%8Cdispatch-barrier-sync%EF%BC%88%E6%A0%85%E6%A0%8F%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">dispatch_barrier_async和dispatch_barrier_sync（栅栏）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">锁的分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#atomic-and-nonatomic"><span class="nav-number">2.</span> <span class="nav-text">atomic and nonatomic</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nonatomic%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.</span> <span class="nav-text">nonatomic简单实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#atomic%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.</span> <span class="nav-text">atomic简单实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E9%9D%A2%E4%B8%89%E4%B8%AA%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB-%EF%BC%9F"><span class="nav-number">2.3.</span> <span class="nav-text">下面三个有什么区别 ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%B8%AA%E5%B1%9E%E6%80%A7%E7%9A%84%E5%8E%9F%E5%AD%90%E6%80%A7%E4%B9%9F%E4%B8%8D%E8%83%BD%E4%BF%9D%E8%AF%81%E5%9C%A8%E4%BD%BF%E7%94%A8%E5%A4%9A%E4%B8%AA%E4%BE%9D%E8%B5%96%E5%B1%9E%E6%80%A7%E6%97%B6%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7%E3%80%82"><span class="nav-number">2.4.</span> <span class="nav-text">单个属性的原子性也不能保证在使用多个依赖属性时的线程安全性。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%92%E6%96%A5%E9%94%81-synchronized-NSLock"><span class="nav-number">3.</span> <span class="nav-text">互斥锁   (@synchronized,NSLock)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81"><span class="nav-number">4.</span> <span class="nav-text">自旋锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSSpinLock"><span class="nav-number">4.1.</span> <span class="nav-text">OSSpinLock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E6%97%8B%E9%94%81%E5%92%8C%E4%BA%92%E6%96%A5%E9%94%81%E5%AF%B9%E6%AF%94"><span class="nav-number">4.2.</span> <span class="nav-text">自旋锁和互斥锁对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dispatch-Semaphore%EF%BC%88%E4%BF%A1%E5%8F%B7%E9%87%8F%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">Dispatch Semaphore（信号量）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%94%81"><span class="nav-number">6.</span> <span class="nav-text">读写锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dispatch-barrier-async%E5%92%8Cdispatch-barrier-sync%EF%BC%88%E6%A0%85%E6%A0%8F%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">dispatch_barrier_async和dispatch_barrier_sync（栅栏）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -384,7 +401,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">160</span>
+          <span class="site-state-item-count">161</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
