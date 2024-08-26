@@ -813,7 +813,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%E4%B8%8D%E5%86%8D%E5%AE%89%E5%85%A8/">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -827,7 +827,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2020/05/02/OSSpinLock%E4%B8%8D%E5%86%8D%E5%AE%89%E5%85%A8/" class="post-title-link" itemprop="url">OSSpinLock 不再安全</a>
+            <a href="/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/" class="post-title-link" itemprop="url">OSSpinLock 与优先级反转</a>
         </h2>
 
         <div class="post-meta">
@@ -844,7 +844,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-25 14:01:41" itemprop="dateModified" datetime="2023-09-25T14:01:41+08:00">2023-09-25</time>
+                <time title="修改时间：2024-08-26 22:43:12" itemprop="dateModified" datetime="2024-08-26T22:43:12+08:00">2024-08-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -871,10 +871,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="OSSpinLock-不再安全"><a href="#OSSpinLock-不再安全" class="headerlink" title="OSSpinLock 不再安全"></a>OSSpinLock 不再安全</h2><p>主要原因发生在低优先级线程拿到锁时，高优先级线程进入忙等(busy-wait)状态，消耗大量 CPU 时间，从而导致低优先级线程拿不到 CPU 时间，也就无法完成任务并释放锁。这种问题被称为优先级反转。</p>
+          <h2 id="操作系统里的线程状态">操作系统里的线程状态</h2>
+<p><img src="./res/States-of-a-thread.png" alt=""></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/05/02/OSSpinLock%E4%B8%8D%E5%86%8D%E5%AE%89%E5%85%A8/#more" rel="contents">
+              <a class="btn" href="/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1140,7 +1141,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
