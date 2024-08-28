@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="虚拟内存和物理内存 计算机组成原理里可知，32位CPU对应32位OS，它的寻址空间是2的32次方，约为4GB，意味着在32位的计算机系统中，理论支持的物理最大寻址空间是4GB。 132位CPU只有32根地址总线，所以最大的寻址能力是2的32次方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS系统层内存管理">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="虚拟内存和物理内存 计算机组成原理里可知，32位CPU对应32位OS，它的寻址空间是2的32次方，约为4GB，意味着在32位的计算机系统中，理论支持的物理最大寻址空间是4GB。 132位CPU只有32根地址总线，所以最大的寻址能力是2的32次方">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/res/mmu.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/res/virtual_mem.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/res/killMem.png">
+<meta property="article:published_time" content="2020-05-16T00:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-28T00:30:05.508Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/res/mmu.png">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>iOS系统层内存管理 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iOS系统层内存管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-16 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-16T08:00:00+08:00">2020-05-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-28 08:30:05" itemprop="dateModified" datetime="2024-08-28T08:30:05+08:00">2024-08-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="虚拟内存和物理内存">虚拟内存和物理内存</h2>
+<p>计算机组成原理里可知，32位CPU对应32位OS，它的寻址空间是2的32次方，约为4GB，意味着在32位的计算机系统中，理论支持的物理最大寻址空间是4GB。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">32位CPU只有32根地址总线，所以最大的寻址能力是2的32次方</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h3 id="虚拟内存到物理内存的映射">虚拟内存到物理内存的映射</h3>
+<p><img src="./res/mmu.png" alt=""></p>
+<p>主要是两个寄存器起作用，界限寄存器用来判断是否越界，如果没有越界就会加上基址寄存器的值，转换为物理内存地址。</p>
+<p>虚拟内存是OS提供给进程使用的概念，而物理内存是CPU提供给OS的概念，从逻辑地址到物理地址最终由CPU中的内存管理单元MMU（Memory Management Unit）进行映射，这样每个进程都能有0x00000000～0xffffffff的寻址空间，物理RAM有限，所有进程分配的内存总量会超过物理RAM数量，有了虚拟内存，OS可以使用硬盘来缓存RAM中无法保存的数据</p>
+<blockquote>
+<p>iOS中没有内存置换的技术，这里讨论的是一般的OS，OSX或者Windows</p>
+</blockquote>
+<p><code>虚拟内存的意义如下：保护了每个进程的地址空间、简化了内存管理，利用硬盘空间扩展了内存空间</code></p>
+<h3 id="内存分页">内存分页</h3>
+<p>为了方便映射和管理，虚拟内存和物理内存都被分割成相同大小的单位，物理内存最小单位被称为帧（Frame），虚拟内存最小单位被称为页（Page）。</p>
+<p>物理内存是按照4kb为一帧被划分开，虚拟内存同样按照4kb为一页来划分，每页的字节数与每帧的字节数始终相同，这样便可以将进程中的每页无缝映射到物理RAM中的每帧。</p>
+<p><img src="./res/virtual_mem.png" alt=""></p>
+<p>虚拟内存这么划分的好处是，可以将进程中连续的地址空间映射到物理RAM中不连续的地址空间中（支持了物理内存的离散使用），这可以最大限度节省内存碎片的产生。当一个进程启动时，OS会创建一张表，来保存虚拟内存到物理RAM的映射关系，这个表被称为“分页表”，类似windwos中的HANDLE</p>
+<h3 id="进程中RAM被写满后怎么办？">进程中RAM被写满后怎么办？</h3>
+<p>在OS X中，会将某些不活跃的帧存到磁盘，但是在iOS中，由于没有内存置换技术，系统会直接将某些不活跃的帧清空！也就是进程在后台被系统杀死了，这主要是由于RAM和磁盘进行数据交换会极大的影响性能。</p>
+<h3 id="进程访问的地址找不到怎么办？">进程访问的地址找不到怎么办？</h3>
+<p>如果OS确定进程访问的地址是错误的，则报错，终止进程；如果进程访问的地址被保存到了磁盘上，OS首先分配一帧内存用来保存请求页，如果当前没有可用帧，将现有帧缓存到磁盘，腾出空间，然后将请求读到内存中，更新进程的页表，最后将控制权返回给进程。</p>
+<p>Resident Memory是进程的virtual memory中常驻物理RAM中的部分。</p>
+<h2 id="脏内存和干净内存">脏内存和干净内存</h2>
+<h3 id="Clean-Memory">Clean Memory</h3>
+<p><code>Clean memory is file-backed memory in which the contents are in sync with disk.</code></p>
+<p>对于一般的桌面系统，clean memory可以认为是能够进行Page Out（将优先级低的内存数据交换到磁盘上的操作）的部分。</p>
+<p>在iOS中Clean Memory由于在磁盘中有备份，能够再次读取，所以是可以被重新创建的内存，包括以下几种：</p>
+<ol>
+<li>system framework</li>
+<li>binary executable of your app</li>
+<li>memory mapped files</li>
+</ol>
+<p><code>一般来说，Clean Momory是只读的，clean在memory warning的时候可以被discard掉，然后recreate出来，例如JPEG图片被加载到内存中时，用的是mmap，是clean Memory</code></p>
+<h3 id="Dirty-Memory">Dirty Memory</h3>
+<p><code>Dirty memory is file-backed memory in which the contents have been modified but not yet written back to disk. The in-memory version of data is out of sync with the on-disk version and is said to be dirty. A mechanism called writeback will eventually update the on-disk version, bringing the two in sync.</code></p>
+<p>脏内存是磁盘上已经被修改但尚未回写到磁盘的内存：通常包括以下几种：</p>
+<ol>
+<li>Memory containing buffered writes that have not been flushed to disk yet</li>
+<li>Regions of memory mapped files that have been updated but not written out to disk yet.</li>
+<li>Pages that are in the process of being written to swap space but have changed since the system started writing them to swap space.</li>
+</ol>
+<p>在iOS中所有不是Clean Memory的内存都是脏内存，系统无法回收。主要包括以下几种：</p>
+<ol>
+<li>Heap allocation</li>
+<li>caches</li>
+<li>decompressed images</li>
+</ol>
+<p>当存在内存压力时，系统将卸载一些干净内存，当再次需要改内存时，系统将重新创建它们。但是对于脏内存，系统无法卸载他们，并且iOS没有交换机制，因此脏内存将始终保留在物理内存中，直到达到一定限制为止，然后你的应用被终止，并且所有内存将被回收给系统。</p>
+<p>eg：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSString</span>* str=[<span class="built_in">NSString</span> stringWIthUTF8String:<span class="string">@&quot;Helllo World&quot;</span>];</span><br><span class="line"><span class="built_in">NSString</span>* strConst=<span class="string">@&quot;Hello world Const&quot;</span>;</span><br><span class="line"><span class="built_in">UIImage</span>* wwdcLogo=[<span class="built_in">UIImage</span> imageNamed:<span class="string">@&quot;wwdclogo&quot;</span>];</span><br></pre></td></tr></table></figure>
+<ol>
+<li>动态分配在heap上的对象，为dirty momory，无法被回收</li>
+<li>字符串在编译的时候会被存放在代码段中的read-only常量区，是clean的</li>
+<li>UIImage是decommpress出来的data，是dirty memory</li>
+</ol>
+<p><code>既然iOS的脏内存无法被回收，那么我们释放对象的意义是什么？是为了方便脏内存压缩算法么？heap上释放之后的内存是什么内存，会不会被回收？</code></p>
+<h3 id="Private和Shared-Memory">Private和Shared Memory</h3>
+<p>RAM中可以被多个进程共享的部分称为Shared Memory，比如系统的Framework，它只映射一份代码到内存，这部分内存会被不同的进程公用，而每个进程单独alloc的内存，则是Pricate Memory</p>
+<h2 id="内存之间的关系">内存之间的关系</h2>
+<p>虚拟内存就是你的应用程序所需的全部内存<br>
+<code>virtual memory = clean memory + dirty memory.</code></p>
+<p>常驻内存是实际加载到物理内存中的内存（物理内存层面），它表示所有脏内存和部分干净内存<br>
+<code>resident memory = dirty memory + clean memory that loaded in physical memory</code></p>
+<p>你的程序有时候会因为系统内存不足而被杀死，这个时候应该更多关注物理内存层面</p>
+<h2 id="iOS内存管理机制">iOS内存管理机制</h2>
+<p>iOS系统中，App的基本内存管理原则是保证前台App的运行，可能回收后台App（传说中的假后台机制）</p>
+<p>iOS中的内存回收管理技术有以下几种：</p>
+<ol>
+<li>脏内存压缩技术–Compressed Memory</li>
+<li>内存警告机制–Responding to Memory Warnings</li>
+<li>低内存回收机制–Jstsam</li>
+</ol>
+<h3 id="Compressed-Memory">Compressed Memory</h3>
+<blockquote>
+<p>由于内存容量和读写寿命的限制，iOS没有Disk swap机制，取而代之使用Compressed memory。Disk swap是指mac OS以及一些其他桌面系统中，当内存可用资源紧张时，系统将内存中的内容写入磁盘中backing store（swaping out）并且在需要访问时从磁盘中再读入RAM（swaping in）。与大多数UNIX系统不同的是，macOS没有预先分配磁盘中的一部分作为backing store，而是利用引导分区所有可用的磁盘空间。</p>
+</blockquote>
+<blockquote>
+<p>苹果最初只是公开了从OS X Mavericks开始使用Compressed memory技术，但iOS系统也从iOS7开始悄悄地使用，从OS X Mavericks Core Technology Overview文档中可以了解到该技术在内存紧张时能够将最近使用过的内存占用压缩至原有大小的一半以下，并且能够在需要时解压复用，它在节省内存的同时提高了系统的响应速度，特点如下：</p>
+</blockquote>
+<ol>
+<li>Shrinks memory usage减少了不活跃内存占用</li>
+<li>Improves power efficiency改善电源效率，通过压缩减少磁盘IO带来的损耗</li>
+<li>Minimizes CPU usage压缩/解压十分迅速，能够尽可能减少CPU的时间开销</li>
+<li>Is multicore aware支持多核操作</li>
+</ol>
+<h3 id="内存警报">内存警报</h3>
+<p>在当压缩脏内存依然不解决问题，导致内存压力过大则会触发内存警报，可以通过以下四种途径获取警报：</p>
+<ol>
+<li>applicationDidReceviewMemoryWaring协议方法</li>
+<li>[UIViewController didReceiveMemoryWaring]实例方法</li>
+<li>UIApplicaitonDidReceiveMemoryWaringNotification内存警告通知</li>
+<li>DISPATCH_SOURCE_TYPE_MEMORYPRESSURE Dispatch触发源</li>
+</ol>
+<p>开发者收到内存警报后可以主动回收程序的内存空间，以达到缓解内存空间使用压力。假如App的占用内存还是控制不住的时候，最终将导致OOM（Out of Memory）崩溃，这个崩溃依赖于OS提供的低内存回收机制–Jetsam</p>
+<h3 id="Jetsam"><a target="_blank" rel="noopener" href="https://satanwoo.github.io/2017/10/18/abort/">Jetsam</a></h3>
+<p>iOS系统中存在一种系统级的内存回收服务（Jetsam）。它是一个常驻系统中的进程，在内核中的线程执行优先级比其他进程的执行优先级都要高，这也是它能够强制回收内存空间的缘故。</p>
+<p>低内存处理机制Jetsam，这是一个基于优先级队列的机制，</p>
+<p><img src="./res/killMem.png" alt=""></p>
+<p>优先级由低到高是：IDLE（空闲）－&gt;BACKGROUND－&gt;FOREGROUND,依次类推。当内存过低的时候，就会在队列中进行广播，希望大家尽量释放内存，如果一段时间后，仍然内存不够，就会开始Kill进程，直到内存够用</p>
+<h2 id="参考">参考</h2>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://hello-david.github.io/archives/e94ffa1c.html">iOS中的内存布局与管理</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/" rel="prev" title="OC内存管理实现">
+      <i class="fa fa-chevron-left"></i> OC内存管理实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/20/iOS%E9%80%86%E5%90%91%E6%94%BB%E9%98%B2/" rel="next" title="iOS逆向攻防">
+      iOS逆向攻防 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%92%8C%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98"><span class="nav-number">1.</span> <span class="nav-text">虚拟内存和物理内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%88%B0%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E7%9A%84%E6%98%A0%E5%B0%84"><span class="nav-number">1.1.</span> <span class="nav-text">虚拟内存到物理内存的映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%A1%B5"><span class="nav-number">1.2.</span> <span class="nav-text">内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E4%B8%ADRAM%E8%A2%AB%E5%86%99%E6%BB%A1%E5%90%8E%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-number">1.3.</span> <span class="nav-text">进程中RAM被写满后怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E8%AE%BF%E9%97%AE%E7%9A%84%E5%9C%B0%E5%9D%80%E6%89%BE%E4%B8%8D%E5%88%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">进程访问的地址找不到怎么办？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%84%8F%E5%86%85%E5%AD%98%E5%92%8C%E5%B9%B2%E5%87%80%E5%86%85%E5%AD%98"><span class="nav-number">2.</span> <span class="nav-text">脏内存和干净内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Clean-Memory"><span class="nav-number">2.1.</span> <span class="nav-text">Clean Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dirty-Memory"><span class="nav-number">2.2.</span> <span class="nav-text">Dirty Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Private%E5%92%8CShared-Memory"><span class="nav-number">2.3.</span> <span class="nav-text">Private和Shared Memory</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">3.</span> <span class="nav-text">内存之间的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">iOS内存管理机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Compressed-Memory"><span class="nav-number">4.1.</span> <span class="nav-text">Compressed Memory</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E8%AD%A6%E6%8A%A5"><span class="nav-number">4.2.</span> <span class="nav-text">内存警报</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Jetsam"><span class="nav-number">4.3.</span> <span class="nav-text">Jetsam</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
