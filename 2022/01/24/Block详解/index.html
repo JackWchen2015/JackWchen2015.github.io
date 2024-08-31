@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://github.com/2022/01/24/Block%E8%AF%A6%E8%A7%A3/blockType.png">
 <meta property="og:image" content="https://github.com/2022/01/24/Block%E8%AF%A6%E8%A7%A3/blockcopy.png">
 <meta property="article:published_time" content="2022-01-24T00:00:00.000Z">
-<meta property="article:modified_time" content="2023-09-25T01:57:36.917Z">
+<meta property="article:modified_time" content="2024-08-30T11:45:29.837Z">
 <meta property="article:author" content="Jack Chen">
 <meta property="article:tag" content="Block">
 <meta name="twitter:card" content="summary">
@@ -228,7 +228,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-09-25 09:57:36" itemprop="dateModified" datetime="2023-09-25T09:57:36+08:00">2023-09-25</time>
+                <time title="修改时间：2024-08-30 19:45:29" itemprop="dateModified" datetime="2024-08-30T19:45:29+08:00">2024-08-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -240,7 +240,7 @@
                 </span>
                   ，
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+                  <a href="/categories/iOS/Objective-C/" itemprop="url" rel="index"><span itemprop="name">Objective-C</span></a>
                 </span>
             </span>
 
@@ -256,14 +256,17 @@
 
       
         <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/Block.png" class="&#x3D;">
-
 <span id="more"></span>
-
-<h2 id="Block的使用"><a href="#Block的使用" class="headerlink" title="Block的使用"></a>Block的使用</h2><h3 id="是什么？"><a href="#是什么？" class="headerlink" title="是什么？"></a>是什么？</h3><p>块，封装了函数调用以及调用环境的OC对象</p>
-<h2 id="Block底层数据结构"><a href="#Block底层数据结构" class="headerlink" title="Block底层数据结构"></a>Block底层数据结构</h2><p>Block本质上也是一个OC对象，它内部也有个<code>isa</code>指针<br>Block是封装了函数调用以及调用环境的OC对象<br>Block底层数据结构如下图所示：</p>
+<h2 id="Block的使用">Block的使用</h2>
+<h3 id="是什么？">是什么？</h3>
+<p>块，封装了函数调用以及调用环境的OC对象</p>
+<h2 id="Block底层数据结构">Block底层数据结构</h2>
+<p>Block本质上也是一个OC对象，它内部也有个<code>isa</code>指针<br>
+Block是封装了函数调用以及调用环境的OC对象<br>
+Block底层数据结构如下图所示：</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/BlockStruct.png" class="&#x3D;">
-
-<h2 id="Block变量捕获机制"><a href="#Block变量捕获机制" class="headerlink" title="Block变量捕获机制"></a>Block变量捕获机制</h2><p>为了保证block内部能够正常访问外部变量，block有个变量捕获机制。</p>
+<h2 id="Block变量捕获机制">Block变量捕获机制</h2>
+<p>为了保证block内部能够正常访问外部变量，block有个变量捕获机制。</p>
 <ol>
 <li>对于全局变量，不会捕获到block内部，访问方式为直接访问</li>
 <li>对于auto类型的局部变量，会捕获到block内部，block内部会自动生成一个成员变量，用来存储这个变量的值，访问方式为值传递。</li>
@@ -271,28 +274,40 @@
 <li>对于对象类型的局部变量，block会连同它的所有权修饰符一起捕获</li>
 </ol>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/valueCapture.png" class="&#x3D;">
-
-<h3 id="为什么局部变量需要捕获，全局变量不用捕获呢？"><a href="#为什么局部变量需要捕获，全局变量不用捕获呢？" class="headerlink" title="为什么局部变量需要捕获，全局变量不用捕获呢？"></a>为什么局部变量需要捕获，全局变量不用捕获呢？</h3><ol>
+<h3 id="为什么局部变量需要捕获，全局变量不用捕获呢？">为什么局部变量需要捕获，全局变量不用捕获呢？</h3>
+<ol>
 <li>作用域的原因，全局变量哪里都可以直接访问，所有不用捕获</li>
 <li>局部变量，外部不能直接访问，所以需要捕获</li>
 <li>auto类型的局部变量可能会被销毁，其内存会消失，block将来执行代码的时候不可能再去访问那块内存，所以捕获其值</li>
 <li>static变量会一直保存在内存中，所以捕获其地址即可</li>
 </ol>
-<h3 id="对象类型的auto变量"><a href="#对象类型的auto变量" class="headerlink" title="对象类型的auto变量"></a>对象类型的auto变量</h3><p>当block内部访问了对象类型的auto变量时</p>
+<h3 id="对象类型的auto变量">对象类型的auto变量</h3>
+<p>当block内部访问了对象类型的auto变量时</p>
 <p>如果block是在堆上，将不会对auto变量产生强引用</p>
-<p>如果block被拷贝到堆上<br>① block 内部的 desc 结构体会新增两个函数：<br> <code>copy</code>（<code>__main_block_copy_0</code>，函数名命名规范同<code>__main_block_impl_0</code>）<br> <code>dispose</code>（__main_block_dispose_0）<br>② 会调用 block 内部的 copy 函数<br>③ copy 函数内部会调用<code>_Block_object_assign</code>函数<br>④ <code>_Block_object_assign</code>函数会根据 auto 变量的修饰符（__strong、__weak、__unsafe_unretained）做出相应的操作，形成强引用（retain）或者弱引用</p>
-<p>如果block从堆上移除<br>① 会调用 block 内部的 <code>dispose</code> 函数<br>② dispose 函数内部会调用<code>_Block_object_dispose</code>函数<br>③ <code>_Block_object_dispose</code>函数会自动释放引用的 auto 变量（release）</p>
+<p>如果block被拷贝到堆上<br>
+① block 内部的 desc 结构体会新增两个函数：<br>
+ <code>copy</code>（<code>__main_block_copy_0</code>，函数名命名规范同<code>__main_block_impl_0</code>）<br>
+ <code>dispose</code>（__main_block_dispose_0）<br>
+② 会调用 block 内部的 copy 函数<br>
+③ copy 函数内部会调用<code>_Block_object_assign</code>函数<br>
+④ <code>_Block_object_assign</code>函数会根据 auto 变量的修饰符（__strong、__weak、__unsafe_unretained）做出相应的操作，形成强引用（retain）或者弱引用</p>
+<p>如果block从堆上移除<br>
+① 会调用 block 内部的 <code>dispose</code> 函数<br>
+② dispose 函数内部会调用<code>_Block_object_dispose</code>函数<br>
+③ <code>_Block_object_dispose</code>函数会自动释放引用的 auto 变量（release）</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/objectCopy.png" class="&#x3D;">
-
-<h3 id="block"><a href="#block" class="headerlink" title="__block"></a>__block</h3><h4 id="block修饰符"><a href="#block修饰符" class="headerlink" title="__block修饰符"></a>__block修饰符</h4><ol>
+<h3 id="block">__block</h3>
+<h4 id="block修饰符">__block修饰符</h4>
+<ol>
 <li><code>__block </code>可以用于解决 block 内部无法修改 auto 变量值的问题；</li>
 <li><code>__block </code>不能修饰全局变量、静态变量；</li>
 <li>编译器会将 <code>__block</code> 变量包装成一个对象（<code>struct __Block_byref_age_0</code>（byref：按地址传递））；</li>
 <li>加 <code>__block</code> 修饰不会修改变量的性质，它还是 auto 变量；</li>
-<li>一般情况下，对被捕获变量进行赋值(赋值!&#x3D;使用)操作需要添加 <code>__block</code> 修饰符。比如给数组添加或者删除对象，就不用加 <code>__block</code> 修饰；</li>
+<li>一般情况下，对被捕获变量进行赋值(赋值!=使用)操作需要添加 <code>__block</code> 修饰符。比如给数组添加或者删除对象，就不用加 <code>__block</code> 修饰；</li>
 <li>在 MRC 下使用 <code>__block</code> 修饰对象类型，在 block 内部不会对该对象进行 retain 操作，所以在 MRC 环境下可以通过 <code>__block</code> 解决循环引用的问题。</li>
 </ol>
-<h4 id="block的-forwarding指针"><a href="#block的-forwarding指针" class="headerlink" title="__block的__forwarding指针"></a>__block的__forwarding指针</h4><p><code>__block</code> 的<code>__forwarding</code>指针存在的意义？</p>
+<h4 id="block的-forwarding指针">__block的__forwarding指针</h4>
+<p><code>__block</code> 的<code>__forwarding</code>指针存在的意义？</p>
 <p>为什么要通过 age 结构体里的<code>__forwarding</code>指针拿到 age 变量的值，而不直接 age 结构体拿到 age 变量的值呢？</p>
 <p><code>__block</code> 的<code>__forwarding</code>是指向自己本身的指针， 为了不论在任何内存位置，都可以顺利的访问同一个 <code>__block</code> 变量。</p>
 <ol>
@@ -302,42 +317,52 @@
 </ol>
 <p>这样不管我们访问的是栈上还是堆上的 <code>__block</code> 变量结构体，只要是通过<code>__forwarding</code>指针访问，都是访问到堆上的 <code>__block</code> 变量结构体；给 age 赋值，就肯定会赋值给堆上的那个 <code>__block</code> 变量中的 age</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/forwarding.png" class="&#x3D;">
-
-<h4 id="对象类型的auto变量、-block变量内存管理区别"><a href="#对象类型的auto变量、-block变量内存管理区别" class="headerlink" title="对象类型的auto变量、__block变量内存管理区别"></a>对象类型的auto变量、__block变量内存管理区别</h4><p>当 block 在栈上时，对它们都不会产生强引用<br>当 block 拷贝到堆上时，都会通过 copy 函数来处理它们</p>
+<h4 id="对象类型的auto变量、-block变量内存管理区别">对象类型的auto变量、__block变量内存管理区别</h4>
+<p>当 block 在栈上时，对它们都不会产生强引用<br>
+当 block 拷贝到堆上时，都会通过 copy 函数来处理它们</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/objectblock.png" class="&#x3D;">
-
 <p>当 block 从堆上移除时，都会通过 dispose 函数来释放它们</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/objectDispose.png" class="&#x3D;">
-
-<h4 id="被-block修饰的对象类型"><a href="#被-block修饰的对象类型" class="headerlink" title="被__block修饰的对象类型"></a>被__block修饰的对象类型</h4><ul>
+<h4 id="被-block修饰的对象类型">被__block修饰的对象类型</h4>
+<ul>
 <li>当 <code>__block</code> 变量在栈上时，不会对指向的对象产生强引用</li>
-<li>当 <code>__block</code> 变量被 copy 到堆时<br>①<code>__Block_byref_object_0</code>即 <code>__block</code> 变量内部会新增两个函数：<br> <code>copy</code>（__Block_byref_id_object_copy）<br> <code>dispose</code>（__Block_byref_id_object_dispose）<br>② 会调用 <code>__block</code> 变量内部的 <code>copy</code> 函数<br>③ <code>copy</code> 函数内部会调用_Block_object_assign函数<br>④ <code>_Block_object_assign</code>函数会根据所指向对象的修饰符（__strong、__weak、__unsafe_unretained）做出相应的操作，形成强引用（retain）或者弱引用（注意：这里仅限于 ARC 时会 retain，MRC 时不会 retain）</li>
-<li>如果 <code>__block</code> 变量从堆上移除<br>① 会调用 <code>__block</code> 变量内部的 dispose 函数<br>② dispose 函数内部会调用_Block_object_dispose函数<br>③ <code>_Block_object_dispose</code>函数会自动释放指向的对象（release）</li>
+<li>当 <code>__block</code> 变量被 copy 到堆时<br>
+①<code>__Block_byref_object_0</code>即 <code>__block</code> 变量内部会新增两个函数：<br>
+ <code>copy</code>（__Block_byref_id_object_copy）<br>
+ <code>dispose</code>（__Block_byref_id_object_dispose）<br>
+② 会调用 <code>__block</code> 变量内部的 <code>copy</code> 函数<br>
+③ <code>copy</code> 函数内部会调用_Block_object_assign函数<br>
+④ <code>_Block_object_assign</code>函数会根据所指向对象的修饰符（__strong、__weak、__unsafe_unretained）做出相应的操作，形成强引用（retain）或者弱引用（注意：这里仅限于 ARC 时会 retain，MRC 时不会 retain）</li>
+<li>如果 <code>__block</code> 变量从堆上移除<br>
+① 会调用 <code>__block</code> 变量内部的 dispose 函数<br>
+② dispose 函数内部会调用_Block_object_dispose函数<br>
+③ <code>_Block_object_dispose</code>函数会自动释放指向的对象（release）</li>
 </ul>
-<h2 id="Block类型"><a href="#Block类型" class="headerlink" title="Block类型"></a>Block类型</h2><p>block 有 3 种类型，可以通过调用 class 方法或者 isa 指针 查看具体类型，最终都是继承自 NSBlock 类型。</p>
+<h2 id="Block类型">Block类型</h2>
+<p>block 有 3 种类型，可以通过调用 class 方法或者 isa 指针 查看具体类型，最终都是继承自 NSBlock 类型。</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/blockType.png" class="&#x3D;">
-
 <p>每一种类型的 block 调用 copy 后的结果如下所示：</p>
 <img src="/2022/01/24/Block%E8%AF%A6%E8%A7%A3/blockcopy.png" class="&#x3D;">
-
-<h2 id="几个问题"><a href="#几个问题" class="headerlink" title="几个问题"></a>几个问题</h2><p>Q：block在给 NSMutableArray 添加或移除对象，需不需要添加 __block？</p>
+<h2 id="几个问题">几个问题</h2>
+<p>Q：block在给 NSMutableArray 添加或移除对象，需不需要添加 __block？</p>
 <p>不需要。</p>
 <p>Q：self 会不会捕获到 block 内部？</p>
 <p>会捕获。 OC 方法都有两个隐式参数，方法调用者self和方法名_cmd。 参数也是一种局部变量。</p>
 <p>Q：_name 会不会捕获到 block 内部？</p>
-<p>会捕获。不是将_name变量进行捕获，而是直接将self捕获到 block 内部，因为_name是 Person 类的成员变量，_name来自当前的对象&#x2F;方法调用者self（self-&gt;_name）。</p>
+<p>会捕获。不是将_name变量进行捕获，而是直接将self捕获到 block 内部，因为_name是 Person 类的成员变量，_name来自当前的对象/方法调用者self（self-&gt;_name）。</p>
 <p>如果使用self.name即调用self的getter方法，即给self对象发送一条消息，那还是要访问到self。self是局部变量，不是全局变量，所以self会捕获到 block 内部。</p>
 <p>Q：__block 修饰符使用注意点：</p>
 <p>在 MRC 下使用 <code>__block</code> 修饰对象类型，在 block 内部不会对该对象进行 retain 操作，所以在 MRC 环境下可以通过 <code>__block</code> 解决循环引用的问题。</p>
 <p>Q：解决在 block 内部通过弱指针访问对象成员时编译器报错的问题：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__<span class="keyword">weak</span> <span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;</span><br><span class="line"><span class="keyword">self</span>.block = ^&#123;</span><br><span class="line">    __<span class="keyword">strong</span> <span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf; <span class="comment">//避免执行过程中提前释放</span></span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%d&quot;</span>,strongSelf-&gt;age);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
 <p>Q：以下代码有问题吗？</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">__block <span class="type">id</span> weakSelf = <span class="keyword">self</span>;</span><br><span class="line"><span class="keyword">self</span>.block = ^&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%p&quot;</span>,weakSelf);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>在 MRC 下，不会产生循环引用；<br>在 ARC 下，会产生循环引用，导致内存泄漏，解决方案如下。</p>
+<p>在 MRC 下，不会产生循环引用；<br>
+在 ARC 下，会产生循环引用，导致内存泄漏，解决方案如下。</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">__block <span class="type">id</span> weakSelf = <span class="keyword">self</span>;</span><br><span class="line"><span class="keyword">self</span>.block = ^&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%p&quot;</span>,weakSelf);</span><br><span class="line">    weakSelf = <span class="literal">nil</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">self</span>.block();</span><br></pre></td></tr></table></figure>
 <p>缺点：必须要调用 block，而且 block 里要将指针置为 nil。如果一直不调用 block，对象就会一直保存在内存中，造成内存泄漏。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904070746996750">OC 底层探索 - Block 详解</a></p>
+<h2 id="参考">参考</h2>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904070746996750">OC 底层探索 - Block 详解</a></p>
 
     </div>
 
@@ -435,14 +460,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

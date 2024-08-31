@@ -207,10 +207,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-08-26 08:00:00 / 修改时间：17:17:19" itemprop="dateCreated datePublished" datetime="2024-08-26T08:00:00+08:00">2024-08-26</time>
+              <time title="创建时间：2024-08-26 08:00:00" itemprop="dateCreated datePublished" datetime="2024-08-26T08:00:00+08:00">2024-08-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-31 17:11:43" itemprop="dateModified" datetime="2024-08-31T17:11:43+08:00">2024-08-31</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -236,15 +242,19 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="并发编程的幕后"><a href="#并发编程的幕后" class="headerlink" title="并发编程的幕后"></a>并发编程的幕后</h2><p>随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是<strong>速度不一致问题</strong>。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。</p>
-<p>我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。</p>
+          <h2 id="并发编程的幕后">并发编程的幕后</h2>
+<p>随着CPU、内存和I/O设备的不断升级，它们之间一直存在着一个矛盾，就是<strong>速度不一致问题</strong>。CPU的速度高于内存，内存的速度又高于I/O设备。</p>
+<p>我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I/O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I/O设备，所以单单提升CPU的性能是不够的。</p>
 <p>为了最大化体现出CPU的性能，计算机底层主要做了三部分优化：</p>
 <ol>
-<li><p>CPU增加了缓存，比内存速度更快，平衡内存的速度</p>
+<li>
+<p>CPU增加了缓存，比内存速度更快，平衡内存的速度</p>
 </li>
-<li><p>操作系统增加了进程和线程，可以对CPU分时复用</p>
+<li>
+<p>操作系统增加了进程和线程，可以对CPU分时复用</p>
 </li>
-<li><p>编译程序会进行指令的重排，使缓存更好的发挥性能</p>
+<li>
+<p>编译程序会进行指令的重排，使缓存更好的发挥性能</p>
 </li>
 </ol>
 <p>我们平时的工作中其实一直都享受着这些优化后的成果，但同时他们也会导致一些很难找到原因的BUG。</p>
@@ -1111,14 +1121,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">

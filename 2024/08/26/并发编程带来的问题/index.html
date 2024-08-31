@@ -20,22 +20,22 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="并发编程的幕后随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是速度不一致问题。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。 我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。 为了最大化体现出CPU的性能，计算机底层主">
+  <meta name="description" content="并发编程的幕后 随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是速度不一致问题。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。 我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。 为了最大化体现出CPU的性能，计算机底层主要做了三部分优化：   CPU增加了缓">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并发编程带来的问题">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="并发编程的幕后随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是速度不一致问题。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。 我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。 为了最大化体现出CPU的性能，计算机底层主">
+<meta property="og:description" content="并发编程的幕后 随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是速度不一致问题。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。 我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。 为了最大化体现出CPU的性能，计算机底层主要做了三部分优化：   CPU增加了缓">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/res/multhread_visiable.png">
-<meta property="og:image" content="https://github.com/res/multhread_cores_visiable.png">
-<meta property="og:image" content="https://github.com/res/multhread_integer.png">
-<meta property="og:image" content="https://github.com/res/multhread_integer_problems.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/res/multhread_visiable.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/res/multhread_cores_visiable.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/res/multhread_integer.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/res/multhread_integer_problems.png">
 <meta property="article:published_time" content="2024-08-26T00:00:00.000Z">
-<meta property="article:modified_time" content="2024-08-26T09:17:19.944Z">
+<meta property="article:modified_time" content="2024-08-31T09:11:43.690Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/res/multhread_visiable.png">
+<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/res/multhread_visiable.png">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/">
 
@@ -216,10 +216,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-08-26 08:00:00 / 修改时间：17:17:19" itemprop="dateCreated datePublished" datetime="2024-08-26T08:00:00+08:00">2024-08-26</time>
+              <time title="创建时间：2024-08-26 08:00:00" itemprop="dateCreated datePublished" datetime="2024-08-26T08:00:00+08:00">2024-08-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-31 17:11:43" itemprop="dateModified" datetime="2024-08-31T17:11:43+08:00">2024-08-31</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -245,44 +251,56 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="并发编程的幕后"><a href="#并发编程的幕后" class="headerlink" title="并发编程的幕后"></a>并发编程的幕后</h2><p>随着CPU、内存和I&#x2F;O设备的不断升级，它们之间一直存在着一个矛盾，就是<strong>速度不一致问题</strong>。CPU的速度高于内存，内存的速度又高于I&#x2F;O设备。</p>
-<p>我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I&#x2F;O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I&#x2F;O设备，所以单单提升CPU的性能是不够的。</p>
+        <h2 id="并发编程的幕后">并发编程的幕后</h2>
+<p>随着CPU、内存和I/O设备的不断升级，它们之间一直存在着一个矛盾，就是<strong>速度不一致问题</strong>。CPU的速度高于内存，内存的速度又高于I/O设备。</p>
+<p>我们写的代码中大多数内容都会经过内存处理，有些内容会去读写I/O设备，根据木桶理论，整体的性能取决于最慢的操作，就是I/O设备，所以单单提升CPU的性能是不够的。</p>
 <p>为了最大化体现出CPU的性能，计算机底层主要做了三部分优化：</p>
 <ol>
-<li><p>CPU增加了缓存，比内存速度更快，平衡内存的速度</p>
+<li>
+<p>CPU增加了缓存，比内存速度更快，平衡内存的速度</p>
 </li>
-<li><p>操作系统增加了进程和线程，可以对CPU分时复用</p>
+<li>
+<p>操作系统增加了进程和线程，可以对CPU分时复用</p>
 </li>
-<li><p>编译程序会进行指令的重排，使缓存更好的发挥性能</p>
+<li>
+<p>编译程序会进行指令的重排，使缓存更好的发挥性能</p>
 </li>
 </ol>
 <p>我们平时的工作中其实一直都享受着这些优化后的成果，但同时他们也会导致一些很难找到原因的BUG。</p>
 <span id="more"></span>
-
-<h2 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h2><p>一个线程对共享变量的修改，另一个线程可以感知到，我们称其为可见性。</p>
+<h2 id="可见性">可见性</h2>
+<p>一个线程对共享变量的修改，另一个线程可以感知到，我们称其为可见性。</p>
 <p>在单核时代，其实是不存在可见性问题的，因为所有的线程都是在一个CPU中工作的，一个线程的写操作对于其他的线程一定是可见的。</p>
-<p><img src="/./res/multhread_visiable.png"></p>
+<p><img src="./res/multhread_visiable.png" alt=""></p>
 <p>但是多核CPU出现后，每个CPU都有自己的缓存，多个线程在不同的CPU中处理数据就会导致不可见问题。</p>
-<p><img src="/./res/multhread_cores_visiable.png"></p>
+<p><img src="./res/multhread_cores_visiable.png" alt=""></p>
 <p>假设变量v的值是1， 两个线程同时执行了v++操作，首先会从内存中读取变量v的数据到各自的CPU缓存中，这个时候两个CPU缓存中的v都是1，执行v++后，两个变量v都变成了2，然后再写回内存，内存中的变量v就变成了2。</p>
 <p>但其实我们想看到的结果v最终应该是3才对。</p>
 <p>在CPU1缓存中执行v++后，CPU2缓存无法感知的到，这就是可见性问题。而由于可见性问题导致的最终数据不正确，就是<strong>线程安全</strong>问题。</p>
-<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>由于I&#x2F;O的速度太慢，早期的操作系统发明了多进程，就是允许某个进程执行一小段时间后，重新选择一个进程来执行，这个过程叫做任务切换，而这一小段的时间我们称其为时间片。</p>
-<p><img src="/./res/multhread_integer.png"></p>
+<h2 id="原子性">原子性</h2>
+<p>由于I/O的速度太慢，早期的操作系统发明了多进程，就是允许某个进程执行一小段时间后，重新选择一个进程来执行，这个过程叫做任务切换，而这一小段的时间我们称其为时间片。</p>
+<p><img src="./res/multhread_integer.png" alt=""></p>
 <p>现在操作系统的任务切换一般指的是更轻量级的线程切换</p>
 <p>一般会在时间片结束的时候进行线程切换，java语言中执行的一段简单的代码往往需要多条CPU的指令实现，比如<code>count++</code>这部分代码，至少需要三条CPU指令：</p>
 <ol>
-<li><p>首先把<code>count</code>从内存中读取到CPU的寄存器中</p>
+<li>
+<p>首先把<code>count</code>从内存中读取到CPU的寄存器中</p>
 </li>
-<li><p>在寄存器中执行<code>+1</code>操作</p>
+<li>
+<p>在寄存器中执行<code>+1</code>操作</p>
 </li>
-<li><p>最后将<code>count</code>的值写入内存中（可能写入到CPU的缓存中）</p>
+<li>
+<p>最后将<code>count</code>的值写入内存中（可能写入到CPU的缓存中）</p>
 </li>
 </ol>
 <p>而<strong>线程切换是可以发生在任意的一条CPU指令执行之后</strong>的，注意，这里说的是CPU的指令，而不是java语言中的指令，对于上面的三条指令来说，我们假设 <code>count=0</code>，如果线程 A 在指令 1 执行完后做线程切换，线程 A 和线程 B 按照下图的顺序执行，那么我们会发现两个线程都执行了 <code>count++ </code>的操作，但是得到的结果不是我们期望的 2，而是 1。</p>
-<p><img src="/./res/multhread_integer_problems.png"></p>
+<p><img src="./res/multhread_integer_problems.png" alt=""></p>
 <p>这就是线程切换导致的数据错误问题，我们<strong>把一个或者多个操作在 CPU 执行的过程中不被中断的特性称为原子性</strong>，CPU 能保证的原子操作是 CPU 指令级别的，而不是高级语言的操作符，这是违背我们直觉的地方。因此，很多时候我们需要在高级语言层面保证操作的原子性(ObjC里的automic)。</p>
-<h2 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h2><p>有序性指的是程序按照代码的先后顺序执行。编译器为了优化性能，有时候会改变程序中语句的先后顺序，例如程序中：“<code>x=1；y=2；</code>”编译器优化后可能变成“<code>y=2；x=1；</code>”。</p>
+<blockquote>
+<p>这里就能回答iOS面试常见问题automic是否能保证线程安全？</p>
+</blockquote>
+<h2 id="有序性">有序性</h2>
+<p>有序性指的是程序按照代码的先后顺序执行。编译器为了优化性能，有时候会改变程序中语句的先后顺序，例如程序中：“<code>x=1；y=2；</code>”编译器优化后可能变成“<code>y=2；x=1；</code>”。</p>
 <p>在这个例子中，编译器调整了语句的顺序，但是不影响程序的最终结果。不过有时候调整了语句的顺序可能导致意想不到的 Bug。</p>
 <p>在 Java 领域一个经典的案例就是利用双重检查创建单例对象，代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Singleton</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> Singleton instance;</span><br><span class="line">  <span class="keyword">static</span> Singleton <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (instance == <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="keyword">synchronized</span>(Singleton.class) &#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="literal">null</span>)</span><br><span class="line">          instance = <span class="keyword">new</span> <span class="title class_">Singleton</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> instance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -290,34 +308,45 @@
 <p>这个过程看上去是不是无懈可击，没有漏洞？</p>
 <p>答案是否定的，问题就出在了<code>new</code>操作上，我们以为的<code>new</code>操作是这样的：</p>
 <ol>
-<li><p>分配一块内存空间</p>
+<li>
+<p>分配一块内存空间</p>
 </li>
-<li><p>在这块内存空间上初始化Singleton实例对象</p>
+<li>
+<p>在这块内存空间上初始化Singleton实例对象</p>
 </li>
-<li><p>把这个对象的内存地址赋值给instance变量</p>
+<li>
+<p>把这个对象的内存地址赋值给instance变量</p>
 </li>
 </ol>
 <p>但实际上由于指令重排，优化后的过程是这样的：</p>
 <ol>
-<li><p>分配一块内存空间</p>
+<li>
+<p>分配一块内存空间</p>
 </li>
-<li><p>把这快内存空间的内存地址赋值给instance变量</p>
+<li>
+<p>把这快内存空间的内存地址赋值给instance变量</p>
 </li>
-<li><p>在这块内存空间上初始化Singleton实例对象</p>
+<li>
+<p>在这块内存空间上初始化Singleton实例对象</p>
 </li>
 </ol>
 <p>那么这样调换顺序后会发生什么呢？</p>
 <p>我们假设线程 A 先执行 <code>getInstance()</code> 方法，当执行完指令 2 时恰好发生了线程切换，切换到了线程 B 上；如果此时线程 B 也执行 <code>getInstance()</code> 方法，那么线程 B 在执行第一个判断时会发现 <code>instance != null</code> ，所以直接返回 <code>instance</code>，而此时的 instance 是没有初始化过的，如果我们这个时候访问 instance 的成员变量就可能触发空指针异常。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>使用并发编程开发，往往会出现很多难以找到原因的BUG，通过对可见性、有序性和原子性的分析，可以为我们排查并发导致的BUG提供一些思路。</p>
+<h2 id="总结">总结</h2>
+<p>使用并发编程开发，往往会出现很多难以找到原因的BUG，通过对可见性、有序性和原子性的分析，可以为我们排查并发导致的BUG提供一些思路。</p>
 <ol>
-<li><p>CPU缓存会导致可见性</p>
+<li>
+<p>CPU缓存会导致可见性</p>
 </li>
-<li><p>指令重排会导致有序性</p>
+<li>
+<p>指令重排会导致有序性</p>
 </li>
-<li><p>线程切换会导致原子性</p>
+<li>
+<p>线程切换会导致原子性</p>
 </li>
 </ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1751728">可见性、有序性和原子性？</a></p>
+<h2 id="参考">参考</h2>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1751728">可见性、有序性和原子性？</a></p>
 
     </div>
 
@@ -409,14 +438,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">164</span>
+          <span class="site-state-item-count">166</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
