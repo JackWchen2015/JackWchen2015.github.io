@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Switch switch 语句会尝试把某个值与若干个模式（pattern）进行匹配。根据第一个匹配成功的模式，switch 语句会执行对应的代码。当有可能的情况较多时，通常用 switch 语句替换 if 语句。 123456789switch &lt;#some value to consider#&gt; &amp;#123;case &lt;#value 1#&gt;:    &lt;#respo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swift语法遗珠">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Switch switch 语句会尝试把某个值与若干个模式（pattern）进行匹配。根据第一个匹配成功的模式，switch 语句会执行对应的代码。当有可能的情况较多时，通常用 switch 语句替换 if 语句。 123456789switch &lt;#some value to consider#&gt; &amp;#123;case &lt;#value 1#&gt;:    &lt;#respo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/privateset.webp">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/privateset2.webp">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/initializerDelegation01@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/initializerDelegation02@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/twoPhaseInitialization01@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/twoPhaseInitialization02@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/initializersExample01@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/initializersExample02@2x.png">
+<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/initializersExample03@2x.png">
+<meta property="article:published_time" content="2024-06-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-01T08:41:26.596Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/res/privateset.webp">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Swift语法遗珠 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2024/06/26/Swift%E8%AF%AD%E6%B3%95%E9%81%97%E7%8F%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Swift语法遗珠
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-06-26 00:00:00" itemprop="dateCreated datePublished" datetime="2024-06-26T00:00:00+08:00">2024-06-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-09-01 16:41:26" itemprop="dateModified" datetime="2024-09-01T16:41:26+08:00">2024-09-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/Swift/" itemprop="url" rel="index"><span itemprop="name">Swift</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>Switch</h1>
+<p>switch 语句会尝试把某个值与若干个模式（pattern）进行匹配。根据第一个匹配成功的模式，switch 语句会执行对应的代码。当有可能的情况较多时，通常用 switch 语句替换 if 语句。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> <span class="operator">&lt;</span>#some value to consider#<span class="operator">&gt;</span> &#123;</span><br><span class="line"><span class="keyword">case</span> <span class="operator">&lt;</span>#value <span class="number">1</span>#<span class="operator">&gt;</span>:</span><br><span class="line">    <span class="operator">&lt;</span>#respond to value <span class="number">1</span>#<span class="operator">&gt;</span></span><br><span class="line"><span class="keyword">case</span> <span class="operator">&lt;</span>#value <span class="number">2</span>#<span class="operator">&gt;</span>,</span><br><span class="line">    <span class="operator">&lt;</span>#value <span class="number">3</span>#<span class="operator">&gt;</span>:</span><br><span class="line">    <span class="operator">&lt;</span>#respond to value <span class="number">2</span> or <span class="number">3</span>#<span class="operator">&gt;</span></span><br><span class="line"><span class="keyword">default</span>:</span><br><span class="line">    <span class="operator">&lt;</span>#otherwise, <span class="keyword">do</span> something <span class="keyword">else</span>#<span class="operator">&gt;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h1>元组</h1>
+<p>三种使用场景（模式匹配、返回值和解构）</p>
+<p>元组允许你把不同类型的数据结合到一起。它是可变的</p>
+<h1>枚举</h1>
+<p>如果枚举成员的实例有原始值，那么这些值是在声明的时候就已经决定了，这意味着不同枚举实例的枚举成员总会有一个相同的原始值。</p>
+<p>当然我们也可以为枚举成员设定关联值，关联值是在创建实例时决定的。这意味着同一枚举成员不同实例的关联值可以不相同。你可以把关联值想象成枚举成员实例的存储属性。</p>
+<h1>可选</h1>
+<p>可以包含多个可选绑定或多个布尔条件在一个 if 语句中，只要使用逗号分开就行。只要有任意一个可选绑定的值为 nil，或者任意一个布尔条件为 false，则整个 if 条件判断为 false。下面的两个 if 语句是等价的：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> firstNumber <span class="operator">=</span> <span class="type">Int</span>(<span class="string">&quot;4&quot;</span>), <span class="keyword">let</span> secondNumber <span class="operator">=</span> <span class="type">Int</span>(<span class="string">&quot;42&quot;</span>), firstNumber <span class="operator">&lt;</span> secondNumber <span class="operator">&amp;&amp;</span> secondNumber <span class="operator">&lt;</span> <span class="number">100</span> &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;<span class="subst">\(firstNumber)</span> &lt; <span class="subst">\(secondNumber)</span> &lt; 100&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出“4 &lt; 42 &lt; 100”</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">let</span> firstNumber <span class="operator">=</span> <span class="type">Int</span>(<span class="string">&quot;4&quot;</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">let</span> secondNumber <span class="operator">=</span> <span class="type">Int</span>(<span class="string">&quot;42&quot;</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> firstNumber <span class="operator">&lt;</span> secondNumber <span class="operator">&amp;&amp;</span> secondNumber <span class="operator">&lt;</span> <span class="number">100</span> &#123;</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;<span class="subst">\(firstNumber)</span> &lt; <span class="subst">\(secondNumber)</span> &lt; 100&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出“4 &lt; 42 &lt; 100”</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在 if 条件语句中使用常量和变量来创建一个可选绑定，仅在 if 语句的句中（body）中才能获取到值。相反，在 guard 语句中使用常量和变量来创建一个可选绑定，仅在 guard 语句外且在语句后才能获取到值。</p>
+</blockquote>
+<h2 id="提前退出">提前退出</h2>
+<p>像 if 语句一样，guard 的执行取决于一个表达式的布尔值。可以使用 <code>guard</code> 语句来要求条件必须为真时，以执行 guard 语句后的代码。不同于 if 语句，一个 guard 语句总是有一个 else 从句，如果条件不为真则执行 else 从句中的代码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">greet</span>(<span class="params">person</span>: [<span class="params">String</span>: <span class="type">String</span>]) &#123;</span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> name <span class="operator">=</span> person[<span class="string">&quot;name&quot;</span>] <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Hello <span class="subst">\(name)</span>!&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">guard</span> <span class="keyword">let</span> location <span class="operator">=</span> person[<span class="string">&quot;location&quot;</span>] <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;I hope the weather is nice near you.&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;I hope the weather is nice in <span class="subst">\(location)</span>.&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">greet(person: [<span class="string">&quot;name&quot;</span>: <span class="string">&quot;John&quot;</span>])</span><br><span class="line"><span class="comment">// 输出“Hello John!”</span></span><br><span class="line"><span class="comment">// 输出“I hope the weather is nice near you.”</span></span><br><span class="line">greet(person: [<span class="string">&quot;name&quot;</span>: <span class="string">&quot;Jane&quot;</span>, <span class="string">&quot;location&quot;</span>: <span class="string">&quot;Cupertino&quot;</span>])</span><br><span class="line"><span class="comment">// 输出“Hello Jane!”</span></span><br><span class="line"><span class="comment">// 输出“I hope the weather is nice in Cupertino.”</span></span><br></pre></td></tr></table></figure>
+<h1>函数</h1>
+<p>函数可以嵌套。被嵌套的函数可以访问外侧函数的变量，你可以使用嵌套函数来重构一个太长或者太复杂的函数。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">returnFifteen</span>() -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> y <span class="operator">=</span> <span class="number">10</span></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">add</span>() &#123;</span><br><span class="line">        y <span class="operator">+=</span> <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">    add()</span><br><span class="line">    <span class="keyword">return</span> y</span><br><span class="line">&#125;</span><br><span class="line">returnFifteen()</span><br></pre></td></tr></table></figure>
+<p>函数是第一等类型，这意味着函数可以作为另一个函数的返回值。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">makeIncrementer</span>() -&gt; ((<span class="type">Int</span>) -&gt; <span class="type">Int</span>) &#123;</span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">addOne</span>(<span class="params">number</span>: <span class="type">Int</span>) -&gt; <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span> <span class="operator">+</span> number</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> addOne</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> increment <span class="operator">=</span> makeIncrementer()</span><br><span class="line">increment(<span class="number">7</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>函数实际上是一种特殊的闭包</strong>:它是一段能之后被调取的代码。闭包中的代码能访问闭包作用域中的变量和函数，即使闭包是在一个不同的作用域被执行的——你已经在嵌套函数的例子中看过了。你可以使用 <code>&#123;&#125;</code> 来创建一个匿名闭包。使用 <code>in</code> 将参数和返回值类型的声明与闭包函数体进行分离。</p>
+<p>如果一个闭包的类型已知，比如作为一个代理的回调，你可以忽略参数，返回值，甚至两个都忽略。单个语句闭包会把它语句的值当做结果返回。</p>
+<h1>闭包</h1>
+<p>闭包采用如下三种形式之一：</p>
+<ul>
+<li>全局函数是一个有名字但不会捕获任何值的闭包</li>
+<li>嵌套函数是一个有名字并可以捕获其封闭函数域内值的闭包</li>
+<li>闭包表达式是一个利用轻量级语法所写的可以捕获其上下文中变量或常量值的匿名闭包</li>
+</ul>
+<p>Swift 的闭包表达式拥有简洁的风格，并鼓励在常见场景中进行语法优化，主要优化如下：</p>
+<ul>
+<li>利用上下文推断参数和返回值类型</li>
+<li>隐式返回单表达式闭包，即单表达式闭包可以省略 return 关键字</li>
+<li>参数名称缩写</li>
+<li>尾随闭包语法</li>
+</ul>
+<h2 id="闭包表达式">闭包表达式</h2>
+<p>闭包表达式是一种构建内联闭包的方式，它的语法简洁。在保证不丢失它语法清晰明了的同时，闭包表达式提供了几种优化的语法简写形式。下面通过对 <code>sorted(by:)</code> 这一个案例的多次迭代改进来展示这个过程，每次迭代都使用了更加简明的方式描述了相同功能。。</p>
+<p>下面的闭包表达式示例使用 <code>sorted(by:) </code>方法对一个 <code>String</code> 类型的数组进行字母逆序排序。以下是初始数组：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> names <span class="operator">=</span> [<span class="string">&quot;Chris&quot;</span>, <span class="string">&quot;Alex&quot;</span>, <span class="string">&quot;Ewa&quot;</span>, <span class="string">&quot;Barry&quot;</span>, <span class="string">&quot;Daniella&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>该例子对一个 <code>String</code> 类型的数组进行排序，因此排序闭包函数类型需为<code> (String, String) -&gt; Bool</code>。</p>
+<h3 id="闭包函数">闭包函数</h3>
+<p>提供排序闭包函数的一种方式是撰写一个符合其类型要求的普通函数，并将其作为<code> sorted(by:)</code> 方法的参数传入：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">backward</span>(<span class="keyword">_</span> <span class="params">s1</span>: <span class="type">String</span>, <span class="keyword">_</span> <span class="params">s2</span>: <span class="type">String</span>) -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> s1 <span class="operator">&gt;</span> s2</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> reversedNames <span class="operator">=</span> names.sorted(by: backward)</span><br><span class="line"><span class="comment">// reversedNames 为 [&quot;Ewa&quot;, &quot;Daniella&quot;, &quot;Chris&quot;, &quot;Barry&quot;, &quot;Alex&quot;]</span></span><br></pre></td></tr></table></figure>
+<h3 id="闭包表达式-2">闭包表达式</h3>
+<p>闭包表达式语法有如下的一般形式：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; (parameters) -&gt; <span class="keyword">return</span> type <span class="keyword">in</span></span><br><span class="line">    statements</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>闭包表达式参数 可以是 <code>in-out</code> 参数，但不能设定默认值。如果你命名了可变参数，也可以使用此可变参数。元组也可以作为参数和返回值。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: &#123; (s1: <span class="type">String</span>, s2: <span class="type">String</span>) -&gt; <span class="type">Bool</span> <span class="keyword">in</span></span><br><span class="line">    <span class="keyword">return</span> s1 <span class="operator">&gt;</span> s2</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>闭包的函数体部分由关键字 in 引入。该关键字表示闭包的参数和返回值类型定义已经完成，闭包函数体即将开始。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: &#123; (s1: <span class="type">String</span>, s2: <span class="type">String</span>) -&gt; <span class="type">Bool</span> <span class="keyword">in</span> <span class="keyword">return</span> s1 <span class="operator">&gt;</span> s2 &#125; )</span><br></pre></td></tr></table></figure>
+<h3 id="根据上下文推断类型​">根据上下文推断类型​</h3>
+<p>因为排序闭包函数是作为 <code>sorted(by:)</code> 方法的参数传入的，<code>Swift</code> 可以推断其参数和返回值的类型。<code>sorted(by:) </code>方法被一个字符串数组调用，因此其参数必须是 <code>(String, String) -&gt; Bool </code>类型的函数。这意味着 <code>(String, String)</code> 和 <code>Bool</code> 类型并不需要作为闭包表达式定义的一部分。因为所有的类型都可以被正确推断，返回箭头<code>（-&gt;）</code>和围绕在参数周围的括号也可以被省略：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: &#123; s1, s2 <span class="keyword">in</span> <span class="keyword">return</span> s1 <span class="operator">&gt;</span> s2 &#125; )</span><br></pre></td></tr></table></figure>
+<h3 id="单表达式闭包的隐式返回​">单表达式闭包的隐式返回​</h3>
+<p>单行表达式闭包可以通过省略 <code>return</code> 关键字来隐式返回单行表达式的结果，如上版本的例子可以改写为：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: &#123; s1, s2 <span class="keyword">in</span> s1 <span class="operator">&gt;</span> s2 &#125; )</span><br></pre></td></tr></table></figure>
+<h3 id="参数名称缩写​">参数名称缩写​</h3>
+<p>Swift 自动为内联闭包提供了参数名称缩写功能，你可以直接通过 <code>$0</code>，<code>$1</code>，<code>$2</code> 来顺序调用闭包的参数，以此类推。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: &#123; <span class="variable">$0</span> <span class="operator">&gt;</span> <span class="variable">$1</span> &#125; )</span><br></pre></td></tr></table></figure>
+<h3 id="运算符方法​">运算符方法​</h3>
+<p>实际上还有一种更简短的方式来编写上面例子中的闭包表达式。Swift 的 String 类型定义了关于大于号（&gt;）的字符串实现，其作为一个函数接受两个 String 类型的参数并返回 Bool 类型的值。而这正好与 sorted(by:) 方法的参数需要的函数类型相符合。因此，你可以简单地传递一个大于号，Swift 可以自动推断找到系统自带的那个字符串函数的实现：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted(by: <span class="operator">&gt;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="尾随闭包​">尾随闭包​</h2>
+<p>如果你需要将一个很长的闭包表达式作为最后一个参数传递给函数，将这个闭包替换成为尾随闭包的形式很有用。尾随闭包是一个书写在函数圆括号之后的闭包表达式，函数支持将其作为最后一个参数调用。在使用尾随闭包时，你不用写出它的参数标签：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted() &#123; <span class="variable">$0</span> <span class="operator">&gt;</span> <span class="variable">$1</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>如果闭包表达式是函数或方法的唯一参数，则当你使用尾随闭包时，你甚至可以把 () 省略掉：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reversedNames <span class="operator">=</span> names.sorted &#123; <span class="variable">$0</span> <span class="operator">&gt;</span> <span class="variable">$1</span> &#125;</span><br></pre></td></tr></table></figure>
+<h1>函数和闭包</h1>
+<ul>
+<li>
+<p>简单来说，闭包是一个代码块，它可以从周围的作用域捕获变量值。</p>
+</li>
+<li>
+<p>简单来说，函数是静态定义的代码块，可以使用其周围作用域中的变量值。</p>
+</li>
+</ul>
+<p>请注意，至少在概念层面上，这些几乎是完全相同的东西。不同之处在于，函数传统上是在定义它们的范围内调用的，而闭包则可能在远离它们的定义点的地方调用。这就是<strong>函数用使用而闭包用捕获</strong>，其周围环境的相关部分的原因（<strong>That’s why functions use, but closures capture, the relevant parts of their surrounding environment</strong>）。闭包类似于<code>c</code>风格的回调，不同之处在于它不需要单独的“<code>context</code>”参数，而是内置了自己的上下文。</p>
+<p>在<code>Swift</code>中，函数(包括方法)在语义上只是一个带有静态名称的闭包——你可以在任何需要闭包参数的地方传递函数名，前提是类型签名是正确的。编译器负责平滑**“使用”<strong>和</strong>“捕获”**之间的差异。</p>
+<h1>属性</h1>
+<h2 id="延时加载存储属性">延时加载存储属性</h2>
+<p>延时加载存储属性是指当第一次被调用的时候才会计算其初始值的属性。在属性声明前使用 <code>lazy</code> 来标示一个延时加载存储属性。</p>
+<blockquote>
+<p>必须将延时加载属性声明成变量（使用 var 关键字），因为属性的初始值可能在实例构造完成之后才会得到。而常量属性在构造过程完成之前必须要有初始值，因此无法声明成延时加载。</p>
+</blockquote>
+<h2 id="应用场景">应用场景</h2>
+<p>当属性的值依赖于一些外部因素且这些外部因素只有在构造过程结束之后才会知道的时候，延时加载属性就会很有用。</p>
+<p>或者当获得属性的值因为需要复杂或者大量的计算，而需要采用需要的时候再计算的方式，延时加载属性也会很有用。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DataImporter</span> &#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    DataImporter 是一个负责将外部文件中的数据导入的类。</span></span><br><span class="line"><span class="comment">    这个类的初始化会消耗不少时间。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">var</span> fileName <span class="operator">=</span> <span class="string">&quot;data.txt&quot;</span></span><br><span class="line">    <span class="comment">// 这里会提供数据导入功能</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DataManager</span> &#123;</span><br><span class="line">    <span class="keyword">lazy</span> <span class="keyword">var</span> importer <span class="operator">=</span> <span class="type">DataImporter</span>()</span><br><span class="line">    <span class="keyword">var</span> data: [<span class="type">String</span>] <span class="operator">=</span> []</span><br><span class="line">    <span class="comment">// 这里会提供数据管理功能</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> manager <span class="operator">=</span> <span class="type">DataManager</span>()</span><br><span class="line">manager.data.append(<span class="string">&quot;Some data&quot;</span>)</span><br><span class="line">manager.data.append(<span class="string">&quot;Some more data&quot;</span>)</span><br><span class="line"><span class="comment">// DataImporter 实例的 importer 属性还没有被创建</span></span><br></pre></td></tr></table></figure>
+<p>由于使用了 <code>lazy</code>，<code>DataImporter</code> 的实例 <code>importer</code> 属性只有在第一次被访问的时候才被创建。比如访问它的属性 <code>fileName</code> 时：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(manager.importer.fileName)</span><br><span class="line"><span class="comment">// DataImporter 实例的 importer 属性现在被创建了</span></span><br><span class="line"><span class="comment">// 输出“data.txt”</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果一个被标记为 <code>lazy</code> 的属性在没有初始化时就同时被多个线程访问，则无法保证该属性只会被初始化一次。</p>
+</blockquote>
+<h2 id="private-set-–-Public-getter-and-Private-setter">private(set) – Public getter and Private setter</h2>
+<p>What would you do if you want to make a Class or Struct property publicly accessible but not settable?</p>
+<p><img src="./res/privateset.webp" alt=""><br>
+But recently i came across new and awesome way to do this in a single line like<br>
+<img src="./res/privateset2.webp" alt=""></p>
+<p>Attach “set” keyword to the access modifier and go.Example, you could add set to internal property to make them not settable from outside your module.</p>
+<h1>方法</h1>
+<p>方法是与某些特定类型相关联的函数</p>
+<h1>构造器</h1>
+<h2 id="类类型的构造器代理">类类型的构造器代理</h2>
+<p>为了简化指定构造器和便利构造器之间的调用关系，Swift 构造器之间的代理调用遵循以下三条规则：</p>
+<ol>
+<li>指定构造器必须调用其直接父类的的指定构造器。</li>
+<li>便利构造器必须调用同类中定义的其它构造器。</li>
+<li>便利构造器最后必须调用指定构造器。</li>
+</ol>
+<p>一个更方便记忆的方法是：</p>
+<ul>
+<li>指定构造器必须总是向上代理</li>
+<li>便利构造器必须总是横向代理</li>
+</ul>
+<p><img src="./res/initializerDelegation01@2x.png" alt=""></p>
+<p>下面图例中展示了一种涉及四个类的更复杂的类层级结构。它演示了指定构造器是如何在类层级中充当“漏斗”的作用，在类的构造器链上简化了类之间的相互关系。</p>
+<p><img src="./res/initializerDelegation02@2x.png" alt=""></p>
+<h2 id="两段式构造过程​">两段式构造过程​</h2>
+<p>Swift 中类的构造过程包含两个阶段。<br>
+第一个阶段，类中的每个存储型属性赋一个初始值。当每个存储型属性的初始值被赋值后，<br>
+第二阶段开始，它给每个类一次机会，在新实例准备使用之前进一步自定义它们的存储型属性。</p>
+<blockquote>
+<p>Swift 的两段式构造过程跟 Objective-C 中的构造过程类似。最主要的区别在于阶段 1，Objective-C 给每一个属性赋值 0 或空值（比如说 0 或 nil）。Swift 的构造流程则更加灵活，它允许你设置定制的初始值，并自如应对某些属性不能以 0 或 nil 作为合法默认值的情况。</p>
+</blockquote>
+<p>Swift 编译器将执行 4 种有效的安全检查，以确保两段式构造过程不出错地完成：</p>
+<ol>
+<li>指定构造器必须保证它所在类的所有属性都必须先初始化完成，之后才能将其它构造任务向上代理给父类中的构造器。</li>
+</ol>
+<p>如上所述，一个对象的内存只有在其所有存储型属性确定之后才能完全初始化。为了满足这一规则，指定构造器必须保证它所在类的属性在它往上代理之前先完成初始化。</p>
+<ol start="2">
+<li>
+<p>指定构造器必须在为继承的属性设置新值之前向上代理调用父类构造器。如果没这么做，指定构造器赋予的新值将被父类中的构造器所覆盖。</p>
+</li>
+<li>
+<p>便利构造器必须为任意属性（包括所有同类中定义的）赋新值之前代理调用其它构造器。如果没这么做，便利构造器赋予的新值将被该类的指定构造器所覆盖。</p>
+</li>
+<li>
+<p>构造器在第一阶段构造完成之前，不能调用任何实例方法，不能读取任何实例属性的值，不能引用 self 作为一个值。</p>
+</li>
+</ol>
+<p>类的实例在第一阶段结束以前并不是完全有效的。只有<strong>第一阶段完成后，类的实例才是有效的，才能访问属性和调用方法</strong>。</p>
+<p>以下是基于上述安全检查的两段式构造过程展示：</p>
+<h3 id="阶段-1​">阶段 1​</h3>
+<ul>
+<li>类的某个指定构造器或便利构造器被调用。</li>
+<li>完成类的新实例内存的分配，但此时内存还没有被初始化。</li>
+<li>指定构造器确保其所在类引入的所有存储型属性都已赋初值。存储型属性所属的内存完成初始化。</li>
+<li>指定构造器切换到父类的构造器，对其存储属性完成相同的任务。</li>
+<li>这个过程沿着类的继承链一直往上执行，直到到达继承链的最顶部。</li>
+<li>当到达了继承链最顶部，而且继承链的最后一个类已确保所有的存储型属性都已经赋值，这个实例的内存被认为已经完全初始化。此时阶段 1 完成。</li>
+</ul>
+<h3 id="阶段-2​">阶段 2​</h3>
+<ul>
+<li>从继承链顶部往下，继承链中每个类的指定构造器都有机会进一步自定义实例。构造器此时可以访问 self、修改它的属性并调用实例方法等等。</li>
+<li>最终，继承链中任意的便利构造器有机会自定义实例和使用 self。</li>
+</ul>
+<p>下图展示了在假定的子类和父类之间的构造阶段 1：</p>
+<p><img src="./res/twoPhaseInitialization01@2x.png" alt=""></p>
+<p>以下展示了相同构造过程的阶段 2：</p>
+<p><img src="./res/twoPhaseInitialization02@2x.png" alt=""></p>
+<p>父类中的指定构造器现在有机会进一步自定义实例（尽管这不是必须的）。</p>
+<p>一旦父类中的指定构造器完成调用，子类中的指定构造器可以执行更多的自定义操作（这也不是必须的）。</p>
+<p>最终，一旦子类的指定构造器完成调用，最开始被调用的便利构造器可以执行更多的自定义操作。</p>
+<h2 id="构造器的继承和重写​">构造器的继承和重写​</h2>
+<p>跟 Objective-C 中的子类不同，Swift 中的子类默认情况下不会继承父类的构造器。</p>
+<h2 id="构造器的自动继承​">构造器的自动继承​</h2>
+<p>假设你为子类中引入的所有新属性都提供了默认值，以下 2 个规则将适用：</p>
+<ol>
+<li>如果子类没有定义任何指定构造器，它将自动继承父类所有的指定构造器。</li>
+<li>如果子类提供了所有父类指定构造器的实现——无论是通过规则 1 继承过来的，还是提供了自定义实现——它将自动继承父类所有的便利构造器。</li>
+</ol>
+<h2 id="指定构造器和便利构造器实践​">指定构造器和便利构造器实践​</h2>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Food</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> name: <span class="type">String</span></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">name</span>: <span class="type">String</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.name <span class="operator">=</span> name</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">convenience</span> <span class="keyword">init</span>() &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(name: <span class="string">&quot;[Unnamed]&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下图中展示了 Food 的构造器链：</p>
+<p><img src="./res/initializersExample01@2x.png" alt=""></p>
+<p>层级中的第二个类是 Food 的子类 RecipeIngredient。RecipeIngredient 类用来表示食谱中的一项原料。它引入了 Int 类型的属性 quantity（以及从 Food 继承过来的 name 属性），并且定义了两个构造器来创建 RecipeIngredient 实例：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">RecipeIngredient</span>: <span class="title class_">Food</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> quantity: <span class="type">Int</span></span><br><span class="line">    <span class="keyword">init</span>(<span class="params">name</span>: <span class="type">String</span>, <span class="params">quantity</span>: <span class="type">Int</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.quantity <span class="operator">=</span> quantity</span><br><span class="line">        <span class="keyword">super</span>.<span class="keyword">init</span>(name: name)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">convenience</span> <span class="keyword">init</span>(<span class="params">name</span>: <span class="type">String</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.<span class="keyword">init</span>(name: name, quantity: <span class="number">1</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="./res/initializersExample02@2x.png" alt=""></p>
+<p>所有的这三种构造器都可以用来创建新的 RecipeIngredient 实例：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> oneMysteryItem <span class="operator">=</span> <span class="type">RecipeIngredient</span>()</span><br><span class="line"><span class="keyword">let</span> oneBacon <span class="operator">=</span> <span class="type">RecipeIngredient</span>(name: <span class="string">&quot;Bacon&quot;</span>)</span><br><span class="line"><span class="keyword">let</span> sixEggs <span class="operator">=</span> <span class="type">RecipeIngredient</span>(name: <span class="string">&quot;Eggs&quot;</span>, quantity: <span class="number">6</span>)</span><br></pre></td></tr></table></figure>
+<p>购物单中的每一项总是从未购买状态开始的。为了呈现这一事实，<code>ShoppingListItem</code> 引入了一个 <code>Boolean</code>（布尔类型） 的属性 <code>purchased</code>，它的默认值是 <code>false</code>。<code>ShoppingListItem</code> 还添加了一个计算型属性 <code>description</code>，它提供了关于 <code>ShoppingListItem</code> 实例的一些文字描述：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ShoppingListItem</span>: <span class="title class_">RecipeIngredient</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> purchased <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">    <span class="keyword">var</span> description: <span class="type">String</span> &#123;</span><br><span class="line">        <span class="keyword">var</span> output <span class="operator">=</span> <span class="string">&quot;<span class="subst">\(quantity)</span> x <span class="subst">\(name)</span>&quot;</span></span><br><span class="line">        output <span class="operator">+=</span> purchased <span class="operator">?</span> <span class="string">&quot; ✔&quot;</span> : <span class="string">&quot; ✘&quot;</span></span><br><span class="line">        <span class="keyword">return</span> output</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为它为自己引入的所有属性都提供了默认值，并且自己没有定义任何构造器，ShoppingListItem 将自动继承所有父类中的指定构造器和便利构造器。</p>
+<p>下图展示了这三个类的构造器链：</p>
+<p><img src="./res/initializersExample03@2x.png" alt=""></p>
+<p>你可以使用三个继承来的构造器来创建 ShoppingListItem 的新实例：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> breakfastList <span class="operator">=</span> [</span><br><span class="line">    <span class="type">ShoppingListItem</span>(),</span><br><span class="line">    <span class="type">ShoppingListItem</span>(name: <span class="string">&quot;Bacon&quot;</span>),</span><br><span class="line">    <span class="type">ShoppingListItem</span>(name: <span class="string">&quot;Eggs&quot;</span>, quantity: <span class="number">6</span>),</span><br><span class="line">]</span><br><span class="line">breakfastList[<span class="number">0</span>].name <span class="operator">=</span> <span class="string">&quot;Orange juice&quot;</span></span><br><span class="line">breakfastList[<span class="number">0</span>].purchased <span class="operator">=</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> breakfastList &#123;</span><br><span class="line">    <span class="built_in">print</span>(item.description)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 1 x orange juice ✔</span></span><br><span class="line"><span class="comment">// 1 x bacon ✘</span></span><br><span class="line"><span class="comment">// 6 x eggs ✘</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/05/05/Swift%E8%8A%B1%E5%9B%AD%E7%AC%94%E8%AE%B0%20-%20%20CoreData/" rel="prev" title="Swift花园笔记 -  CoreData">
+      <i class="fa fa-chevron-left"></i> Swift花园笔记 -  CoreData
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/08/26/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98/" rel="next" title="并发编程带来的问题">
+      并发编程带来的问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Switch</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">2.</span> <span class="nav-text">元组</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">3.</span> <span class="nav-text">枚举</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">4.</span> <span class="nav-text">可选</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E5%89%8D%E9%80%80%E5%87%BA"><span class="nav-number">4.1.</span> <span class="nav-text">提前退出</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">5.</span> <span class="nav-text">函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">6.</span> <span class="nav-text">闭包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">6.1.</span> <span class="nav-text">闭包表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E5%87%BD%E6%95%B0"><span class="nav-number">6.1.1.</span> <span class="nav-text">闭包函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E8%A1%A8%E8%BE%BE%E5%BC%8F-2"><span class="nav-number">6.1.2.</span> <span class="nav-text">闭包表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E4%B8%8A%E4%B8%8B%E6%96%87%E6%8E%A8%E6%96%AD%E7%B1%BB%E5%9E%8B%E2%80%8B"><span class="nav-number">6.1.3.</span> <span class="nav-text">根据上下文推断类型​</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E8%A1%A8%E8%BE%BE%E5%BC%8F%E9%97%AD%E5%8C%85%E7%9A%84%E9%9A%90%E5%BC%8F%E8%BF%94%E5%9B%9E%E2%80%8B"><span class="nav-number">6.1.4.</span> <span class="nav-text">单表达式闭包的隐式返回​</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E5%90%8D%E7%A7%B0%E7%BC%A9%E5%86%99%E2%80%8B"><span class="nav-number">6.1.5.</span> <span class="nav-text">参数名称缩写​</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E7%AE%97%E7%AC%A6%E6%96%B9%E6%B3%95%E2%80%8B"><span class="nav-number">6.1.6.</span> <span class="nav-text">运算符方法​</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%BE%E9%9A%8F%E9%97%AD%E5%8C%85%E2%80%8B"><span class="nav-number">6.2.</span> <span class="nav-text">尾随闭包​</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">7.</span> <span class="nav-text">函数和闭包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">8.</span> <span class="nav-text">属性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%B6%E6%97%B6%E5%8A%A0%E8%BD%BD%E5%AD%98%E5%82%A8%E5%B1%9E%E6%80%A7"><span class="nav-number">8.1.</span> <span class="nav-text">延时加载存储属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">8.2.</span> <span class="nav-text">应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#private-set-%E2%80%93-Public-getter-and-Private-setter"><span class="nav-number">8.3.</span> <span class="nav-text">private(set) – Public getter and Private setter</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">9.</span> <span class="nav-text">方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">10.</span> <span class="nav-text">构造器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%9E%84%E9%80%A0%E5%99%A8%E4%BB%A3%E7%90%86"><span class="nav-number">10.1.</span> <span class="nav-text">类类型的构造器代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%A4%E6%AE%B5%E5%BC%8F%E6%9E%84%E9%80%A0%E8%BF%87%E7%A8%8B%E2%80%8B"><span class="nav-number">10.2.</span> <span class="nav-text">两段式构造过程​</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-1%E2%80%8B"><span class="nav-number">10.2.1.</span> <span class="nav-text">阶段 1​</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5-2%E2%80%8B"><span class="nav-number">10.2.2.</span> <span class="nav-text">阶段 2​</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%99%A8%E7%9A%84%E7%BB%A7%E6%89%BF%E5%92%8C%E9%87%8D%E5%86%99%E2%80%8B"><span class="nav-number">10.3.</span> <span class="nav-text">构造器的继承和重写​</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%99%A8%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BB%A7%E6%89%BF%E2%80%8B"><span class="nav-number">10.4.</span> <span class="nav-text">构造器的自动继承​</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E6%9E%84%E9%80%A0%E5%99%A8%E5%92%8C%E4%BE%BF%E5%88%A9%E6%9E%84%E9%80%A0%E5%99%A8%E5%AE%9E%E8%B7%B5%E2%80%8B"><span class="nav-number">10.5.</span> <span class="nav-text">指定构造器和便利构造器实践​</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">167</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
