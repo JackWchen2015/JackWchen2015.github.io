@@ -184,6 +184,307 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/" class="post-title-link" itemprop="url">GCD队列优先级和队列组</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-08 08:00:00" itemprop="dateCreated datePublished" datetime="2022-02-08T08:00:00+08:00">2022-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-31 17:07:51" itemprop="dateModified" datetime="2024-08-31T17:07:51+08:00">2024-08-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="GCD队列的服务质量与优先级">GCD队列的服务质量与优先级</h2>
+<ul>
+<li>
+<p>NSQualityOfServiceUserInteractive<br>
+与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；</p>
+</li>
+<li>
+<p>NSQualityOfServiceUserInitiated<br>
+由用户发起的并且需要立即得到结果的任务，比如滑动 <code>scroll view</code> 时去加载数据用于后续 <code>cell</code> 的显示，这些任务通常跟后续的用户交互相关，在几秒或者更短的时间内完成；</p>
+</li>
+<li>
+<p>NSQualityOfServiceUtility<br>
+一些可能需要花点时间的任务，这些任务不需要马上返回结果，比如下载的任务，这些任务可能花费几秒或者几分钟的时间；</p>
+</li>
+<li>
+<p>NSQualityOfServiceBackground<br>
+这些任务对用户不可见，比如后台进行备份的操作，这些任务可能需要较长的时间，几分钟甚至几个小时；</p>
+</li>
+<li>
+<p>NSQualityOfServiceDefault<br>
+优先级介于 <code>user-initiated</code> 和 <code>utility</code>，当没有 QoS 信息时默认使用，开发者不应该使用这个值来设置自己的任务。</p>
+</li>
+</ul>
+<h3 id="服务质量枚举类型">服务质量枚举类型</h3>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">QOS_CLASS_USER_INTERACTIVE</span><br><span class="line">QOS_CLASS_USER_INITIATED</span><br><span class="line">QOS_CLASS_DEFAULT</span><br><span class="line">QOS_CLASS_UTILITY</span><br><span class="line">QOS_CLASS_BACKGROUND</span><br></pre></td></tr></table></figure>
+<p>队列的优先级与服务质量的对应关系：</p>
+<p><img src="./res/Qos.png" alt=""></p>
+<h3 id="给队列设置QoS">给队列设置QoS</h3>
+<p><code>dispatch_queue_attr_make_with_qos_class</code></p>
+<p><code>dispatch_set_target_queue</code></p>
+<h2 id="GCD队列任务间依赖关系">GCD队列任务间依赖关系</h2>
+<h3 id="dispatch-set-target-queue"><code>dispatch_set_target_queue</code></h3>
+<p>除了能用来设置队列的 QoS 之外，还能够创建队列的层次体系。当我们想让不同队列中的任务同步的执行时，我们可以创建一个串行队列，然后将这些队列的 target 指向新创建的队列即可，比如：</p>
+<p><img src="./res/targetQueue.png" alt=""></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">    <span class="built_in">dispatch_queue_t</span> targetQueue = dispatch_queue_create(<span class="string">&quot;target_queue&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue1 = dispatch_queue_create(<span class="string">&quot;queue1&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue2 = dispatch_queue_create(<span class="string">&quot;queue2&quot;</span>, DISPATCH_QUEUE_CONCURRENT);</span><br><span class="line">    dispatch_set_target_queue(queue1, targetQueue);</span><br><span class="line">    dispatch_set_target_queue(queue2, targetQueue);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue1, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务1,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue2, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务2,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue2, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务3,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:18.142729+0800 多线程[6669:1213619] 执行任务1,queue1</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:19.143926+0800 多线程[6669:1213619] 执行任务2,queue2</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:20.147740+0800 多线程[6669:1213619] 执行任务3,queue2</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>注意点： 避免相互依赖，如将队列 A 的目标队列设置为队列 B，并将队列 B 的目标队列设置为队列 A。</p>
+<h2 id="Dispatch-Group队列组">Dispatch Group队列组</h2>
+<p>GCD 队列组，又称“调度组”，实现所有任务执行完成后有一个统一的回调。</p>
+<p>例如：异步下载歌曲，等所有歌曲都下载完毕以后，转到主线程提示用户</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">    dispatch_group_t group = dispatch_group_create();</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲1&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲2&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲3&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        [<span class="built_in">NSThread</span> sleepForTimeInterval:<span class="number">1</span>];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载完毕&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x6000028c8c00&gt;&#123;number = 6, name = (null)&#125;,下载歌曲2</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x60000283f400&gt;&#123;number = 5, name = (null)&#125;,下载歌曲1</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600002803440&gt;&#123;number = 4, name = (null)&#125;,下载歌曲3</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x60000285c5c0&gt;&#123;number = 1, name = main&#125;,下载完毕</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<h3 id="队列组的原理">队列组的原理</h3>
+<p>真正实现统一回调的操作：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> dispatch_group_enter(dispatch_group_t group);</span><br><span class="line"><span class="type">void</span> dispatch_group_leave(dispatch_group_t group);</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_group_async(group, queue, ^&#123; </span><br><span class="line">&#125;); </span><br><span class="line"><span class="comment">//等价于</span></span><br><span class="line">dispatch_group_enter(group);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">    dispatch_group_leave(group);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">// 1.创建队列组</span></span><br><span class="line">    dispatch_group_t group = dispatch_group_create();</span><br><span class="line">    <span class="comment">// 2.获取全局并发队列</span></span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">//ARC中不用写也不能写</span></span><br><span class="line"><span class="comment">//    dispatch_retain(group);</span></span><br><span class="line">    <span class="comment">// 3.进入队列组，执行此函数后，再添加的异步执行的block任务都会被group监听</span></span><br><span class="line">    dispatch_group_enter(group);</span><br><span class="line">    <span class="comment">// 4.添加任务</span></span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务1&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">        <span class="comment">// 5.离开队列组</span></span><br><span class="line">        dispatch_group_leave(group);</span><br><span class="line">        <span class="comment">//ARC中不用写也不能写</span></span><br><span class="line"><span class="comment">//        dispatch_release(group);</span></span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_enter(group);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务2&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">        dispatch_group_leave(group);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 6.获得队列组的通知</span></span><br><span class="line">    dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务3&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 7.等待队列组，监听的队列中的所有任务都执行完毕，才会执行后续代码，会阻塞线程（很少使用）</span></span><br><span class="line">    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务4&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003d98d00&gt;&#123;number = 3, name = (null)&#125;,执行任务1</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003d4de80&gt;&#123;number = 9, name = (null)&#125;,执行任务2</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003dcd2c0&gt;&#123;number = 1, name = main&#125;,执行任务4</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003dcd2c0&gt;&#123;number = 1, name = main&#125;,执行任务3</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/08/GCD%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">GCD基础</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-08 08:00:00" itemprop="dateCreated datePublished" datetime="2022-02-08T08:00:00+08:00">2022-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-30 19:38:41" itemprop="dateModified" datetime="2024-08-30T19:38:41+08:00">2024-08-30</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img src="./res/GCDstart.png" alt=""></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/08/GCD%E5%9F%BA%E7%A1%80/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/31/RunLoop%E4%B9%8BNSTimer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/01/31/RunLoop%E4%B9%8BNSTimer/" class="post-title-link" itemprop="url">RunLoop之NSTimer</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-31 08:00:00" itemprop="dateCreated datePublished" datetime="2022-01-31T08:00:00+08:00">2022-01-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 19:55:52" itemprop="dateModified" datetime="2023-05-13T19:55:52+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/RunLoop/" itemprop="url" rel="index"><span itemprop="name">RunLoop</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="NSTimer-的创建"><a href="#NSTimer-的创建" class="headerlink" title="NSTimer 的创建"></a>NSTimer 的创建</h2><p><code>NSTimer</code>的创建通常有两种方式，一种是以 <code>scheduledTimerWithTimeInterval</code> 为开头的类方法 。这些方法在创建了 <code>NSTimer</code> 之后会将这个 <code>NSTimer</code> 以 <code>NSDefaultRunLoopMode</code> 模式放入当前线程的 <code>RunLoop</code>。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">+ ( <span class="built_in">NSTimer</span> *) scheduledTimerWithTimeInterval:invocation:repeats: </span><br><span class="line">+ ( <span class="built_in">NSTimer</span> *) scheduledTimerWithTimeInterval:target:selector:userInfo:repeats:</span><br></pre></td></tr></table></figure>
+
+<p>另一种是以 timerWithTimeInterval 为开头的类方法。这些方法创建的 NSTimer 并不能马上使用，还需要调用 RunLoop 的 addTimer:forMode: 方法将 NSTimer 放入 RunLoop，这样 NSTimer 才能正常工作。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">+ ( <span class="built_in">NSTimer</span> *) timerWithTimeInterval:invocation:repeats:</span><br><span class="line">+ ( <span class="built_in">NSTimer</span> *) timerWithTimeInterval:target:selector:userInfo:repeats:</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Timers work in conjunction with run loops. Run loops maintain strong references to their timers, so you don’t have to maintain your own strong reference to a timer after you have added it to a run loop.</p>
+</blockquote>
+<p>从 <code>NSTimer</code> 的官方文档可以得知，<code>RunLoop</code> 对加入其中的 <code>NSTimer</code> 会添加一个强引用。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/01/31/RunLoop%E4%B9%8BNSTimer/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/31/RunLoop%E4%B9%8B%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E6%9C%BA%E5%88%B6%E3%80%81%E7%BA%BF%E7%A8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -780,264 +1081,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/21/iOS%E4%B9%8B%E5%B8%88%E5%A4%A7%E5%B0%8F%E6%B5%B7%E8%85%BE%E5%8D%9A%E5%AE%A2%E7%AC%94%E8%AE%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/21/iOS%E4%B9%8B%E5%B8%88%E5%A4%A7%E5%B0%8F%E6%B5%B7%E8%85%BE%E5%8D%9A%E5%AE%A2%E7%AC%94%E8%AE%B0/" class="post-title-link" itemprop="url">【读书笔记】iOS之师大小海腾博客</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-01-21 08:00:00" itemprop="dateCreated datePublished" datetime="2022-01-21T08:00:00+08:00">2022-01-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-04 17:10:03" itemprop="dateModified" datetime="2023-04-04T17:10:03+08:00">2023-04-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="属性关键字和所有权修饰符"><a href="#属性关键字和所有权修饰符" class="headerlink" title="属性关键字和所有权修饰符"></a>属性关键字和所有权修饰符</h2><h3 id="atomic-修饰的属性是怎么样保存线程安全的？"><a href="#atomic-修饰的属性是怎么样保存线程安全的？" class="headerlink" title="atomic 修饰的属性是怎么样保存线程安全的？"></a>atomic 修饰的属性是怎么样保存线程安全的？</h3><p><code>atomic</code> 原子性（默认），编译器会自动生成互斥锁，对setter和getter方法进行加锁，可以保证<code>属性的赋值和取值</code>的原子性是线程安全的，但<code>不包括操作和访问</code></p>
-<p>比如说atomic修饰的是一个数组的话，那么我们对数组进行赋值和取值是可以保证线程安全的，但是如果我们对数组进行操作，比如说给数组添加对象或者移除对象，是不在atomic的负责范围之内的，所以给被atomic修饰的数组添加对象或者移除对象是没办法保证线程安全的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/01/21/iOS%E4%B9%8B%E5%B8%88%E5%A4%A7%E5%B0%8F%E6%B5%B7%E8%85%BE%E5%8D%9A%E5%AE%A2%E7%AC%94%E8%AE%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/01/21/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B9%8BAutoreleasePool/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/01/21/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B9%8BAutoreleasePool/" class="post-title-link" itemprop="url">iOS内存管理之AutoreleasePool</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-01-21 08:00:00" itemprop="dateCreated datePublished" datetime="2022-01-21T08:00:00+08:00">2022-01-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-04 16:59:14" itemprop="dateModified" datetime="2023-04-04T16:59:14+08:00">2023-04-04</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/AutoreleasePool/" itemprop="url" rel="index"><span itemprop="name">AutoreleasePool</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <img src="/2022/01/21/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B9%8BAutoreleasePool/catalog.png" class="&#x3D;">
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/01/21/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B9%8BAutoreleasePool/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2021/11/23/ReactiveObjC%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/23/ReactiveObjC%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95/" class="post-title-link" itemprop="url">ReactiveObjC的高级用法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-23 08:00:00" itemprop="dateCreated datePublished" datetime="2021-11-23T08:00:00+08:00">2021-11-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-05-13 19:59:09" itemprop="dateModified" datetime="2023-05-13T19:59:09+08:00">2023-05-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/RAC/" itemprop="url" rel="index"><span itemprop="name">RAC</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>Hook是一种用于改变API执行结果的技术，而RAC运用的是Hook思想</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/23/ReactiveObjC%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1107,7 +1150,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">173</span>
+          <span class="site-state-item-count">176</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

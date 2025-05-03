@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="《SwiftUI编程思想》 onevcat  第一版笔记  上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SwiftUI 编程思想  上">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/04/26/SwiftUI%20%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3%20%E4%B8%8A/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="《SwiftUI编程思想》 onevcat  第一版笔记  上">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-05-03T03:14:16.962Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/04/26/SwiftUI%20%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3%20%E4%B8%8A/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SwiftUI 编程思想  上 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/04/26/SwiftUI%20%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3%20%E4%B8%8A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SwiftUI 编程思想  上
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-26 00:00:00" itemprop="dateCreated datePublished" datetime="2025-04-26T00:00:00+08:00">2025-04-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-05-03 11:14:16" itemprop="dateModified" datetime="2025-05-03T11:14:16+08:00">2025-05-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《SwiftUI编程思想》 onevcat  第一版笔记  上</p>
+<span id="more"></span>
+<h2 id="概览">概览</h2>
+<p>在 <code>SwiftUI</code> 中，<code>view</code> 是值，而非对象，它们是不可变的，相较于在面向对象的框架中的处理方式，<code>view</code> 的创建和更新是以完全不同的<strong>声明式方式</strong>完成的。消除了<strong>view 和 app 的状态不同步</strong>一整类错误</p>
+<h3 id="View的创建">View的创建</h3>
+<p>要在 <code>SwiftUI</code> 中创建 <code>view</code>，你需要创建一棵包含 <code>view</code> 的值的树，来描述应该在屏幕上显示的内容。 要更改屏幕上的内容，你可以修改 <code>state</code> 值，这样新的 <code>view</code> 值的树会被重新计算。然后，<code>SwiftUI</code> 会更新屏幕，以反映这些新的 <code>view</code> 值。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">View</span> &#123;</span><br><span class="line">	<span class="keyword">func</span> <span class="title function_">debug</span>() -&gt; <span class="keyword">Self</span> &#123;</span><br><span class="line">		<span class="built_in">print</span>(<span class="type">Mirror</span>(reflecting: <span class="keyword">self</span>).subjectType)</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">self</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="type">VStack</span> &#123; <span class="comment">/*... */</span> &#125;.debug()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>查看View的返回类型</p>
+</blockquote>
+<p>注意：</p>
+<ol>
+<li>在 <code>body</code> 属性中构造的 <code>view</code> 的类型，包含了整个 <code>view</code> 树的结构：它不仅包含了当前屏幕上显示的部分，还包含了 <code>app</code> 生命周期中可能会在屏幕上显示的所有 <code>view</code></li>
+</ol>
+<blockquote>
+<p><code>ViewBuilder</code>是由 <code>Swift</code> 的函数构建器特性实现的,不能使用循环、<code>guard</code> 或 <code>if let</code>,可以编写简单的 <code>if</code> 语句</p>
+</blockquote>
+<ol start="2">
+<li>
+<p><code>View</code> 的树不仅只包含当前可见的部分，它包含的是整个结构，这是有优点的：<code>SwiftUI</code> 能够更有效地找出 <code>view</code> 更新后发生了什么变化</p>
+</li>
+<li>
+<p><code>Modifys</code>操作都会在 <code>view</code> 树中创建新层，因此它们的顺序通常很重要</p>
+</li>
+<li>
+<p>在<code>UIKit</code> 中，<code>view</code> 的创建和 <code>view</code> 的更新是两条不同的代码路径，<code>SwiftUI</code> 中，这两个代码路径合二为一了</p>
+</li>
+</ol>
+<h3 id="View的布局">View的布局</h3>
+<p>布局是自上而下的：父 <code>view</code> 向子 <code>view</code> 提供它们的可用空间，子 <code>view</code> 基于这个空间来决定自己的尺寸</p>
+<p><code>SwiftUI</code> 从最外层的 <code>view</code> 开始布局过程。在 <code>SwiftUI</code> 里，因为我们只是在描述屏幕上应该显示的内容，所以我们永远不会去直接设置一个 <code>view</code> 的 <code>frame</code> 属性，你只能将其包装在 <code>frame</code> 修饰器中，它的可用空间将被提供给子元素</p>
+<p>如果想要实现父 view 的布局依赖子 view 的尺寸，需要用<code>GeometryReader</code> 和 <code>Preference</code></p>
+<h3 id="View的更新">View的更新</h3>
+<p>触发 <code>view</code> 更新的属性会被用 <code>@State</code>、<code>@ObservedObject</code> 或者 <code>@EnvironmentObject</code> 属性标签进行标记，<strong>更改状态属性是在 SwiftUI 中触发 view 更新的唯一方法</strong>，这种新的处理方式消除了 <code>view</code> 和 <code>app</code> 状态不同步这一整个类别的常见错误</p>
+<h2 id="View更新">View更新</h2>
+<p>面向对象的 <code>GUI</code> 程序 (例如 UIKit app 和浏览器中的 DOM (文档对象模型，Document Object Model) app) 中，有两条与 <code>view</code> 相关的代码路径：<br>
+一条路径处理 <code>view</code> 的初始构造，另一条路径负责在事件发生时更新 <code>view</code>。</p>
+<h3 id="面向对象的问题">面向对象的问题</h3>
+<p>这些代码路径是分离开的，而且涉及手动更新，所以很容易出现错误：我们可能会响应事件来更新 view，但却忘了更新 model，反之亦有可能。<br>
+无论哪种情况，view 都会与 model 不同步，app 可能会表现出不确定的行为、卡死甚至崩溃。</p>
+<h3 id="面向对象的解决">面向对象的解决</h3>
+<p>在 AppKit 和 UIKit 编程中，有许多技术可以尝试解决此问题。AppKit 里使用 <code>Cocoa Binding</code>技术，它是一个可以使 model 和 view 保持同步的双向层。在 <code>UIKit</code> 里，人们使用像是响应式编程这样的技术来让这两个代码路径 (在大部分情况下) 得到统一。</p>
+<h3 id="SwiftUI的解决">SwiftUI的解决</h3>
+<p>SwiftUI 的设计完全避免了此类问题。首先，只有 view 的 body 属性这一个代码路径可以构造初始的 view，而且这条路径也会用于所有的后续更新。</p>
+<p>其次，SwiftUI 让使用者无法绕过正常的 view 的更新周期，也无法直接修改 view 树。在 SwiftUI 中，想要更新屏幕上的内容，触发对 body 属性的重新求值是唯一的方法。</p>
+<h4 id="为什么-view-树需要每次都拥有相同的结构？">为什么 view 树需要每次都拥有相同的结构？</h4>
+<p>app 状态发生变化并重新计算 view 树时，<code>SwiftUI</code> 必须找出前一棵树与新树之间发生了什么变化，以便有效地更新显示，这样才能避免从头开始重新构建和渲染所有内容。如果能保证旧树和新树具有相同的结构，那么这个任务将更容易，更高效。</p>
+<h3 id="树的-diff-算法">树的 diff 算法</h3>
+<p>也就是比较两棵树结构之间不同之处的算法)的算法复杂度是 O(n^3),</p>
+<h4 id="React-框架做法">React 框架做法</h4>
+<p>为了能控制复杂度，像 React 这样的框架使用了具有 <code>O(n) </code>复杂的的启发式 <code>diff</code> 算法，它在 diff 的精度和效率之间进行了权衡：这种算法可能会导致实际被重建的部分要比严格意义上真正需要重建的部分更大，开发者们可能会需要提供一些提示，来表明树的哪些部分在更新时是稳定的，从而应对这种影响。</p>
+<h4 id="SwiftUI的做法">SwiftUI的做法</h4>
+<p>SwiftUI 针对此问题采用了不同的方法：由于 view 树的结构在更新时始终相同，因此它不需要执行完整的树 diff。<strong>只需要比较新旧两个节点上可能会被改变的属性值</strong> (比如 stack 的对齐方式和间距等) 就行了</p>
+<h3 id="重新创建的优化">重新创建的优化</h3>
+<p>即便 view 树的比较要比执行完整树比较要快得多，但每次重新创建和比较整个 view 树值难道不是依然很浪费吗？</p>
+<p>View的创建也就是研究 view 的 body 会在什么时候被运行</p>
+<p>SwiftUI 会追踪哪些 view 使用了哪些状态变量， SwiftUI 只会重新去执行那些使用了 <code>@State</code> 属性的 <code>view</code> 的 <code>body</code> (对于其他属性包装，例如<code>@ObservedObject</code> 和 <code>@Environment</code>，也是一样的)</p>
+<h3 id="Binding">Binding</h3>
+<p>本质上来说，<code>binding</code> 是它所捕获变量的 <code>setter</code> 和 <code>getter</code>。SwiftUI 的属性包装 (比如 @State，@ObservedObject 等) 都有对应的 binding，你可以在属性名前加上 $ 前缀来访问它。(在属性包装的术语中，binding 被叫做一个投射值 (projected value)。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">LabelView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="meta">@Binding</span> <span class="keyword">var</span> number: <span class="type">Int</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;LabelView&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> <span class="type">Group</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> number <span class="operator">&gt;</span> <span class="number">0</span> &#123;</span><br><span class="line">		<span class="type">Text</span>(<span class="string">&quot;You&#x27;ve tapped <span class="subst">\(number)</span> times&quot;</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="meta">@State</span> <span class="keyword">var</span> counter <span class="operator">=</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;ContentView&quot;</span>)</span><br><span class="line">	<span class="keyword">return</span> <span class="type">VStack</span> &#123;</span><br><span class="line">		<span class="type">Button</span>(<span class="string">&quot;Tap me!&quot;</span>) &#123; <span class="keyword">self</span>.counter <span class="operator">+=</span> <span class="number">1</span> &#125;</span><br><span class="line">		<span class="type">LabelView</span>(number: <span class="variable">$counter</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>// 开始时的控制台输出：<br>
+// ContentView<br>
+// LabelView</p>
+</blockquote>
+<blockquote>
+<p>// 每次更新的控制台输出：<br>
+// LabelView</p>
+</blockquote>
+<p>上例所示，SwiftUI 会追踪哪些 view 使用了哪些 state 变量：它知道 <code>ContentView</code> 在渲染 <code>body</code> 时并没有用到 <code>counter</code>，但 <code>LabelView</code> (通过 <code>binding</code> 间接地) 用到了它。因此，对 <code>counter</code> 属性的更改只会触发对<code>LabelView</code> <code>body</code> 的重新求值。</p>
+<h2 id="动态view树">动态view树</h2>
+<p>SwiftUI 提供了三种不同的机制来构建一棵树的动态部分：</p>
+<ol>
+<li><code>View builder</code> 中的 <code>if/else </code>条件</li>
+<li><code>ForEach</code></li>
+<li><code>AnyView</code></li>
+</ol>
+<h3 id="ForEach">ForEach</h3>
+<p>在 <code>ForEach</code> 中，<code>view</code> 的数量是可以改变的，但它们都需要拥有相同的类型,<code>ForEach</code> 最常见的是和 List (类似 UIKit 中的 table view) 一起使用</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		<span class="type">ForEach</span>(<span class="number">1</span><span class="operator">...</span><span class="number">3</span>, id: \.<span class="keyword">self</span>) &#123; x <span class="keyword">in</span></span><br><span class="line">		<span class="type">Text</span>(<span class="string">&quot;Item <span class="subst">\(x)</span>&quot;</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 类型：ForEach&lt;ClosedRange&lt;Int&gt;, Int, Text&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>ForEach</code> 的参数<br>
+第一个参数是所要显示数据的集合<br>
+第二个参数是键路径 (<code>keypath</code>)，它指定应该使用哪个属性来标识元素 (集合的元素要么必须遵守 <code>Identifiable</code> 协议，要么我们需要为它指定标识符的键路径)。我们通过指定 <code>\.self</code> 作为标识键路径，将元素本身用作标识符</p>
+<p>第三个参数负责从集合中的元素构造 view</p>
+<blockquote>
+<p>由于 <code>ForEach</code> 要求每个元素都是可标识的，因此它可以在运行时 (通过计算 diff) 找出自上次<code>view</code>更新以来所添加或删除的视图。</p>
+</blockquote>
+<h3 id="AnyView">AnyView</h3>
+<p><code>AnyView</code> 是一个可以用任意 <code>view</code> 来初始化的 <code>view</code>，它可以对输入的 <code>view</code> 进行包装并擦除它的类型。</p>
+<blockquote>
+<p>使用 AnyView 会删除有关 view 树的基本静态类型信息，而这些信息将可以帮助 SwiftUI 更高效地执行更新。</p>
+</blockquote>
+<h2 id="高效的View树">高效的View树</h2>
+<p><code>SwiftUI</code> 在每次更新时要高效地对 <code>view</code> 树的值进行比较，这需要依赖 <code>view</code> 树结构的静态信息。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> counter <span class="operator">&gt;</span> <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="type">Text</span>(<span class="string">&quot;You&#x27;ve tapped <span class="subst">\(counter)</span> times&quot;</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="type">Image</span>(systemName: <span class="string">&quot;lightbulb&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// error: Function declares an opaque return type, but the return statements</span></span><br><span class="line"><span class="comment">// in its body do not have matching underlying types</span></span><br></pre></td></tr></table></figure>
+<p>虽然 <code>Text</code> 和 <code>Image</code> 都遵守 <code>View</code> 协议，但是我们无法从 <code>body</code> 的不同分支返回具有不同具体类型的值,必须从所有分支都返回相同类型的内容。</p>
+<p>可以通过将整个 <code>body</code> 包装在一个 <code>Group</code> 中来解决此问题。由于 <code>Group</code>的初始化方法参数是 <code>view builder</code> 闭包，因此 <code>if/else</code> 条件被编码为 <code>view</code> 树的一部分。结果类型为：<br>
+<code>Group&lt;_ConditionalContent&lt;Text, Image&gt;&gt;</code></p>
+<blockquote>
+<p>除了使用 Group 外，你也可以为 body 计算属性加上 @ViewBuilder 标签。</p>
+</blockquote>
+<h3 id="状态属性的位置">状态属性的位置</h3>
+<p>SwiftUI 会跟踪哪些 <code>view</code> 使用了哪些状态属性，并在 view 更新时，SwiftUI 仅去执行实际上可能被更改了的view 的 body。</p>
+<p>想要最好地利用 <code>SwiftUI</code> 的智能 <code>view</code> 树的更新特性，我们应该尽可能地将状态属性放在本地。相反，在根 view 上用一个状态属性表示所有的 model 状态，并以简单的参数形式将所有数据向下传递到 view 树中，会是最糟糕的选择，因为这将导致很多不必要的 view 被重建</p>
+<h3 id="状态属性标签">状态属性标签</h3>
+<p>能让 SwiftUI 更新 view 的唯一方法是<strong>更改信息源</strong>，也就是在我们的示例中那些用 <code>@State</code> 声明的状态属性。 <code>SwiftUI</code> 用来触发 <code>view</code> 更新的所有属性包装器均遵守 <code>DynamicProperty</code> 协议，属性包装器均遵守 DynamicProperty 协议。以下类型实现了它：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">→</span> <span class="type">Binding</span></span><br><span class="line"><span class="operator">→</span> <span class="type">Environment</span></span><br><span class="line"><span class="operator">→</span> <span class="type">EnvironmentObject</span></span><br><span class="line"><span class="operator">→</span> <span class="type">FetchRequest</span></span><br><span class="line"><span class="operator">→</span> <span class="type">GestureState</span></span><br><span class="line"><span class="operator">→</span> <span class="type">ObservedObject</span></span><br><span class="line"><span class="operator">→</span> <span class="type">State</span></span><br></pre></td></tr></table></figure>
+<h3 id="属性包装">属性包装</h3>
+<p><code>SwiftUI</code> 发布时，为了能写出简洁且易读的 <code>SwiftUI</code> 程序，<code>Swift</code> 中添加了两个新特性：函数构建器 (<code>function builder</code>) 和属性包装器 (<code>property wrapper</code>)。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="meta">@State</span> <span class="keyword">var</span> counter <span class="operator">=</span> <span class="number">0</span></span><br><span class="line">	<span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="type">VStack</span> &#123;</span><br><span class="line">			<span class="type">Button</span>(<span class="string">&quot;Tap me!&quot;</span>) &#123; <span class="keyword">self</span>.counter <span class="operator">+=</span> <span class="number">1</span> &#125;</span><br><span class="line">			<span class="type">LabelView</span>(number: <span class="variable">$counter</span>)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为 body 不是一个 <code>mutating</code> 的函数或者属性，如果我们移除 <code>@State</code> 前缀，那么 body 中的 <code>counter</code> 就不再能变更了。不使用属性包装器语法，来重写上面的示例：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span>: <span class="title class_">View</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> counter <span class="operator">=</span> <span class="type">State</span>(initialValue: <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="type">VStack</span> &#123;</span><br><span class="line">				<span class="type">Button</span>(<span class="string">&quot;Tap me!&quot;</span>) &#123; <span class="keyword">self</span>.counter.wrappedValue <span class="operator">+=</span> <span class="number">1</span> &#125;</span><br><span class="line">				<span class="type">LabelView</span>(number: counter.projectedValue)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，必须用 State 的显式初始化方法创建我们的 counter，State 是定义在 SwiftUI中的结构体，它被标记了 <code>@propertyWrapper</code></p>
+<p>其次,State 实际上定义了一个被标记为 <code>nonmutating set</code>的 <code>wrappedValue</code> 属性，这意味着我们可以在不可变方法或属性 (例如 body) 的内部修改它。</p>
+<p>最后，我们没有传递 <code>$counter</code> 到我们的 <code>LabelView</code>，而是传递了 <code>counter.projectedValue</code>，它的类型是 <code>Binding&lt;Int&gt;</code>。</p>
+<blockquote>
+<p><code>State</code> 类型还可以启用依赖追踪。当 view 的 body 访问 State 变量的 wrappedValue 时，这个view 会与该 State 变量建立依赖。这意味着 SwiftUI 知道 wrappedValue 更改时要去更新哪些 view。</p>
+</blockquote>
+<h4 id="mutating关键字">mutating关键字</h4>
+<p><code>Swift</code>的结构体或者枚举的方法中，如果方法中需要修改当前结构体或者枚举的属性值，则需要再<code>func</code>前面加上<code>mutating</code>关键字，否则编译器会直接报错。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> x: <span class="type">Int</span></span><br><span class="line">    <span class="keyword">func</span> <span class="title function_">setX</span>(<span class="keyword">_</span> <span class="params">value</span>: <span class="type">Int</span>) &#123;</span><br><span class="line">        <span class="keyword">self</span>.x <span class="operator">=</span> value  <span class="comment">// cannot assgin to property: &#x27;self&#x27; is immutable  </span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>普通函数传值参数是值传递，mutating关键字本质是包装了inout关键字，加mutating关键字后参数会变成地址传递；</p>
+</blockquote>
+<h2 id="环境">环境</h2>
+<p>环境是<code>SwiftUI</code>用于将值沿<code>view</code>树向下传递的机制。也就是说，值从父 view 传递到其包含的子 view 树，是依靠环境完成的。</p>
+<h3 id="环境是如何工作的">环境是如何工作的</h3>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="type">VStack</span> &#123;</span><br><span class="line">		<span class="type">Text</span>(<span class="string">&quot;Hello, world!&quot;</span>)</span><br><span class="line">		.transformEnvironment(\.font) &#123; <span class="built_in">dump</span>(<span class="variable">$0</span>) &#125;</span><br><span class="line">	&#125;</span><br><span class="line">	.font(<span class="type">Font</span>.headline)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="comment">// - style: SwiftUI.Font.TextStyle.headline</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="type">VStack</span> &#123;</span><br><span class="line">		<span class="type">Text</span>(<span class="string">&quot;Hello World!&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	.environment(\.font, <span class="type">Font</span>.headline)</span><br><span class="line">	.debug()</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">ModifiedContent&lt;</span></span><br><span class="line"><span class="comment">VStack&lt;Text&gt;,</span></span><br><span class="line"><span class="comment">_EnvironmentKeyWritingModifier&lt;Optional&lt;Font&gt;&gt;</span></span><br><span class="line"><span class="comment">&gt;</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>调用<code>.environment(\.font, ...)</code>所产生结果的类型和<code>.font(...)</code>调用完全一致</p>
+<blockquote>
+<p>VStack 上调用的 <code>font</code> 方法，其实只是 <code>.environment</code> 函数的一个简单包装而已</p>
+</blockquote>
+<p>环境修饰器只会改变它的直属子 <code>view</code> 树的环境，而绝不会更改同层其他节点或是父 <code>view</code> 的环境。</p>
+<h3 id="使用环境">使用环境</h3>
+<p>定义一个新的类型，让它遵守 <code>EnvironmentKey</code> 协议：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">fileprivate</span> <span class="keyword">struct</span> <span class="title class_">PointerSizeKey</span>: <span class="title class_">EnvironmentKey</span> &#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">let</span> defaultValue: <span class="type">CGFloat</span> <span class="operator">=</span> <span class="number">0.1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>EnvironmentKey</code> 协议的唯一要求是一个静态的 <code>defaultValue</code> 属性,因为 <code>.environment</code> API 通过从 <code>EnvironmentValues</code> 的键路径来获取对应类型的值，所我们还要为 <code>EnvironmentValues</code> 添加一个属性，这样我们才能将它用作键路径：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">EnvironmentValues</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> knobPointerSize: <span class="type">CGFloat</span> &#123;</span><br><span class="line">		<span class="keyword">get</span> &#123; <span class="keyword">self</span>[<span class="type">PointerSizeKey</span>.<span class="keyword">self</span>] &#125;</span><br><span class="line">		<span class="keyword">set</span> &#123; <span class="keyword">self</span>[<span class="type">PointerSizeKey</span>.<span class="keyword">self</span>] <span class="operator">=</span> newValue &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">knobPointerSize</span>(<span class="keyword">_</span> <span class="params">size</span>: <span class="type">CGFloat</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		environment(\.knobPointerSize, size)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="依赖注入">依赖注入</h3>
+<p>可以把环境看作是一种依赖注入；设置环境值等同于注入依赖，而读取环境值则等同于接收依赖。</p>
+<p>环境中通常使用的都是值类型：一个通过 <code>@Environment</code> 属性依赖某个环境值的 view，只会在一个新的环境值被设置到相应的 <code>key</code> 时才会失效并重绘。</p>
+<p><code>environmentObject(_:) </code>修饰器。这个方法接受一个 <code>ObservableObject</code>，它不需要指定<code>EnvironmentKey</code>，因为这个对象的类型会自动被用作 <code>key</code></p>
+<h3 id="Preferences">Preferences</h3>
+<p>环境允许我们将值从一个父 view 隐式地传递给它的子 view，而 preference 系统则允许我们将值隐式地从子 view 传递给它们的父 view。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">NavigationView</span> &#123;</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">	.navigationBarTitle(<span class="string">&quot;Root View&quot;</span>)</span><br><span class="line">	.background(<span class="type">Color</span>.gray)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>navigationBarTitle</code> 定义了 <code>preference</code>，这个值被沿着树向上传递，通过 <code>.background</code> 修饰器，一直到达 <code>navigation view</code>，并最终被读取。</p>
+<blockquote>
+<p>一个 preference 也由一个 (由类型表示的) key，一个对应值的关联类型 (在navigation title 的例子中，这是一个包含 Text view 的私有类型) 和一个默认值 (本例中，也许是 nil) 组成。和 EnvironmentKey 不同，PreferenceKey 还需要一种合并多个值的方式，以对<br>
+应多个 view 子树中都定义了同一个 preference 的情况。</p>
+</blockquote>
+<h4 id="Demo">Demo</h4>
+<p>重新创建 <code>NavigationView</code> 的一小部分</p>
+<p>第一步,创建一个新的 <code>PreferenceKey</code>。对于关联类型，我们选择 <code>String?</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyNavigationTitleKey</span>: <span class="title class_">PreferenceKey</span> &#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">var</span> defaultValue: <span class="type">String</span>? <span class="operator">=</span> <span class="literal">nil</span></span><br><span class="line">	<span class="keyword">static</span> <span class="keyword">func</span> <span class="title function_">reduce</span>(<span class="params">value</span>: <span class="keyword">inout</span> <span class="type">String</span>?, <span class="params">nextValue</span>: () -&gt; <span class="type">String</span>?) &#123;</span><br><span class="line">		value <span class="operator">=</span> value <span class="operator">??</span> nextValue()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二步，我们需要一种方式来在任意 view 上定义 <code>navigation title</code></p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extension</span> <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">myNavigationTitle</span>(<span class="keyword">_</span> <span class="params">title</span>: <span class="type">String</span>) -&gt; <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		preference(key: <span class="type">MyNavigationTitleKey</span>.<span class="keyword">self</span>, value: title)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，我们需要在我们的 <code>MyNavigationView</code> 中读取 <code>preference</code>。要使用这个值，我们需要将它存储在 <code>@State</code> 变量中：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyNavigationView</span>&lt;<span class="title class_">Content</span>&gt;: <span class="title class_">View</span> <span class="title class_">where</span> <span class="title class_">Content</span>: <span class="title class_">View</span> &#123;</span><br><span class="line"><span class="keyword">let</span> content: <span class="type">Content</span></span><br><span class="line"><span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> title: <span class="type">String</span>? <span class="operator">=</span> <span class="literal">nil</span></span><br><span class="line"><span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">	<span class="type">VStack</span> &#123;</span><br><span class="line">		<span class="type">Text</span>(title <span class="operator">??</span> <span class="string">&quot;&quot;</span>)</span><br><span class="line">		.font(<span class="type">Font</span>.largeTitle)</span><br><span class="line">		content.onPreferenceChange(<span class="type">MyNavigationTitleKey</span>.<span class="keyword">self</span>) &#123; title <span class="keyword">in</span></span><br><span class="line">			<span class="keyword">self</span>.title <span class="operator">=</span> title</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当 view 首次被渲染时，title 是 nil。当子 view (content) 被渲染时，它将对应 MyNavigationTitleKey 的值沿树向上传递，onPreferenceChange 闭包会被调用。这会更改 title 属性，然后，因为 title 是一个 @State 属性，MyNavigationView 的 body 将被再次执行。</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MyNavigationView</span>(content:</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">	.myNavigationTitle(<span class="string">&quot;Root View&quot;</span>)</span><br><span class="line">	.background(<span class="type">Color</span>.gray)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/19/Stanford%20CS193p-%5B13-15%5D/" rel="prev" title="Stanford CS193p - [13-15]">
+      <i class="fa fa-chevron-left"></i> Stanford CS193p - [13-15]
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/28/SwiftUI%20%E7%BC%96%E7%A8%8B%E6%80%9D%E6%83%B3%20%20%E4%B8%AD/" rel="next" title="SwiftUI 编程思想 中">
+      SwiftUI 编程思想 中 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#View%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">1.1.</span> <span class="nav-text">View的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View%E7%9A%84%E5%B8%83%E5%B1%80"><span class="nav-number">1.2.</span> <span class="nav-text">View的布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View%E7%9A%84%E6%9B%B4%E6%96%B0"><span class="nav-number">1.3.</span> <span class="nav-text">View的更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View%E6%9B%B4%E6%96%B0"><span class="nav-number">2.</span> <span class="nav-text">View更新</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">面向对象的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%A7%A3%E5%86%B3"><span class="nav-number">2.2.</span> <span class="nav-text">面向对象的解决</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SwiftUI%E7%9A%84%E8%A7%A3%E5%86%B3"><span class="nav-number">2.3.</span> <span class="nav-text">SwiftUI的解决</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-view-%E6%A0%91%E9%9C%80%E8%A6%81%E6%AF%8F%E6%AC%A1%E9%83%BD%E6%8B%A5%E6%9C%89%E7%9B%B8%E5%90%8C%E7%9A%84%E7%BB%93%E6%9E%84%EF%BC%9F"><span class="nav-number">2.3.1.</span> <span class="nav-text">为什么 view 树需要每次都拥有相同的结构？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%91%E7%9A%84-diff-%E7%AE%97%E6%B3%95"><span class="nav-number">2.4.</span> <span class="nav-text">树的 diff 算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#React-%E6%A1%86%E6%9E%B6%E5%81%9A%E6%B3%95"><span class="nav-number">2.4.1.</span> <span class="nav-text">React 框架做法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SwiftUI%E7%9A%84%E5%81%9A%E6%B3%95"><span class="nav-number">2.4.2.</span> <span class="nav-text">SwiftUI的做法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E5%88%9B%E5%BB%BA%E7%9A%84%E4%BC%98%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">重新创建的优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Binding"><span class="nav-number">2.6.</span> <span class="nav-text">Binding</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81view%E6%A0%91"><span class="nav-number">3.</span> <span class="nav-text">动态view树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ForEach"><span class="nav-number">3.1.</span> <span class="nav-text">ForEach</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AnyView"><span class="nav-number">3.2.</span> <span class="nav-text">AnyView</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E6%95%88%E7%9A%84View%E6%A0%91"><span class="nav-number">4.</span> <span class="nav-text">高效的View树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%B1%9E%E6%80%A7%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-number">4.1.</span> <span class="nav-text">状态属性的位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%B1%9E%E6%80%A7%E6%A0%87%E7%AD%BE"><span class="nav-number">4.2.</span> <span class="nav-text">状态属性标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%9E%E6%80%A7%E5%8C%85%E8%A3%85"><span class="nav-number">4.3.</span> <span class="nav-text">属性包装</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mutating%E5%85%B3%E9%94%AE%E5%AD%97"><span class="nav-number">4.3.1.</span> <span class="nav-text">mutating关键字</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">5.</span> <span class="nav-text">环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="nav-number">5.1.</span> <span class="nav-text">环境是如何工作的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%8E%AF%E5%A2%83"><span class="nav-number">5.2.</span> <span class="nav-text">使用环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5"><span class="nav-number">5.3.</span> <span class="nav-text">依赖注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Preferences"><span class="nav-number">5.4.</span> <span class="nav-text">Preferences</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Demo"><span class="nav-number">5.4.1.</span> <span class="nav-text">Demo</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">176</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
