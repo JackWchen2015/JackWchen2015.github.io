@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Swift UI 的架构方式 异步操作的 Action 对于一个异步操作，一般来说我们比较关注两个时间点。首先是异步操作开始的时候，我们可能希望在此时显示像是“正在加载”的界面，让用户知道正在进行一项耗时操作。另一个时间点是操作完成时，这时候我们可以使用异步操作的结果 (比如网络请求返回的数据) 来更新界面。因此一个异步操作一般会对应两个 State： 一个代表操作开始，app 进入等待状态； 另">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SwiftUI 与 Combine 下">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/01/SwiftUI%E4%B8%8ECombine%20%E4%B8%8B/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Swift UI 的架构方式 异步操作的 Action 对于一个异步操作，一般来说我们比较关注两个时间点。首先是异步操作开始的时候，我们可能希望在此时显示像是“正在加载”的界面，让用户知道正在进行一项耗时操作。另一个时间点是操作完成时，这时候我们可以使用异步操作的结果 (比如网络请求返回的数据) 来更新界面。因此一个异步操作一般会对应两个 State： 一个代表操作开始，app 进入等待状态； 另">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-05-31T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-06-09T06:32:30.302Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/01/SwiftUI%E4%B8%8ECombine%20%E4%B8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SwiftUI 与 Combine 下 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/01/SwiftUI%E4%B8%8ECombine%20%E4%B8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SwiftUI 与 Combine 下
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-01 00:00:00" itemprop="dateCreated datePublished" datetime="2025-06-01T00:00:00+08:00">2025-06-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-06-09 14:32:30" itemprop="dateModified" datetime="2025-06-09T14:32:30+08:00">2025-06-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>Swift UI 的架构方式</h1>
+<h2 id="异步操作的-Action">异步操作的 Action</h2>
+<p>对于一个异步操作，一般来说我们比较关注两个时间点。首先是异步操作开始的时候，我们可能希望在此时显示像是“正在加载”的界面，让用户知道正在进行一项耗时操作。另一个时间点是操作完成时，这时候我们可以使用异步操作的结果 (比如网络请求返回的数据) 来更新界面。因此一个异步操作一般会对应两个 State：<br>
+一个代表操作开始，app 进入等待状态；<br>
+另一个代表操作结束，可以按照需要更新 UI。</p>
+<span id="more"></span>
+<p>在我们的架构中我们使用 Command 来代表“在设置状态的同时需要触发一些其他操作”这个语境。Reducer 在返回新的 State 的同时，还返回一个代表需要进行何种副作用的 Command 值 (对应上一段中的第一个时间点)。</p>
+<p>Store 在接收到这个 Command 后，开始进行额外操作，并在操作完成后发送一个新的 Action。这个 Action 中带有异步操作所获取到的数据。它将再次触发 Reducer 并返回新的 State，继而完成异步操作结束时的 UI 更新 (对应上一段中的第二个时间点)。</p>
+<h2 id="复合状态驱动UI">复合状态驱动UI</h2>
+<p>Redux for Swift 架构的基础，它们的最终目标非常明确，那就是在双向上保证单一数据源的可靠性：即所有影响 UI 的数据都应当来自于 Store，且 UI 的状态应当与 Store 中的状态同步。</p>
+<p>对于通过 Action 改变的状态，如果我们想要执行网络请求这样的副作用，可以通过同时返回合适的 AppCommand 完成。但是对于通过绑定来更新的状态，由于不会经过 Store 的 reduce 方法来返回 Command，我们缺少一种有效的手段来在它们改变时执行副作用。</p>
+<p>如何通过 UI 绑定触发副作用？<br>
+<code>Combine</code></p>
+<p>@Published 需要在内部生成并持有存储，因此我们只能针对定义在 class 里的变量添加 @Published。</p>
+<h2 id="手势处理和导航">手势处理和导航</h2>
+<h3 id="Group">Group</h3>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> panel: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line"><span class="comment">// 2</span></span><br><span class="line"><span class="type">Group</span> &#123;</span><br><span class="line"><span class="keyword">if</span> pokemonList.selectionState.panelPresented &#123;</span><br><span class="line">	<span class="keyword">if</span> selectedPanelIndex <span class="operator">!=</span> <span class="literal">nil</span> <span class="operator">&amp;&amp;</span> pokemonList.pokemons <span class="operator">!=</span> <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="type">PokemonInfoPanelOverlay</span>(</span><br><span class="line">		model: pokemonList.pokemons<span class="operator">!</span>[selectedPanelIndex<span class="operator">!</span>]<span class="operator">!</span>)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="type">EmptyView</span>()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="type">EmptyView</span>()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 <code>Group</code>，在内层利用 <code>@ViewBuilder</code> 支持 <code>if...else</code> 语句的特性，可以把不同类型的 View 包装到 Group View 里。另一种方式是使用 AnyView 把它们的具体类型抹消</p>
+<h3 id="GestureState">GestureState</h3>
+<p>被标记为 <code>@GestureState</code> 的变量，除了具有和普通<code>@State</code>类似的行为外，还会在 <code>panelDraggingGesture</code> 手势结束后被自动置回初始值 0。所以当下划距离不足以让面板关闭时，手势结束后面板将回到原地 (你也许注意到了，我们设定的弹簧动画依然有效)。当下划距离足够，面板将被正常关闭，通过 onEneded，isPresented 这个 Binding 将溯及到表示面板显示状态的 <code>panelPresented</code> 变量，并将它设为 false。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GestureState</span> <span class="keyword">private</span> <span class="keyword">var</span> translation <span class="operator">=</span> <span class="type">CGPoint</span>.zero</span><br><span class="line"><span class="keyword">var</span> panelDraggingGesture: <span class="keyword">some</span> <span class="type">Gesture</span> &#123;</span><br><span class="line">    <span class="type">DragGesture</span>()</span><br><span class="line">        .updating(<span class="variable">$translation</span>) &#123; current, state, <span class="keyword">_</span> <span class="keyword">in</span></span><br><span class="line">            state.y <span class="operator">=</span> current.translation.height</span><br><span class="line">        &#125;</span><br><span class="line">        .onEnded &#123; state <span class="keyword">in</span></span><br><span class="line">            <span class="keyword">if</span> state.translation.height <span class="operator">&gt;</span> <span class="number">250</span> &#123;</span><br><span class="line">                <span class="keyword">self</span>.isPresented.wrappedValue <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Cell共享状态">Cell共享状态</h3>
+<p>在一般处理像是 cell 这样的会重复多次出现的 View 中的状态时，我们需要牢记，如果使用的状态不属于 cell 本身，那么它们是可能会在多个 cell 之间共享的。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">ContentView</span> : <span class="title class_">View</span> &#123;</span><br><span class="line">	<span class="meta">@State</span> <span class="keyword">var</span> show: <span class="type">Bool</span> <span class="operator">=</span> <span class="literal">false</span></span><br><span class="line">	<span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">		<span class="type">NavigationView</span> &#123;</span><br><span class="line">			<span class="type">List</span>(<span class="number">0</span><span class="operator">..&lt;</span><span class="number">10</span>) &#123; i <span class="keyword">in</span></span><br><span class="line">				<span class="type">NavigationLink</span>(</span><br><span class="line">				destination: <span class="type">Text</span>(<span class="string">&quot;Detail <span class="subst">\(i)</span>&quot;</span>),</span><br><span class="line">				isActive: <span class="keyword">self</span>.<span class="variable">$show</span>)</span><br><span class="line">				&#123;</span><br><span class="line">					<span class="type">Text</span>(<span class="string">&quot;Cell <span class="subst">\(i)</span>&quot;</span>)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当你点击某个 cell 时，根据你使用的 Xcode 版本不同，可能会出现各种奇怪的现象。比如在本书写作时的 Xcode 中，它将会顺次把从 0 到 9 的 Detail Text 都推入一遍，最后再回到初始的列表状态。</p>
+<p>原因，是因为 show 是定义在 ContentView 中的变量，它被所有的 cell 共享。当你点击某个 cell 时，show 的值被设置，这导致 body 部分被重新求值。而此时，show 不仅会作用在你点击的 cell 上，也会作用在所有其他 cell 上，也就是同时有多个 NavigationLink 的 isActive 参数接收到了 true，这会带来未定义的行为。</p>
+<p>同样的情况也会发生在 List 的 cell 上使用 .sheet 以 modal 方式弹出的界面中。.sheet 最常见的用法是 sheet(isPresented:content:)，它需要 Binding 来决定展示与否，在实际 app 中更容易让人犯错。</p>
+<p>因此，面对这类 cell 中需要某个状态的时候，我们需要引入这个状态和当前 cell 的某种关联</p>
+<h2 id="布局和对齐">布局和对齐</h2>
+<h3 id="布局">布局</h3>
+<p>fixedSize。这个 modifier 将提示布局系统忽略掉外界条件，让被修饰的 View 使用它在无约束下原本应有的理想尺寸。</p>
+<p>frame ：它并不是将所作用的 View 的尺寸进行更改，而是新创建一个 View，并强制地用其指定的尺寸，对内容 (其实也就是它的子 View) 进行提案</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">frame(width:height:alignment:)</span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">frame</span>(</span><br><span class="line"><span class="params">minWidth</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>, </span><br><span class="line"><span class="params">idealWidth</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>,</span><br><span class="line"><span class="params">maxWidth</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>, </span><br><span class="line"><span class="params">minHeight</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>, </span><br><span class="line"><span class="params">idealHeight</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>, </span><br><span class="line"><span class="params">maxHeight</span>: <span class="type">CGFloat</span>? <span class="operator">=</span> <span class="literal">nil</span>, </span><br><span class="line"><span class="params">alignment</span>: <span class="type">Alignment</span> <span class="operator">=</span> .center</span><br><span class="line">) -&gt; <span class="keyword">some</span> <span class="type">View</span></span><br></pre></td></tr></table></figure>
+<p>和固定宽高的版本不同，这个方法为尺寸定义了一套约束：如果从父 View 中获得的提案尺寸小于 minXXX 或者大于 maxXXX，这个 frame 将会把这个提案尺寸截取到相应的最小值或者最大值，然后进行提案。<br>
+frame 方法的两种版本里，所有的参数都有默认值 nil，如果你使用这个默认值，那么 frame 将不在这个方向上改变原有的尺寸提案，而是将它直接传递给子 View。</p>
+<p>frame 方法的最后一个参数表示所使用的对齐方式。不过，很多时候单纯地改变这个对齐方式不会有任何效果：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span> &#123;</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line">.frame(alignment: .leading)</span><br><span class="line">.background(<span class="type">Color</span>.purple)</span><br></pre></td></tr></table></figure>
+<p>因为这个 alignment 指定的是 frame View 中的内容在其内部的对齐方式，如果不指定宽度或者高度，那么 frame 的尺寸将完全由它的内容决定。换言之，内容都已经占据了 frame 的全部空间，不论采用哪种方式，内容在 frame 里都是“贴边的”。对齐也就没有任何意义了。想要体现和实验 frame 里的对齐方式，可以为 frame 添加一个多余内容所需空间的尺寸参数：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span> &#123;</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line">.frame(width: <span class="number">300</span>, alignment: .leading)</span><br><span class="line">.background(<span class="type">Color</span>.purple)</span><br></pre></td></tr></table></figure>
+<h3 id="隐式对齐和显式对齐">隐式对齐和显式对齐</h3>
+<p><code>alignmentGuide</code> 所做的事情，是负责修改 g (HorizontalAlignment 或者 VerticalAlignment) 的对齐方式，把原来的 <code>defaultValue(in:)</code> 所提供的默认值，用 computeValue 返回的 CGFloat 值进行替代。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span> &#123;</span><br><span class="line">	<span class="type">Image</span>(systemName: <span class="string">&quot;person.circle&quot;</span>)</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;User:&quot;</span>)</span><br><span class="line">	.font(.footnote)</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;onevcat | Wei Wang&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码相当于：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HStack</span>(alignment: .center) &#123;</span><br><span class="line">	<span class="type">Image</span>(systemName: <span class="string">&quot;person.circle&quot;</span>)</span><br><span class="line">		.alignmentGuide(<span class="type">VerticalAlignment</span>.center) &#123; d <span class="keyword">in</span></span><br><span class="line">			d[<span class="type">VerticalAlignment</span>.center]</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;User:&quot;</span>)</span><br><span class="line">		.font(.footnote)</span><br><span class="line">		.alignmentGuide(<span class="type">VerticalAlignment</span>.center) &#123; d <span class="keyword">in</span></span><br><span class="line">			d[<span class="type">VerticalAlignment</span>.center]</span><br><span class="line">		&#125;</span><br><span class="line">	<span class="type">Text</span>(<span class="string">&quot;onevcat | Wei Wang&quot;</span>)</span><br><span class="line">		.alignmentGuide(<span class="type">VerticalAlignment</span>.center) &#123; d <span class="keyword">in</span></span><br><span class="line">			d[<span class="type">VerticalAlignment</span>.center]</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意，只有当 <code>alignmentGuide</code> 的第一个参数 <code>VerticalAlignment.center</code> 和外层容器 <code>HStack</code> 的 <code>alignment</code> 参数一致时，它才会被考虑。因为 <code>alignmentGuide</code> API 的作用就是修改传入的 alignment 的数值。</p>
+</blockquote>
+<h3 id="自定义-Alignment-和跨-View-对齐">自定义 Alignment 和跨 View 对齐</h3>
+<p>新建对齐的最主要目的，还是为了跨越 View 的层级来进行对齐。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/05/11/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%AD/" rel="prev" title="SwiftUI 与 Combine 中">
+      <i class="fa fa-chevron-left"></i> SwiftUI 与 Combine 中
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">Swift UI 的架构方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C%E7%9A%84-Action"><span class="nav-number">1.1.</span> <span class="nav-text">异步操作的 Action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%90%88%E7%8A%B6%E6%80%81%E9%A9%B1%E5%8A%A8UI"><span class="nav-number">1.2.</span> <span class="nav-text">复合状态驱动UI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%8B%E5%8A%BF%E5%A4%84%E7%90%86%E5%92%8C%E5%AF%BC%E8%88%AA"><span class="nav-number">1.3.</span> <span class="nav-text">手势处理和导航</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Group"><span class="nav-number">1.3.1.</span> <span class="nav-text">Group</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GestureState"><span class="nav-number">1.3.2.</span> <span class="nav-text">GestureState</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cell%E5%85%B1%E4%BA%AB%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.3.</span> <span class="nav-text">Cell共享状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%83%E5%B1%80%E5%92%8C%E5%AF%B9%E9%BD%90"><span class="nav-number">1.4.</span> <span class="nav-text">布局和对齐</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E5%B1%80"><span class="nav-number">1.4.1.</span> <span class="nav-text">布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%BC%8F%E5%AF%B9%E9%BD%90%E5%92%8C%E6%98%BE%E5%BC%8F%E5%AF%B9%E9%BD%90"><span class="nav-number">1.4.2.</span> <span class="nav-text">隐式对齐和显式对齐</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-Alignment-%E5%92%8C%E8%B7%A8-View-%E5%AF%B9%E9%BD%90"><span class="nav-number">1.4.3.</span> <span class="nav-text">自定义 Alignment 和跨 View 对齐</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
