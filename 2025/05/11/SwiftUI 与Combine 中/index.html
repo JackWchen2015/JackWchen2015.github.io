@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://github.com/res/swiftui_combine_latest.png">
 <meta property="og:image" content="https://github.com/res/swiftui_combine_publish_subject.png">
 <meta property="article:published_time" content="2025-05-10T16:00:00.000Z">
-<meta property="article:modified_time" content="2025-06-11T14:58:58.098Z">
+<meta property="article:modified_time" content="2025-06-11T15:04:14.318Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://github.com/res/swiftui_combine_zip.png">
@@ -223,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2025-06-11 22:58:58" itemprop="dateModified" datetime="2025-06-11T22:58:58+08:00">2025-06-11</time>
+                <time title="修改时间：2025-06-11 23:04:14" itemprop="dateModified" datetime="2025-06-11T23:04:14+08:00">2025-06-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -289,7 +289,7 @@
 <p><img src="/../res/swiftui_combine_zip.png"></p>
 <p>zip 在时序语义上更接近于“当…且…”，当 Publisher1 发布值，且 Publisher2 发布值时，将两个值合并，作为新的事件发布出去。在实践中，zip 经常被用在合并多个异步事件的结果，比如同时发出了多个网络请求，希望在它们全部完成的时候把结果合并在一起。</p>
 <h3 id="combineLatest"><a href="#combineLatest" class="headerlink" title="combineLatest"></a>combineLatest</h3><p>combineLatest的语义接近于“当…或…”，当 Publisher1 发布值，或者 Publisher2 发布值时，将两个值合并，作为新的事件发布出去。</p>
-<p><img src="/./res/swiftui_combine_latest.png"></p>
+<p><img src="/../res/swiftui_combine_latest.png"></p>
 <p>在实践中，combineLatest 被用来处理多个可变状态，在其中某一个状态发生变化时，获取这些全部状态的最新值。比如你的 UI 上有多个 TextField，你可能想要在其中某一个值变动时获取到所有 TextField 中的值并对它们进行检查 (没错，我说的就是用户注册)。</p>
 <h2 id="响应式和指令式的桥梁"><a href="#响应式和指令式的桥梁" class="headerlink" title="响应式和指令式的桥梁"></a>响应式和指令式的桥梁</h2><h3 id="Future"><a href="#Future" class="headerlink" title="Future"></a>Future</h3><p>如果我们希望订阅操作和值的发布是异步行为，不在同一时间发生的话，可以使用 Future。Future 提供了一种方式，可以让我们创建一个接受未来的事件的 Publisher。</p>
 <blockquote>
@@ -305,7 +305,7 @@
 <h2 id="订阅和绑定"><a href="#订阅和绑定" class="headerlink" title="订阅和绑定"></a>订阅和绑定</h2><h3 id="通过sink订阅Publisher事件"><a href="#通过sink订阅Publisher事件" class="headerlink" title="通过sink订阅Publisher事件"></a>通过sink订阅Publisher事件</h3><p>sink的函数签名如下：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">sink</span>(<span class="params">receiveCompletion</span>: </span><br><span class="line">	<span class="keyword">@escaping</span> ((<span class="type">Subscribers</span>.<span class="type">Completion</span>&lt;<span class="keyword">Self</span>.<span class="type">Failure</span>&gt;) -&gt; <span class="type">Void</span>),</span><br><span class="line"><span class="params">receiveValue</span>: </span><br><span class="line">	<span class="keyword">@escaping</span> ((<span class="keyword">Self</span>.<span class="type">Output</span>) -&gt; <span class="type">Void</span>)</span><br><span class="line">) -&gt; <span class="type">AnyCancellable</span></span><br></pre></td></tr></table></figure>
 <p>一个完整的“发布-订阅”流程如下所示：</p>
-<p><img src="/./res/swiftui_combine_publish_subject.png"></p>
+<p><img src="/../res/swiftui_combine_publish_subject.png"></p>
 <h3 id="通过assign绑定Publisher值"><a href="#通过assign绑定Publisher值" class="headerlink" title="通过assign绑定Publisher值"></a>通过assign绑定Publisher值</h3><p>Subscribers.Assign，它可以用来将 Publisher 的输出值通过 key path 绑定到一个对象的属性上去。在 SwiftUI 中，这种值通常会是 ObservableObject 中的属性值，它进一步会被用来驱动 View 的更新。</p>
 <p>注意 assign 所接受的第一个参数的类型为 ReferenceWritableKeyPath，也就是说，只有 class 上用 var 声明的属性可以通过 assign 来直接赋值。</p>
 <p>assign 的另一个“限制”是，上游 Publisher 的 Failure 的类型必须是 Never。如果上游 Publisher 可能会发生错误，我们则必须先对它进行处理，比如使用 replaceError 或者 catch 来把错误在绑定之前就“消化”掉。</p>
