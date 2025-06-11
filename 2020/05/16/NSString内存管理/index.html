@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="一道面试题 12345678910111213141516171819202122@interface ViewController : UIViewController@property (nonatomic, strong) NSString *string1;@property (nonatomic, weak) NSString *string2;@end@implementation V">
+  <meta name="description" content="一道面试题12345678910111213141516171819202122@interface ViewController : UIViewController@property (nonatomic, strong) NSString *string1;@property (nonatomic, weak) NSString *string2;@end@implementation Vi">
 <meta property="og:type" content="article">
 <meta property="og:title" content="NSString内存管理">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/NSString%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="一道面试题 12345678910111213141516171819202122@interface ViewController : UIViewController@property (nonatomic, strong) NSString *string1;@property (nonatomic, weak) NSString *string2;@end@implementation V">
+<meta property="og:description" content="一道面试题12345678910111213141516171819202122@interface ViewController : UIViewController@property (nonatomic, strong) NSString *string1;@property (nonatomic, weak) NSString *string2;@end@implementation Vi">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-05-16T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-08-28T01:30:33.823Z">
@@ -246,27 +246,23 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="一道面试题">一道面试题</h2>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> : <span class="title">UIViewController</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> *string1;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="built_in">NSString</span> *string2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">        </span><br><span class="line">    [<span class="keyword">self</span> testKeyword];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="type">void</span>)testKeyword &#123;</span><br><span class="line">    <span class="keyword">self</span>.string1 = [[<span class="built_in">NSString</span> alloc] initWithUTF8String:<span class="string">&quot;string 1&quot;</span>];</span><br><span class="line">    <span class="keyword">self</span>.string2 = <span class="keyword">self</span>.string1;</span><br><span class="line">    <span class="keyword">self</span>.string1 = <span class="literal">nil</span>;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 1 = %@&quot;</span>,<span class="keyword">self</span>.string1);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 2 = %@&quot;</span>, <span class="keyword">self</span>.string2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+        <h2 id="一道面试题"><a href="#一道面试题" class="headerlink" title="一道面试题"></a>一道面试题</h2><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> : <span class="title">UIViewController</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> *string1;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="built_in">NSString</span> *string2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">        </span><br><span class="line">    [<span class="keyword">self</span> testKeyword];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="type">void</span>)testKeyword &#123;</span><br><span class="line">    <span class="keyword">self</span>.string1 = [[<span class="built_in">NSString</span> alloc] initWithUTF8String:<span class="string">&quot;string 1&quot;</span>];</span><br><span class="line">    <span class="keyword">self</span>.string2 = <span class="keyword">self</span>.string1;</span><br><span class="line">    <span class="keyword">self</span>.string1 = <span class="literal">nil</span>;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 1 = %@&quot;</span>,<span class="keyword">self</span>.string1);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 2 = %@&quot;</span>, <span class="keyword">self</span>.string2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
 <span id="more"></span>
-<h2 id="NSString内存管理">NSString内存管理</h2>
-<p><code>NSString</code>在<code>OC</code>的内存管理策略中是一个特殊的存在，因为其在编译和运行中做了一些优化处理。</p>
+
+<h2 id="NSString内存管理"><a href="#NSString内存管理" class="headerlink" title="NSString内存管理"></a>NSString内存管理</h2><p><code>NSString</code>在<code>OC</code>的内存管理策略中是一个特殊的存在，因为其在编译和运行中做了一些优化处理。</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//宏定义</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> XWLog(_var) (&#123; NSString *name = @#_var; NSLog(@<span class="string">&quot;变量名=%@，类型=%@， 地址=%p，值=%@，引用计数=%d&quot;</span>, name, [_var class], _var, _var, (int)[_var retainCount]); &#125;)</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//测试代码</span></span><br><span class="line">    <span class="built_in">NSString</span> *a = <span class="string">@&quot;string&quot;</span>;</span><br><span class="line">    <span class="built_in">NSString</span> *b = [[<span class="built_in">NSString</span> alloc]init];</span><br><span class="line">    <span class="built_in">NSString</span> *c = [[<span class="built_in">NSString</span> alloc]initWithString:<span class="string">@&quot;string&quot;</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *d = [[<span class="built_in">NSString</span> alloc]initWithFormat:<span class="string">@&quot;string&quot;</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *e = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;string&quot;</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *f = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;123456789&quot;</span>];</span><br><span class="line">    <span class="built_in">NSString</span> *g = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;1234567890&quot;</span>];</span><br><span class="line">    XWLog(a); XWLog(b); XWLog(c); XWLog(d); XWLog(e); XWLog(f); XWLog(g);</span><br></pre></td></tr></table></figure>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//打印结果</span></span><br><span class="line">变量名=a，类型=__NSCFConstantString， 地址=<span class="number">0x1015f3120</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=b，类型=__NSCFConstantString， 地址=<span class="number">0x1019808d0</span>，值=，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=c，类型=__NSCFConstantString， 地址=<span class="number">0x1015f3120</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=d，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa00676e697274736</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=e，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa00676e697274736</span>，值=string，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=f，类型=<span class="built_in">NSTaggedPointerString</span>， 地址=<span class="number">0xa1ea1f72bb30ab19</span>，值=<span class="number">123456789</span>，引用计数=<span class="number">-1</span></span><br><span class="line">变量名=g，类型=__NSCFString， 地址=<span class="number">0x60800002b580</span>，值=<span class="number">1234567890</span>，引用计数=<span class="number">1</span></span><br></pre></td></tr></table></figure>
-<h3 id="NSCFString">__NSCFString</h3>
-<p>对象类型的字符串，在运行时创建，存储在堆区，服从OC的对象内存管理策略，长度不能太小（内容若包含中文字符，不论长度大小，都是<code>NSCFString</code>），否则创建的是<code>NSTaggedPointerString</code>类型，例如上面f与g</p>
-<h3 id="NSTaggedPointerString">NSTaggedPointerString</h3>
-<p>对于64位程序，为了节省内存和提高运行速度，苹果引入了<code>Tagged Point</code>技术，在运行时创建时对字符串的内容和长度作出判断，若字符串内容是由ASCII构成且长度较小（大概10个字符以内），这是创建的字符串就是<code>NSTaggedPointerString</code>类型，字符串直接存储在指针里，引用计数同样为-1，不适用对象的内存管理策略。</p>
+<h3 id="NSCFString"><a href="#NSCFString" class="headerlink" title="__NSCFString"></a>__NSCFString</h3><p>对象类型的字符串，在运行时创建，存储在堆区，服从OC的对象内存管理策略，长度不能太小（内容若包含中文字符，不论长度大小，都是<code>NSCFString</code>），否则创建的是<code>NSTaggedPointerString</code>类型，例如上面f与g</p>
+<h3 id="NSTaggedPointerString"><a href="#NSTaggedPointerString" class="headerlink" title="NSTaggedPointerString"></a>NSTaggedPointerString</h3><p>对于64位程序，为了节省内存和提高运行速度，苹果引入了<code>Tagged Point</code>技术，在运行时创建时对字符串的内容和长度作出判断，若字符串内容是由ASCII构成且长度较小（大概10个字符以内），这是创建的字符串就是<code>NSTaggedPointerString</code>类型，字符串直接存储在指针里，引用计数同样为-1，不适用对象的内存管理策略。</p>
 <blockquote>
 <p>Tagged Pointer指针的值不再是地址，而是真正的值，所以它不再是一个对象，只是一个披着对象皮的普通变量而已。它的内存并不存储在堆中，OC对象的内存管理对其无效。</p>
 </blockquote>
-<h3 id="NSCFConstantString">__NSCFConstantString</h3>
-<p>常量字符串，该类型的字符串是以字面量创建的，是在编译期创建的，保存在常量区</p>
+<h3 id="NSCFConstantString"><a href="#NSCFConstantString" class="headerlink" title="__NSCFConstantString"></a>__NSCFConstantString</h3><p>常量字符串，该类型的字符串是以字面量创建的，是在编译期创建的，保存在常量区</p>
 <blockquote>
 <p>文字常量区存放常量字符串，程序结束后由系统释放，也就是说指向常量表的指针不受引用计数管理，OC的内存管理策略对其无效。</p>
 </blockquote>
-<h2 id="参考">参考</h2>
-<ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/462adf281fde">NSString 的内存问题</a></li>
 </ol>
 
@@ -284,12 +280,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/" rel="prev" title="iOS内存管理法则与优化">
-      <i class="fa fa-chevron-left"></i> iOS内存管理法则与优化
+    <a href="/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/" rel="prev" title="OC内存管理实现">
+      <i class="fa fa-chevron-left"></i> OC内存管理实现
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/" rel="next" title="OC内存管理实现">
-      OC内存管理实现 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/05/20/iOS%E9%80%86%E5%90%91%E6%94%BB%E9%98%B2/" rel="next" title="iOS逆向攻防">
+      iOS逆向攻防 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -363,7 +359,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -375,7 +371,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

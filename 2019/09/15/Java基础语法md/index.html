@@ -244,38 +244,30 @@
       
         <p>这篇主要总结一下Java语法方面的技巧</p>
 <span id="more"></span>
-<h2 id="Pubilic-Class和Class">Pubilic Class和Class</h2>
-<p>使用Pubilic class类名称声明一个类时，类名称必须和文件名称一致，否则程序将无法编译</p>
-<h2 id="JVM">JVM</h2>
-<p>每当使用Java命令执行一个类时，实际上都会启动一个JVM，每一个JVM实际上就是在操作系统中启动了一个进程，Java本身具备了垃圾收集机制，所以在Java运行时至少会启动两个线程，一个是main线程，另外一个是垃圾收集线程。</p>
-<h2 id="Java有参构造方法和无参构造方法">Java有参构造方法和无参构造方法</h2>
-<ol>
-<li>编写一个类时没有添加无参构造方法，那么编译器会自动添加无参构造方法；(如果自己添加构造函数，无论有参数或是没参数，默认构造函数都将无效)</li>
-<li>编写时添加了有参构造方法而未添加无参构造方法，那么编译器只认有参构造方法而不会默认添加无参构造方法！<br>
-如果需要使用无参构造方法，一定要在类里面添加</li>
-</ol>
-<h2 id="对象的生命周期">对象的生命周期</h2>
 
-<h2 id="String-StringBuffer-StringBuilder">String,StringBuffer,StringBuilder</h2>
-<ol>
+<h2 id="Pubilic-Class和Class"><a href="#Pubilic-Class和Class" class="headerlink" title="Pubilic Class和Class"></a>Pubilic Class和Class</h2><p>使用Pubilic class类名称声明一个类时，类名称必须和文件名称一致，否则程序将无法编译</p>
+<h2 id="JVM"><a href="#JVM" class="headerlink" title="JVM"></a>JVM</h2><p>每当使用Java命令执行一个类时，实际上都会启动一个JVM，每一个JVM实际上就是在操作系统中启动了一个进程，Java本身具备了垃圾收集机制，所以在Java运行时至少会启动两个线程，一个是main线程，另外一个是垃圾收集线程。</p>
+<h2 id="Java有参构造方法和无参构造方法"><a href="#Java有参构造方法和无参构造方法" class="headerlink" title="Java有参构造方法和无参构造方法"></a>Java有参构造方法和无参构造方法</h2><ol>
+<li>编写一个类时没有添加无参构造方法，那么编译器会自动添加无参构造方法；(如果自己添加构造函数，无论有参数或是没参数，默认构造函数都将无效)</li>
+<li>编写时添加了有参构造方法而未添加无参构造方法，那么编译器只认有参构造方法而不会默认添加无参构造方法！<br>如果需要使用无参构造方法，一定要在类里面添加</li>
+</ol>
+<h2 id="对象的生命周期"><a href="#对象的生命周期" class="headerlink" title="对象的生命周期"></a>对象的生命周期</h2>
+<h2 id="String-StringBuffer-StringBuilder"><a href="#String-StringBuffer-StringBuilder" class="headerlink" title="String,StringBuffer,StringBuilder"></a>String,StringBuffer,StringBuilder</h2><ol>
 <li>String是不可变的，String类是final修饰的，所以值是不变的（StirngBufer，StringBuilder可变）</li>
 <li>String，StringBuffer是线程安全的，StringBuilder是线程不安全的（StringBuffer的append操作用了synchronized）</li>
 <li>String对象串联的效率最慢，单线程下字符串的串联用StringBuilder，多线程下用StringBuffer</li>
 </ol>
-<h2 id="equals和hashCode">equals和hashCode</h2>
-<ol>
+<h2 id="equals和hashCode"><a href="#equals和hashCode" class="headerlink" title="equals和hashCode"></a>equals和hashCode</h2><ol>
 <li>如果两个对象相同（equals方法返回true），那么它们的hashCode值一定要相同；</li>
 <li>如果两个对象的hashCode相同，它们并不一定相同。</li>
 <li>当然，你未必要按照要求去做，但是如果你违背了上述原则就会发现在使用容器时，相同的对象可以出现在Set集合中，同时增加新元素的效率会大大下降（对于使用哈希存储的系统，如果哈希码频繁的冲突将会造成存取性能急剧下降）。</li>
 </ol>
-<h2 id="volatile关键字">volatile关键字</h2>
-<p>volatile关键字的两层语义</p>
+<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>volatile关键字的两层语义</p>
 <ol>
 <li>保证了不同线程对这个变量进行操作时的可见性，即一个线程修改了某个变量的值，这新值对其他线程来说是立即可见的。</li>
 <li>禁止进行指令重排序。</li>
 </ol>
-<p><strong>内存模型</strong><br>
-当程序在运行过程中，会将运算需要的数据从主存复制一份到CPU的高速缓存当中，那么CPU进行计算时就可以直接从它的高速缓存读取数据和向其中写入数据，当运算结束之后，再将高速缓存中的数据刷新到主存当中。</p>
+<p><strong>内存模型</strong><br>当程序在运行过程中，会将运算需要的数据从主存复制一份到CPU的高速缓存当中，那么CPU进行计算时就可以直接从它的高速缓存读取数据和向其中写入数据，当运算结束之后，再将高速缓存中的数据刷新到主存当中。</p>
 <p>如果一个变量在多个CPU中都存在缓存（一般在多线程编程时才会出现），那么就可能存在缓存不一致的问题。</p>
 <p>为了解决缓存不一致性问题，通常来说有以下2种解决方法：</p>
 <ol>
@@ -283,39 +275,28 @@
 <li>通过缓存一致性协议（Intel 的MESI协议）</li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">核心的思想是：当CPU写数据时，如果发现操作的变量是共享变量，即在其他CPU中也存在该</span><br><span class="line">变量的副本，会发出信号通知其他CPU将该变量的缓存行置为无效状态，因此当其他CPU需要</span><br><span class="line">读取这个变量时，发现自己缓存中缓存该变量的缓存行是无效的，那么它就会从内存重新读</span><br><span class="line">取。</span><br></pre></td></tr></table></figure>
-<h2 id="final关键字">final关键字</h2>
-<p>final关键字可以用来修饰类、方法和变量（包括成员变量和局部变量）</p>
+
+<h2 id="final关键字"><a href="#final关键字" class="headerlink" title="final关键字"></a>final关键字</h2><p>final关键字可以用来修饰类、方法和变量（包括成员变量和局部变量）</p>
 <ol>
-<li>修饰类<br>
-　当用final修饰一个类时，表明这个类不能被继承。final类中的成员变量可以根据需要设为final，但是要注意final类中的所有成员方法都会被隐式地指定为final方法。</li>
-<li>修饰方法<br>
-“使用final方法的原因有两个。第一个原因是把方法锁定，以防任何继承类修改它的含义；第二个原因是效率。在早期的Java实现版本中，会将final方法转为内嵌调用。但是如果方法过于庞大，可能看不到内嵌调用带来的任何性能提升。在最近的Java版本中，不需要使用final方法进行这些优化了。“<br>
-　　因此，如果只有在想明确禁止 该方法在子类中被覆盖的情况下才将方法设置为final的。<br>
-　　<code>注：类的private方法会隐式地被指定为final方法</code>。</li>
-<li>修饰变量<br>
-　　修饰变量是final用得最多的地方<br>
-对于一个final变量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。</li>
+<li>修饰类<br>　当用final修饰一个类时，表明这个类不能被继承。final类中的成员变量可以根据需要设为final，但是要注意final类中的所有成员方法都会被隐式地指定为final方法。</li>
+<li>修饰方法<br>“使用final方法的原因有两个。第一个原因是把方法锁定，以防任何继承类修改它的含义；第二个原因是效率。在早期的Java实现版本中，会将final方法转为内嵌调用。但是如果方法过于庞大，可能看不到内嵌调用带来的任何性能提升。在最近的Java版本中，不需要使用final方法进行这些优化了。“<br>　　因此，如果只有在想明确禁止 该方法在子类中被覆盖的情况下才将方法设置为final的。<br>　　<code>注：类的private方法会隐式地被指定为final方法</code>。</li>
+<li>修饰变量<br>　　修饰变量是final用得最多的地方<br>对于一个final变量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。</li>
 </ol>
-<h2 id="Static关键字">Static关键字</h2>
-<ol>
-<li>static方法<br>
-“static方法就是没有this的方法。在static方法内部不能调用非静态方法，反过来是可以的。而且可以在没有创建任何对象的前提下，仅仅通过类本身来调用static方法。这实际上正是static方法的主要用途。”</li>
+<h2 id="Static关键字"><a href="#Static关键字" class="headerlink" title="Static关键字"></a>Static关键字</h2><ol>
+<li>static方法<br>“static方法就是没有this的方法。在static方法内部不能调用非静态方法，反过来是可以的。而且可以在没有创建任何对象的前提下，仅仅通过类本身来调用static方法。这实际上正是static方法的主要用途。”</li>
 </ol>
-<p>一句话来描述就是：<strong>方便在没有创建对象的情况下来进行调用（方法/变量）</strong>。</p>
+<p>一句话来描述就是：<strong>方便在没有创建对象的情况下来进行调用（方法&#x2F;变量）</strong>。</p>
 <ol start="2">
 <li>static变量</li>
 </ol>
-<p>static变量也称作静态变量，静态变量和非静态变量的区别是：静态变量被所有的对象所共享，在内存中只有一个副本，它当且仅当在类初次加载时会被初始化。而非静态变量是对象所拥有的，在创建对象的时候被初始化，存在多个副本，各个对象拥有的副本互不影响。<br>
-　　static成员变量的初始化顺序按照定义的顺序进行初始化。</p>
+<p>static变量也称作静态变量，静态变量和非静态变量的区别是：静态变量被所有的对象所共享，在内存中只有一个副本，它当且仅当在类初次加载时会被初始化。而非静态变量是对象所拥有的，在创建对象的时候被初始化，存在多个副本，各个对象拥有的副本互不影响。<br>　　static成员变量的初始化顺序按照定义的顺序进行初始化。</p>
 <ol start="3">
 <li>static代码块</li>
 </ol>
 <p>在类初次被加载的时候，会按照static块的顺序来执行每个static块，并且只会执行一次。</p>
-<h2 id="Extends-implements">Extends implements</h2>
-<p>Extends可以理解为全盘继承了父类的功能。implements可以理解为为这个类附加一些额外的功能；interface定义一些方法,并没有实现,需要implements来实现才可用。extend可以继承一个接口,但仍是一个接口,也需要implements之后才可用。</p>
+<h2 id="Extends-implements"><a href="#Extends-implements" class="headerlink" title="Extends implements"></a>Extends implements</h2><p>Extends可以理解为全盘继承了父类的功能。implements可以理解为为这个类附加一些额外的功能；interface定义一些方法,并没有实现,需要implements来实现才可用。extend可以继承一个接口,但仍是一个接口,也需要implements之后才可用。</p>
 <p>对于class而言，Extends用于(单)继承一个类（class），而implements用于实现一个接口(interface)</p>
-<p>Implements 接口实现<br>
-Implements是一个类实现一个接口用的关键字，它是用来实现接口中定义的抽象方法</p>
+<p>Implements 接口实现<br>Implements是一个类实现一个接口用的关键字，它是用来实现接口中定义的抽象方法</p>
 
     </div>
 
@@ -410,7 +391,7 @@ Implements是一个类实现一个接口用的关键字，它是用来实现接�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -422,7 +403,7 @@ Implements是一个类实现一个接口用的关键字，它是用来实现接�
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

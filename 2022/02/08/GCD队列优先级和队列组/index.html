@@ -20,20 +20,20 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="GCD队列的服务质量与优先级   NSQualityOfServiceUserInteractive 与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；   NSQualityOfServiceUserInitiated 由用户发起的并且需要立即得到结果的任务，比如滑动 scroll view 时去加载数据用于后续 cell 的显示，这些任务通常跟后续的用">
+  <meta name="description" content="GCD队列的服务质量与优先级 NSQualityOfServiceUserInteractive与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；  NSQualityOfServiceUserInitiated由用户发起的并且需要立即得到结果的任务，比如滑动 scroll view 时去加载数据用于后续 cell 的显示，这些任务通常跟后续的用户交互相关">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GCD队列优先级和队列组">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="GCD队列的服务质量与优先级   NSQualityOfServiceUserInteractive 与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；   NSQualityOfServiceUserInitiated 由用户发起的并且需要立即得到结果的任务，比如滑动 scroll view 时去加载数据用于后续 cell 的显示，这些任务通常跟后续的用">
+<meta property="og:description" content="GCD队列的服务质量与优先级 NSQualityOfServiceUserInteractive与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；  NSQualityOfServiceUserInitiated由用户发起的并且需要立即得到结果的任务，比如滑动 scroll view 时去加载数据用于后续 cell 的显示，这些任务通常跟后续的用户交互相关">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/res/Qos.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/res/targetQueue.png">
+<meta property="og:image" content="https://github.com/res/Qos.png">
+<meta property="og:image" content="https://github.com/res/targetQueue.png">
 <meta property="article:published_time" content="2022-02-08T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-08-31T09:07:51.496Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/res/Qos.png">
+<meta name="twitter:image" content="https://github.com/res/Qos.png">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2022/02/08/GCD%E9%98%9F%E5%88%97%E4%BC%98%E5%85%88%E7%BA%A7%E5%92%8C%E9%98%9F%E5%88%97%E7%BB%84/">
 
@@ -249,50 +249,36 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="GCD队列的服务质量与优先级">GCD队列的服务质量与优先级</h2>
-<ul>
-<li>
-<p>NSQualityOfServiceUserInteractive<br>
-与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；</p>
+        <h2 id="GCD队列的服务质量与优先级"><a href="#GCD队列的服务质量与优先级" class="headerlink" title="GCD队列的服务质量与优先级"></a>GCD队列的服务质量与优先级</h2><ul>
+<li><p>NSQualityOfServiceUserInteractive<br>与用户交互的任务，这些任务通常跟 UI 级别的刷新相关，比如动画，这些任务需要在一瞬间完成；</p>
 </li>
-<li>
-<p>NSQualityOfServiceUserInitiated<br>
-由用户发起的并且需要立即得到结果的任务，比如滑动 <code>scroll view</code> 时去加载数据用于后续 <code>cell</code> 的显示，这些任务通常跟后续的用户交互相关，在几秒或者更短的时间内完成；</p>
+<li><p>NSQualityOfServiceUserInitiated<br>由用户发起的并且需要立即得到结果的任务，比如滑动 <code>scroll view</code> 时去加载数据用于后续 <code>cell</code> 的显示，这些任务通常跟后续的用户交互相关，在几秒或者更短的时间内完成；</p>
 </li>
-<li>
-<p>NSQualityOfServiceUtility<br>
-一些可能需要花点时间的任务，这些任务不需要马上返回结果，比如下载的任务，这些任务可能花费几秒或者几分钟的时间；</p>
+<li><p>NSQualityOfServiceUtility<br>一些可能需要花点时间的任务，这些任务不需要马上返回结果，比如下载的任务，这些任务可能花费几秒或者几分钟的时间；</p>
 </li>
-<li>
-<p>NSQualityOfServiceBackground<br>
-这些任务对用户不可见，比如后台进行备份的操作，这些任务可能需要较长的时间，几分钟甚至几个小时；</p>
+<li><p>NSQualityOfServiceBackground<br>这些任务对用户不可见，比如后台进行备份的操作，这些任务可能需要较长的时间，几分钟甚至几个小时；</p>
 </li>
-<li>
-<p>NSQualityOfServiceDefault<br>
-优先级介于 <code>user-initiated</code> 和 <code>utility</code>，当没有 QoS 信息时默认使用，开发者不应该使用这个值来设置自己的任务。</p>
+<li><p>NSQualityOfServiceDefault<br>优先级介于 <code>user-initiated</code> 和 <code>utility</code>，当没有 QoS 信息时默认使用，开发者不应该使用这个值来设置自己的任务。</p>
 </li>
 </ul>
-<h3 id="服务质量枚举类型">服务质量枚举类型</h3>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">QOS_CLASS_USER_INTERACTIVE</span><br><span class="line">QOS_CLASS_USER_INITIATED</span><br><span class="line">QOS_CLASS_DEFAULT</span><br><span class="line">QOS_CLASS_UTILITY</span><br><span class="line">QOS_CLASS_BACKGROUND</span><br></pre></td></tr></table></figure>
+<h3 id="服务质量枚举类型"><a href="#服务质量枚举类型" class="headerlink" title="服务质量枚举类型"></a>服务质量枚举类型</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">QOS_CLASS_USER_INTERACTIVE</span><br><span class="line">QOS_CLASS_USER_INITIATED</span><br><span class="line">QOS_CLASS_DEFAULT</span><br><span class="line">QOS_CLASS_UTILITY</span><br><span class="line">QOS_CLASS_BACKGROUND</span><br></pre></td></tr></table></figure>
 <p>队列的优先级与服务质量的对应关系：</p>
-<p><img src="./res/Qos.png" alt=""></p>
-<h3 id="给队列设置QoS">给队列设置QoS</h3>
-<p><code>dispatch_queue_attr_make_with_qos_class</code></p>
+<p><img src="/./res/Qos.png"></p>
+<h3 id="给队列设置QoS"><a href="#给队列设置QoS" class="headerlink" title="给队列设置QoS"></a>给队列设置QoS</h3><p><code>dispatch_queue_attr_make_with_qos_class</code></p>
 <p><code>dispatch_set_target_queue</code></p>
-<h2 id="GCD队列任务间依赖关系">GCD队列任务间依赖关系</h2>
-<h3 id="dispatch-set-target-queue"><code>dispatch_set_target_queue</code></h3>
-<p>除了能用来设置队列的 QoS 之外，还能够创建队列的层次体系。当我们想让不同队列中的任务同步的执行时，我们可以创建一个串行队列，然后将这些队列的 target 指向新创建的队列即可，比如：</p>
-<p><img src="./res/targetQueue.png" alt=""></p>
+<h2 id="GCD队列任务间依赖关系"><a href="#GCD队列任务间依赖关系" class="headerlink" title="GCD队列任务间依赖关系"></a>GCD队列任务间依赖关系</h2><h3 id="dispatch-set-target-queue"><a href="#dispatch-set-target-queue" class="headerlink" title="dispatch_set_target_queue"></a><code>dispatch_set_target_queue</code></h3><p>除了能用来设置队列的 QoS 之外，还能够创建队列的层次体系。当我们想让不同队列中的任务同步的执行时，我们可以创建一个串行队列，然后将这些队列的 target 指向新创建的队列即可，比如： </p>
+<p><img src="/./res/targetQueue.png"></p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">    <span class="built_in">dispatch_queue_t</span> targetQueue = dispatch_queue_create(<span class="string">&quot;target_queue&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue1 = dispatch_queue_create(<span class="string">&quot;queue1&quot;</span>, DISPATCH_QUEUE_SERIAL);</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue2 = dispatch_queue_create(<span class="string">&quot;queue2&quot;</span>, DISPATCH_QUEUE_CONCURRENT);</span><br><span class="line">    dispatch_set_target_queue(queue1, targetQueue);</span><br><span class="line">    dispatch_set_target_queue(queue2, targetQueue);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue1, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务1,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue2, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务2,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue2, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;执行任务3,%s&quot;</span>,dispatch_queue_get_label(DISPATCH_CURRENT_QUEUE_LABEL));</span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:18.142729+0800 多线程[6669:1213619] 执行任务1,queue1</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:19.143926+0800 多线程[6669:1213619] 执行任务2,queue2</span></span><br><span class="line"><span class="comment">2020-02-01 19:05:20.147740+0800 多线程[6669:1213619] 执行任务3,queue2</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
 <p>注意点： 避免相互依赖，如将队列 A 的目标队列设置为队列 B，并将队列 B 的目标队列设置为队列 A。</p>
-<h2 id="Dispatch-Group队列组">Dispatch Group队列组</h2>
-<p>GCD 队列组，又称“调度组”，实现所有任务执行完成后有一个统一的回调。</p>
+<h2 id="Dispatch-Group队列组"><a href="#Dispatch-Group队列组" class="headerlink" title="Dispatch Group队列组"></a>Dispatch Group队列组</h2><p>GCD 队列组，又称“调度组”，实现所有任务执行完成后有一个统一的回调。</p>
 <p>例如：异步下载歌曲，等所有歌曲都下载完毕以后，转到主线程提示用户</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">    dispatch_group_t group = dispatch_group_create();</span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲1&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲2&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_async(group, queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载歌曲3&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        [<span class="built_in">NSThread</span> sleepForTimeInterval:<span class="number">1</span>];</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,下载完毕&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x6000028c8c00&gt;&#123;number = 6, name = (null)&#125;,下载歌曲2</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x60000283f400&gt;&#123;number = 5, name = (null)&#125;,下载歌曲1</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600002803440&gt;&#123;number = 4, name = (null)&#125;,下载歌曲3</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x60000285c5c0&gt;&#123;number = 1, name = main&#125;,下载完毕</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
-<h3 id="队列组的原理">队列组的原理</h3>
-<p>真正实现统一回调的操作：</p>
+
+<h3 id="队列组的原理"><a href="#队列组的原理" class="headerlink" title="队列组的原理"></a>队列组的原理</h3><p>真正实现统一回调的操作：</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> dispatch_group_enter(dispatch_group_t group);</span><br><span class="line"><span class="type">void</span> dispatch_group_leave(dispatch_group_t group);</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dispatch_group_async(group, queue, ^&#123; </span><br><span class="line">&#125;); </span><br><span class="line"><span class="comment">//等价于</span></span><br><span class="line">dispatch_group_enter(group);</span><br><span class="line"><span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">    dispatch_group_leave(group);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">// 1.创建队列组</span></span><br><span class="line">    dispatch_group_t group = dispatch_group_create();</span><br><span class="line">    <span class="comment">// 2.获取全局并发队列</span></span><br><span class="line">    <span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">//ARC中不用写也不能写</span></span><br><span class="line"><span class="comment">//    dispatch_retain(group);</span></span><br><span class="line">    <span class="comment">// 3.进入队列组，执行此函数后，再添加的异步执行的block任务都会被group监听</span></span><br><span class="line">    dispatch_group_enter(group);</span><br><span class="line">    <span class="comment">// 4.添加任务</span></span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务1&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">        <span class="comment">// 5.离开队列组</span></span><br><span class="line">        dispatch_group_leave(group);</span><br><span class="line">        <span class="comment">//ARC中不用写也不能写</span></span><br><span class="line"><span class="comment">//        dispatch_release(group);</span></span><br><span class="line">    &#125;);</span><br><span class="line">    dispatch_group_enter(group);</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务2&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">        dispatch_group_leave(group);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 6.获得队列组的通知</span></span><br><span class="line">    dispatch_group_notify(group, dispatch_get_main_queue(), ^&#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务3&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 7.等待队列组，监听的队列中的所有任务都执行完毕，才会执行后续代码，会阻塞线程（很少使用）</span></span><br><span class="line">    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%@,执行任务4&quot;</span>,[<span class="built_in">NSThread</span> currentThread]);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003d98d00&gt;&#123;number = 3, name = (null)&#125;,执行任务1</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003d4de80&gt;&#123;number = 9, name = (null)&#125;,执行任务2</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003dcd2c0&gt;&#123;number = 1, name = main&#125;,执行任务4</span></span><br><span class="line"><span class="comment">&lt;NSThread: 0x600003dcd2c0&gt;&#123;number = 1, name = main&#125;,执行任务3</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
 
     </div>
@@ -309,12 +295,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/02/08/GCD%E5%9F%BA%E7%A1%80/" rel="prev" title="GCD基础">
-      <i class="fa fa-chevron-left"></i> GCD基础
+    <a href="/2022/01/31/RunLoop%E4%B9%8BNSTimer/" rel="prev" title="RunLoop之NSTimer">
+      <i class="fa fa-chevron-left"></i> RunLoop之NSTimer
     </a></div>
       <div class="post-nav-item">
-    <a href="/2022/02/08/GCD%E4%B9%8B%20Barrier,Apply,Source/" rel="next" title="GCD之 Barrier,Apply,Source">
-      GCD之 Barrier,Apply,Source <i class="fa fa-chevron-right"></i>
+    <a href="/2022/02/08/GCD%E5%9F%BA%E7%A1%80/" rel="next" title="GCD基础">
+      GCD基础 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -388,7 +374,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -400,7 +386,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

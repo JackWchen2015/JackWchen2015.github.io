@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。 在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。">
+  <meta name="description" content="大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="YYDispatchQueuePool全局队列管理工具">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2018/12/06/YYDispatchQueuePool/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。 在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。">
+<meta property="og:description" content="大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-12-06T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-08-26T09:27:17.147Z">
@@ -247,16 +247,17 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。<br>
-在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。</p>
+        <p>大体上原理，就是通过创建不同优先级的context（5个），context中创建有限数量的queue（CPU核数）。<br>在使用的时候，通过优先级获取不同的context，然后轮着返回不同的queue让你换着用，你就可以一定程度上实现并行队列，并且控制线程数量。</p>
 <span id="more"></span>
-<h2 id="OverView">OverView</h2>
-<p>我写了一个简单的工具 <code>YYDispatchQueuePool</code>，为不同优先级创建和 CPU 数量相同的 serial queue，每次从 pool 中获取 queue 时，会轮询返回其中一个 queue。我把 App 内所有异步操作，包括图像解码、对象释放、异步绘制等，都按优先级不同放入了全局的 serial queue 中执行，这样尽量避免了过多线程导致的性能问题。</p>
-<h3 id="QOS">QOS</h3>
-<p>iOS8提供了一种新的优先级类型Thread quality of service (QOS)，官方建议是iOS 8以上优先使用QOS，以下兼容老的优先级宏，</p>
+
+<h2 id="OverView"><a href="#OverView" class="headerlink" title="OverView"></a>OverView</h2><p>我写了一个简单的工具 <code>YYDispatchQueuePool</code>，为不同优先级创建和 CPU 数量相同的 serial queue，每次从 pool 中获取 queue 时，会轮询返回其中一个 queue。我把 App 内所有异步操作，包括图像解码、对象释放、异步绘制等，都按优先级不同放入了全局的 serial queue 中执行，这样尽量避免了过多线程导致的性能问题。</p>
+<h3 id="QOS"><a href="#QOS" class="headerlink" title="QOS"></a>QOS</h3><p>iOS8提供了一种新的优先级类型Thread quality of service (QOS)，官方建议是iOS 8以上优先使用QOS，以下兼容老的优先级宏，</p>
 <p>在iOS8之后统一为5个等级</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NSQualityOfServiceUserInteractive：最高优先级, 用于处理 UI 相关的任务</span><br><span class="line">NSQualityOfServiceUserInitiated：次高优先级, 用于执行需要立即返回的任务</span><br><span class="line">NSQualityOfServiceUtility：普通优先级，主要用于不需要立即返回的任务</span><br><span class="line">NSQualityOfServiceBackground：后台优先级，用于处理一些用户不会感知的任务</span><br><span class="line">NSQualityOfServiceDefault：默认优先级，当没有设置优先级的时候，线程默认优先级</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">inline</span> dispatch_queue_priority_t <span class="built_in">NSQualityOfServiceToDispatchPriority</span>(<span class="built_in">NSQualityOfService</span> qos) &#123;</span><br><span class="line">    <span class="keyword">switch</span> (qos) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="built_in">NSQualityOfServiceUserInteractive</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_HIGH;</span><br><span class="line">        <span class="keyword">case</span> <span class="built_in">NSQualityOfServiceUserInitiated</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_HIGH;</span><br><span class="line">        <span class="keyword">case</span> <span class="built_in">NSQualityOfServiceUtility</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_LOW;</span><br><span class="line">        <span class="keyword">case</span> <span class="built_in">NSQualityOfServiceBackground</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_BACKGROUND;</span><br><span class="line">        <span class="keyword">case</span> <span class="built_in">NSQualityOfServiceDefault</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_DEFAULT;</span><br><span class="line">        <span class="keyword">default</span>: <span class="keyword">return</span> DISPATCH_QUEUE_PRIORITY_DEFAULT;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
 <ul>
 <li>NSQualityOfServiceUserInteractive 表示用户交互任务，任务优先级高</li>
 <li>NSQualityOfServiceUserInitiated 用户发起的需要立即得到回应的任务，优先级高</li>
@@ -264,19 +265,16 @@
 <li>NSQualityOfServiceBackground 后台任务，对用户不可见，比如数据备份。任务的时间比较长</li>
 <li>NSQualityOfServiceDefault 默认优先级任务，处于UserInitiated和Utility之间</li>
 </ul>
-<h3 id="GCD队列">GCD队列</h3>
-<p>GCD 有三种队列类型.</p>
+<h3 id="GCD队列"><a href="#GCD队列" class="headerlink" title="GCD队列"></a>GCD队列</h3><p>GCD 有三种队列类型.</p>
 <ul>
-<li>main queue:     主队列.</li>
+<li>main queue:     主队列. </li>
 <li>global queue:   全局队列.</li>
 <li>custom queue: 自定义队列.</li>
 </ul>
-<p>系统提供了五种队列：<br>
-一种是，Main Queue 是一种串行队列，在主线程中执行，可以通过dispatch_get_main_queue()获取</p>
+<p>系统提供了五种队列：<br>一种是，Main Queue 是一种串行队列，在主线程中执行，可以通过dispatch_get_main_queue()获取</p>
 <p>其余四中是：优先级分别为high，default，low，background的并行队列，可以通过dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH,0);</p>
 <p>这里第一个参数是优先级，第二个参数是0，这里是官方文档说的哈！</p>
-<h2 id="参考">参考</h2>
-<p><a target="_blank" rel="noopener" href="https://juejin.im/post/5acddd5a518825557b4d1b35">YYDispatchQueuePool 学习笔记</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://juejin.im/post/5acddd5a518825557b4d1b35">YYDispatchQueuePool 学习笔记</a></p>
 
     </div>
 
@@ -374,7 +372,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -386,7 +384,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

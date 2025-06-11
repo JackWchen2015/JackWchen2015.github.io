@@ -184,398 +184,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">OC内存管理实现</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-16 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-16T08:00:00+08:00">2020-05-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-08-28 09:28:51" itemprop="dateModified" datetime="2024-08-28T09:28:51+08:00">2024-08-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一道面试题">一道面试题</h2>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSInteger</span> i = <span class="number">0xFFFFFFFFFFFFFF</span>;</span><br><span class="line"><span class="comment">//NSInteger i = 1;</span></span><br><span class="line"><span class="built_in">NSNumber</span> *number = [<span class="built_in">NSNumber</span> numberWithInteger:i];</span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%zd&quot;</span>, malloc_size((__bridge <span class="keyword">const</span> <span class="type">void</span> *)(number))); <span class="comment">// 32</span></span><br><span class="line"><span class="built_in">NSLog</span>(<span class="string">@&quot;%zd&quot;</span>, <span class="keyword">sizeof</span>(number)); <span class="comment">// 8</span></span><br></pre></td></tr></table></figure>
-<p>由于<code>NSNumber</code>继承自<code>NSObject</code>，所有它有<code>isa</code>指针，加上内存对齐的处理，系统给<code>NSNumber</code>对象分配了 32 个字节内存。通过 <code>LLDB</code> 指令读取它的内存，实际上它并没有用完 32 个字节。</p>
-<p><img src="./res/NSNumber_unTagedPointer.webp" alt=""></p>
-<h2 id="Tagged-Pointer">Tagged Pointer</h2>
-<p>iPhone 5s开始采用64bit cpu架构，也就是指针占用4个字节，32bit的寻址范围是4G，显然64bit的指针存在空间浪费，对于小对象，比如<code>NSNumer</code>，<code>NSDate</code>，<code>NSString</code>，<code>TaggeddPointer</code>不再是地址，而是真正的值。这种方式可以节省内存，提高执行效率</p>
-<p>引入 <code>Tagged Pointer</code> 技术之后<code>NSNumber</code>等对象的指针中存储的数据变成了<strong>Tag+Data</strong>形式（Tag为特殊标记，用于区分<code>NSNumber</code>、<code>NSDate</code>、<code>NSString</code>等对象类型；<code>Data</code>为对象的值）。这样使用一个<code>NSNumber</code>对象只需要 8 个字节指针内存。当指针的 8 个字节不够存储数据时，才会在将对象存储在堆上。</p>
-<h3 id="实现分析">实现分析</h3>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">               </span><br><span class="line">    <span class="built_in">NSNumber</span> *number1 = @<span class="number">1</span>;</span><br><span class="line">    <span class="built_in">NSNumber</span> *number2 = @<span class="number">2</span>;</span><br><span class="line">    <span class="built_in">NSNumber</span> *number3 = @<span class="number">79</span>;</span><br><span class="line">    <span class="built_in">NSNumber</span> *number4 = @(<span class="number">0xFFFFFFFFFFFFFFFF</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;%p %p %p %p&quot;</span>, number1, number2, number3, number4);   </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 0xb000000000000012 0xb000000000000022 0xb0000000000004f2 0x600000678480</span></span><br></pre></td></tr></table></figure>
-<p><code>number1</code>～<code>number3</code>指针为<code>Tagged Pointer</code>类型，可以看到对象的值都存储在了指针中，对应倒数第二位开始的1、2、4f。而<code>number4</code>由于数据过大，指针的8个字节不够存储，所以在堆中分配了内存。</p>
-<p>最后一位用来表示数据类型。</p>
-<p>第一位<code>b</code>的二进制为<code>1011</code>，其中第一位1是<code>Tagged Pointer</code>标识位。后面的<code>011</code>是类标识位，对应十进制为<code>3</code>，表示<code>NSNumber</code>类。<br>
-下图是iOS下<code>NSNumber</code>的<code>Tagged Pointer</code>位视图</p>
-<p><img src="./res/NSNumber_TaggedPointer.webp" alt=""></p>
-<h3 id="相关题目">相关题目</h3>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> * name;</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="keyword">self</span>.name = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;abcdefghij&quot;</span>];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> * name;</span><br><span class="line"></span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="keyword">self</span>.name = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;abcdefghi&quot;</span>];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>第一段代码Crash，而第二段却没有问题。<br>
-分别打印两段代码的<code>self.name</code>类型看看，原来第一段代码中self.name为<code>__NSCFString</code>类型，而第二段代码中为<code>NSTaggedPointerString</code>类型。</p>
-</blockquote>
-<p><code>__NSCFString</code>存储在堆上，它是个正常对象，需要维护引用计数的。<code>self.name</code>通过<code>setter</code>方法为其赋值。而setter方法的实现如下：</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- (<span class="type">void</span>)setName:(<span class="built_in">NSString</span> *)name &#123;</span><br><span class="line">    <span class="keyword">if</span>(_name != name) &#123;</span><br><span class="line">        [_name release];</span><br><span class="line">        _name = [name <span class="keyword">retain</span>]; <span class="comment">// or [name copy]</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>异步并发执行<code>setter</code>方法，可能就会有多条线程同时执行<code>[_name release]</code>，连续<code>release</code>两次就会造成对象的过度释放，导致<code>Crash</code>。</p>
-<p>解决办法：</p>
-<ol>
-<li>使用atomic属性关键字。</li>
-<li>加锁</li>
-</ol>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">@property</span> (atomic, <span class="keyword">strong</span>) <span class="built_in">NSString</span> * name;</span><br><span class="line"><span class="built_in">dispatch_queue_t</span> queue = dispatch_get_global_queue(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++) &#123;</span><br><span class="line">    <span class="built_in">dispatch_async</span>(queue, ^&#123;</span><br><span class="line">        <span class="comment">// 加锁</span></span><br><span class="line">        <span class="keyword">self</span>.name = [<span class="built_in">NSString</span> stringWithFormat:<span class="string">@&quot;abcdefghij&quot;</span>];</span><br><span class="line">        <span class="comment">// 解锁</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>第二段代码中的NSString为<code>NSTaggedPointerString</code>类型，在<code>objc_release</code>函数中会判断指针是不是<code>TaggedPointer</code>类型，是的话就不对对象进行<code>release</code>操作，也就避免了因过度释放对象而导致的<code>Crash</code>，因为根本就没执行释放操作。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">__attribute__((aligned(<span class="number">16</span>), flatten, noinline))</span><br><span class="line"><span class="type">void</span> </span><br><span class="line">objc_release(<span class="type">id</span> obj)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (!obj) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (obj-&gt;isTaggedPointer()) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">return</span> obj-&gt;release();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="isa指针（NONPOINTER-ISA）">isa指针（NONPOINTER_ISA）</h2>
-<ul>
-<li>非指针型isa：值的部分代表<code>class</code>地址</li>
-<li>指针型isa：值代表<code>class</code>地址</li>
-</ul>
-<h3 id="非指针型isa">非指针型isa</h3>
-<p>同理64位存储一个内存地址是种浪费，<code>isa</code>是一个公用体结构<code>union</code>，<code>NONPOINTER_ISA</code>是给对象分配了内存空间，但是不使用<code>sideTable</code>管理引用计数，而是把引用计数存在了<code>isa</code>当中。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">union</span> isa_t </span><br><span class="line">&#123;</span><br><span class="line">    isa_t() &#123; &#125;</span><br><span class="line">    isa_t(uintptr_t value) : bits(value) &#123; &#125;</span><br><span class="line"></span><br><span class="line">    Class cls;</span><br><span class="line">    uintptr_t bits;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">struct</span> &#123;</span><br><span class="line">        uintptr_t indexed           : <span class="number">1</span>;<span class="comment">//0表示普通的isa,1表示使用优化的存储引用计数</span></span><br><span class="line">        uintptr_t has_assoc         : <span class="number">1</span>;<span class="comment">//对象是否包含associated object</span></span><br><span class="line">        uintptr_t has_cxx_dtor      : <span class="number">1</span>;<span class="comment">//该对象是否有 C++ 或 ARC 的析构函数</span></span><br><span class="line">        uintptr_t shiftcls          : <span class="number">44</span>; <span class="comment">// MACH_VM_MAX_ADDRESS 0x7fffffe00000   类的指针</span></span><br><span class="line">        uintptr_t magic             : <span class="number">6</span>;<span class="comment">//固定值为 0xd2，用于在调试时分辨对象是否未完成初始化</span></span><br><span class="line">        uintptr_t weakly_referenced : <span class="number">1</span>;<span class="comment">//该对象是否有过 weak 对象</span></span><br><span class="line">        uintptr_t deallocating      : <span class="number">1</span>;<span class="comment">//该对象是否正在析构</span></span><br><span class="line">        uintptr_t has_sidetable_rc  : <span class="number">1</span>;<span class="comment">//是否使用了引用计数表sideTable</span></span><br><span class="line">        uintptr_t extra_rc          : <span class="number">8</span>;<span class="comment">//存储引用计数值减一后的结</span></span><br><span class="line">    &#125;;</span><br><span class="line">    ……</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h3 id="指针型isa">指针型isa</h3>
-<p><code>SideTable</code>包含了引用计数表，弱引用计数表，以及一个自旋锁。结构如下</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> SideTable &#123;</span><br><span class="line">    spinlock_t slock;</span><br><span class="line">    RefcountMap refcnts;</span><br><span class="line">    weak_table_t weak_table;</span><br><span class="line">    ……</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>引用计数表</li>
-</ul>
-<p>是用<code>hash</code>表实现的，引用计数会存在多张<code>sideTable</code>中，修改引用计数，需要经过两次<code>hash</code>算法，第一次是从<code>sideTables</code>中找到具体的<code>sideTable</code>，第二次是从<code>sideTable</code>中找到对应的引用计数。之所以设计成多张<code>sideTable</code>而不是一张<code>sideTables</code>，是因为每次操作都需要加锁，减锁操作，多张可以分离锁，加快操作速度。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SideTable &amp;table = SideTables()[<span class="variable language_">this</span>];</span><br><span class="line">size_t &amp;refcntStorage = table.refcnts[<span class="variable language_">this</span>];</span><br><span class="line"><span class="comment">//refcntStorage  就是引用计数 两次hash查找</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>弱引用表</li>
-</ul>
-<p>苹果使用<code>sideTables</code>保存所有的<code>weak</code>引用，key就是对象地址，<code>weak_entry_t</code>作为值，<code>weak_entry_t</code>中保存了所有指向该对象的弱引用。</p>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> weak_table_t &#123;</span><br><span class="line">    weak_entry_t *weak_entries;</span><br><span class="line">    size_t    num_entries;</span><br><span class="line">    uintptr_t mask;</span><br><span class="line">    uintptr_t max_hash_displacement;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h2 id="总结">总结</h2>
-<p>目前OC管理内存的方式有两种Taged Pointer 和 isa指针</p>
-<h2 id="参考">参考</h2>
-<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844904132940136462">Tagged Pointer</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/NSString%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/16/NSString%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" class="post-title-link" itemprop="url">NSString内存管理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-16 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-16T08:00:00+08:00">2020-05-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-08-28 09:30:33" itemprop="dateModified" datetime="2024-08-28T09:30:33+08:00">2024-08-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一道面试题">一道面试题</h2>
-<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> : <span class="title">UIViewController</span></span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> *string1;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">weak</span>) <span class="built_in">NSString</span> *string2;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">ViewController</span></span></span><br><span class="line">- (<span class="type">void</span>)viewDidLoad &#123;</span><br><span class="line">    [<span class="variable language_">super</span> viewDidLoad];</span><br><span class="line">    <span class="comment">// Do any additional setup after loading the view.</span></span><br><span class="line">        </span><br><span class="line">    [<span class="keyword">self</span> testKeyword];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-(<span class="type">void</span>)testKeyword &#123;</span><br><span class="line">    <span class="keyword">self</span>.string1 = [[<span class="built_in">NSString</span> alloc] initWithUTF8String:<span class="string">&quot;string 1&quot;</span>];</span><br><span class="line">    <span class="keyword">self</span>.string2 = <span class="keyword">self</span>.string1;</span><br><span class="line">    <span class="keyword">self</span>.string1 = <span class="literal">nil</span>;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 1 = %@&quot;</span>,<span class="keyword">self</span>.string1);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@&quot;String 2 = %@&quot;</span>, <span class="keyword">self</span>.string2);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/16/NSString%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">iOS内存管理法则与优化</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-16 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-16T08:00:00+08:00">2020-05-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-08-28 09:39:43" itemprop="dateModified" datetime="2024-08-28T09:39:43+08:00">2024-08-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">内存管理</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote>
-<p>苹果公司在2011年的全球开发者大会上指出，90%的应用崩溃与内存管理有关，其中最主要的原因是错误的内存访问和保留环所引起的内存泄漏。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Jack Chen">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="学计算机的那个">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/" class="post-title-link" itemprop="url">iOS防逆向代码混淆</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-14 08:00:00" itemprop="dateCreated datePublished" datetime="2020-05-14T08:00:00+08:00">2020-05-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-06-13 21:22:15" itemprop="dateModified" datetime="2020-06-13T21:22:15+08:00">2020-06-13</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS/%E9%80%86%E5%90%91%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">逆向安全</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>上一篇文章里可以看到，砸壳（Dumpdecrypted破壳）之后的ipa包使用class-dump分析之后，App跟裸奔一样，所以需要做代码混淆来添加逆向的难度。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/13/iOS%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B3%A8%E5%85%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -719,8 +327,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="操作系统里的线程状态">操作系统里的线程状态</h2>
-<p><img src="./res/States-of-a-thread.png" alt=""></p>
+          <h2 id="操作系统里的线程状态"><a href="#操作系统里的线程状态" class="headerlink" title="操作系统里的线程状态"></a>操作系统里的线程状态</h2><p><img src="/./res/States-of-a-thread.png"></p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/#more" rel="contents">
@@ -1082,6 +689,347 @@
   
   
 
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/12/02/runLoop%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/12/02/runLoop%E6%80%BB%E7%BB%93/" class="post-title-link" itemprop="url">RunLoop</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-02 08:00:00" itemprop="dateCreated datePublished" datetime="2019-12-02T08:00:00+08:00">2019-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-05-13 20:19:53" itemprop="dateModified" datetime="2023-05-13T20:19:53+08:00">2023-05-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/RunLoop/" itemprop="url" rel="index"><span itemprop="name">RunLoop</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>Run loops are part of the fundamental infrastructure associated with threads. A runloop is an event processing loop that you use to schedule work and coordinate the receipt of incoming events. The purpose of a run loop is to keep your thread busy when there is work to do and put your thread to sleep when there is none.</p>
+</blockquote>
+<p>Runloop是与线程相关联的基础架构的一部分，它用来接受循环事件和安排线程的工作，在有工作时让线程处于繁忙状态，没有事件需要处理时让线程休眠；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RunLoop管理事件，让线程在没有消息时休眠以避免占用资源，由用户态切换到内核态；在消息到来时被唤醒，由内核态切换到用户态，这种机制，叫做“事件循环”机制。</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/12/02/runLoop%E6%80%BB%E7%BB%93/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/29/UITableview%E4%BC%98%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/29/UITableview%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">UITableView优化</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-29 08:00:00" itemprop="dateCreated datePublished" datetime="2019-11-29T08:00:00+08:00">2019-11-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-04 16:38:55" itemprop="dateModified" datetime="2023-04-04T16:38:55+08:00">2023-04-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/UI/" itemprop="url" rel="index"><span itemprop="name">UI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>UITableView是iOS开发中的常用控件，用来加载列表数据，当数据量大或者布局过于复杂的时候有可能出现卡顿，影响用户体验。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/29/UITableview%E4%BC%98%E5%8C%96/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/" class="post-title-link" itemprop="url">HTTPS协议</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-25 08:00:00" itemprop="dateCreated datePublished" datetime="2019-11-25T08:00:00+08:00">2019-11-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-11 18:59:43" itemprop="dateModified" datetime="2020-05-11T18:59:43+08:00">2020-05-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>HTTP 主要有这些不足，例举如下</p>
+<ol>
+<li>通信使用明文(不加密)，内容可能会被窃听 </li>
+<li>不验证通信方的身份，因此有可能遭遇伪装   </li>
+<li>无法证明报文的完整性，所以有可能已遭篡改</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/25/HTTPS%E5%8D%8F%E8%AE%AE/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2019/11/25/%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%8F%8A%E5%BF%83%E8%B7%B3%E4%BF%9D%E6%B4%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2019/11/25/%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%8F%8A%E5%BF%83%E8%B7%B3%E4%BF%9D%E6%B4%BB/" class="post-title-link" itemprop="url">长连接及心跳保活</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-25 08:00:00" itemprop="dateCreated datePublished" datetime="2019-11-25T08:00:00+08:00">2019-11-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-04-10 11:26:12" itemprop="dateModified" datetime="2020-04-10T11:26:12+08:00">2020-04-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">计算机网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>短连接的使用有很大的瓶颈，所以才会有长连接的使用空间，但是长连接也会因为某些原因断开。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/11/25/%E9%95%BF%E8%BF%9E%E6%8E%A5%E5%8F%8A%E5%BF%83%E8%B7%B3%E4%BF%9D%E6%B4%BB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
 
   
   <nav class="pagination">
@@ -1151,7 +1099,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1163,7 +1111,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

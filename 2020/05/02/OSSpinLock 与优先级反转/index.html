@@ -27,14 +27,14 @@
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="操作系统里的线程状态">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/res/States-of-a-thread.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/res/PriorityInversion.webp">
+<meta property="og:image" content="https://github.com/res/States-of-a-thread.png">
+<meta property="og:image" content="https://github.com/res/PriorityInversion.webp">
 <meta property="article:published_time" content="2020-05-02T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-08-26T14:43:12.825Z">
 <meta property="article:author" content="Jack Chen">
 <meta property="article:tag" content="OSSpinLock">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/res/States-of-a-thread.png">
+<meta name="twitter:image" content="https://github.com/res/States-of-a-thread.png">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/02/OSSpinLock%20%E4%B8%8E%E4%BC%98%E5%85%88%E7%BA%A7%E5%8F%8D%E8%BD%AC/">
 
@@ -250,47 +250,38 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="操作系统里的线程状态">操作系统里的线程状态</h2>
-<p><img src="./res/States-of-a-thread.png" alt=""></p>
+        <h2 id="操作系统里的线程状态"><a href="#操作系统里的线程状态" class="headerlink" title="操作系统里的线程状态"></a>操作系统里的线程状态</h2><p><img src="/./res/States-of-a-thread.png"></p>
 <span id="more"></span>
+
 <ol>
-<li>
-<p>当要处理应用程序时(When an application is to be processed)，它会创建一个线程。</p>
+<li><p>当要处理应用程序时(When an application is to be processed)，它会创建一个线程。 </p>
 </li>
-<li>
-<p>然后，它被分配所需的资源(比如网络)，并进入<code>READY</code>队列。</p>
+<li><p>然后，它被分配所需的资源(比如网络)，并进入<code>READY</code>队列。 </p>
 </li>
-<li>
-<p>当线程调度器(类似进程调度器)为线程分配处理器时，它进入<code>RUNNING</code>队列。</p>
+<li><p>当线程调度器(类似进程调度器)为线程分配处理器时，它进入<code>RUNNING</code>队列。 </p>
 </li>
-<li>
-<p>处理过程中需要触发一些其他事件时，这是在它的控制之外的(比如另一个要完成的处理)，它从<code>RUNNING</code>队列转换到<code>WAITING</code>队列。</p>
+<li><p>处理过程中需要触发一些其他事件时，这是在它的控制之外的(比如另一个要完成的处理)，它从<code>RUNNING</code>队列转换到<code>WAITING</code>队列。 </p>
 </li>
-<li>
-<p>当应用程序具有延迟线程处理的能力时，它可以在需要时延迟线程并使其休眠一段特定的时间。然后线程从<code>RUNNING</code>队列转换到<code>DELAYED</code>队列。</p>
-<p>线程延迟的一个例子是闹钟的贪睡。在它第一次响铃并且没有被用户关闭之后，它会在一段特定的时间后再次响铃。在此期间，线程进入睡眠状态。</p>
+<li><p>当应用程序具有延迟线程处理的能力时，它可以在需要时延迟线程并使其休眠一段特定的时间。然后线程从<code>RUNNING</code>队列转换到<code>DELAYED</code>队列。 </p>
+<p>线程延迟的一个例子是闹钟的贪睡。在它第一次响铃并且没有被用户关闭之后，它会在一段特定的时间后再次响铃。在此期间，线程进入睡眠状态。 </p>
 </li>
-<li>
-<p>当线程生成一个<code>I/O</code>请求，并且在它完成之前不能继续移动时，它从<code>RUNNING</code>队列转换到<code>BLOCKED</code>队列。</p>
+<li><p>当线程生成一个<code>I/O</code>请求，并且在它完成之前不能继续移动时，它从<code>RUNNING</code>队列转换到<code>BLOCKED</code>队列。 </p>
 </li>
-<li>
-<p>处理完成后，线程从<code>RUNNING</code>转换到<code>FINISHED</code>。</p>
+<li><p>处理完成后，线程从<code>RUNNING</code>转换到<code>FINISHED</code>。</p>
 </li>
 </ol>
-<p><code>WAITING</code>和<code>BLOCKED</code>转换之间的区别在于，在<code>WAITING</code>中，线程等待来自另一个线程的信号或等待另一个处理完成，这意味着突发时间是特定的。然而，在<code>BLOCKED</code>状态下，没有指定的时间(它取决于用户何时提供输入)。</p>
+<p><code>WAITING</code>和<code>BLOCKED</code>转换之间的区别在于，在<code>WAITING</code>中，线程等待来自另一个线程的信号或等待另一个处理完成，这意味着突发时间是特定的。然而，在<code>BLOCKED</code>状态下，没有指定的时间(它取决于用户何时提供输入)。 </p>
 <blockquote>
 <p>The difference between the WAITING and BLOCKED transition is that in WAITING the thread waits for the signal from another thread or waits for another process to be completed, meaning the burst time is specific. While, in BLOCKED state, there is no specified time (it depends on the user when to give an input).</p>
 </blockquote>
 <p>为了成功地执行所有处理事项，处理器需要通过Thread Control Blocks (TCB)维护关于每个线程的信息。</p>
-<h2 id="优先级反转">优先级反转</h2>
-<p>实时操作系统的一个基本要求就是基于优先级的抢占系统。保证优先级高的线程在“第一时间”抢到执行权，是实时系统的第一黄金准则。</p>
+<h2 id="优先级反转"><a href="#优先级反转" class="headerlink" title="优先级反转"></a>优先级反转</h2><p>实时操作系统的一个基本要求就是基于优先级的抢占系统。保证优先级高的线程在“第一时间”抢到执行权，是实时系统的第一黄金准则。</p>
 <p>但是这种基于优先级抢占的系统，有一个著名的问题需要关注，就是“<strong>优先级反转</strong>”（Priority Inversion），简单来说，就是<strong>有低优先级的线程占据了CPU，妨碍了高优先级线程的执行</strong>。“优先级反转”是几乎每一个实时操作系统的噩梦，系统设计上花了很多精力去关注，但依然会出错。</p>
 <p>现代最出名的例子，就是1997美国宇航局的火星探路车（Mars Pathfinder）了。</p>
 <p>基本情况就是火星探路车在登录火星后的一段时间里无法工作，最后查明是因为优先级反转导致探路车的计算机不断重启。总算最后NASA远程打了个补丁上去，解决了这个问题。这个耗时三年，花了2.6亿美金的项目差点就折在小小的“优先级反转”上了。</p>
 <p>所以今天就让我们看看优先级反转是怎样发生的，以及对于QNX这样的基于消息传递的操作系统有什么影响。</p>
-<h3 id="什么是“优先级反转”">什么是“优先级反转”</h3>
-<p>下面这个时序图就是一个经典的优先级反转</p>
-<p><img src="./res/PriorityInversion.webp" alt=""></p>
+<h3 id="什么是“优先级反转”"><a href="#什么是“优先级反转”" class="headerlink" title="什么是“优先级反转”"></a>什么是“优先级反转”</h3><p>下面这个时序图就是一个经典的优先级反转</p>
+<p><img src="/./res/PriorityInversion.webp"></p>
 <ol>
 <li>线程A在一个比较低的优先级上工作(Running), 假设是10吧。然后在时间点T1的时候，线程A锁定了一把互斥锁，并开始操作互斥数据。</li>
 <li>这时有个高优线级线程C（比如优先级20）在时间点T2被唤醒(Ready)，它也也需要操作互斥数据。当它加锁互斥锁时，因为互斥锁在T1被线程A锁掉了，所以线程C放弃CPU进入阻塞状态(WAITING)，而线程A得以占据CPU，继续执行。</li>
@@ -301,10 +292,8 @@
 </ol>
 <p>上面这个时序里，<strong>线程B从T3到T4占据CPU运行的行为，就是事实上的优先级反转</strong>。一个优先级15的线程B，通过压制优线级10的线程A，而事实上导致高优先级线程C无法正确得到CPU。这段时间是不可控的，因为线程B可以长时间占据CPU（即使轮转时间片到时，线程A和B都处于可执行态，但是因为B的优先级高，它依然可以占据CPU），其结果就是高优先级线程C可能长时间无法得到 CPU。</p>
 <p>上面所说的美国宇航局的火星车，就是因为有高优先级的线程被压制，从而在指定时间内无法获得CPU，导致 “看门狗”认为系统出了无法恢复的故障，直接重启了系统。重启后系统再次进入相同状态，导致不断重启，无法正常工作。</p>
-<h3 id="为什么忙等会导致低优先级线程拿不到时间片？">为什么忙等会导致低优先级线程拿不到时间片？</h3>
-<p>现代操作系统在管理普通线程时，通常采用时间片轮转算法(Round Robin，简称 RR)。每个线程会被分配一段时间片(quantum)，通常在 10-100 毫秒左右。当线程用完属于自己的时间片以后，就会被操作系统挂起，放入等待队列中，直到下一次被分配时间片。</p>
-<h2 id="优先级反转-vs-自旋锁">优先级反转 vs 自旋锁</h2>
-<ul>
+<h3 id="为什么忙等会导致低优先级线程拿不到时间片？"><a href="#为什么忙等会导致低优先级线程拿不到时间片？" class="headerlink" title="为什么忙等会导致低优先级线程拿不到时间片？"></a>为什么忙等会导致低优先级线程拿不到时间片？</h3><p>现代操作系统在管理普通线程时，通常采用时间片轮转算法(Round Robin，简称 RR)。每个线程会被分配一段时间片(quantum)，通常在 10-100 毫秒左右。当线程用完属于自己的时间片以后，就会被操作系统挂起，放入等待队列中，直到下一次被分配时间片。</p>
+<h2 id="优先级反转-vs-自旋锁"><a href="#优先级反转-vs-自旋锁" class="headerlink" title="优先级反转 vs 自旋锁"></a>优先级反转 vs 自旋锁</h2><ul>
 <li>优先级反转问题的出现跟自旋锁没有关系</li>
 <li>不使用自旋锁时也可能出现优先级反转问题。只要是线程或任务有多个优先级，理论上就可能有反转问题</li>
 <li>操作系统在优先级反转发生时通常都会有自动的解决方案，比如提高低优先级线程的优先级等</li>
@@ -316,13 +305,11 @@
 <blockquote>
 <p>再加上，高优先级线程使用自旋锁进行轮训等待锁时在一直占用CPU时间片，使得低优先级线程拿到时间片的概率降低</p>
 </blockquote>
-<h3 id="总结">总结</h3>
-<ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
 <li>优先级反转问题的出现跟自旋锁没有关系</li>
 <li>但一旦出现优先级反转问题，自旋锁会让优先级反转问题不容易解决，甚至造成更严重的线程等待问题</li>
 </ul>
-<h2 id="atomic-和-os-unfair-lock">atomic 和 os_unfair_lock</h2>
-<ul>
+<h2 id="atomic-和-os-unfair-lock"><a href="#atomic-和-os-unfair-lock" class="headerlink" title="atomic 和 os_unfair_lock"></a>atomic 和 os_unfair_lock</h2><ul>
 <li><code>OSSpinLock</code>被废弃后，官方建议使用<code>os_unfair_lock</code>代替；</li>
 <li><code>os_unfair_lock</code>其实是互斥锁（参考资料中有提到）</li>
 <li>在老版本中，atomic内部也是用自旋锁实现的，但后续也改成互斥锁了</li>
@@ -330,22 +317,21 @@
 <blockquote>
 <p>iOS系统中优先级反转问题是如何解决的？–参考资料中的苹果官方文档有提到</p>
 </blockquote>
-<h2 id="自旋锁的实现原理">自旋锁的实现原理</h2>
-<p>自旋锁的目的是为了确保临界区只有一个线程可以访问，它的使用可以用下面这段伪代码来描述:</p>
+<h2 id="自旋锁的实现原理"><a href="#自旋锁的实现原理" class="headerlink" title="自旋锁的实现原理"></a>自旋锁的实现原理</h2><p>自旋锁的目的是为了确保临界区只有一个线程可以访问，它的使用可以用下面这段伪代码来描述:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;  </span><br><span class="line">    Acquire Lock</span><br><span class="line">        Critical section  <span class="comment">// 临界区</span></span><br><span class="line">    Release Lock</span><br><span class="line">        Reminder section <span class="comment">// 不需要锁保护的代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>自旋锁的实现思路很简单，理论上来说只要定义一个全局变量，用来表示锁的可用情况即可，伪代码如下:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> lock = <span class="literal">false</span>; <span class="comment">// 一开始没有锁上，任何线程都可以申请锁  </span></span><br><span class="line"><span class="keyword">do</span> &#123;  </span><br><span class="line">    <span class="keyword">while</span>(lock); <span class="comment">// 如果 lock 为 true 就一直死循环，相当于申请锁</span></span><br><span class="line">    lock = <span class="literal">true</span>; <span class="comment">// 挂上锁，这样别的线程就无法获得锁</span></span><br><span class="line">        Critical section  <span class="comment">// 临界区</span></span><br><span class="line">    lock = <span class="literal">false</span>; <span class="comment">// 相当于释放锁，这样别的线程可以进入临界区</span></span><br><span class="line">        Reminder section <span class="comment">// 不需要锁保护的代码        </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>这段代码存在一个问题: 如果一开始有多个线程同时执行 while 循环，他们都不会在这里卡住，而是继续执行，这样就无法保证锁的可靠性了。<strong>解决思路也很简单，只要确保申请锁的过程是原子操作即可</strong>。</p>
-<h2 id="原子操作">原子操作</h2>
-<p><strong>狭义上的原子操作表示一条不可打断的操作，也就是说线程在执行操作过程中，不会被操作系统挂起，而是一定会执行完</strong>。在单处理器环境下，一条汇编指令显然是原子操作，因为中断也要通过指令来实现。</p>
+<h2 id="原子操作"><a href="#原子操作" class="headerlink" title="原子操作"></a>原子操作</h2><p><strong>狭义上的原子操作表示一条不可打断的操作，也就是说线程在执行操作过程中，不会被操作系统挂起，而是一定会执行完</strong>。在单处理器环境下，一条汇编指令显然是原子操作，因为中断也要通过指令来实现。</p>
 <blockquote>
 <p>真正的原子操作必须由硬件提供支持</p>
 </blockquote>
 <p>比如 x86 平台上如果在指令前面加上 “LOCK” 前缀，对应的机器码在执行时会把总线锁住，使得其他 CPU不能再执行相同操作，从而从硬件层面确保了操作的原子性。</p>
 <p>申请锁的过程，可以用一个原子性操作 <code>test_and_set</code> 来完成，它用伪代码可以这样表示:</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> test_and_set (<span class="type">bool</span> *target) &#123;  </span><br><span class="line">    <span class="type">bool</span> rv = *target; </span><br><span class="line">    *target = <span class="literal">TRUE</span>; </span><br><span class="line">    <span class="keyword">return</span> rv;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> lock = <span class="literal">false</span>; <span class="comment">// 一开始没有锁上，任何线程都可以申请锁  </span></span><br><span class="line"><span class="keyword">do</span> &#123;  </span><br><span class="line">    <span class="keyword">while</span>(test_and_set(&amp;lock); <span class="comment">// test_and_set 是一个原子操作</span></span><br><span class="line">        Critical section  <span class="comment">// 临界区</span></span><br><span class="line">    lock = <span class="literal">false</span>; <span class="comment">// 相当于释放锁，这样别的线程可以进入临界区</span></span><br><span class="line">        Reminder section <span class="comment">// 不需要锁保护的代码        </span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="参考">参考</h2>
-<ol>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/thread-states-in-operating-systems/">Thread States in Operating Systems</a></li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/146132061">优先级反转那点事儿</a></li>
 <li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7070416276564213791">对iOS中自旋锁与优先级反转（Priority inversion）的理解</a></li>
@@ -447,7 +433,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -459,7 +445,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

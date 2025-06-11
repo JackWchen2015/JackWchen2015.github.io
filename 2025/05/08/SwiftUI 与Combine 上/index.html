@@ -20,24 +20,24 @@
     var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="简介 现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。  (DSL)，其中一个典型的代表是 SQL  指令式编程更偏向于是“写给计算机的语言”，而相对地， 声明式编程则更偏向于“写给人看的语言”。 指令式是教会计算机“怎么做”， 声明式是教会计算机“做什么”。">
+  <meta name="description" content="简介现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。  (DSL)，其中一个典型的代表是 SQL  指令式编程更偏向于是“写给计算机的语言”，而相对地，声明式编程则更偏向于“写给人看的语言”。 指令式是教会计算机“怎么做”，声明式是教会计算机“做什么”。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SwiftUI 与 Combine 上">
 <meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/index.html">
 <meta property="og:site_name" content="学计算机的那个">
-<meta property="og:description" content="简介 现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。  (DSL)，其中一个典型的代表是 SQL  指令式编程更偏向于是“写给计算机的语言”，而相对地， 声明式编程则更偏向于“写给人看的语言”。 指令式是教会计算机“怎么做”， 声明式是教会计算机“做什么”。">
+<meta property="og:description" content="简介现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。  (DSL)，其中一个典型的代表是 SQL  指令式编程更偏向于是“写给计算机的语言”，而相对地，声明式编程则更偏向于“写给人看的语言”。 指令式是教会计算机“怎么做”，声明式是教会计算机“做什么”。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swift_combine_redux.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swiftui_combine_obstract.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swiftui_combine_base.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swiftui_combine_output.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swiftui_combine_scan.png">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swiftui_combine_bounce.png">
+<meta property="og:image" content="https://github.com/res/swift_combine_redux.png">
+<meta property="og:image" content="https://github.com/res/swiftui_combine_obstract.png">
+<meta property="og:image" content="https://github.com/res/swiftui_combine_base.png">
+<meta property="og:image" content="https://github.com/res/swiftui_combine_output.png">
+<meta property="og:image" content="https://github.com/res/swiftui_combine_scan.png">
+<meta property="og:image" content="https://github.com/res/swiftui_combine_bounce.png">
 <meta property="article:published_time" content="2025-05-07T16:00:00.000Z">
 <meta property="article:modified_time" content="2025-06-09T06:32:16.748Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/res/swift_combine_redux.png">
+<meta name="twitter:image" content="https://github.com/res/swift_combine_redux.png">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/05/08/SwiftUI%20%E4%B8%8ECombine%20%E4%B8%8A/">
 
@@ -253,35 +253,26 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="简介">简介</h2>
-<p>现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。</p>
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>现代语言中，一般使用函数式编程或者 DSL(领域特定语言) 的方式来实现声明式的编程方式。</p>
 <blockquote>
 <p>(DSL)，其中一个典型的代表是 SQL</p>
 </blockquote>
-<p>指令式编程更偏向于是“写给计算机的语言”，而相对地，<br>
-声明式编程则更偏向于“写给人看的语言”。</p>
-<p>指令式是教会计算机“怎么做”，<br>
-声明式是教会计算机“做什么”。</p>
+<p>指令式编程更偏向于是“写给计算机的语言”，而相对地，<br>声明式编程则更偏向于“写给人看的语言”。</p>
+<p>指令式是教会计算机“怎么做”，<br>声明式是教会计算机“做什么”。</p>
 <span id="more"></span>
-<h3 id="声明式的UI">声明式的UI</h3>
-<p>声明式 UI 都有如下特点：</p>
+
+<h3 id="声明式的UI"><a href="#声明式的UI" class="headerlink" title="声明式的UI"></a>声明式的UI</h3><p>声明式 UI 都有如下特点：</p>
 <ol>
 <li>代表 UI 层的 View 并不是真实负责渲染的传统意义的视图层级，而是一个“虚拟的” 对 View 组织关系的描述 (声明)。</li>
 <li>决定 UI 的用户状态 State 被存储在某个或某几个对象中。</li>
-<li>用一个函数描述 View，这个函数的输入参数是 State，即 View = f(State)。</li>
+<li>用一个函数描述 View，这个函数的输入参数是 State，即 View &#x3D; f(State)。</li>
 <li>框架在 State 改变时，调用上述函数获取对应新的 State 的 View，并与当前的 View 进行差分计算，并重新渲染更改的部分。</li>
 </ol>
-<h3 id="SwfitUI-和-Combine简介">SwfitUI 和 Combine简介</h3>
-<p>Combine是由纯Swift 编写的。是基于响应式编程，用于处理数据流的框架。</p>
-<h2 id="你好，SwiftUI">你好，SwiftUI</h2>
-<h3 id="字体大小">字体大小</h3>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.font(.title)</span><br><span class="line">.font(.system(size: <span class="number">48</span>)) </span><br><span class="line">.font(.custom(<span class="string">&quot;Copperplate&quot;</span>, size: <span class="number">48</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="SwfitUI-和-Combine简介"><a href="#SwfitUI-和-Combine简介" class="headerlink" title="SwfitUI 和 Combine简介"></a>SwfitUI 和 Combine简介</h3><p> Combine是由纯Swift 编写的。是基于响应式编程，用于处理数据流的框架。</p>
+<h2 id="你好，SwiftUI"><a href="#你好，SwiftUI" class="headerlink" title="你好，SwiftUI"></a>你好，SwiftUI</h2><h3 id="字体大小"><a href="#字体大小" class="headerlink" title="字体大小"></a>字体大小</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.font(.title)</span><br><span class="line">.font(.system(size: <span class="number">48</span>)) </span><br><span class="line">.font(.custom(<span class="string">&quot;Copperplate&quot;</span>, size: <span class="number">48</span>))</span><br></pre></td></tr></table></figure>
 <p>使用预定义的字体可以让我们不需要额外的工作就能适配 <code>Dynamic Type</code> 特性</p>
-<h2 id="数据状态和绑定">数据状态和绑定</h2>
-<h3 id="纯函数式事件响应循环">纯函数式事件响应循环</h3>
-<p>纯函数指的是，返回值只由调用时的参数决定，而不依赖于任何系统状态，也不改变其作用域之外的变量状态的函数。</p>
-<h3 id="Store，Action，Reducer">Store，Action，Reducer</h3>
-<p>如果你对 Redux 或者 Flux，甚至是它们的思想来源 Elm 有了解的话，会对这些命名感到十分亲切。</p>
+<h2 id="数据状态和绑定"><a href="#数据状态和绑定" class="headerlink" title="数据状态和绑定"></a>数据状态和绑定</h2><h3 id="纯函数式事件响应循环"><a href="#纯函数式事件响应循环" class="headerlink" title="纯函数式事件响应循环"></a>纯函数式事件响应循环</h3><p>纯函数指的是，返回值只由调用时的参数决定，而不依赖于任何系统状态，也不改变其作用域之外的变量状态的函数。</p>
+<h3 id="Store，Action，Reducer"><a href="#Store，Action，Reducer" class="headerlink" title="Store，Action，Reducer"></a>Store，Action，Reducer</h3><p>如果你对 Redux 或者 Flux，甚至是它们的思想来源 Elm 有了解的话，会对这些命名感到十分亲切。</p>
 <p>以 Redux 为代表的状态管理和组件通讯架构，在近来的前端开发中很受欢迎。它的基本思想和步骤如下：</p>
 <ol>
 <li>将 app 当作一个状态机，状态决定用户界面。</li>
@@ -290,41 +281,26 @@
 <li>Reducer 接受原有的 State 和发送过来的 Action，生成新的 State。</li>
 <li>用新的 State 替换 Store 中原有的状态，并用新状态来驱动更新界面。</li>
 </ol>
-<p><img src="./res/swift_combine_redux.png" alt=""></p>
-<p>首先，除了通过 Action 外，也可以通过 Binding 来改变状态。<br>
-其次，我们希望 Reducer 具有纯函数特性，我们在 PokeMaster app 的架构中，选择在 Reducer 处理当前 State 和 Action 后，除了返回新的 State 以外，再额外返回一个 Command 值，并让 Command 来执行所需的副作用。</p>
-<h3 id="操作回溯和数据共享">操作回溯和数据共享</h3>
-<p>对于 @State 修饰的属性的访问，只能发生在 body 或者 body 所调用的方法中。你不能在外部改变 @State 的值，它的所有相关操作和状态改变都应该是和当前 View 挂钩的。</p>
-<h2 id="Combine和异步编程">Combine和异步编程</h2>
-<p>传统的 Cocoa 和 UIKit 提供了一系列的异步 API</p>
+<p><img src="/./res/swift_combine_redux.png"></p>
+<p>首先，除了通过 Action 外，也可以通过 Binding 来改变状态。<br>其次，我们希望 Reducer 具有纯函数特性，我们在 PokeMaster app 的架构中，选择在 Reducer 处理当前 State 和 Action 后，除了返回新的 State 以外，再额外返回一个 Command 值，并让 Command 来执行所需的副作用。</p>
+<h3 id="操作回溯和数据共享"><a href="#操作回溯和数据共享" class="headerlink" title="操作回溯和数据共享"></a>操作回溯和数据共享</h3><p>对于 @State 修饰的属性的访问，只能发生在 body 或者 body 所调用的方法中。你不能在外部改变 @State 的值，它的所有相关操作和状态改变都应该是和当前 View 挂钩的。</p>
+<h2 id="Combine和异步编程"><a href="#Combine和异步编程" class="headerlink" title="Combine和异步编程"></a>Combine和异步编程</h2><p>传统的 Cocoa 和 UIKit 提供了一系列的异步 API</p>
 <ol>
-<li>闭包回调：这是现代 Cocoa 开发中最常见的异步方式，比如<br>
-<code>URLSession</code> 就提供了闭包的网络请求方法：<br>
-<code>dataTask(with:completionHandler:)</code> 中的 <code>completionHandler</code> 就是这样</li>
-<li>Delegate：Protocol-Delegate 是 Cocoa 中的一种常见设计模式。<code>UITableView</code> 中相关的<br>
-<code>UITableViewDataSource</code> 和 <code>UITableViewDelegate</code> 都是这种模式的体现。另外，<code>URLSession</code> 除了提供基于闭包回调的方法以外，也存在基于<code>protocol-delegate</code> 的另一套 API。</li>
-<li>Notification：在异步操作完成时，可以通过 NotificationCenter 的相关 API<br>
-发送一个通知 (Notification)，如果有观察者注册想要接收该通知，那么这个<br>
-通知将被传递给观察者并调用相关代码。</li>
+<li>闭包回调：这是现代 Cocoa 开发中最常见的异步方式，比如<br><code>URLSession</code> 就提供了闭包的网络请求方法：<br><code>dataTask(with:completionHandler:)</code> 中的 <code>completionHandler</code> 就是这样</li>
+<li>Delegate：Protocol-Delegate 是 Cocoa 中的一种常见设计模式。<code>UITableView</code> 中相关的<br><code>UITableViewDataSource</code> 和 <code>UITableViewDelegate</code> 都是这种模式的体现。另外，<code>URLSession</code> 除了提供基于闭包回调的方法以外，也存在基于<code>protocol-delegate</code> 的另一套 API。</li>
+<li>Notification：在异步操作完成时，可以通过 NotificationCenter 的相关 API<br>发送一个通知 (Notification)，如果有观察者注册想要接收该通知，那么这个<br>通知将被传递给观察者并调用相关代码。</li>
 </ol>
 <blockquote>
-<p>异步编程的本质是响应未来的事件流,可以<br>
-用一种通用的方式“抹去” 不同异步 API 的区别，让事件发生这一核心概念暴露出来。在异步操作中某个事件发生时，将这个事件和与其相关的数据“发布” 出来。而对这个事件感兴趣的代码可以订阅这个事件，来进行后续操作。</p>
+<p>异步编程的本质是响应未来的事件流,可以<br>用一种通用的方式“抹去” 不同异步 API 的区别，让事件发生这一核心概念暴露出来。在异步操作中某个事件发生时，将这个事件和与其相关的数据“发布” 出来。而对这个事件感兴趣的代码可以订阅这个事件，来进行后续操作。</p>
 </blockquote>
-<p>响应式异步编程的抽象和特点：<br>
-异步操作在合适的时机发布事件，这些事件带有数据，使用一个或多个操作来处理这些事件以及内部的数据。<br>
-在末端，使用一个订阅者来“消化” 这个事件和数据，并进一步驱动程序的其他部分(比如 UI 界面) 的运行。<br>
-上面这些对于事件和数据的操作，以及末端的订阅，都是在<br>
-事件发生之前完成的。一开始我们就将这些设定好，之后它可以以预设的方式响应源源不断发生的事件流。</p>
-<p><img src="./res/swiftui_combine_obstract.png" alt=""></p>
-<h3 id="Combine-基础">Combine 基础</h3>
-<blockquote>
+<p>响应式异步编程的抽象和特点：<br>异步操作在合适的时机发布事件，这些事件带有数据，使用一个或多个操作来处理这些事件以及内部的数据。<br>在末端，使用一个订阅者来“消化” 这个事件和数据，并进一步驱动程序的其他部分(比如 UI 界面) 的运行。<br>上面这些对于事件和数据的操作，以及末端的订阅，都是在<br>事件发生之前完成的。一开始我们就将这些设定好，之后它可以以预设的方式响应源源不断发生的事件流。</p>
+<p><img src="/./res/swiftui_combine_obstract.png"></p>
+<h3 id="Combine-基础"><a href="#Combine-基础" class="headerlink" title="Combine 基础"></a>Combine 基础</h3><blockquote>
 <p>通过对事件处理的操作进行组合 (combine) ，来对异步事件进行自定义处理 (这也正是 Combine 框架的名字的由来)。Combine 提供了一组声明式的Swift API，来处理随时间变化的值。这些值可以代表用户界面的事件，网络的响应，计划好的事件，或者很多其他类型的异步数据。</p>
 </blockquote>
 <p>Combine 中最重要的角色有三种，恰好对应了这三种操作：负责发布事件的 Publisher，负责订阅事件的 Subscriber，以及负责转换事件和数据的 Operator。</p>
-<p><img src="./res/swiftui_combine_base.png" alt=""></p>
-<h4 id="Publisher">Publisher</h4>
-<p>在 Combine 中，我们使用 <code>Publisher</code> 协议来代表事件的发布者。</p>
+<p><img src="/./res/swiftui_combine_base.png"></p>
+<h4 id="Publisher"><a href="#Publisher" class="headerlink" title="Publisher"></a>Publisher</h4><p>在 Combine 中，我们使用 <code>Publisher</code> 协议来代表事件的发布者。</p>
 <p>Publisher 协议中所必须的内容十分简单，它包括两个关联类型 (associatedtype) 以及一个 receive 方法：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line">	<span class="keyword">associatedtype</span> <span class="type">Output</span></span><br><span class="line">	<span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line">	<span class="keyword">func</span> <span class="title function_">receive</span>&lt;<span class="type">S</span>&gt;(<span class="params">subscriber</span>: <span class="type">S</span>) <span class="keyword">where</span></span><br><span class="line">		<span class="type">S</span> : <span class="type">Subscriber</span>,</span><br><span class="line">		<span class="keyword">Self</span>.<span class="type">Failure</span> <span class="operator">!</span><span class="string">&quot; S.Failure,</span></span><br><span class="line"><span class="string">		Self.Output !&quot;</span> <span class="type">S</span>.<span class="type">Input</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>Publisher 最主要的工作其实有两个：发布新的事件及其数据，以及准备好被<code>Subscriber</code> 订阅。</p>
@@ -335,70 +311,52 @@
 <li>类型为 Failure 的错误：这代表事件流中发生了问题，事件流到此终止。</li>
 <li>完成事件：表示事件流中所有的元素都已经发布结束，事件流到此终止。</li>
 </ol>
-<h4 id="事件图">事件图</h4>
-<p>图中从左向右的横轴表示时间，圆圈表示每个 output 的值，时间轴最后的竖线代表了 <code>finished</code> 事件。下面的图示中，Publisher 依次发布了 20，40，60，80 和 100 五<br>
-个值，并在之后正常完成：</p>
-<p><img src="./res/swiftui_combine_output.png" alt=""></p>
-<h4 id="有限事件流和无限事件流">有限事件流和无限事件流</h4>
-<p>最终会终结的事件流称为有限事件流，而将不会发出 failure 或者 finished 的事件流称为无限事件流。</p>
+<h4 id="事件图"><a href="#事件图" class="headerlink" title="事件图"></a>事件图</h4><p>图中从左向右的横轴表示时间，圆圈表示每个 output 的值，时间轴最后的竖线代表了 <code>finished</code> 事件。下面的图示中，Publisher 依次发布了 20，40，60，80 和 100 五<br>个值，并在之后正常完成：</p>
+<p><img src="/./res/swiftui_combine_output.png"></p>
+<h4 id="有限事件流和无限事件流"><a href="#有限事件流和无限事件流" class="headerlink" title="有限事件流和无限事件流"></a>有限事件流和无限事件流</h4><p>最终会终结的事件流称为有限事件流，而将不会发出 failure 或者 finished 的事件流称为无限事件流。</p>
 <p>有限事件流最常见的一个例子是网络请求的相关操作,无限事件流则正好相反，这类 Publisher 永远不会发出 failure 或者 finished。一个典型的例子是 UI 操作</p>
-<h4 id="Operator">Operator</h4>
-<p>想在一个 Text 上表示某个按钮被按下的总次数的话，就需要对这些 output 事件进行统计。在 Combine 中，我们可以使用 <code>scan</code> 来完成累加的工作。scan 让我们提供一个暂存值，每次事件发生时我们有机会执行一个闭包来更新这个暂存值，并准备好在下一次事件时使用它。同时，这个暂存值也将被<br>
-作为新的 <code>Publisher</code> 事件被发送出去：</p>
+<h4 id="Operator"><a href="#Operator" class="headerlink" title="Operator"></a>Operator</h4><p>想在一个 Text 上表示某个按钮被按下的总次数的话，就需要对这些 output 事件进行统计。在 Combine 中，我们可以使用 <code>scan</code> 来完成累加的工作。scan 让我们提供一个暂存值，每次事件发生时我们有机会执行一个闭包来更新这个暂存值，并准备好在下一次事件时使用它。同时，这个暂存值也将被<br>作为新的 <code>Publisher</code> 事件被发送出去：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> buttonClicked: <span class="type">AnyPublisher</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;</span><br><span class="line">buttonClicked</span><br><span class="line">.scan(<span class="number">0</span>) &#123; value, <span class="keyword">_</span></span><br><span class="line"><span class="keyword">in</span> value <span class="operator">+</span> <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure>
 <p>用 E 的圆圈来表示按钮点击事件，上面的代码将把 buttonClicked 转换为一个发布点击次数的新的 Publisher，它所发布的数据的类型是 Int</p>
-<p><img src="./res/swiftui_combine_scan.png" alt=""></p>
+<p><img src="/./res/swiftui_combine_scan.png"></p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> buttonClicked: <span class="type">AnyPublisher</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;</span><br><span class="line">buttonClicked</span><br><span class="line">	.scan(<span class="number">0</span>) &#123; value, <span class="keyword">_</span> <span class="keyword">in</span> value <span class="operator">+</span> <span class="number">1</span> &#125;</span><br><span class="line">	.map &#123; <span class="type">String</span>(<span class="variable">$0</span>) &#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>每个 Operator 的行为模式都一样：它们使用上游 Publisher 所发布的数据作为输入，以此产生的新的数据，然后自身成为新的 Publisher，并将这些新的数据作为输出，发布给下游。</p>
 <p>通过一系列组合，我们可以得到一个响应式的 Publisher 链条：当链条最上端的 Publisher 发布某个事件后，链条中的各个 Operator 对事件和数据进行处理。在链条的末端我们希望最终能得到可以直接驱动 UI 状态的事件和数据。</p>
 <p>这样，终端的消费者可以直接使用这些准备好的数据，而这个消费者的角色由 <code>Subscriber</code>来担任。</p>
 </blockquote>
-<h4 id="Subscriber">Subscriber</h4>
-<p>和 Publisher 类似，Combine 中的 Subscriber 也是一个抽象的协议，它定义了某个类型想要成为订阅者角色时所需要满足的条件：</p>
+<h4 id="Subscriber"><a href="#Subscriber" class="headerlink" title="Subscriber"></a>Subscriber</h4><p>和 Publisher 类似，Combine 中的 Subscriber 也是一个抽象的协议，它定义了某个类型想要成为订阅者角色时所需要满足的条件：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Subscriber</span> &#123;</span><br><span class="line"><span class="keyword">associatedtype</span> <span class="type">Input</span></span><br><span class="line"><span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">receive</span>(<span class="params">subscription</span>: <span class="type">Subscription</span>)</span><br><span class="line"><span class="keyword">func</span> <span class="title function_">receive</span>(<span class="keyword">_</span> <span class="params">input</span>: <span class="keyword">Self</span>.<span class="type">Input</span>) -&gt; <span class="type">Subscribers</span>.<span class="type">Demand</span></span><br><span class="line"><span class="keyword">func</span> <span class="title function_">receive</span>(<span class="params">completion</span>: <span class="type">Subscribers</span>.<span class="type">Completion</span>&lt;<span class="keyword">Self</span>.<span class="type">Failure</span>&gt;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="sink">sink</h4>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> buttonClicked: <span class="type">AnyPublisher</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;</span><br><span class="line">buttonClicked</span><br><span class="line">	.scan(<span class="number">0</span>) &#123; value, <span class="keyword">_</span> <span class="keyword">in</span> value <span class="operator">+</span> <span class="number">1</span> &#125;</span><br><span class="line">	.map &#123; <span class="type">String</span>(<span class="variable">$0</span>) &#125;</span><br><span class="line">	.sink &#123; <span class="built_in">print</span>(<span class="string">&quot;Button pressed count: <span class="subst">\(<span class="variable">$0</span>)</span>&quot;</span>) &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="sink"><a href="#sink" class="headerlink" title="sink"></a>sink</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> buttonClicked: <span class="type">AnyPublisher</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;</span><br><span class="line">buttonClicked</span><br><span class="line">	.scan(<span class="number">0</span>) &#123; value, <span class="keyword">_</span> <span class="keyword">in</span> value <span class="operator">+</span> <span class="number">1</span> &#125;</span><br><span class="line">	.map &#123; <span class="type">String</span>(<span class="variable">$0</span>) &#125;</span><br><span class="line">	.sink &#123; <span class="built_in">print</span>(<span class="string">&quot;Button pressed count: <span class="subst">\(<span class="variable">$0</span>)</span>&quot;</span>) &#125;</span><br></pre></td></tr></table></figure>
 <p><code>sink</code> 方法完整的函数签名如下：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">sink</span>(</span><br><span class="line"><span class="params">receiveCompletion</span>:</span><br><span class="line">	<span class="keyword">@escaping</span> ((<span class="type">Subscribers</span>.<span class="type">Completion</span>&lt;<span class="keyword">Self</span>.<span class="type">Failure</span>&gt;) -&gt; <span class="type">Void</span>),</span><br><span class="line"><span class="params">receiveValue</span>: </span><br><span class="line">	<span class="keyword">@escaping</span> ((<span class="keyword">Self</span>.<span class="type">Output</span>) -&gt; <span class="type">Void</span>)) -&gt; <span class="type">AnyCancellable</span></span><br></pre></td></tr></table></figure>
 <p>可以同时提供两个闭包，receiveCompletion 用来接收 failure 或者 finished 事件，receiveValue 用来接收 output 值。</p>
 <p>sink 可以充当一座桥梁，将响应函数式的 Publisher 链式代码，终结并桥接到基于闭包的指令式世界中来。</p>
-<p>如果你是想要让数据继续在SwiftUI 的声明式的世界中来驱动 UI 的话，另一个 Subscriber 可能会更为简洁常用，<br>
-那就是 <code>assign</code></p>
-<h4 id="assign">assign</h4>
-<p>assign 接受一个 class 对象以及对象类型上的某个键路径 (key path)。每当 output 事件到来时，其中包含的值就将被<br>
-设置到对应的属性上去：</p>
+<p>如果你是想要让数据继续在SwiftUI 的声明式的世界中来驱动 UI 的话，另一个 Subscriber 可能会更为简洁常用，<br>那就是 <code>assign</code></p>
+<h4 id="assign"><a href="#assign" class="headerlink" title="assign"></a>assign</h4><p>assign 接受一个 class 对象以及对象类型上的某个键路径 (key path)。每当 output 事件到来时，其中包含的值就将被<br>设置到对应的属性上去：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">	<span class="keyword">var</span> bar: <span class="type">String</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> foo <span class="operator">=</span> <span class="type">Foo</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> buttonClicked: <span class="type">AnyPublisher</span>&lt;<span class="type">Void</span>, <span class="type">Never</span>&gt;</span><br><span class="line">buttonClicked</span><br><span class="line">	.scan(<span class="number">0</span>) &#123; value, _in value <span class="operator">+</span> <span class="number">1</span> &#125;</span><br><span class="line">	.map &#123; <span class="type">String</span>(<span class="variable">$0</span>) &#125;</span><br><span class="line">	.assign(to: \.bar, on: foo)</span><br></pre></td></tr></table></figure>
 <p>这样的 Subscriber 让我们可以彻底摆脱指令式的写法，直接将事件值“绑定” 到具体的属性上。</p>
-<p>assign 方法的具体定义如下，它要求 keyPath 满足<br>
-<code>ReferenceWritableKeyPath</code>：</p>
+<p>assign 方法的具体定义如下，它要求 keyPath 满足<br><code>ReferenceWritableKeyPath</code>：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">assign</span>&lt;<span class="type">Root</span>&gt;(</span><br><span class="line"><span class="params">to</span> <span class="params">keyPath</span>: <span class="type">ReferenceWritableKeyPath</span>&lt;<span class="type">Root</span>, <span class="keyword">Self</span>.<span class="type">Output</span>&gt;,</span><br><span class="line"><span class="params">on</span> <span class="params">object</span>: <span class="type">Root</span></span><br><span class="line">) -&gt; <span class="type">AnyCancellable</span></span><br></pre></td></tr></table></figure>
 <p>也就是说，只有那些 class 类型的实例中的属性能被绑定。在 SwiftUI 中，代表 View 对应的模型的 <code>ObservableObject</code> 接口只能由 class 修饰的类型来实现，这也正是 assign 最常用的地方。</p>
-<h4 id="Subject">Subject</h4>
-<p>Subject 本身也是一个 Publisher：</p>
+<h4 id="Subject"><a href="#Subject" class="headerlink" title="Subject"></a>Subject</h4><p>Subject 本身也是一个 Publisher：</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Subject</span> : <span class="title class_">AnyObject</span>, <span class="title class_">Publisher</span> &#123;</span><br><span class="line">	<span class="keyword">func</span> <span class="title function_">send</span>(<span class="keyword">_</span> <span class="params">value</span>: <span class="keyword">Self</span>.<span class="type">Output</span>)</span><br><span class="line">	<span class="keyword">func</span> <span class="title function_">send</span>(<span class="params">completion</span>: <span class="type">Subscribers</span>.<span class="type">Completion</span>&lt;<span class="keyword">Self</span>.<span class="type">Failure</span>&gt;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果说 sink 提供了由函数响应式向指令式编程转变的路径的话，Subject 则补全了这条通路的另一侧：<br>
-它让你可以将传统的指令式异步 API 里的事件和信号转换到响应式的世界中去。</p>
+<p>如果说 sink 提供了由函数响应式向指令式编程转变的路径的话，Subject 则补全了这条通路的另一侧：<br>它让你可以将传统的指令式异步 API 里的事件和信号转换到响应式的世界中去。</p>
 <blockquote>
 <p>Combine 内置提供了两种常用的 Subject 类型，分别是 PassthroughSubject 和 CurrentValueSubject</p>
 <p>PassthroughSubject 并不会对接受到的值进行保留,当订阅开始后，它将监听并响应接下来的事件。</p>
-<p>CurrentValueSubject 则会包装和持有一个值，并在<br>
-设置该值时发送事件并保留新的值。在订阅发生的瞬间，CurrentValueSubject 会把当前保存的值发送给订阅者。</p>
+<p>CurrentValueSubject 则会包装和持有一个值，并在<br>设置该值时发送事件并保留新的值。在订阅发生的瞬间，CurrentValueSubject 会把当前保存的值发送给订阅者。</p>
 </blockquote>
-<h4 id="Scheduler">Scheduler</h4>
-<p>Publisher 决定了发布怎样的 (what) 事件流，Scheduler 所要解决的就是两个问题：在什么地方 (where)，以及在什么时候 (when) 来发布事件和执行代码。</p>
+<h4 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h4><p>Publisher 决定了发布怎样的 (what) 事件流，Scheduler 所要解决的就是两个问题：在什么地方 (where)，以及在什么时候 (when) 来发布事件和执行代码。</p>
 <ul>
-<li>关于 where<br>
-Combine 里提供了 <code>receive(on:options:)</code> 来让下游在指定的线程中接收事件。</li>
+<li>关于 where<br>Combine 里提供了 <code>receive(on:options:)</code> 来让下游在指定的线程中接收事件。</li>
 </ul>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">URLSession</span>.shared</span><br><span class="line">	.dataTaskPublisher(for: <span class="type">URL</span>(string: <span class="string">&quot;https://example.com&quot;</span>)<span class="operator">!</span>)</span><br><span class="line">	.compactMap &#123; <span class="type">String</span>(data: <span class="variable">$0</span>.data, encoding: .utf8) &#125;</span><br><span class="line">	.receive(on: <span class="type">RunLoop</span>.main)</span><br><span class="line">	.sink(receiveCompletion: &#123; <span class="keyword">_</span> <span class="keyword">in</span></span><br><span class="line">		</span><br><span class="line">	&#125;, receiveValue: &#123;</span><br><span class="line">	textView.text <span class="operator">=</span> <span class="variable">$0</span></span><br><span class="line">	&#125;)</span><br></pre></td></tr></table></figure>
 <p>RunLoop 就是一个实现了 Scheduler 协议的类型,如果没有 receive(on: RunLoop.main) 的话，sink 的闭包将会在后台线程执行，这在更新 UI 时将带来问题。</p>
 <ul>
-<li>关于when<br>
-比较常见的两种操作是 delay 和 debounce。delay 简单地将所有事件按照一定事件延后。debounce 则是设置了一个计时器，在事件第一次到来时，计时器启动。在计时器有效期间，每次接收到新值，则将计时器时间重置。当且仅当计时窗口中没有新<br>
-的值到来时，最后一次事件的值才会被当作新的事件发送出去。</li>
+<li>关于when<br>比较常见的两种操作是 delay 和 debounce。delay 简单地将所有事件按照一定事件延后。debounce 则是设置了一个计时器，在事件第一次到来时，计时器启动。在计时器有效期间，每次接收到新值，则将计时器时间重置。当且仅当计时窗口中没有新<br>的值到来时，最后一次事件的值才会被当作新的事件发送出去。</li>
 </ul>
-<p><img src="./res/swiftui_combine_bounce.png" alt=""></p>
+<p><img src="/./res/swiftui_combine_bounce.png"></p>
 
     </div>
 
@@ -493,7 +451,7 @@ Combine 里提供了 <code>receive(on:options:)</code> 来让下游在指定的�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -505,7 +463,7 @@ Combine 里提供了 <code>receive(on:options:)</code> 来让下游在指定的�
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

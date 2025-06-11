@@ -27,12 +27,12 @@
 <meta property="og:site_name" content="学计算机的那个">
 <meta property="og:description" content="苹果公司在2011年的全球开发者大会上指出，90%的应用崩溃与内存管理有关，其中最主要的原因是错误的内存访问和保留环所引起的内存泄漏。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/res/mrc.jpg">
+<meta property="og:image" content="https://github.com/res/mrc.jpg">
 <meta property="article:published_time" content="2020-05-16T00:00:00.000Z">
 <meta property="article:modified_time" content="2024-08-28T01:39:43.726Z">
 <meta property="article:author" content="Jack Chen">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/res/mrc.jpg">
+<meta name="twitter:image" content="https://github.com/res/mrc.jpg">
 
 <link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2020/05/16/iOS%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E6%B3%95%E5%88%99%E4%B8%8E%E4%BC%98%E5%8C%96/">
 
@@ -252,21 +252,20 @@
 <p>苹果公司在2011年的全球开发者大会上指出，90%的应用崩溃与内存管理有关，其中最主要的原因是错误的内存访问和保留环所引起的内存泄漏。</p>
 </blockquote>
 <span id="more"></span>
-<h2 id="程序级内存管理">程序级内存管理</h2>
-<p>iOS系统中使用引用计数来管理内存对象，当一个对象的计数器不为0的时候，表示这个对象需要被使用，故而是存活的，当计数器为0的时候则表示这个对象不需要被使用。</p>
-<h3 id="MRC">MRC</h3>
-<ol>
+
+
+<h2 id="程序级内存管理"><a href="#程序级内存管理" class="headerlink" title="程序级内存管理"></a>程序级内存管理</h2><p>iOS系统中使用引用计数来管理内存对象，当一个对象的计数器不为0的时候，表示这个对象需要被使用，故而是存活的，当计数器为0的时候则表示这个对象不需要被使用。</p>
+<h3 id="MRC"><a href="#MRC" class="headerlink" title="MRC"></a>MRC</h3><ol>
 <li>自己创建自己持有</li>
 <li>非自己生成的对象，自己也可以持有</li>
 <li>不需要的自己持有的对象时释放</li>
 <li>非自己持有的对象无法释放</li>
 </ol>
-<p><img src="./res/mrc.jpg" alt=""></p>
-<h3 id="ARC">ARC</h3>
-<blockquote>
+<p><img src="/./res/mrc.jpg"></p>
+<h3 id="ARC"><a href="#ARC" class="headerlink" title="ARC"></a>ARC</h3><blockquote>
 <p>自动引用计数（ARC）是一种编译器功能，可提供OC对象的自动内存管理。</p>
 </blockquote>
-<p><code>ARC</code>环境的作用范围是OC对象，而<code>CoreFoundation</code>或者其它C类型的指针对象/结构体需要转换成OC对象才能够使用<code>ARC</code>，通过以下三种桥接方式来利用<code>ARC</code>：</p>
+<p><code>ARC</code>环境的作用范围是OC对象，而<code>CoreFoundation</code>或者其它C类型的指针对象&#x2F;结构体需要转换成OC对象才能够使用<code>ARC</code>，通过以下三种桥接方式来利用<code>ARC</code>：</p>
 <ol>
 <li><code>__bridge</code> 可以桥接<code>OC</code>对象和<code>Core Foundation</code>，而不改变被转换对象的持有对象，当ARC控制的OC对象释放时，对应的<code>Core Foundation</code>对象指针也会被释放。</li>
 <li><code>__bridge_retained</code>和<code>CFBridgingRetain</code>也能够桥接两者，不同的是它会变更被转换对象的持有状态，即会进行一步<code>retain</code>让它的计数器+1，编译器不会自动管理<code>Core Foundation</code>对象的内存，需要调用<code>CFRelease（</code>）手动释放。</li>
@@ -279,34 +278,28 @@
 <li><code>__unsafe_unretained</code>与weak类似不会修改被引用对象的持有状态（计数器不变），但这个对象释放后这个使用它修饰的变量的指针会悬空不会自动置为<code>nil</code>。</li>
 <li><code>__autoreleasing</code>相当于MRC下<code>[object autorelease]</code>或者<code>ARC</code>下使用<code>@autorelease&#123;&#125;</code>管理的变量，将这个变量标记为自动释放。</li>
 </ol>
-<h3 id="优化技巧">优化技巧</h3>
-<h4 id="Block循环引用">Block循环引用</h4>
-<p>先将强引用的对象转为弱引用指针，防止了<code>Block</code>和对象之间的循环引用，再在<code>Block</code>中将<code>weakSelf</code>的弱引用转换成<code>strongSelf</code>的强引用指针，防止多线程和<code>ARC</code>环境下弱引用随时被释放的问题。</p>
+<h3 id="优化技巧"><a href="#优化技巧" class="headerlink" title="优化技巧"></a>优化技巧</h3><h4 id="Block循环引用"><a href="#Block循环引用" class="headerlink" title="Block循环引用"></a>Block循环引用</h4><p>先将强引用的对象转为弱引用指针，防止了<code>Block</code>和对象之间的循环引用，再在<code>Block</code>中将<code>weakSelf</code>的弱引用转换成<code>strongSelf</code>的强引用指针，防止多线程和<code>ARC</code>环境下弱引用随时被释放的问题。</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">__<span class="keyword">weak</span> MyViewController *wself = <span class="keyword">self</span>;</span><br><span class="line"><span class="keyword">self</span>.completionHandler = ^(<span class="built_in">NSInteger</span> result) &#123;</span><br><span class="line">    __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(wself) sself = wself; <span class="comment">// 强引用一次</span></span><br><span class="line">    [sself.property removeObserver: sself forKeyPath:<span class="string">@&quot;pathName&quot;</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h4 id="降低内存峰值">降低内存峰值</h4>
-<p>Lazy Allocation，懒加载</p>
+
+<h4 id="降低内存峰值"><a href="#降低内存峰值" class="headerlink" title="降低内存峰值"></a>降低内存峰值</h4><p>Lazy Allocation，懒加载</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">lazy</span> <span class="keyword">var</span> goodsImageView: <span class="type">UIImageView</span> <span class="operator">=</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> goodsImageView <span class="operator">=</span> <span class="type">UIImageView</span>()</span><br><span class="line">        <span class="keyword">return</span> goodsImageView</span><br><span class="line">    &#125;()</span><br></pre></td></tr></table></figure>
-<h4 id="图片的读取">图片的读取</h4>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">imageView<span class="operator">?</span>.image <span class="operator">=</span> <span class="type">UIImage</span>(named: name)</span><br><span class="line">imageView<span class="operator">?</span>.image <span class="operator">=</span> <span class="type">UIImage</span>(contentsOfFile: path)</span><br></pre></td></tr></table></figure>
+<h4 id="图片的读取"><a href="#图片的读取" class="headerlink" title="图片的读取"></a>图片的读取</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">imageView<span class="operator">?</span>.image <span class="operator">=</span> <span class="type">UIImage</span>(named: name)</span><br><span class="line">imageView<span class="operator">?</span>.image <span class="operator">=</span> <span class="type">UIImage</span>(contentsOfFile: path)</span><br></pre></td></tr></table></figure>
 <ol>
 <li>带缓存，如果频繁读取小文件，用它只需要读取一次就好，但是缺点就是如果使用大图片会常驻内存，对于降低内存峰值不利</li>
 <li>不带缓存，适合使用大图片，使用完就释放</li>
 </ol>
-<h4 id="NSData-内存映射文件">NSData &amp; 内存映射文件</h4>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">init?</span>(<span class="params">contentsOfFile</span> <span class="params">path</span>: <span class="type">String</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">contentsOfFile</span> <span class="params">path</span>: <span class="type">String</span>, <span class="params">options</span> <span class="params">readOptionsMask</span>: <span class="type">NSDataReadingOptions</span>) <span class="keyword">throws</span></span><br></pre></td></tr></table></figure>
+<h4 id="NSData-内存映射文件"><a href="#NSData-内存映射文件" class="headerlink" title="NSData &amp; 内存映射文件"></a>NSData &amp; 内存映射文件</h4><figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">init?</span>(<span class="params">contentsOfFile</span> <span class="params">path</span>: <span class="type">String</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">init</span>(<span class="params">contentsOfFile</span> <span class="params">path</span>: <span class="type">String</span>, <span class="params">options</span> <span class="params">readOptionsMask</span>: <span class="type">NSDataReadingOptions</span>) <span class="keyword">throws</span></span><br></pre></td></tr></table></figure>
 <p>第二种比第一个多一个<code>Options</code>，第二种方式是创建了一个内存映射文件（<code>NSDataReadingMapped</code>），提高读取的速度，也方便了<code>clean dirty</code>回收。</p>
-<h4 id="NSAutoReleasePool">NSAutoReleasePool</h4>
-<p>为什么在<code>ARC</code>时代还需要使用自动释放池？原因就是为了避免内存峰值，常见的是一个很大的<code>For</code>循环，里面不段生成<code>autorelease</code>对象，（<code>datawithContentofFile</code>返回的是<code>autorelease</code>对象），其实每迭代一次，资源都已经用完了，不需要再使用，这个时候就可以释放，但是程序需要等到<code>Runloop</code>结束的时候才可以释放，这就增大了内存的峰值。</p>
+<h4 id="NSAutoReleasePool"><a href="#NSAutoReleasePool" class="headerlink" title="NSAutoReleasePool"></a>NSAutoReleasePool</h4><p>为什么在<code>ARC</code>时代还需要使用自动释放池？原因就是为了避免内存峰值，常见的是一个很大的<code>For</code>循环，里面不段生成<code>autorelease</code>对象，（<code>datawithContentofFile</code>返回的是<code>autorelease</code>对象），其实每迭代一次，资源都已经用完了，不需要再使用，这个时候就可以释放，但是程序需要等到<code>Runloop</code>结束的时候才可以释放，这就增大了内存的峰值。</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">loadBigData</span>() &#123;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="number">1</span><span class="operator">...</span><span class="number">10000</span> &#123;</span><br><span class="line">        autoreleasepool &#123;</span><br><span class="line">            <span class="keyword">let</span> data <span class="operator">=</span> <span class="type">NSData</span>.dataWithContentsOfFile(</span><br><span class="line">                path, options: <span class="literal">nil</span>, error: <span class="literal">nil</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="内存警告处理">内存警告处理</h4>
-<p>收到内存警告时，所要做的：</p>
+
+<h4 id="内存警告处理"><a href="#内存警告处理" class="headerlink" title="内存警告处理"></a>内存警告处理</h4><p>收到内存警告时，所要做的：</p>
 <ol>
 <li>尽可能释放资源，尤其是图片等占用内存多的资源，等需要的时候再进行重建</li>
 <li>单例模式的滥用，会导致单例对象一直持有资源，在内存紧张的时候要进行释放。</li>
 <li>进行缓存更推荐使用NSCache而不是NSDictionary，就是因为NSCache不仅线程安全，而且对存在compressed memory情况下的内存警告也做了优化，可以由系统自动释放内存。</li>
 </ol>
-<h2 id="参考">参考</h2>
-<ol start="2">
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol start="2">
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/f95b9bfda4a0">iOS 内存管理与优化</a></li>
 <li><a target="_blank" rel="noopener" href="https://xta0.me/2012/07/10/iOS-Memory-1.html">理解iOS中的内存结构</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/462adf281fde">NSString 的内存问题</a></li>
@@ -326,12 +319,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/05/14/iOS%E9%98%B2%E9%80%86%E5%90%91%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86/" rel="prev" title="iOS防逆向代码混淆">
-      <i class="fa fa-chevron-left"></i> iOS防逆向代码混淆
+    <a href="/2020/05/16/iOS%E7%B3%BB%E7%BB%9F%E5%B1%82%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="prev" title="iOS系统层内存管理">
+      <i class="fa fa-chevron-left"></i> iOS系统层内存管理
     </a></div>
       <div class="post-nav-item">
-    <a href="/2020/05/16/NSString%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="next" title="NSString内存管理">
-      NSString内存管理 <i class="fa fa-chevron-right"></i>
+    <a href="/2020/05/16/OC%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%AE%9E%E7%8E%B0/" rel="next" title="OC内存管理实现">
+      OC内存管理实现 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -405,7 +398,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -417,7 +410,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

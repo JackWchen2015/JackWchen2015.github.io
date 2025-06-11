@@ -253,34 +253,30 @@
       
         <p>Spring Boot框架里面用到了很多注解，发现不明所以，所以学习一下。</p>
 <span id="more"></span>
-<h2 id="注解简介">注解简介</h2>
-<p>出现注解之前，XML大行其道，以松耦合的方式完成了框架中几乎所有的配置，但是随着项目越来越大，xml的内容也越来越复杂，维护成本变高。</p>
+
+<h2 id="注解简介"><a href="#注解简介" class="headerlink" title="注解简介"></a>注解简介</h2><p>出现注解之前，XML大行其道，以松耦合的方式完成了框架中几乎所有的配置，但是随着项目越来越大，xml的内容也越来越复杂，维护成本变高。</p>
 <p>于是一种标记式高耦合的配置方式产生了，注解，可以作用于类，方法，属性，几乎需要配置的地方都可以进行注解。</p>
 <p>xml和注解两种不同配置方式，各有优劣，<strong>追求低耦合就要抛弃高效率，追求效率必然会遇到耦合</strong></p>
-<h2 id="注解的本质">注解的本质</h2>
-<blockquote>
-<p>The common interface extended by all annotation types<br>
-所有的注解类型都继承自这个普通的接口（Annotation）</p>
+<h2 id="注解的本质"><a href="#注解的本质" class="headerlink" title="注解的本质"></a>注解的本质</h2><blockquote>
+<p>The common interface extended by all annotation types<br>所有的注解类型都继承自这个普通的接口（Annotation）</p>
 </blockquote>
 <p>eg:</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Override &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>其实本质上就是</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Override</span> <span class="keyword">extends</span> <span class="title class_">Annotation</span>&#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><strong>注解的本质就是一个继承了 Annotation 接口的接口</strong>。</p>
-<h2 id="注解的分类">注解的分类</h2>
-<p>一个注解准确意义上来说，只不过是一种特殊的注释而已，如果没有解析它的代码，它可能连注释都不如</p>
+<h2 id="注解的分类"><a href="#注解的分类" class="headerlink" title="注解的分类"></a>注解的分类</h2><p>一个注解准确意义上来说，只不过是一种特殊的注释而已，如果没有解析它的代码，它可能连注释都不如</p>
 <p>解析一个类或者方法的注解往往有两种形式，一种是编译器直接的扫描，一种是运行期反射</p>
-<h3 id="编译器注解">编译器注解</h3>
-<p>编译器的扫描指的是编译器在对 java 代码编译字节码的过程中会检测到某个类或者方法被一些注解修饰，这时它就会对于这些注解进行某些处理，典型的就是注解 @Override。这一种情况只适用于那些编译器已经熟知的注解类，比如 JDK 内置的几个注解。</p>
+<h3 id="编译器注解"><a href="#编译器注解" class="headerlink" title="编译器注解"></a>编译器注解</h3><p>编译器的扫描指的是编译器在对 java 代码编译字节码的过程中会检测到某个类或者方法被一些注解修饰，这时它就会对于这些注解进行某些处理，典型的就是注解 @Override。这一种情况只适用于那些编译器已经熟知的注解类，比如 JDK 内置的几个注解。</p>
 <ol>
 <li>@Override</li>
 <li>@Deprecated</li>
 <li>@SuppressWarnings</li>
 </ol>
-<h3 id="元注解">元注解</h3>
-<p>元注解是用于修饰注解的注解，通常用在注解的定义上,一般用于指定某个注解生命周期以及作用目标等信息</p>
+<h3 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h3><p>元注解是用于修饰注解的注解，通常用在注解的定义上,一般用于指定某个注解生命周期以及作用目标等信息</p>
 <p>eg:</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.SOURCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Override &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>JAVA 中有以下几个元注解：</p>
 <ol>
 <li>@Target：注解的作用目标</li>
@@ -288,11 +284,9 @@
 <li>@Documented：注解是否应当被包含在 JavaDoc 文档中</li>
 <li>@Inherited：是否允许子类继承该注解</li>
 </ol>
-<h4 id="Target">@Target</h4>
-<p>@Target 的定义如下：</p>
+<h4 id="Target"><a href="#Target" class="headerlink" title="@Target"></a>@Target</h4><p>@Target 的定义如下：</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/target.png" class="">
-<p>可以通过以下的方式来为这个 value 传值：<br>
-<code>@Target(value = &#123;ElementType.FIELD&#125;)</code></p>
+<p>可以通过以下的方式来为这个 value 传值：<br><code>@Target(value = &#123;ElementType.FIELD&#125;)</code></p>
 <p>ElementType 是一个枚举类型，有以下一些值：</p>
 <ol>
 <li>ElementType.TYPE：允许被修饰的注解作用在类、接口和枚举上</li>
@@ -304,22 +298,17 @@
 <li>ElementType.ANNOTATION_TYPE：允许作用在注解上</li>
 <li>ElementType.PACKAGE：允许作用在包上</li>
 </ol>
-<h4 id="Retention">@Retention</h4>
-<p>用于指明当前注解的生命周期，它的基本定义如下：</p>
+<h4 id="Retention"><a href="#Retention" class="headerlink" title="@Retention"></a>@Retention</h4><p>用于指明当前注解的生命周期，它的基本定义如下：</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/retention.png" class="">
-<p>也有一个 value 属性：<br>
-<code>@Retention(value = RetentionPolicy.RUNTIME</code><br>
-RetentionPolicy 依然是一个枚举类型，它有以下几个枚举值可取：</p>
+<p>也有一个 value 属性：<br><code>@Retention(value = RetentionPolicy.RUNTIME</code><br> RetentionPolicy 依然是一个枚举类型，它有以下几个枚举值可取：</p>
 <ol>
 <li>RetentionPolicy.SOURCE：当前注解编译期可见，不会写入 class 文件</li>
 <li>RetentionPolicy.CLASS：类加载阶段丢弃，会写入 class 文件</li>
 <li>RetentionPolicy.RUNTIME：永久保存，可以反射获取</li>
 </ol>
 <p>@Retention 注解指定了被修饰的注解的生命周期，一种是只能在编译期可见，编译后会被丢弃，一种会被编译器编译进 class 文件中，无论是类或是方法，乃至字段，他们都是有属性表的，而 JAVA 虚拟机也定义了几种注解属性表用于存储注解信息，但是这种可见性不能带到方法区，类加载时会予以丢弃，最后一种则是永久存在的可见性。</p>
-<h4 id="Documented">@Documented</h4>
-<p>@Documented 注解修饰的注解，当我们执行 JavaDoc 文档打包时会被保存进 doc 文档，反之将在打包时丢弃。@Inherited 注解修饰的注解是具有可继承性的，也就说我们的注解修饰了一个类，而该类的子类将自动继承父类的该注解。</p>
-<h3 id="注解与反射">注解与反射</h3>
-<p>从虚拟机的层面看看，注解的本质</p>
+<h4 id="Documented"><a href="#Documented" class="headerlink" title="@Documented"></a>@Documented</h4><p>@Documented 注解修饰的注解，当我们执行 JavaDoc 文档打包时会被保存进 doc 文档，反之将在打包时丢弃。@Inherited 注解修饰的注解是具有可继承性的，也就说我们的注解修饰了一个类，而该类的子类将自动继承父类的该注解。</p>
+<h3 id="注解与反射"><a href="#注解与反射" class="headerlink" title="注解与反射"></a>注解与反射</h3><p>从虚拟机的层面看看，注解的本质</p>
 <p>自定义一个注解类型：</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/jvm.png" class="">
 <p>指定了 Hello 这个注解只能修饰字段和方法，并且该注解永久存活，以便我们反射获取。</p>
@@ -342,32 +331,30 @@ RetentionPolicy 依然是一个枚举类型，它有以下几个枚举值可取�
 </ol>
 <p>设置一个虚拟机启动参数，用于捕获 JDK 动态代理类。</p>
 <blockquote>
-<p>-Dsun.misc.ProxyGenerator.saveGeneratedFiles=true</p>
+<p>-Dsun.misc.ProxyGenerator.saveGeneratedFiles&#x3D;true</p>
 </blockquote>
 <p>然后 main 函数</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/main.png" class="">
-<p>注解本质上是继承了 Annotation 接口的接口，而当你通过反射，也就是我们这里的 getAnnotation 方法去获取一个注解类实例的时候，其实 JDK 是通过动态代理机制生成一个实现我们注解（接口）的代理类。<br>
-运行程序后，会看到输出目录里有这么一个代理类，反编译之后是这样的：</p>
+<p>注解本质上是继承了 Annotation 接口的接口，而当你通过反射，也就是我们这里的 getAnnotation 方法去获取一个注解类实例的时候，其实 JDK 是通过动态代理机制生成一个实现我们注解（接口）的代理类。<br>运行程序后，会看到输出目录里有这么一个代理类，反编译之后是这样的：</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/proxy.png" class="">
-<p>代理类实现接口 Hello 并重写其所有方法，包括 value 方法以及接口 Hello 从 Annotation 接口继承而来的方法。而这个关键的 InvocationHandler 实例是谁？<br>
-AnnotationInvocationHandler 是 JAVA 中专门用于处理注解的 Handler</p>
+<p>代理类实现接口 Hello 并重写其所有方法，包括 value 方法以及接口 Hello 从 Annotation 接口继承而来的方法。而这个关键的 InvocationHandler 实例是谁？<br>AnnotationInvocationHandler 是 JAVA 中专门用于处理注解的 Handler</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/handle01.png" class="">
+
 <p>这里有一个 memberValues，它是一个 Map 键值对，键是我们注解属性名称，值就是该属性当初被赋上的值。</p>
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/handle02.png" class="">
+
 <img src="/2019/09/13/Java%E6%B3%A8%E8%A7%A3/handle03.png" class="">
+
 <p>而这个 invoke 方法就很有意思了，大家注意看，我们的代理类代理了 Hello 接口中所有的方法，所以对于代理类中任何方法的调用都会被转到这里来。</p>
-<p>var2 指向被调用的方法实例，而这里首先用变量 var4 获取该方法的简明名称，接着 switch 结构判断当前的调用方法是谁，如果是 Annotation 中的四大方法，将 var7 赋上特定的值。<br>
-如果当前调用的方法是 toString，equals，hashCode，annotationType 的话，AnnotationInvocationHandler 实例中已经预定义好了这些方法的实现，直接调用即可。<br>
-那么假如 var7 没有匹配上这四种方法，说明当前的方法调用的是自定义注解字节声明的方法，例如我们 Hello 注解的 value 方法。这种情况下，将从我们的注解 map 中获取这个注解属性对应的值。</p>
+<p>var2 指向被调用的方法实例，而这里首先用变量 var4 获取该方法的简明名称，接着 switch 结构判断当前的调用方法是谁，如果是 Annotation 中的四大方法，将 var7 赋上特定的值。<br>如果当前调用的方法是 toString，equals，hashCode，annotationType 的话，AnnotationInvocationHandler 实例中已经预定义好了这些方法的实现，直接调用即可。<br>那么假如 var7 没有匹配上这四种方法，说明当前的方法调用的是自定义注解字节声明的方法，例如我们 Hello 注解的 value 方法。这种情况下，将从我们的注解 map 中获取这个注解属性对应的值。</p>
 <p>反射注解的工作原理:</p>
 <ol>
-<li>通过键值对的形式为注解属性赋值，像这样：@Hello（value = “hello”）。</li>
+<li>通过键值对的形式为注解属性赋值，像这样：@Hello（value &#x3D; “hello”）。</li>
 <li>用注解修饰某个元素，编译器将在编译期扫描每个类或者方法上的注解，会做一个基本的检查，你的这个注解是否允许作用在当前位置，最后会将注解信息写入元素的属性表。</li>
 <li>当进行反射的时候，虚拟机将所有生命周期在 RUNTIME 的注解取出来放到一个 map 中，并创建一个 AnnotationInvocationHandler 实例，把这个 map 传递给它。</li>
 <li>最后，虚拟机将采用 JDK 动态代理机制生成一个目标注解的代理类，并初始化好处理器。这样，一个注解的实例就创建出来了，它本质上就是一个代理类，你应当去理解好 AnnotationInvocationHandler 中 invoke 方法的实现逻辑，这是核心。一句话概括就是，<strong>通过方法名返回注解属性值</strong>。</li>
 </ol>
-<h2 id="参考">参考</h2>
-<ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><a target="_blank" rel="noopener" href="https://juejin.im/post/5b45bd715188251b3a1db54f">JAVA 注解的基本原理</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/a08e7e9ed765">Java自定义注解</a></li>
 </ol>
@@ -465,7 +452,7 @@ AnnotationInvocationHandler 是 JAVA 中专门用于处理注解的 Handler</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -477,7 +464,7 @@ AnnotationInvocationHandler 是 JAVA 中专门用于处理注解的 Handler</p>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

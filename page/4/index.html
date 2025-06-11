@@ -424,12 +424,12 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="Scene">Scene</h2>
-<p>A scene contains the view hierarchy of your app.</p>
+          <h2 id="Scene"><a href="#Scene" class="headerlink" title="Scene"></a>Scene</h2><p>A scene contains the view hierarchy of your app.</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">TabView</span> &#123;</span><br><span class="line">                <span class="type">ContentView</span>()</span><br><span class="line">                    .tabItem &#123;</span><br><span class="line">                        <span class="type">Label</span>(<span class="string">&quot;Journal&quot;</span>, systemImage: <span class="string">&quot;book&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">                <span class="type">SettingsView</span>()</span><br><span class="line">                    .tabItem &#123;</span><br><span class="line">                        <span class="type">Label</span>(<span class="string">&quot;Settings&quot;</span>, systemImage: <span class="string">&quot;gear&quot;</span>)</span><br><span class="line">                    &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>In this sample, body returns the primary scene <code>WindowGroup</code>, which describes the view hierarchy of the sample’s main window.</p>
 <blockquote>
-<p>WindowGroup: It provides platform-specific behaviors for your app, such as supporting multiple windows in macOS and iPadOS.</p>
+<p>WindowGroup: It provides platform-specific behaviors for your app, such as supporting multiple windows in macOS and iPadOS. </p>
 </blockquote>
 <p>The computed <code>body</code> property can return one or more primary and secondary scenes.</p>
           <!--noindex-->
@@ -516,10 +516,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1>常用的宏方法</h1>
-<h2 id="main">@main</h2>
-<p>The <strong>@main</strong> attribute identifies the app’s entry point.</p>
+          <h1 id="常用的宏方法"><a href="#常用的宏方法" class="headerlink" title="常用的宏方法"></a>常用的宏方法</h1><h2 id="main"><a href="#main" class="headerlink" title="@main"></a>@main</h2><p>The <strong>@main</strong> attribute identifies the app’s entry point.</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> SwiftUI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">@main</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyApp</span>: <span class="title class_">App</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">Scene</span> &#123;</span><br><span class="line">        <span class="type">WindowGroup</span> &#123;</span><br><span class="line">            <span class="type">ContentView</span>()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>The entry point is responsible for the start up of the app.</p>
 </blockquote>
@@ -846,11 +845,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>环境：<br>
-Mac OS  Monterey 12.5.1<br>
-MacBook Air (M1, 2020)<br>
-Xcode 14.1<br>
-Python 3.11.5</p>
+          <p>环境：<br>Mac OS  Monterey 12.5.1<br>MacBook Air (M1, 2020)<br>Xcode 14.1<br>Python 3.11.5</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2023/10/07/Mac%20install%20TensorFlow/#more" rel="contents">
@@ -1112,7 +1107,7 @@ Python 3.11.5</p>
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1124,7 +1119,7 @@ Python 3.11.5</p>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

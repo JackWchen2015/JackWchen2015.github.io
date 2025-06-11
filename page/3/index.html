@@ -925,10 +925,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1>overview</h1>
-<p>单例类是一种设计模式，在任何给定时间，程序中只能存在一个类的实例。这意味着每次从该类创建对象时，它都会返回相同的实例。当我们想要确保应用程序中只有一个类的实例时，通常使用单例类，例如应该在整个程序中使用的配置类。</p>
+          <h1 id="overview"><a href="#overview" class="headerlink" title="overview"></a>overview</h1><p>单例类是一种设计模式，在任何给定时间，程序中只能存在一个类的实例。这意味着每次从该类创建对象时，它都会返回相同的实例。当我们想要确保应用程序中只有一个类的实例时，通常使用单例类，例如应该在整个程序中使用的配置类。 </p>
 <p>另一方面，依赖注入是一种设计模式，其中对象的依赖项由外部实体注入到对象中，而不是对象自己创建它们。换句话说，<strong>对象不是创建自己的依赖项，而是提供来自外部的依赖项</strong>。这<strong>使得对象更具模块化和可测试性</strong>，因为它可以很容易地替换为模拟对象以进行测试。</p>
-<p>依赖注入通常用于代码复杂性较高的大型应用程序中，并且需要减少应用程序不同部分之间的耦合。它还允许在应用程序的设计中具有更大的灵活性，使其更容易修改和扩展。</p>
+<p>依赖注入通常用于代码复杂性较高的大型应用程序中，并且需要减少应用程序不同部分之间的耦合。它还允许在应用程序的设计中具有更大的灵活性，使其更容易修改和扩展。 </p>
 <p>总之，单例类和依赖注入的主要区别在于单例确保一个类在程序中只存在一个实例，而依赖注入是一种从外部向对象提供其依赖的方法。它们可以一起使用，但是它们在软件设计中服务于不同的目的。</p>
           <!--noindex-->
             <div class="post-button">
@@ -1014,8 +1013,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1>Publisher</h1>
-<p>发布者向一个或多个订阅者发送值。它们遵循<code>Publisher</code>协议，并声明输出的类型和它们产生的任何错误:</p>
+          <h1 id="Publisher"><a href="#Publisher" class="headerlink" title="Publisher"></a>Publisher</h1><p>发布者向一个或多个订阅者发送值。它们遵循<code>Publisher</code>协议，并声明输出的类型和它们产生的任何错误:</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">protocol</span> <span class="title class_">Publisher</span> &#123;</span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Output</span></span><br><span class="line">  <span class="keyword">associatedtype</span> <span class="type">Failure</span> : <span class="type">Error</span></span><br><span class="line">  <span class="keyword">func</span> <span class="title function_">receive</span>&lt;<span class="type">S</span>&gt;(<span class="params">subscriber</span>: <span class="type">S</span>) <span class="keyword">where</span> <span class="type">S</span> : <span class="type">Subscriber</span>, <span class="keyword">Self</span>.<span class="type">Failure</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Failure</span>, <span class="keyword">Self</span>.<span class="type">Output</span> <span class="operator">==</span> <span class="type">S</span>.<span class="type">Input</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>发布者可以随时间发送任意数量的值，也可以发送错误而失败。关联类型<code>Output</code>定义发布者可以发送哪些类型的值，而关联类型<code>Failure</code>定义它可能失败的错误类型。发布者可以通过指定<code>never</code>关联类型来声明它永远不会失败。</p>
           <!--noindex-->
@@ -1109,7 +1107,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1121,7 +1119,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

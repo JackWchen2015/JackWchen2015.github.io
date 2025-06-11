@@ -260,7 +260,7 @@
 <li>中断</li>
 </ol>
 <h4 id="CPU与外界的通信"><a href="#CPU与外界的通信" class="headerlink" title="CPU与外界的通信"></a>CPU与外界的通信</h4><p>安装在主板上的CPU与外界沟通的门户是<strong>前端总线</strong>（front-side bus），前端总线把CPU与北桥连接起来。每当CPU需要读写内存时，都会使用这条总线。CPU通过一部分管脚来传输想要读写的物理内存地址，同时另一些管脚用于发送将被写入或接收被读出的数据。一个Intel Core 2 QX6600有33个针脚用于传输物理内存地址（可以表示233个地址位置），64个针脚用于接收&#x2F;发送数据（所以数据在64位通道中传输，也就是8字节的数据块）。这使得CPU可以控制64GB的物理内存（233个地址乘以8字节）。</p>
-<h3 id="内存映射I-x2F-O"><a href="#内存映射I-x2F-O" class="headerlink" title="内存映射I&#x2F;O"></a>内存映射I&#x2F;O</h3><ul>
+<h3 id="内存映射I-O"><a href="#内存映射I-O" class="headerlink" title="内存映射I&#x2F;O"></a>内存映射I&#x2F;O</h3><ul>
 <li><p>我们可能曾经认为内存指的就是RAM，被各式各样的程序读写着。的确，大部分CPU发出的内存请求都被北桥转送给了RAM管理器，但并非全部如此。物理内存地址还可能被用于主板上各种设备间的通信，这种通信方式叫做<strong>内存映射I&#x2F;O</strong>。这类设备包括显卡，大多数的PCI卡（比如扫描仪或SCSI卡），以及BIOS中的flash存储器等。</p>
 </li>
 <li><p>当北桥接收到一个物理内存访问请求时，它需要决定把这个请求转发到哪里：是发给RAM？抑或是显卡？具体发给谁是由内存地址映射表来决定的。映射表知道每一个物理内存地址区域所对应的设备。绝大部分的地址被映射到了RAM，其余地址由映射表来通知芯片组该由哪个设备来响应此地址的访问请求。这些被映射为设备的内存地址形成了一个经典的空洞，位于PC内存的640KB到1MB之间。当内存地址被保留用于显卡和PCI设备时，就会形成更大的空洞。这就是为什么32位的操作系统无法使用全部的4GB RAM。Linux中，&#x2F;proc&#x2F;iomem这个文件简明的列举了这些空洞的地址范围。下图展示了Intel PC低端4GB物理内存地址形成的一个典型的内存映射：</p>
@@ -355,7 +355,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BB%8AIntel%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">如今Intel计算机组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%BB%E8%A6%81%E9%80%9A%E8%BF%873%E7%A7%8D%E6%96%B9%E5%BC%8F%E4%B8%8E%E5%A4%96%E7%95%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">2.1.</span> <span class="nav-text">CPU主要通过3种方式与外界交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%8E%E5%A4%96%E7%95%8C%E7%9A%84%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.</span> <span class="nav-text">CPU与外界的通信</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84I-x2F-O"><span class="nav-number">3.</span> <span class="nav-text">内存映射I&#x2F;O</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BB%8AIntel%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">如今Intel计算机组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%BB%E8%A6%81%E9%80%9A%E8%BF%873%E7%A7%8D%E6%96%B9%E5%BC%8F%E4%B8%8E%E5%A4%96%E7%95%8C%E4%BA%A4%E4%BA%92"><span class="nav-number">2.1.</span> <span class="nav-text">CPU主要通过3种方式与外界交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CPU%E4%B8%8E%E5%A4%96%E7%95%8C%E7%9A%84%E9%80%9A%E4%BF%A1"><span class="nav-number">2.2.</span> <span class="nav-text">CPU与外界的通信</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84I-O"><span class="nav-number">3.</span> <span class="nav-text">内存映射I&#x2F;O</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number"></span> <span class="nav-text">参考</span></a></div>
       </div>
       <!--/noindex-->
 
@@ -369,7 +369,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">179</span>
+          <span class="site-state-item-count">175</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -381,7 +381,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">28</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
