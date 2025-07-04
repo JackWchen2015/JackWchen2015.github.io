@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"github.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Using Combine 笔记这是一本中高级难度的书，主要关注在如何使用 Combine 框架。 本书的内容包括示例代码和测试，都放在 GitHub 的仓库中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Using Combine 笔记">
+<meta property="og:url" content="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/05/Using%20Combine%20%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="学计算机的那个">
+<meta property="og:description" content="Using Combine 笔记这是一本中高级难度的书，主要关注在如何使用 Combine 框架。 本书的内容包括示例代码和测试，都放在 GitHub 的仓库中">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://github.com/res/usingcombine_basic_types.svg">
+<meta property="og:image" content="https://github.com/res/usingcombine_input_output.svg">
+<meta property="og:image" content="https://github.com/res/usingcombine_marble_diagram.svg">
+<meta property="og:image" content="https://github.com/res/usingcombine_combine_marble_diagram.svg">
+<meta property="article:published_time" content="2025-06-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-07-04T03:39:23.125Z">
+<meta property="article:author" content="Jack Chen">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/res/usingcombine_basic_types.svg">
+
+<link rel="canonical" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/05/Using%20Combine%20%E7%AC%94%E8%AE%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Using Combine 笔记 | 学计算机的那个</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">学计算机的那个</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">不是我觉到、悟到，你给不了我，给了也拿不住;只有我觉到、悟到，才有可能做到，能做到的才是我的.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://github.com/JackWchen2015/JackWchen2015.github.io.git/2025/06/05/Using%20Combine%20%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Jack Chen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="学计算机的那个">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Using Combine 笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-06-05 00:00:00" itemprop="dateCreated datePublished" datetime="2025-06-05T00:00:00+08:00">2025-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-07-04 11:39:23" itemprop="dateModified" datetime="2025-07-04T11:39:23+08:00">2025-07-04</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/" itemprop="url" rel="index"><span itemprop="name">iOS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS/SwiftUI/" itemprop="url" rel="index"><span itemprop="name">SwiftUI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Using-Combine-笔记"><a href="#Using-Combine-笔记" class="headerlink" title="Using Combine 笔记"></a>Using Combine 笔记</h1><p>这是一本中高级难度的书，主要关注在如何使用 Combine 框架。 本书的内容包括示例代码和测试，都放在 <a href="https://github.com/heckj/swiftui-notes">GitHub</a> 的仓库中</p>
+<span id="more"></span>
+
+<h2 id="Combine-简介"><a href="#Combine-简介" class="headerlink" title="Combine 简介"></a>Combine 简介</h2><p>用 Apple 官方的话来说，Combine 是:</p>
+<blockquote>
+<p>a declarative Swift API for processing values over time.</p>
+</blockquote>
+<p>RxSwift 的概念和 API 对应到 Combine 上,<a href="https://github.com/CombineCommunity/rxswift-to-combine-cheatsheet">表单</a></p>
+<p>Combine 框架 不是 开源的</p>
+<h3 id="函数响应式编程"><a href="#函数响应式编程" class="headerlink" title="函数响应式编程"></a>函数响应式编程</h3><p>函数响应式编程， 也称为数据流编程</p>
+<h3 id="Combine-的特性"><a href="#Combine-的特性" class="headerlink" title="Combine 的特性"></a>Combine 的特性</h3><p>Combine 通过嵌入 <code>back-pressure</code> 来扩展函数响应式编程。</p>
+<blockquote>
+<p>Back-pressure 是指订阅者应该控制它一次获得多少信息以及需要处理多少信息。<br>这带来了高效的数据操作，并且通过流处理的数据量是可控和可取消的。</p>
+</blockquote>
+<p><strong>在这本书中，我将把 Combine 中的一系列组合操作称作 管道。</strong></p>
+<h3 id="什么情况使用-Combine"><a href="#什么情况使用-Combine" class="headerlink" title="什么情况使用 Combine"></a>什么情况使用 Combine</h3><p>当你想要设置对各种输入做出反应时，Combine 最合适， 用户界面也非常适合这种模式。</p>
+<blockquote>
+<p>在用户界面中使用函数响应式编程的经典示例是表单验证</p>
+</blockquote>
+<p>你可以使用 Combine 执行的一些操作包括：</p>
+<ol>
+<li>你可以设置管道以仅在字段中输入的值有效时启用提交按钮。</li>
+<li>管道还可以执行异步操作（例如检查网络服务）并使用返回的值来选择在视图中更新的方式和内容。</li>
+<li>管道还可用于对用户在文本字段中动态输入做出反应，并根据他们输入的内容更新用户界面视图。</li>
+</ol>
+<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><p>这些核心概念是：Publisher and Subscriber、操作符、Subjects</p>
+<h3 id="Publisher"><a href="#Publisher" class="headerlink" title="Publisher"></a>Publisher</h3><p>当其被订阅之后，根据请求会提供数据， 没有任何订阅请求的发布者不会提供任何数据。当你描述一个 Combine 的发布者时，应该用两种相关的类型来描述它：一种用于输出，一种用于失败。</p>
+<p><img src="/../res/usingcombine_basic_types.svg"></p>
+<p>例如，如果发布者返回了一个 String 类型的实例，并且可能以 URLError 实例的形式返回失败，那么发布者可能会用 <code>&lt;String, URLError&gt; </code>来描述。</p>
+<p>当订阅者发出请求时，许多发布者会立即提供数据。 在某些情况下，发布者可能有一个单独的机制，使其能够在订阅后返回数据。 这是由协议 <code>ConnectablePublisher</code> 来约定实现的。 遵循 <code>ConnectablePublisher</code> 的发布者将有一个额外的机制，在订阅者发出请求后才启动数据流。 这可能是对发布者单独的调用 <code>.connect()</code> 来完成。 另一种可能是 <code>.autoconnect()</code>，一旦订阅者请求，它将立即启动数据流。</p>
+<h3 id="订阅者"><a href="#订阅者" class="headerlink" title="订阅者"></a>订阅者</h3><p>订阅者负责请求数据并接受发布者提供的数据（和可能的失败）。 订阅者同样被描述为两种关联类型，一种用于输入，一种用于失败。 订阅者发起数据请求，并控制它接收的数据量。 它可以被认为是在 Combine 中起“驱动作用”的，因为如果没有订阅者，其他组件将保持闲置状态，没有数据会流动起来。</p>
+<p>当你将订阅者连接到发布者时，两种类型都必须匹配：发布者的输出和订阅者的输入以及它们的失败类型。 将其可视化的一种方法是对两种类型进行一系列并行操作，其中两种类型都需要匹配才能将组件插入在一起。</p>
+<p><img src="/../res/usingcombine_input_output.svg"></p>
+<p>Combine 中有两个内建的订阅者： <code>Assign</code> 和 <code>Sink</code>。 SwiftUI 中有一个订阅者： <code>onReceive</code>。</p>
+<p>SwiftUI 中的几乎每个 control 都可以充当订阅者。 SwiftUI 中的 View 协议 定义了一个 <code>.onReceive(publisher)</code> 函数，可以把视图当作订阅者使用。 onReceive 函数接受一个类似于 sink 接受的闭包，可以操纵 SwiftUI 中的 <code>@State</code> 或 <code>@Bindings</code>。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">MyView</span> : <span class="title class_">View</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@State</span> <span class="keyword">private</span> <span class="keyword">var</span> currentStatusValue <span class="operator">=</span> <span class="string">&quot;ok&quot;</span></span><br><span class="line">    <span class="keyword">var</span> body: <span class="keyword">some</span> <span class="type">View</span> &#123;</span><br><span class="line">        <span class="type">Text</span>(<span class="string">&quot;Current status: <span class="subst">\(currentStatusValue)</span>&quot;</span>)</span><br><span class="line">            .onReceive(<span class="type">MyPublisher</span>.currentStatusPublisher) &#123; newStatus <span class="keyword">in</span></span><br><span class="line">                <span class="keyword">self</span>.currentStatusValue <span class="operator">=</span> newStatus</span><br><span class="line">            &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="用弹珠图描述管道"><a href="#用弹珠图描述管道" class="headerlink" title="用弹珠图描述管道"></a>用弹珠图描述管道</h3><p>函数响应式编程社区使用一种称为 弹珠图 的视觉描述来说明数据流的变化</p>
+<p><img src="/../res/usingcombine_marble_diagram.svg"></p>
+<p>怎么看懂弹珠图:</p>
+<ul>
+<li>不管周围描述的是什么元素，在该例子的图上，中心是一个操作符。 具体的操作符的名称通常位于中心块上。</li>
+<li>上面和下面的线表示随着时间移动的数据， 由左到右。 线上的符号表示离散着的数据。</li>
+<li>我们通常假定数据正在向下流动。 在这种情况下，顶线表示对操作符的输入，底线表示输出。</li>
+<li>在某些图表中，顶线上的符号可能与底线上的符号不同， 这时图表通常意味着输出的类型与输入的类型不同。</li>
+<li>在有些图中，你也可能在时间线上看到竖线 “｜” 或 “ X ” 或终结时间线， 这用于表示数据流的结束。 时间线末端的竖线意味着数据流已正常终止。 “X” 表示抛出了错误或异常。</li>
+</ul>
+<h3 id="用弹珠图描述-Combine"><a href="#用弹珠图描述-Combine" class="headerlink" title="用弹珠图描述 Combine"></a>用弹珠图描述 Combine</h3><p><img src="/../res/usingcombine_combine_marble_diagram.svg"></p>
+<h3 id="Back-pressure"><a href="#Back-pressure" class="headerlink" title="Back pressure"></a>Back pressure</h3><p>Combine 的设计使订阅者控制数据流，因此它也控制着在管道中处理数据的内容和时间。 这是一个在 Combine 中被叫做 back-pressure 的特性。</p>
+<p>这意味着由订阅者通过提供其想要或能够接受多少信息量来推动管道内数据的处理。 当订阅者连接到发布者时，它会基于特定的 需求 去请求数据。</p>
+<p>特定需求的请求通过组成管道进行传递。 每个操作符依次接受数据请求，然后请求与之相连的发布者提供信息。</p>
+<h3 id="Subjects"><a href="#Subjects" class="headerlink" title="Subjects"></a>Subjects</h3><p>Subjects 是一种遵循 Subject 协议的特殊的发布者。 这个协议要求 subjects 有一个 <code>.send(_:) </code>方法，来允许开发者发送特定的值给订阅者或管道。</p>
+<p>Subjects 可以通过调用 <code>.send(_:) </code>方法来将值“注入”到流中， 这对于将现有的命令式的代码与 Combine 集成非常有用。</p>
+<p>一个 subject 还可以向多个订阅者广播消息。</p>
+<h2 id="使用-Combine-进行开发"><a href="#使用-Combine-进行开发" class="headerlink" title="使用 Combine 进行开发"></a>使用 Combine 进行开发</h2><h3 id="关于管道运用的思考"><a href="#关于管道运用的思考" class="headerlink" title="关于管道运用的思考"></a>关于管道运用的思考</h3><p>在用 Combine 进行开发时，有两种更广泛的发布者模式经常出现：期望发布者返回单一的值并完成，和期望发布者随着时间的推移返回多个值。</p>
+<p>当你创建发布者或管道的实例时，好好思考你希望它如何工作是值得的 —— 要么是一次性的，要么是连续的。 你的选择将关系到你如何处理错误，或者你是否要处理操纵事件时序的操作符 (例如 debounce 或者 throttle).</p>
+<h3 id="管道和线程"><a href="#管道和线程" class="headerlink" title="管道和线程"></a>管道和线程</h3><p>Combine 不是一个单线程的结构。 操作符和发布者可以在不同的调度队列或 runloops 中运行。 构建的管道可以在单个队列中，也可以跨多个队列或线程传输数据。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.receive(on: <span class="type">RunLoop</span>.main)</span><br></pre></td></tr></table></figure>
+<h3 id="把-Combine-运用到你的开发中"><a href="#把-Combine-运用到你的开发中" class="headerlink" title="把 Combine 运用到你的开发中"></a>把 Combine 运用到你的开发中</h3><h2 id="常用模式和方法"><a href="#常用模式和方法" class="headerlink" title="常用模式和方法"></a>常用模式和方法</h2><h3 id="用-Future-来封装异步请求以创建一次性的发布者"><a href="#用-Future-来封装异步请求以创建一次性的发布者" class="headerlink" title="用 Future 来封装异步请求以创建一次性的发布者"></a>用 Future 来封装异步请求以创建一次性的发布者</h3><p>Future 在创建时立即发起其中异步 API 的调用，而不是 当它收到订阅需求时。 这可能不是你想要或需要的行为。 如果你希望在订阅者请求数据时再发起调用，你可能需要用 Deferred 来包装 Future。</p>
+<h3 id="有序的异步操作"><a href="#有序的异步操作" class="headerlink" title="有序的异步操作"></a>有序的异步操作</h3><p>通过将任何异步 API 请求与 Future 发布者进行封装，然后将其与 flatMap 操作符链接在一起，你可以以特定顺序调用被封装的异步 API 请求。</p>
+<p>通过使用 Future 或其他发布者创建多个管道，使用 zip 操作符将它们合并之后等待管道完成，通过这种方法可以创建多个并行的异步请求。</p>
+<p>通过组合这些技术，可以创建任何并行或串行任务的结构。</p>
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><ul>
+<li>如果管道设置为返回单个结果并终止， 一个很好的例子就是 使用 catch 处理一次性管道中的错误。</li>
+</ul>
+<blockquote>
+</blockquote>
+<p>catch 处理错误的方式，是将上游发布者替换为另一个发布者，这是你在闭包中用返回值提供的。</p>
+<blockquote>
+<p>请注意，这实际上终止了管道。 如果你使用的是一次性发布者（不创建多个事件），那这就没什么。</p>
+</blockquote>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">IPInfo</span>: <span class="title class_">Codable</span> &#123;</span><br><span class="line">    <span class="comment">// matching the data structure returned from ip.jsontest.com</span></span><br><span class="line">    <span class="keyword">var</span> ip: <span class="type">String</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> myURL <span class="operator">=</span> <span class="type">URL</span>(string: <span class="string">&quot;http://ip.jsontest.com&quot;</span>)</span><br><span class="line"><span class="comment">// NOTE(heckj): you&#x27;ll need to enable insecure downloads in your Info.plist for this example</span></span><br><span class="line"><span class="comment">// since the URL scheme is &#x27;http&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> remoteDataPublisher <span class="operator">=</span> <span class="type">URLSession</span>.shared.dataTaskPublisher(for: myURL<span class="operator">!</span>)</span><br><span class="line">    <span class="comment">// the dataTaskPublisher output combination is (data: Data, response: URLResponse)</span></span><br><span class="line">    .map(&#123; (inputTuple) -&gt; <span class="type">Data</span> <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">return</span> inputTuple.data</span><br><span class="line">    &#125;)</span><br><span class="line">    .decode(type: <span class="type">IPInfo</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>()) </span><br><span class="line">    .catch &#123; err <span class="keyword">in</span> </span><br><span class="line">        <span class="keyword">return</span> <span class="type">Publishers</span>.<span class="type">Just</span>(<span class="type">IPInfo</span>(ip: <span class="string">&quot;8.8.8.8&quot;</span>))</span><br><span class="line">    &#125;</span><br><span class="line">    .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在发生暂时失败时重试</li>
+</ul>
+<p>当向 dataTaskPublisher 请求数据时，请求可能会失败。 在这种情况下，你将收到一个带有 error 的 <code>.failure</code> 事件。 当失败时，retry 操作符将允许你对相同请求进行一定次数的重试。 当发布者不发送 <code>.failure</code> 事件时，retry 操作符会传递结果值。 retry 仅在发送 <code>.failure</code> 事件时才在 Combine 管道内做出响应。</p>
+<blockquote>
+<p>使用 retry 操作符与 URLSession.dataTaskPublisher 时，请验证你请求的 URL 如果反复请求或重试，不会产生副作用。 理想情况下，此类请求应具有幂等性。 如果没有，retry 操作符可能会发出多个请求，并产生非常意想不到的副作用。</p>
+</blockquote>
+<ul>
+<li>如果管道被设置为持续更新，则错误处理要复杂一点。 这种情况下的一个很好的例子是 使用 flatMap 和 catch 在不取消管道的情况下处理错误。</li>
+</ul>
+<p>flatMap 是用于处理持续事件流中错误的操作符。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> remoteDataPublisher <span class="operator">=</span> <span class="type">Just</span>(<span class="keyword">self</span>.testURL<span class="operator">!</span>) </span><br><span class="line">    .flatMap &#123; url <span class="keyword">in</span> </span><br><span class="line">        <span class="type">URLSession</span>.shared.dataTaskPublisher(for: url) </span><br><span class="line">        .tryMap &#123; data, response -&gt; <span class="type">Data</span> <span class="keyword">in</span> </span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> httpResponse <span class="operator">=</span> response <span class="keyword">as?</span> <span class="type">HTTPURLResponse</span>,</span><br><span class="line">                httpResponse.statusCode <span class="operator">==</span> <span class="number">200</span> <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="type">TestFailureCondition</span>.invalidServerResponse</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> data</span><br><span class="line">        &#125;</span><br><span class="line">        .decode(type: <span class="type">PostmanEchoTimeStampCheckResponse</span>.<span class="keyword">self</span>, decoder: <span class="type">JSONDecoder</span>()) </span><br><span class="line">        .catch &#123;<span class="keyword">_</span> <span class="keyword">in</span> </span><br><span class="line">            <span class="keyword">return</span> <span class="type">Just</span>(<span class="type">PostmanEchoTimeStampCheckResponse</span>(valid: <span class="literal">false</span>))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .eraseToAnyPublisher()</span><br></pre></td></tr></table></figure>
+<h2 id="和-UIKit-或-AppKit-集成"><a href="#和-UIKit-或-AppKit-集成" class="headerlink" title="和 UIKit 或 AppKit 集成"></a>和 UIKit 或 AppKit 集成</h2><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://zhiying.space/using-combine/">Using combine</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/06/01/SwiftUI%E4%B8%8ECombine%20%E4%B8%8B/" rel="prev" title="SwiftUI 与 Combine 下">
+      <i class="fa fa-chevron-left"></i> SwiftUI 与 Combine 下
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Using-Combine-%E7%AC%94%E8%AE%B0"><span class="nav-number">1.</span> <span class="nav-text">Using Combine 笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Combine-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.1.</span> <span class="nav-text">Combine 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E5%93%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">函数响应式编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Combine-%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.2.</span> <span class="nav-text">Combine 的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E4%BD%BF%E7%94%A8-Combine"><span class="nav-number">1.1.3.</span> <span class="nav-text">什么情况使用 Combine</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="nav-number">1.2.</span> <span class="nav-text">核心概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Publisher"><span class="nav-number">1.2.1.</span> <span class="nav-text">Publisher</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A2%E9%98%85%E8%80%85"><span class="nav-number">1.2.2.</span> <span class="nav-text">订阅者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E5%BC%B9%E7%8F%A0%E5%9B%BE%E6%8F%8F%E8%BF%B0%E7%AE%A1%E9%81%93"><span class="nav-number">1.2.3.</span> <span class="nav-text">用弹珠图描述管道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E5%BC%B9%E7%8F%A0%E5%9B%BE%E6%8F%8F%E8%BF%B0-Combine"><span class="nav-number">1.2.4.</span> <span class="nav-text">用弹珠图描述 Combine</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Back-pressure"><span class="nav-number">1.2.5.</span> <span class="nav-text">Back pressure</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Subjects"><span class="nav-number">1.2.6.</span> <span class="nav-text">Subjects</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Combine-%E8%BF%9B%E8%A1%8C%E5%BC%80%E5%8F%91"><span class="nav-number">1.3.</span> <span class="nav-text">使用 Combine 进行开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E7%AE%A1%E9%81%93%E8%BF%90%E7%94%A8%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">1.3.1.</span> <span class="nav-text">关于管道运用的思考</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E9%81%93%E5%92%8C%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">管道和线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%8A-Combine-%E8%BF%90%E7%94%A8%E5%88%B0%E4%BD%A0%E7%9A%84%E5%BC%80%E5%8F%91%E4%B8%AD"><span class="nav-number">1.3.3.</span> <span class="nav-text">把 Combine 运用到你的开发中</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%A8%A1%E5%BC%8F%E5%92%8C%E6%96%B9%E6%B3%95"><span class="nav-number">1.4.</span> <span class="nav-text">常用模式和方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8-Future-%E6%9D%A5%E5%B0%81%E8%A3%85%E5%BC%82%E6%AD%A5%E8%AF%B7%E6%B1%82%E4%BB%A5%E5%88%9B%E5%BB%BA%E4%B8%80%E6%AC%A1%E6%80%A7%E7%9A%84%E5%8F%91%E5%B8%83%E8%80%85"><span class="nav-number">1.4.1.</span> <span class="nav-text">用 Future 来封装异步请求以创建一次性的发布者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E5%BA%8F%E7%9A%84%E5%BC%82%E6%AD%A5%E6%93%8D%E4%BD%9C"><span class="nav-number">1.4.2.</span> <span class="nav-text">有序的异步操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.4.3.</span> <span class="nav-text">错误处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-UIKit-%E6%88%96-AppKit-%E9%9B%86%E6%88%90"><span class="nav-number">1.5.</span> <span class="nav-text">和 UIKit 或 AppKit 集成</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Jack Chen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">176</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jack Chen</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
